@@ -74,7 +74,6 @@
             <artifactId>org.wso2.carbon.transport.http.netty.feature</artifactId>
             <type>zip</type>
         </dependency>
-
     </dependencies>
     <build>
         <plugins>
