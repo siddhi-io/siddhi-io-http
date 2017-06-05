@@ -71,5 +71,4 @@ public class HttpWorkerThread implements Runnable {
                     .handleCallback();
         }
     }
-
 }

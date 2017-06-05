@@ -32,7 +32,6 @@ import javax.security.auth.login.LoginException;
 public class HttpAuthenticator {
 
     public HttpAuthenticator() {
-
     }
 
     /**
@@ -58,8 +57,6 @@ public class HttpAuthenticator {
         } else {
             throw new HttpSourceAdaptorRuntimeException("Authentication header not found when trying to " +
                     "authenticate with basic authentication ", carbonCallback, 401);
-
         }
     }
-
 }

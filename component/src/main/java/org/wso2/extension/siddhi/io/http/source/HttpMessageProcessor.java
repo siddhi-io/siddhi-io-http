@@ -125,7 +125,6 @@ public class HttpMessageProcessor implements CarbonMessageProcessor {
         }
     }
 
-
     void disconnect() {
         executorService.shutdown();
     }

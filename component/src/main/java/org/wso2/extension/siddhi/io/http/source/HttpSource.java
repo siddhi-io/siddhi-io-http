@@ -152,7 +152,6 @@ public class HttpSource extends Source {
             registeredListenerURL.put(listenerUrl, sourceEventListener);
             registeredListenerAuthentication.put(sourceEventListener, isAuth);
         }
-
     }
 
     static Map<SourceEventListener, Boolean> getRegisteredListenerAuthentication() {
@@ -221,6 +220,4 @@ public class HttpSource extends Source {
     public void restoreState(Map<String, Object> state) {
         // no state to restore
     }
-
-
 }

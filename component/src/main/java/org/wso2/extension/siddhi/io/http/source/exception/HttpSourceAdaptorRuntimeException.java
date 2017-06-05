@@ -47,7 +47,6 @@ public class HttpSourceAdaptorRuntimeException extends RuntimeException {
         carbonCallback.done(defaultCarbonMessage);
     }
 
-
     public HttpSourceAdaptorRuntimeException(Throwable cause, CarbonCallback carbonCallback, int code) {
         super(cause);
         DefaultCarbonMessage defaultCarbonMessage = new DefaultCarbonMessage();

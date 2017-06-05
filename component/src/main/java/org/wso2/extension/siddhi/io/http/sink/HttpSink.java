@@ -164,7 +164,6 @@ public class HttpSink extends Sink {
 
     @Override
     public void restoreState(Map<String, Object> state) {
-
     }
 
     @Override
@@ -239,7 +238,6 @@ public class HttpSink extends Sink {
         }
     }
 
-
     private CarbonMessage generateCarbonMessage(List<Header> headers, HttpPayloadDataSource payload, String contentType,
                                                 String httpMethod, CarbonMessage cMessage) {
         //set Static Properties
@@ -300,6 +298,4 @@ public class HttpSink extends Sink {
             log.error("Failed to shutdown server in " + HttpConstants.HTTP_SINK_ID + streamID, e);
         }
     }
-
-
 }

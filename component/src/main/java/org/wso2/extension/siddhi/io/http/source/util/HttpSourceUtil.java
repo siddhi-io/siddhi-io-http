@@ -106,6 +106,5 @@ public class HttpSourceUtil {
         }
         return new Object[]{listenerConfig, context};
     }
-
 }
 

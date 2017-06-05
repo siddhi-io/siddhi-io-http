@@ -48,7 +48,6 @@ class HttpConnectorRegistry {
     private static final Logger log = Logger.getLogger(HttpConnectorRegistry.class);
 
     private HttpConnectorRegistry() {
-
     }
 
     static HttpConnectorRegistry getInstance() {
@@ -151,5 +150,4 @@ class HttpConnectorRegistry {
         }
         return true;
     }
-
 }
