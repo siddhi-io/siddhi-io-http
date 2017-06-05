@@ -22,6 +22,9 @@ package org.wso2.extension.siddhi.io.http.util;
  * {@code HttpConstant }Http Sink Constants.
  */
 public class HttpConstants {
+    private HttpConstants() {
+    }
+
     //util values
     public static final String HEADERSPLITER = "#";
     public static final String HEADERNAMEVALUESPLITER = ":";
