@@ -44,6 +44,7 @@ public class HttpsServerListnerHandler implements Runnable {
     private HttpServerListener sl;
     private int port;
     private KeyStore ks;
+    private  HttpsServer server;;
     public HttpsServerListnerHandler(int port) throws KeyStoreException {
         this.sl = new HttpServerListener();
         this.port = port;
@@ -57,8 +58,6 @@ public class HttpsServerListnerHandler implements Runnable {
 
     @Override
     public void run() {
-
-        HttpsServer server;
         try {
             char[] passphrase = "wso2carbon".toCharArray();
             ks.load(new FileInputStream(System.getProperty("carbon.home") + "/conf/security/wso2carbon.jks"),
@@ -87,5 +86,11 @@ public class HttpsServerListnerHandler implements Runnable {
                 KeyStoreException | KeyManagementException e) {
             logger.error("Error in creating test server ", e);
         }
+    }
+    public void shutdown() {
+        if (server != null) {
+            server.stop(1);
+        }
+
     }
 }

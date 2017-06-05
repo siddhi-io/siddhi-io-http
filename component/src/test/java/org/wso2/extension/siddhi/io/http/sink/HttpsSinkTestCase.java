@@ -79,6 +79,41 @@ public class HttpsSinkTestCase {
         Assert.assertEquals(eventData, "<events><event><symbol>WSO2</symbol>" +
                         "<price>55.645</price><volume>100</volume></event></events>\n");
         executionPlanRuntime.shutdown();
+        lst.shutdown();
+
+    }
+    /**
+     * Test case for HTTPS output publisher.
+     */
+    @Test
+    public void testHTTPSPublisherCustomClientTrustStorePath() throws Exception {
+        setCarbonHome();
+        logger.info("Test case for HTTPS output publisher.");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
+        String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);" +
+                "@sink(type='http'," + "publisher.url='https://localhost:8055/rec/pro'," + "method='{{method}}'," +
+                "" + "headers='{{headers}}',client.truststore.path='${carbon.home}/conf/security/client-" +
+                "truststore.jks', " + "client.truststore.pass='wso2carbon',"
+                + "@map(type='xml', @payload('{{message}}'))) "
+                + "Define stream BarStream (message String,method String,headers String);";
+        String query = ("@info(name = 'query1') " + "from FooStream select message,method,headers insert " +
+                "into BarStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(inStreamDefinition + query);
+        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
+        executionPlanRuntime.start();
+        HttpsServerListnerHandler lst = new HttpsServerListnerHandler(8055);
+        fooStream.send(new Object[]{"<events><event><symbol>WSO2</symbol>" +
+                "<price>55.645</price><volume>100</volume></event></events>", "POST", "Name:John#Age:23"});
+        while (!lst.getServerListner().iaMessageArrive()) {
+            Thread.sleep(100);
+        }
+        String eventData = lst.getServerListner().getData();
+        Assert.assertEquals(eventData, "<events><event><symbol>WSO2</symbol>" +
+                "<price>55.645</price><volume>100</volume></event></events>\n");
+        executionPlanRuntime.shutdown();
+        lst.shutdown();
     }
 }
 
