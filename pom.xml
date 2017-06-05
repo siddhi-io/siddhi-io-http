@@ -102,7 +102,6 @@
                 <artifactId>commons-collections</artifactId>
                 <version>3.1</version>
             </dependency>
-
             <!--OSGI Test Dependencies-->
             <dependency>
                 <groupId>org.wso2.carbon.transport</groupId>

@@ -191,7 +191,6 @@
                                 ${basedir}/target/org.eclipse.equinox.executable_3.5.0.v20110530-7P7NFUFFLWUl76mart
                             </executable>
                             <repositoryURL>file:${basedir}/target/p2-repo</repositoryURL>
-
                         </configuration>
                     </execution>
                     <execution>
@@ -295,10 +294,8 @@
                             <goal>run</goal>
                         </goals>
                     </execution>
-
                 </executions>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
