@@ -1,0 +1,131 @@
+################################################################################
+#   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved
+#
+#   Licensed under the Apache License, Version 2.0 (the \"License\");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an \"AS IS\" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+################################################################################
+
+  # Carbon Configuration Parameters
+wso2.carbon:
+    # value to uniquely identify a server
+  id: wso2-das
+    # server name
+  name: WSO2 Data Analytics Server
+    # ports used by this server
+  ports:
+      # port offset
+    offset: 0
+
+  # Siddhi Configuration Parameters
+siddhi:
+  extensions:
+    -
+        # Extension configuration for window time
+      extension:
+          # Extension name
+        name: 'passThrough'
+          # Extension namespace
+        namespace: 'sourceMapper'
+          # Extension properties
+        properties:
+          time: 20s
+    -
+        # Extension configuration for window length
+      extension:
+          # Extension name
+        name: 'http'
+          # Extension namespace
+        namespace: 'source'
+          # Extension properties
+        properties:
+          latency.metrics.enabled: true
+          server.bootstrap.socket.timeout: 15
+          client.bootstrap.socket.timeout: 15
+          default.host: 0.0.0.0
+          default.port: 9763
+          default.scheme: http
+          default.keyStoreFile: ''
+          default.keyStorePass: ''
+          default.certPass: ''
+          https.host: 0.0.0.0
+          https.port: 9763
+          https.scheme: https
+          https.keyStoreFile: ${carbon.home}/conf/security/wso2carbon.jks
+          https.keyStorePass: wso2carbon
+          https.certPass: wso2carbon
+    -
+        # Extension configuration for window length
+      extension:
+          # Extension name
+        name: 'http'
+          # Extension namespace
+        namespace: 'sink'
+          # Extension properties
+        properties:
+          latency.metrics.enabled: true
+          server.bootstrap.socket.timeout: 15
+          client.bootstrap.socket.timeout: 15
+          default.host: 0.0.0.0
+          default.port: 9763
+          default.scheme: http
+          default.keyStoreFile: ''
+          default.keyStorePass: ''
+          default.certPass: ''
+          https.host: 0.0.0.0
+          https.port: 9763
+          https.scheme: https
+          https.clientStoreFile: ${carbon.home}/conf/security/client-truststore.jks
+          https.clientStorePass: wso2carbon
+          https.certPass: wso2carbon
+    -
+        # Extension configuration for rdbms store
+      extension:
+          # Extension name
+        name: 'rdbms'
+          # Extension namespace
+        namespace: 'store'
+          # Extension properties
+        properties:
+            #h2 configuration
+          h2.tableCreateQuery: CREATE TABLE {{TABLE_NAME}} ({{COLUMNS, PRIMARY_KEYS}})
+          h2.tableCheckQuery: SELECT 1 FROM {{TABLE_NAME}} LIMIT 1
+          h2.indexCreateQuery: CREATE INDEX {{TABLE_NAME}}_INDEX ON {{TABLE_NAME}} ({{INDEX_COLUMNS}})
+          h2.recordExistsQuery: SELECT TOP 1 1 FROM {{TABLE_NAME}} {{CONDITION}}
+          h2.recordSelectQuery: SELECT * FROM {{TABLE_NAME}} {{CONDITION}}
+          h2.recordInsertQuery: INSERT INTO {{TABLE_NAME}} VALUES ({{Q}})
+          h2.recordUpdateQuery: UPDATE {{TABLE_NAME}} SET {{COLUMNS_AND_VALUES}} {{CONDITION}}
+          h2.recordDeleteQuery: DELETE FROM {{TABLE_NAME}} {{CONDITION}}
+          h2.stringSize: 254
+          h2.typeMapping.binaryType: BLOB
+          h2.typeMapping.booleanType: TINYINT(1)
+          h2.typeMapping.doubleType: DOUBLE
+          h2.typeMapping.floatType: FLOAT
+          h2.typeMapping.integerType: INTEGER
+          h2.typeMapping.longType: BIGINT
+          h2.typeMapping.stringType: VARCHAR
+            #mysql configuration
+          mysql.tableCreateQuery: CREATE TABLE {{TABLE_NAME}} ({{COLUMNS, PRIMARY_KEYS}})
+          mysql.tableCheckQuery: SELECT 1 FROM {{TABLE_NAME}} LIMIT 1
+          mysql.indexCreateQuery: CREATE INDEX {{TABLE_NAME}}_INDEX ON {{TABLE_NAME}} ({{INDEX_COLUMNS}})
+          mysql.recordExistsQuery: SELECT 1 FROM {{TABLE_NAME}} {{CONDITION}}
+          mysql.recordSelectQuery: SELECT * FROM {{TABLE_NAME}} {{CONDITION}}
+          mysql.recordInsertQuery: INSERT INTO {{TABLE_NAME}} VALUES ({{Q}})
+          mysql.recordUpdateQuery: UPDATE {{TABLE_NAME}} SET {{COLUMNS_AND_VALUES}} {{CONDITION}}
+          mysql.recordDeleteQuery: DELETE FROM {{TABLE_NAME}} {{CONDITION}}
+          mysql.stringSize: 254
+          mysql.typeMapping.binaryType: BLOB
+          mysql.typeMapping.booleanType: TINYINT(1)
+          mysql.typeMapping.doubleType: DOUBLE
+          mysql.typeMapping.floatType: FLOAT
+          mysql.typeMapping.integerType: INTEGER
+          mysql.typeMapping.longType: BIGINT
+          mysql.typeMapping.stringType: VARCHAR
