@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -100,7 +115,7 @@
             <dependency>
                 <groupId>apache-collections</groupId>
                 <artifactId>commons-collections</artifactId>
-                <version>3.1</version>
+                <version>${commons.collections.version}</version>
             </dependency>
             <!--OSGI Test Dependencies-->
             <dependency>
@@ -129,7 +144,7 @@
             <dependency>
                 <groupId>org.wso2.eclipse.osgi</groupId>
                 <artifactId>org.eclipse.osgi.services</artifactId>
-                <version>3.5.100.v20160504-1419</version>
+                <version>${org.eclipse.osgi.services.version}</version>
                 <optional>true</optional>
             </dependency>
             <dependency>
@@ -280,6 +295,8 @@
         </dependencies>
     </dependencyManagement>
     <properties>
+        <commons.collections.version>3.1</commons.collections.version>
+        <org.eclipse.osgi.services.version>3.5.100.v20160504-1419</org.eclipse.osgi.services.version>
         <org.ops4j.pax.tipi.version>1.3.0.1</org.ops4j.pax.tipi.version>
         <org.wso2.siddhi.feature.version>2.0.11</org.wso2.siddhi.feature.version>
         <osgi.test.util.version>5.2.0-SNAPSHOT</osgi.test.util.version>
@@ -316,6 +333,12 @@
         </osgi.framework.console.package.import.version.range>
         <org.eclipse.osgi.util.package.import.version.range>[1.1.0, 2.0.0)
         </org.eclipse.osgi.util.package.import.version.range>
+        <org.apache.maven.wagon.verstion>2.1</org.apache.maven.wagon.verstion>
+        <org.jvnet.maven.incrementalbuild.version>1.3</org.jvnet.maven.incrementalbuild.version>
+        <maven.compiler.plugin.version>3.5.1</maven.compiler.plugin.version>
+        <maven.compiler.plugin.source.version>1.8</maven.compiler.plugin.source.version>
+        <maven.compiler.plugin.target.version>1.8</maven.compiler.plugin.target.version>
+        <carbon.feature.plugin.version>3.1.0</carbon.feature.plugin.version>
     </properties>
     <scm>
         <connection>scm:git:https://github.com/wso2-extensions/siddhi-io-http.git</connection>
@@ -329,7 +352,7 @@
             <extension>
                 <groupId>org.apache.maven.wagon</groupId>
                 <artifactId>wagon-ssh</artifactId>
-                <version>2.1</version>
+                <version>${org.apache.maven.wagon.verstion}</version>
             </extension>
         </extensions>
         <plugins>
@@ -346,9 +369,14 @@
                 <artifactId>maven-deploy-plugin</artifactId>
             </plugin>
             <plugin>
+                <groupId>org.wso2.carbon.maven</groupId>
+                <artifactId>carbon-feature-plugin</artifactId>
+                <version>${carbon.feature.plugin.version}</version>
+            </plugin>
+            <plugin>
                 <groupId>org.jvnet.maven.incrementalbuild</groupId>
                 <artifactId>incremental-build-plugin</artifactId>
-                <version>1.3</version>
+                <version>${org.jvnet.maven.incrementalbuild.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -358,12 +386,17 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.ops4j.pax.exam</groupId>
+                <artifactId>maven-paxexam-plugin</artifactId>
+                <version>${maven.paxexam.plugin.version}</version>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>${maven.compiler.plugin.version}</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${maven.compiler.plugin.source.version}</source>
+                    <target>${maven.compiler.plugin.target.version}</target>
                 </configuration>
             </plugin>
             <plugin>
