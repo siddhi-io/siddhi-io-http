@@ -107,19 +107,19 @@ import java.util.concurrent.ConcurrentHashMap;
                         possibleParameters = "N/A"
                 ),
                 @SystemParameter(
-                        name = "https.keyStoreFile",
+                        name = "https.keystore.file",
                         description = "The default keystore file path.",
                         defaultValue = "${carbon.home}/conf/security/wso2carbon.jks",
                         possibleParameters = "N/A"
                 ),
                 @SystemParameter(
-                        name = "https.keyStorePass",
+                        name = "https.keystore.pass",
                         description = "The default keystore pass.",
                         defaultValue = "wso2carbon",
                         possibleParameters = "N/A"
                 ),
                 @SystemParameter(
-                        name = "https.certPass",
+                        name = "https.cert.pass",
                         description = "The default cert pass.",
                         defaultValue = "wso2carbon",
                         possibleParameters = "N/A"

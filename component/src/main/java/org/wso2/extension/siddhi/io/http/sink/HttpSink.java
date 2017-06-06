@@ -153,14 +153,14 @@ import java.util.concurrent.TimeUnit;
                         possibleParameters = "N/A"
                 ),
                 @SystemParameter(
-                        name = "https.trustStoreFile",
+                        name = "https.truststore.file",
                         description = "The default truststore file path.",
                         defaultValue = "${carbon.home}/conf/security/client-truststore.jks",
                         possibleParameters = "N/A"
                 ),
                 @SystemParameter(
-                        name = "https.trustStorePass",
-                        description = "The default truststore pass.",
+                        name = "https.truststore.pass",
+                        description = "The default truststore password.",
                         defaultValue = "wso2carbon",
                         possibleParameters = "N/A"
                 )

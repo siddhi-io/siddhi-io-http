@@ -59,8 +59,8 @@ siddhi:
           https.host: 0.0.0.0
           https.port: 9763
           https.scheme: https
-          https.keyStoreFile: ${carbon.home}/conf/security/wso2carbon.jks
-          https.keyStorePass: wso2carbon
+          https.keystore.file: ${carbon.home}/conf/security/wso2carbon.jks
+          https.keyStore.pass: wso2carbon
           https.certPass: wso2carbon
     -
         # Extension configuration for window length
@@ -83,8 +83,8 @@ siddhi:
           https.host: 0.0.0.0
           https.port: 9763
           https.scheme: https
-          https.clientStoreFile: ${carbon.home}/conf/security/client-truststore.jks
-          https.clientStorePass: wso2carbon
+          https.truststore.file: ${carbon.home}/conf/security/client-truststore.jks
+          https.truststore.pass: wso2carbon
           https.certPass: wso2carbon
     -
         # Extension configuration for rdbms store

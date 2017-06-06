@@ -85,19 +85,19 @@ public class HttpConstants {
     public static final String APPLICATION_JSON = "application/json";
 
     //https parameters
-    public static final String KEYSTORE_FILE = "https.keyStoreFile";
+    public static final String KEYSTORE_FILE = "https.keystore.file";
     public static final String KEYSTORE_FILE_VALUE = "${carbon.home}/conf/security/wso2carbon.jks";
-    public static final String KEYSTORE_PASS = "https.keyStorePass";
+    public static final String KEYSTORE_PASS = "https.keystore.pass";
     public static final String KEYSTORE_PASS_VALUE = "wso2carbon";
-    public static final String CERT_PASS = "https.certPass";
+    public static final String CERT_PASS = "https.cert.pass";
     public static final String CERT_PASS_VALUE = "wso2carbon";
     public static final String CARBONMESSAGE_HOST = "Host";
     public static final String DEFAULT_PORT = "default.port";
     public static final String DEFAULT_HOST = "default.host";
     public static final String DEFAULT_PROTOCOL = "default.protocol";
-    public static final String TRUSTSTORE_FILE = "https.trustStoreFile";
+    public static final String TRUSTSTORE_FILE = "https.truststore.file";
     public static final String TRUSTSTORE_FILE_VALUE = "${carbon.home}/conf/security/client-truststore.jks";
-    public static final String TRUSTSTORE_PASS = "https.trustStorePass";
+    public static final String TRUSTSTORE_PASS = "https.truststore.pass";
     public static final String TRUSTSTORE_PASS_VALUE = "wso2carbon";
 
     //Http siddhi source properties
