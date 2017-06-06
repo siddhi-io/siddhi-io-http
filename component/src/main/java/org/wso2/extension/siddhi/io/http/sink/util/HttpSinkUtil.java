@@ -185,6 +185,7 @@ public class HttpSinkUtil {
 
             case HttpConstants.MAP_WSO2EVENT:
                 return HttpConstants.MAP_WSO2EVENT;
+
             default: {
                 log.info("Invalid payload map type. System support only text," +
                         "Json and XML type hence proceed with default text mapping");

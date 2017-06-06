@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.carbon.messaging.DefaultCarbonMessage;
 import org.wso2.carbon.messaging.Header;
+import org.wso2.carbon.messaging.exceptions.ClientConnectorException;
 import org.wso2.carbon.transport.http.netty.config.SenderConfiguration;
 import org.wso2.carbon.transport.http.netty.config.TransportProperty;
 import org.wso2.carbon.transport.http.netty.sender.HTTPClientConnector;
@@ -48,16 +49,16 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
  * {@code HttpSink } Handle the HTTP publishing tasks.
  */
 @Extension(name = "http", namespace = "sink",
-        description = "This extension handle the output transport via http using carbon transport ", parameters = {
+        description = "This is description for http sink extension. This extension handle the output transport via " +
+                "http or https protocols using carbon transport. As the additional features this component can " +
+                "provide basic authentication.", parameters = {
         @Parameter(name = "method", description = "Http method such as get,put,post. by default it is post", type =
                 {DataType.BOOL}),
         @Parameter(name = "publisher.url", description = "URL of http end pont which events should be send. It is " +
@@ -74,10 +75,12 @@ import java.util.concurrent.TimeUnit;
         @Parameter(name = "basic.auth.password", description = "by this user can enable give their password of server" +
                 " to be send data. If basic auth enable then this is a mandatory argument", type =
                 {DataType.STRING}),
-        @Parameter(name = "client.truststore.path", description = "user can give custom client trusore if user never " +
-                "mention such then system use default client-trustore in ${carbon.home}/conf/security folder", type =
+        @Parameter(name = "client.truststore.path", description = "user can give custom client trusts-sore if user " +
+                "never " +
+                "mention such then system use default client-trusts-sore in ${carbon.home}/conf/security folder", type =
                 {DataType.STRING}),
-        @Parameter(name = "client.truststore.pass", description = "user can give custom client trusore pass if user " +
+        @Parameter(name = "client.truststore.pass", description = "user can give custom client trusts-sore pass if " +
+                "user " +
                 "never mention such then system use default in deployment YML", type =
                 {DataType.STRING})},
         examples = {
@@ -131,13 +134,13 @@ import java.util.concurrent.TimeUnit;
                 ),
                 @SystemParameter(
                         name = "https.trustStoreFile",
-                        description = "The default truststore file path.",
+                        description = "The default trusts-store file path.",
                         defaultValue = "${carbon.home}/conf/security/client-truststore.jks",
                         possibleParameters = "N/A"
                 ),
                 @SystemParameter(
                         name = "https.trustStorePass",
-                        description = "The default truststore pass.",
+                        description = "The default trusts-store pass.",
                         defaultValue = "wso2carbon",
                         possibleParameters = "N/A"
                 )
@@ -151,10 +154,10 @@ public class HttpSink extends Sink {
     private Set<SenderConfiguration> senderConfig;
     private String mapType;
     private Map<String, String> httpStaticProperties;
-    private Set<TransportProperty> nettyTrasportProperty;
+    private Set<TransportProperty> nettyTransportProperty;
     private Option httpHeaderOption;
     private Option httpMethodOption;
-    private String athourizationHeader;
+    private String authorizationHeader;
     private String isAuth;
 
     @Override
@@ -179,14 +182,11 @@ public class HttpSink extends Sink {
         HttpPayloadDataSource messageDataSource = new HttpPayloadDataSource(messageBody, cMessage.getOutputStream());
         messageDataSource.setOutputStream(cMessage.getOutputStream());
         cMessage = generateCarbonMessage(headersList, messageDataSource, contentType, httpMethod, cMessage);
-        Future future = executorService.submit(new HttpPublisher(cMessage, httpStaticProperties, clientConnector,
-                messageBody, streamID));
         try {
-            future.get();
-        } catch (InterruptedException e) {
-            log.error("Thread interrupted while submitting", e);
-        } catch (ExecutionException e) {
-            log.error("Thread execution terminated unexpectedly while submitting", e);
+            clientConnector.send(cMessage, new HttpSinkCallback(messageBody), httpStaticProperties);
+        } catch (ClientConnectorException e) {
+            log.error("Error sending the HTTP message with payload " + payload + " in " +
+                    HttpConstants.HTTP_SINK_ID + streamID, e);
         }
     }
 
@@ -231,19 +231,18 @@ public class HttpSink extends Sink {
             this.executorService = executionPlanContext.getExecutorService();
             this.senderConfig = new HttpSinkUtil().getSenderConfigurations(httpStaticProperties, clientStoreFile,
                     clientStorePass);
-            this.nettyTrasportProperty = new HttpSinkUtil().getTransportConfigurations(sinkConfigReader);
+            this.nettyTransportProperty = new HttpSinkUtil().getTransportConfigurations(sinkConfigReader);
             byte[] val = (userName + ":" + userPassword).getBytes(Charset.defaultCharset());
-            this.athourizationHeader = HttpConstants.AUTHORIZATION_METHOD + Base64.encode
+            this.authorizationHeader = HttpConstants.AUTHORIZATION_METHOD + Base64.encode
                     (Unpooled.copiedBuffer(val));
         }
     }
 
     private CarbonMessage generateCarbonMessage(List<Header> headers, HttpPayloadDataSource payload, String contentType,
                                                 String httpMethod, CarbonMessage cMessage) {
-        //set Static Properties
         //if Authentication enabled
         if (isAuth.equalsIgnoreCase(HttpConstants.TRUE)) {
-            cMessage.setHeader(HttpConstants.AUTHORIZATION_HEADER, athourizationHeader);
+            cMessage.setHeader(HttpConstants.AUTHORIZATION_HEADER, authorizationHeader);
         }
         // Set meta data
         cMessage.setProperty(org.wso2.carbon.messaging.Constants.PROTOCOL,
@@ -270,7 +269,6 @@ public class HttpSink extends Sink {
             payload.setOutputStream(cMessage.getOutputStream());
             cMessage.setMessageDataSource(payload);
             cMessage.setAlreadyRead(true);
-
         }
         //Handel Empty Messages
         if (cMessage.isEmpty() && cMessage.getMessageDataSource() == null) {
@@ -281,7 +279,7 @@ public class HttpSink extends Sink {
 
     @Override
     public void connect() {
-        this.clientConnector = new HTTPClientConnector(senderConfig, nettyTrasportProperty);
+        this.clientConnector = new HTTPClientConnector(senderConfig, nettyTransportProperty);
         log.info(streamID + " has successfully connected to ");
     }
 

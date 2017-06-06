@@ -39,10 +39,6 @@ public class HttpSinkAdaptorRuntimeException extends RuntimeException {
         super(message, cause);
     }
 
-    public HttpSinkAdaptorRuntimeException(Throwable cause) {
-        super(cause);
-    }
-
     public HttpSinkAdaptorRuntimeException(String message, Throwable cause, boolean enableSuppression,
                                            boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);

@@ -43,7 +43,9 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Http source for receive the http and https request.
  */
-@Extension(name = "http", namespace = "source", description = "HTTP Source", parameters = {
+@Extension(name = "http", namespace = "source", description = "This is HTTP Source description. Which it handles " +
+        "receiving http or https POST which has text, xml or json payloads. This component is capable of providing " +
+        "basic authentication if user enabled it using proper parameters.", parameters = {
         @Parameter(name = "receiver.url", description = "Used to get the listening url. this is an optional parameter "
                 + "and by default it listening to the stream.", type = {DataType.STRING}),
         @Parameter(name = "is.basic.auth.enabled", description = "Used to specify the whether user need to " +
@@ -126,6 +128,9 @@ public class HttpSource extends Source {
     private ListenerConfiguration listenerConfig;
     private String context;
     private ConfigReader configReader;
+    private String workerThread;
+    private String serverBootstrapWorkerThread;
+    private String serverBootstrapBossThread;
 
     @Override
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
@@ -141,6 +146,12 @@ public class HttpSource extends Source {
                 defaultBaseURL + sourceEventListener.getStreamDefinition().getId());
         Boolean isAuth = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants.ISAUTH,
                 HttpConstants.EMPTY_ISAUTH).toLowerCase(Locale.ENGLISH));
+        workerThread = optionHolder.validateAndGetStaticValue(HttpConstants.WORKER_COUNT, HttpConstants
+                .DEFAULT_WORKER_COUNT);
+        serverBootstrapWorkerThread = optionHolder.validateAndGetStaticValue(HttpConstants
+                .SERVER_BOOTSTRAP_WORKER_GROUP_SIZE, HttpConstants.EMPTY_STRING);
+        serverBootstrapBossThread = optionHolder.validateAndGetStaticValue(HttpConstants
+                .SERVER_BOOTSTRAP_BOSS_GROUP_SIZE, HttpConstants.EMPTY_STRING);
         Object[] configuration = new HttpSourceUtil().setListenerProperty(listenerUrl, configReader);
         listenerConfig = (ListenerConfiguration) configuration[0];
         context = (String) configuration[1];
@@ -165,7 +176,8 @@ public class HttpSource extends Source {
     @Override
     public void connect() throws ConnectionUnavailableException {
         if (HttpConnectorRegistry.getInstance().createServerConnector(listenerUrl, context, sourceId, listenerConfig,
-                registeredListenerURL, registeredListenerAuthentication, configReader)) {
+                registeredListenerURL, registeredListenerAuthentication, configReader,
+                workerThread, serverBootstrapWorkerThread, serverBootstrapBossThread)) {
             log.info("New server connector has started on " + listenerUrl.replace(context, HttpConstants.
                     EMPTY_STRING));
         } else {
@@ -201,14 +213,20 @@ public class HttpSource extends Source {
 
     @Override
     public void pause() {
-        HttpConnectorRegistry.getInstance().getMessageProcessor(listenerUrl.replace(context, HttpConstants
-                .EMPTY_STRING)).pause();
+        if (HttpConnectorRegistry.getInstance().getMessageProcessor(listenerUrl.replace(context, HttpConstants
+                .EMPTY_STRING)).isRunning()) {
+            HttpConnectorRegistry.getInstance().getMessageProcessor(listenerUrl.replace(context, HttpConstants
+                    .EMPTY_STRING)).pause();
+        }
     }
 
     @Override
     public void resume() {
-        HttpConnectorRegistry.getInstance().getMessageProcessor(listenerUrl.replace(context, HttpConstants
-                .EMPTY_STRING)).resume();
+        if (HttpConnectorRegistry.getInstance().getMessageProcessor(listenerUrl.replace(context, HttpConstants
+                .EMPTY_STRING)).isPaused()) {
+            HttpConnectorRegistry.getInstance().getMessageProcessor(listenerUrl.replace(context, HttpConstants
+                    .EMPTY_STRING)).resume();
+        }
     }
 
     @Override

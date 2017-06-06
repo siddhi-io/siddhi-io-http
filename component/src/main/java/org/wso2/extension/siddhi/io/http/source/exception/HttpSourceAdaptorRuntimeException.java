@@ -27,10 +27,20 @@ import org.wso2.carbon.transport.http.netty.common.Constants;
  */
 public class HttpSourceAdaptorRuntimeException extends RuntimeException {
 
+    public HttpSourceAdaptorRuntimeException(String message, Throwable e) {
+        super(message, e);
+    }
     public HttpSourceAdaptorRuntimeException(String message) {
         super(message);
     }
 
+    public HttpSourceAdaptorRuntimeException(String message, CarbonCallback carbonCallback, int code, Throwable cause) {
+        super(message, cause);
+        DefaultCarbonMessage defaultCarbonMessage = new DefaultCarbonMessage();
+        defaultCarbonMessage.setStringMessageBody(message);
+        defaultCarbonMessage.setProperty(Constants.HTTP_STATUS_CODE, code);
+        carbonCallback.done(defaultCarbonMessage);
+    }
     public HttpSourceAdaptorRuntimeException(String message, CarbonCallback carbonCallback, int code) {
         super(message);
         DefaultCarbonMessage defaultCarbonMessage = new DefaultCarbonMessage();
