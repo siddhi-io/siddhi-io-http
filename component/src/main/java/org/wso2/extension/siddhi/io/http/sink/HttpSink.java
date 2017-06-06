@@ -81,8 +81,9 @@ import java.util.concurrent.TimeUnit;
                 "never mention such then system use default in deployment YML", type =
                 {DataType.STRING})},
         examples = {
-                @Example(syntax = "@sink(type='http', topic='stock', @map(type='xml'))\n"
-                        + "define stream FooStream (payload string, method string, headers string);\n", description =
+                @Example(syntax = "@sink(type='http',publisher.url='http://localhost:8009', method='{{method}}'," +
+                        "headers='{{headers}}', @map(type='xml' , @payload('{{payloadBody}}')))" +
+                        "define stream FooStream (payloadBody String, method string, headers string);\n", description =
                         "Expected input should be in following format:" +
                                 "{" +
                                 "<events>\n"
