@@ -73,7 +73,7 @@ public class HttpConstants {
     public static final String IS_AUTHENTICATION_REQUIRED = "basic.auth.enabled";
     public static final String RECEIVER_USERNAME = "basic.auth.username";
     public static final String RECEIVER_PASSWORD = "basic.auth.password";
-    public static final String CLIENT_TRUSTSTORE_PATH = "client.trustsstore.path";
+    public static final String CLIENT_TRUSTSTORE_PATH = "client.truststore.path";
     public static final String CLIENT_TRUSTSTORE_PASS = "client.truststore.pass";
     public static final String MAP_TEXT = "text";
     public static final String MAP_JSON = "json";

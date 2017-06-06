@@ -16,12 +16,7 @@
  *  under the License.
  *
  */
-
 package org.wso2.extension.siddhi.io.http.source;
-
-
-
-
 
 import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.exceptions.ServerConnectorException;

@@ -56,17 +56,14 @@ import java.util.concurrent.TimeUnit;
  * {@code HttpSink } Handle the HTTP publishing tasks.
  */
 @Extension(name = "http", namespace = "sink",
-        description = "This is description for http sink extension. This extension handle the output transport via " +
-                "http or https protocols using carbon transport. As the additional features this component can " +
-                "provide basic authentication.", parameters = {
-        @Parameter(name = "method", description = "Http method such as get,put,post. by default it is post", type =
-                {DataType.BOOL}),
+        description = "This is description for http sink extension. This extension publish the http events in any " +
+                "method types such as POST, GET, PUT, DELETE  via http or https protocols. As the additional features" +
+                " this component can provide basic authentication as well as user can publish events using custom " +
+                "client truststore files when publishing events via https protocol. And also user can add any number" +
+                " of headers for each event dynamically."
+        , parameters = {
         @Parameter(name = "publisher.url", description = "URL of http end pont which events should be send. It is " +
-                "mandatory field", type =
-                {DataType.STRING}),
-        @Parameter(name = "headers", description = "user can specify any number of header with comma separated and " +
-                "colan separated header name and value Ex: header1:value1, header2:value2", type = {
-                DataType.STRING}),
+                "mandatory field", type = {DataType.STRING}),
         @Parameter(name = "basic.auth.enabled", description = "by this user can enable the basic " +
                 "authentication if ths parameter is true then basic authentication is enables", type =
                 {DataType.STRING}),
@@ -75,26 +72,49 @@ import java.util.concurrent.TimeUnit;
         @Parameter(name = "basic.auth.password", description = "by this user can enable give their password of server" +
                 " to be send data. If basic auth enable then this is a mandatory argument", type =
                 {DataType.STRING}),
-        @Parameter(name = "client.truststore.path", description = "user can give custom client trusts-sore if user " +
+        @Parameter(name = "client.truststore.path", description = "user can give custom client truststore if user " +
                 "never " +
                 "mention such then system use default client-trusts-sore in ${carbon.home}/conf/security folder", type =
                 {DataType.STRING}),
-        @Parameter(name = "client.truststore.pass", description = "user can give custom client trusts-sore pass if " +
+        @Parameter(name = "client.truststore.pass", description = "user can give custom client truststore pass if " +
                 "user " +
                 "never mention such then system use default in deployment YML", type =
                 {DataType.STRING})},
         examples = {
                 @Example(syntax = "@sink(type='http', topic='stock', @map(type='xml'))\n"
-                        + "define stream FooStream (symbol string, price float, volume long);\n", description =
-                        "Above configuration will do a default XML input mapping which will " + "generate below " +
-                                "output"
+                        + "define stream FooStream (payload string, method string, headers string);\n", description =
+                        "Expected input should be in following format:" +
+                                "{" +
+                                "<events>\n"
+                                + "    <event>\n"
+                                + "        <symbol>WSO2</symbol>\n"
+                                + "        <price>55.6</price>\n"
+                                + "        <volume>100</volume>\n"
+                                + "    </event>\n"
+                                + "</events>\n"
+                                + ","
+                                + "POST"
+                                + "Content-Length:24#Content-Location:USA#Retry-After:120"
+                                + "}"
+                                + "Above configuration will do a default XML input mapping which will "
+                                + "generate as below " +
+                                "~Output payload"
                                 + "<events>\n"
                                 + "    <event>\n"
                                 + "        <symbol>WSO2</symbol>\n"
                                 + "        <price>55.6</price>\n"
                                 + "        <volume>100</volume>\n"
                                 + "    </event>\n"
-                                + "</events>\n")},
+                                + "</events>\n"
+                                + "~Output headers"
+                                + "Content-Length:24,Content-Location:USA,Retry-After:120,"
+                                + "Content-Type:application/xml"
+                                + "~Output property"
+                                + "HTTP_METHOD:POST"
+                                + "If user wish to have basic authentication enabled then it is expected to have "
+                                + "parameter set basic.auth.enabled='true' parameter along with basic.auth"
+                                + ".username='userName' , basic.auth.password='passWord'. Then output contains the "
+                                + "Authorization header as well")},
         systemParameter = {
                 @SystemParameter(
                         name = "latency.metrics.enabled",
@@ -134,13 +154,13 @@ import java.util.concurrent.TimeUnit;
                 ),
                 @SystemParameter(
                         name = "https.trustStoreFile",
-                        description = "The default trusts-store file path.",
+                        description = "The default truststore file path.",
                         defaultValue = "${carbon.home}/conf/security/client-truststore.jks",
                         possibleParameters = "N/A"
                 ),
                 @SystemParameter(
                         name = "https.trustStorePass",
-                        description = "The default trusts-store pass.",
+                        description = "The default truststore pass.",
                         defaultValue = "wso2carbon",
                         possibleParameters = "N/A"
                 )

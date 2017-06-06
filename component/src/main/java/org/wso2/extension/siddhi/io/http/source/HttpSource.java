@@ -43,15 +43,18 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Http source for receive the http and https request.
  */
-@Extension(name = "http", namespace = "source", description = "This is HTTP Source description. Which it handles " +
-        "receiving http or https POST which has text, xml or json payloads. This component is capable of providing " +
-        "basic authentication if user enabled it using proper parameters.", parameters = {
+@Extension(name = "http", namespace = "source", description = "This is HTTP Source description. Which it " +
+        "receive http or https POST request which has text, xml or json payloads. This component is capable of " +
+        "providing basic authentication if user enabled it as well as user can process events orderly if user set " +
+        "required parameters.", parameters
+        = {
         @Parameter(name = "receiver.url", description = "Used to get the listening url. this is an optional parameter "
                 + "and by default it listening to the stream.", type = {DataType.STRING}),
         @Parameter(name = "is.basic.auth.enabled", description = "Used to specify the whether user need to " +
                 "authenticated with basic authentication " + "or not", type = {DataType.STRING})},
         examples = {
-                @Example(syntax = "@source(type='http', topic='stock', @map(type='xml'))\n"
+                @Example(syntax = "@source(type='http', receiver.url='http://localhost:9055/endpoints/RecPro', " +
+                        "@map(type='xml'))\n"
                         + "define stream FooStream (symbol string, price float, volume long);\n",
                         description = "Above configuration will do a default XML input mapping. Expected "
                                 + "input will look like below."
@@ -61,7 +64,11 @@ import java.util.concurrent.ConcurrentHashMap;
                                 + "        <price>55.6</price>\n"
                                 + "        <volume>100</volume>\n"
                                 + "    </event>\n"
-                                + "</events>\n")},
+                                + "</events>\n"
+                                + "if user has enabled the basic authentication by parameter is.basic.auth.enabled="
+                                + "'true'  then it is expected to have header "
+                                + "Authorization:'Basic encodeBase64(username:Password)'"
+                                + "as a header in each event.")},
         systemParameter = {
                 @SystemParameter(
                         name = "latency.metrics.enabled",
