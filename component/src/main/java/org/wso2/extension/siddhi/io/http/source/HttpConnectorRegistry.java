@@ -132,12 +132,14 @@ class HttpConnectorRegistry {
             if ((configs.get(HttpConstants.WORKER_COUNT) != workerThreadCount) || (configs.get(HttpConstants.
                     SERVER_BOOTSTRAP_WORKER_GROUP_SIZE) != serverBootstrapWorkerThreadCount) ||
                     (configs.get(HttpConstants.WORKER_COUNT) != serverBootstrapBossThreadCount)) {
-                registeredListenerAuthentication.remove(registeredListenerURL.get(listenerUrl));
-                registeredListenerURL.remove(listenerUrl);
-                throw new HttpSourceAdaptorRuntimeException("Conflict with already existing" + sourceId);
+                log.error("Listener already exist for host:port " + listenerUrl.replace
+                        (context, HttpConstants.EMPTY_STRING) + " But conflict with already existing serve connector " +
+                        "which has following configurations " + configs.toString() + ". So source is connected to " +
+                        "the server which has those configurations.");
+            } else {
+                log.info("Listener already exist for host:port " + listenerUrl.replace
+                        (context, HttpConstants.EMPTY_STRING) + " no need to register again in " + sourceId);
             }
-            log.info("Listener already exist for host:port " + listenerUrl.replace
-                    (context, HttpConstants.EMPTY_STRING) + " no need to register again in " + sourceId);
             return false;
         }
     }
