@@ -44,10 +44,16 @@ import java.util.concurrent.ConcurrentHashMap;
  * Http source for receive the http and https request.
  */
 @Extension(name = "http", namespace = "source", description = "HTTP Source", parameters = {
-        @Parameter(name = "receiver.url", description = "Used to get the listening url. this is an optional parameter "
-                + "and by default it listening to the stream.", type = {DataType.STRING}),
-        @Parameter(name = "is.basic.auth.enabled", description = "Used to specify the whether user need to " +
-                "authenticated with basic authentication " + "or not", type = {DataType.STRING})},
+        @Parameter(name = "receiver.url", description = "The URL to which the events should be received. The default " +
+                "value is the URL to the event stream for which the source is configured. This URL is specified in " +
+                "the following format." +
+                " `http://localhost:8080/<streamName>`" +
+                "If you want to use SSL authentication for the event flow, you can specify the URL as follows."
+                + "`https://localhost:8080/<streamName>`", type = {DataType.STRING}),
+        @Parameter(name = "is.basic.auth.enabled", description = "If this is set to `true`, basic authentication is " +
+                "enabled for incoming events, and at each event arrival, the system checks whether the use who sent " +
+                "the event is authorised to access the WSO2 DAS server. If basic authentication fails, the event flow" +
+                "is not authenticated and an authentication error is logged in the CLI." , type = {DataType.STRING})},
         examples = {
                 @Example(syntax = "@source(type='http', topic='stock', @map(type='xml'))\n"
                         + "define stream FooStream (symbol string, price float, volume long);\n",

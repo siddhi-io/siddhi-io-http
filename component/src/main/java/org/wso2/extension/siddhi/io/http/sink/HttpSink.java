@@ -57,41 +57,52 @@ import java.util.concurrent.TimeUnit;
  * {@code HttpSink } Handle the HTTP publishing tasks.
  */
 @Extension(name = "http", namespace = "sink",
-        description = "This extension handle the output transport via http using carbon transport ", parameters = {
-        @Parameter(name = "method", description = "Http method such as get,put,post. by default it is post", type =
-                {DataType.BOOL}),
-        @Parameter(name = "publisher.url", description = "URL of http end pont which events should be send. It is " +
-                "mandatory field", type =
-                {DataType.STRING}),
-        @Parameter(name = "headers", description = "user can specify any number of header with comma separated and " +
-                "colan separated header name and value Ex: header1:value1, header2:value2", type = {
-                DataType.STRING}),
-        @Parameter(name = "basic.auth.enabled", description = "by this user can enable the basic " +
-                "authentication if ths parameter is true then basic authentication is enables", type =
-                {DataType.STRING}),
-        @Parameter(name = "basic.auth.username", description = "by this user can enable give their username. If basic" +
-                " auth enable then this is a mandatory argument", type = {DataType.STRING}),
-        @Parameter(name = "basic.auth.password", description = "by this user can enable give their password of server" +
-                " to be send data. If basic auth enable then this is a mandatory argument", type =
-                {DataType.STRING}),
-        @Parameter(name = "client.truststore.path", description = "user can give custom client trusore if user never " +
-                "mention such then system use default client-trustore in ${carbon.home}/conf/security folder", type =
-                {DataType.STRING}),
-        @Parameter(name = "client.truststore.pass", description = "user can give custom client trusore pass if user " +
-                "never mention such then system use default in deployment YML", type =
-                {DataType.STRING})},
+        description = "This extension handles the output transport via HTTP using the WSO2 Carbon transport ",
+        parameters = {
+                @Parameter(name = "method", description = " The HTTP method type. Possible values are `GET`, `PUT`," +
+                        "and `POST`. The default method is `POST`.", type = {DataType.BOOL}),
+                @Parameter(name = "publisher.url", description = "The URL to which the outgoing events published via " +
+                        "HTTP must be sent. If this is not specified, an error is logged in the CLI. If you want to " +
+                        "enable SSO authentication for the event flow, use `https` instead of `http` in the URL." +
+                        "e.g., `http://localhost:8080/EndPoint`, `https://localhost:8080/EndPoint`",
+                        type = {DataType.STRING}),
+                @Parameter(name = "headers", description = "This parameters allows you to specify the HTTP headers " +
+                        "with which the events need to be published. The headers should be added in the format shown " +
+                        "in the examples below. Multiple headers can be specified as a comma-separated list." +
+                        "e.g., `headerName1:Value1`, `headerName2:value2`", type = {DataType.STRING}),
+                @Parameter(name = "basic.auth.enabled", description = "This specifies whether basic authentication " +
+                        "is enabled for the event flow or not. If this parameter is set to `true`, it is required to " +
+                        "provide an authentication header in each event with the relevant user name and the password " +
+                        "in order to publish events. The value for this field is `false` by default",
+                        type = {DataType.STRING}),
+                @Parameter(name = "basic.auth.username", description = "The username to include in the authentication" +
+                        " header of the events to be published if basic authentication is enabled for the event flow" +
+                        " (i.e., via the `basic.auth.enabled` parameter). It is required to specify a username when " +
+                        "basic authentication is enabled.", type = {DataType.STRING}),
+                @Parameter(name = "basic.auth.password", description = "The password to include in the authentication" +
+                        " header of the events to be published if basic authentication is enabled for the event flow " +
+                        "(i.e., via the `basic.auth.enabled` parameter). It is required to specify a password when " +
+                        "basic authentication is enabled.", type = {DataType.STRING}),
+                @Parameter(name = "client.truststore.path", description = "The file path to the location of the " +
+                        "truststore of the WSO2 DAS client at sends the HTTP events. A custom client trust store can " +
+                        "be specified if required. If no custom trust store is specified, the system uses the default" +
+                        "client-trustore in the`${carbon.home}/conf/security` directory.", type = {DataType.STRING}),
+                @Parameter(name = "client.truststore.pass", description = "The password to access the client " +
+                        "truststore. A custom password can be specified if required. If no custom password is " +
+                        "specified, the system uses the default password in the deployment YML.",
+                        type = {DataType.STRING})},
         examples = {
-                @Example(syntax = "@sink(type='http', topic='stock', @map(type='xml'))\n"
-                        + "define stream FooStream (symbol string, price float, volume long);\n", description =
-                        "Above configuration will do a default XML input mapping which will " + "generate below " +
-                                "output"
-                                + "<events>\n"
-                                + "    <event>\n"
-                                + "        <symbol>WSO2</symbol>\n"
-                                + "        <price>55.6</price>\n"
-                                + "        <volume>100</volume>\n"
-                                + "    </event>\n"
-                                + "</events>\n")},
+                @Example(syntax = "@sink(type='http', topic='stock', @map(type='xml'))\n" +
+                        "define stream FooStream (symbol string, price float, volume long);\n", description =
+                        "The above configuration does a default XML input mapping that " + "generates the following " +
+                                "output " +
+                                "`<events>\n`" +
+                        "    <event>\n" +
+                        "        <symbol>WSO2</symbol>\n" +
+                        "        <price>55.6</price>\n" +
+                        "        <volume>100</volume>\n" +
+                        "    </event>\n" +
+                        "</events>\n")},
         systemParameter = {
                 @SystemParameter(
                         name = "latency.metrics.enabled",
