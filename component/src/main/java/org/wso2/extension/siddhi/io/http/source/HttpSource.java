@@ -42,33 +42,41 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Http source for receive the http and https request.
  */
-@Extension(name = "http", namespace = "source", description = "This is HTTP Source description. Which it " +
-        "receive http or https POST request which has text, xml or json payloads. This component is capable of " +
-        "providing basic authentication if user enabled it as well as user can process events orderly if user set " +
-        "required parameters.", parameters = {
-        @Parameter(name = "receiver.url", description = "The URL to which the events should be received. The default " +
-                "value is the URL to the event stream for which the source is configured. This URL is specified in " +
-                "the following format. `http://localhost:8080/<streamName>`" +
-                "If you want to use SSL authentication for the event flow, you can specify the URL as follows."
-                + "`https://localhost:8080/<streamName>`", type = {DataType.STRING}, optional = true),
-        @Parameter(name = "basic.auth.enabled", description = "If this is set to `true`, basic authentication is " +
-                "enabled for incoming events, and at each event arrival, the system checks whether the use who sent " +
-                "the event is authorised to access the WSO2 DAS server. If basic authentication fails, the event flow" +
-                "is not authenticated and an authentication error is logged in the CLI.", type = {DataType.STRING},
-                optional = true),
-        @Parameter(name = "worker.count", description = "Siddhi level thread pool thread count. By default this " +
-                "value is one. If user need to preserve event order then this parameter should be one.", type =
-                {DataType.STRING}, optional = true),
-        @Parameter(name = "server.bootstrap.boss.group.size", description = "Netty level bootstrap boss group size. " +
-                "By default it use configurations in netty-transport.yml.", type = {DataType.STRING}),
-        @Parameter(name = "server.bootstrap.worker.group.size", description = "Netty level bootstrap boss group " +
-                "size. By default it use configurations in netty-transport.yml.", type = {DataType.STRING})},
+@Extension(name = "http", namespace = "source", description = "The HTTP source receives POST requests via HTTP or " +
+        "HTTPS in `text`, `XML` or `JSON` format. If required, you can enable basic authentication to ensure that " +
+        "events are received only from users who are authorized to access WSO2 DAS.",
+        parameters = {
+                @Parameter(name = "receiver.url", description = "The URL to which the events should be received. The " +
+                        "default value is the URL to the event stream for which the source is configured. This URL " +
+                        "is specified in the following format. " +
+                        "`http://localhost:8080/<streamName>`" +
+                        "If you want to use SSL authentication for the event flow, you can specify the URL as " +
+                        "follows." +
+                        "`https://localhost:8080/<streamName>`", type = {DataType.STRING}, optional = true),
+                @Parameter(name = "basic.auth.enabled", description = "If this is set to `true`, " +
+                        "basic authentication is enabled for incoming events, and the credentials with which each " +
+                        "event is sent are verified to ensure that the user is authorized to access the WSO2 DAS " +
+                        "server. If basic authentication fails, the event flow is not authenticated and an " +
+                        "authentication error is logged in the CLI.",
+                        type = {DataType.STRING},
+                        optional = true),
+                @Parameter(name = "worker.count", description = "The number of active threads in the Siddhi level " +
+                        "thread pool. The value is 1 by default. If you want to ensure that the events are directed " +
+                        "to the event stream in the same order in which they arrive, the value for this parameter " +
+                        "must be 1 so that events are not delivered via multiple threads, distorting the order.",
+                        type = {DataType.STRING}, optional = true),
+                @Parameter(name = "server.bootstrap.boss.group.size", description = "The Netty level bootstrap boss " +
+                        "group size. This uses the configurations in the `netty-transport.yml` file by default.",
+                        type = {DataType.STRING}),
+                @Parameter(name = "server.bootstrap.worker.group.size", description = "The Netty level bootstrap " +
+                        "boss group size. This uses the configurations in the `netty-transport.yml` file by default.",
+                        type = {DataType.STRING})},
         examples = {
                 @Example(syntax = "@source(type='http', receiver.url='http://localhost:9055/endpoints/RecPro', " +
                         "@map(type='xml'))\n"
                         + "define stream FooStream (symbol string, price float, volume long);\n",
-                        description = "Above configuration will do a default XML input mapping. Expected "
-                                + "input will look like below."
+                        description = "Above source configuration performs a default XML input mapping. The expected "
+                                + "input is as follows:"
                                 + "<events>\n"
                                 + "    <event>\n"
                                 + "        <symbol>WSO2</symbol>\n"
@@ -76,10 +84,9 @@ import java.util.concurrent.ConcurrentHashMap;
                                 + "        <volume>100</volume>\n"
                                 + "    </event>\n"
                                 + "</events>\n"
-                                + "if user has enabled the basic authentication by parameter basic.auth.enabled="
-                                + "'true'  then it is expected to have header "
-                                + "Authorization:'Basic encodeBase64(username:Password)'"
-                                + "as a header in each event.")},
+                                + "If basic authentication is enabled via the `basic.auth.enabled='true` setting, " +
+                                "each input event is also expected to contain the " +
+                                "`Authorization:'Basic encodeBase64(username:Password)'` header.")},
         systemParameter = {
                 @SystemParameter(
                         name = "latency.metrics.enabled",

@@ -76,9 +76,10 @@ import java.util.concurrent.TimeUnit;
                         "(i.e., via the `basic.auth.enabled` parameter). It is required to specify a password when " +
                         "basic authentication is enabled.", type = {DataType.STRING}, optional = true),
                 @Parameter(name = "client.truststore.path", description = "The file path to the location of the " +
-                        "truststore of the WSO2 DAS client at sends the HTTP events. A custom client trust store can " +
-                        "be specified if required. If no custom trust store is specified, the system uses the default" +
-                        "client-trustore in the`${carbon.home}/conf/security` directory.", type = {DataType.STRING},
+                        "truststore of the WSO2 DAS client that sends the HTTP events. A custom client trust store " +
+                        "can be specified if required. If no custom trust store is specified, the system uses the " +
+                        "default client-trustore in the`${carbon.home}/conf/security` directory.",
+                        type = {DataType.STRING},
                         optional = true),
                 @Parameter(name = "client.truststore.pass", description = "The password to access the client " +
                         "truststore. A custom password can be specified if required. If no custom password is " +
@@ -116,10 +117,12 @@ import java.util.concurrent.TimeUnit;
                                 + "Content-Type:application/xml"
                                 + "~Output property"
                                 + "HTTP_METHOD:POST"
-                                + "If user wish to have basic authentication enabled then it is expected to have "
-                                + "parameter set basic.auth.enabled='true' parameter along with basic.auth"
-                                + ".username='userName' , basic.auth.password='passWord'. Then output contains the "
-                                + "Authorization header as well")},
+                                + " If you need to use basic authentication, the `basic.auth.enabled` parameter must" +
+                                " be set to `true`. This would also require values to be specified for the" +
+                                " `basic.auth.username` and `basic.auth.password` parameters (e.g., " +
+                                "`basic.auth.username='userName'` and `basic.auth.password='passWord'`). As a result," +
+                                "the output will also contain the `Authorization` header.")
+                        },
         systemParameter = {
                 @SystemParameter(
                         name = "latency.metrics.enabled",
