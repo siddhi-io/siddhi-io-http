@@ -54,7 +54,6 @@ public class HttpTestUtil {
         carbonHome = Paths.get(carbonHome.toString(), "src", "test", "resources");
         System.setProperty(Constants.CARBON_HOME, carbonHome.toString());
         logger.info("Carbon Home Absolute path set to: " + carbonHome.toAbsolutePath());
-
     }
 
     public void httpPublishEvent(String event, URI baseURI, String path, Boolean auth, String mapping,
@@ -70,12 +69,11 @@ public class HttpTestUtil {
                 HttpServerUtil.setHeader(urlConn, "Authorization",
                         "Basic " + java.util.Base64.getEncoder().encodeToString(("admin" + ":" + "admin").getBytes()));
             }
-            HttpServerUtil.setHeader(urlConn, "Content-Type", mapping);
-            HttpServerUtil.setHeader(urlConn, "HTTP_METHOD", methodType);
             HttpServerUtil.writeContent(urlConn, event);
             assert urlConn != null;
             logger.info("Event response code " + urlConn.getResponseCode());
             logger.info("Event response message " + urlConn.getResponseMessage());
+            urlConn.disconnect();
         } catch (IOException e) {
             HttpServerUtil.handleException("IOException occurred while running the HttpsSourceTestCaseForSSL", e);
         }
@@ -163,6 +161,7 @@ public class HttpTestUtil {
             out.close();
             logger.info("Event response code " + httpsCon.getResponseCode());
             logger.info("Event response message " + httpsCon.getResponseMessage());
+            httpsCon.disconnect();
         } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException e) {
             logger.error(e);
         }

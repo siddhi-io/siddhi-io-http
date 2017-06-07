@@ -55,7 +55,6 @@ public class ServerUtil {
 
     static void handleException(String msg, Exception ex) {
         log.error(msg, ex);
-        // fail(msg);
     }
 
 }

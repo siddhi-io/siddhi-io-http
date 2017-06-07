@@ -237,7 +237,7 @@
                                 </goals>
                                 <configuration>
                                     <outputDirectory>
-                                        ${project.build.directory}/wso2carbon-kernel-${project.version}/conf/security
+                                        ${project.build.directory}/wso2das-${project.version}/conf/security
                                     </outputDirectory>
                                     <overwrite>true</overwrite>
                                     <resources>

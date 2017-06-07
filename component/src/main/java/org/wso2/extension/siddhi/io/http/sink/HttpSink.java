@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.carbon.messaging.DefaultCarbonMessage;
 import org.wso2.carbon.messaging.Header;
+import org.wso2.carbon.messaging.exceptions.ClientConnectorException;
 import org.wso2.carbon.transport.http.netty.config.SenderConfiguration;
 import org.wso2.carbon.transport.http.netty.config.TransportProperty;
 import org.wso2.carbon.transport.http.netty.sender.HTTPClientConnector;
@@ -48,61 +49,77 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
  * {@code HttpSink } Handle the HTTP publishing tasks.
  */
 @Extension(name = "http", namespace = "sink",
-        description = "This extension handles the output transport via HTTP using the WSO2 Carbon transport ",
+        description = "This is description for http sink extension. This extension publish the http events in any " +
+                "method types such as POST, GET, PUT, DELETE  via http or https protocols. As the additional features" +
+                " this component can provide basic authentication as well as user can publish events using custom " +
+                "client truststore files when publishing events via https protocol. And also user can add any number" +
+                " of headers for each event dynamically.",
         parameters = {
-                @Parameter(name = "method", description = " The HTTP method type. Possible values are `GET`, `PUT`," +
-                        "and `POST`. The default method is `POST`.", type = {DataType.BOOL}),
                 @Parameter(name = "publisher.url", description = "The URL to which the outgoing events published via " +
                         "HTTP must be sent. If this is not specified, an error is logged in the CLI. If you want to " +
                         "enable SSO authentication for the event flow, use `https` instead of `http` in the URL." +
                         "e.g., `http://localhost:8080/EndPoint`, `https://localhost:8080/EndPoint`",
                         type = {DataType.STRING}),
-                @Parameter(name = "headers", description = "This parameters allows you to specify the HTTP headers " +
-                        "with which the events need to be published. The headers should be added in the format shown " +
-                        "in the examples below. Multiple headers can be specified as a comma-separated list." +
-                        "e.g., `headerName1:Value1`, `headerName2:value2`", type = {DataType.STRING}),
-                @Parameter(name = "basic.auth.enabled", description = "This specifies whether basic authentication " +
-                        "is enabled for the event flow or not. If this parameter is set to `true`, it is required to " +
-                        "provide an authentication header in each event with the relevant user name and the password " +
-                        "in order to publish events. The value for this field is `false` by default",
-                        type = {DataType.STRING}),
                 @Parameter(name = "basic.auth.username", description = "The username to include in the authentication" +
                         " header of the events to be published if basic authentication is enabled for the event flow" +
                         " (i.e., via the `basic.auth.enabled` parameter). It is required to specify a username when " +
-                        "basic authentication is enabled.", type = {DataType.STRING}),
+                        "basic authentication is enabled.", type = {DataType.STRING}, optional = true),
                 @Parameter(name = "basic.auth.password", description = "The password to include in the authentication" +
                         " header of the events to be published if basic authentication is enabled for the event flow " +
                         "(i.e., via the `basic.auth.enabled` parameter). It is required to specify a password when " +
-                        "basic authentication is enabled.", type = {DataType.STRING}),
+                        "basic authentication is enabled.", type = {DataType.STRING}, optional = true),
                 @Parameter(name = "client.truststore.path", description = "The file path to the location of the " +
                         "truststore of the WSO2 DAS client at sends the HTTP events. A custom client trust store can " +
                         "be specified if required. If no custom trust store is specified, the system uses the default" +
-                        "client-trustore in the`${carbon.home}/conf/security` directory.", type = {DataType.STRING}),
+                        "client-trustore in the`${carbon.home}/conf/security` directory.", type = {DataType.STRING},
+                        optional = true),
                 @Parameter(name = "client.truststore.pass", description = "The password to access the client " +
                         "truststore. A custom password can be specified if required. If no custom password is " +
                         "specified, the system uses the default password in the deployment YML.",
-                        type = {DataType.STRING})},
+                        type = {DataType.STRING}, optional = true)},
         examples = {
-                @Example(syntax = "@sink(type='http', topic='stock', @map(type='xml'))\n" +
-                        "define stream FooStream (symbol string, price float, volume long);\n", description =
-                        "The above configuration does a default XML input mapping that " + "generates the following " +
-                                "output " +
-                                "`<events>\n`" +
-                        "    <event>\n" +
-                        "        <symbol>WSO2</symbol>\n" +
-                        "        <price>55.6</price>\n" +
-                        "        <volume>100</volume>\n" +
-                        "    </event>\n" +
-                        "</events>\n")},
+                @Example(syntax = "@sink(type='http',publisher.url='http://localhost:8009', method='{{method}}'," +
+                        "headers='{{headers}}', @map(type='xml' , @payload('{{payloadBody}}')))" +
+                        "define stream FooStream (payloadBody String, method string, headers string);\n", description =
+                        "Expected input should be in following format:" +
+                                "{" +
+                                "<events>\n"
+                                + "    <event>\n"
+                                + "        <symbol>WSO2</symbol>\n"
+                                + "        <price>55.6</price>\n"
+                                + "        <volume>100</volume>\n"
+                                + "    </event>\n"
+                                + "</events>\n"
+                                + ","
+                                + "POST"
+                                + "Content-Length:24#Content-Location:USA#Retry-After:120"
+                                + "}"
+                                + "Above configuration will do a default XML input mapping which will "
+                                + "generate as below "
+                                + "~Output payload"
+                                + "<events>\n"
+                                + "    <event>\n"
+                                + "        <symbol>WSO2</symbol>\n"
+                                + "        <price>55.6</price>\n"
+                                + "        <volume>100</volume>\n"
+                                + "    </event>\n"
+                                + "</events>\n"
+                                + "~Output headers"
+                                + "Content-Length:24,Content-Location:USA,Retry-After:120,"
+                                + "Content-Type:application/xml"
+                                + "~Output property"
+                                + "HTTP_METHOD:POST"
+                                + "If user wish to have basic authentication enabled then it is expected to have "
+                                + "parameter set basic.auth.enabled='true' parameter along with basic.auth"
+                                + ".username='userName' , basic.auth.password='passWord'. Then output contains the "
+                                + "Authorization header as well")},
         systemParameter = {
                 @SystemParameter(
                         name = "latency.metrics.enabled",
@@ -141,14 +158,14 @@ import java.util.concurrent.TimeUnit;
                         possibleParameters = "N/A"
                 ),
                 @SystemParameter(
-                        name = "https.trustStoreFile",
+                        name = "https.truststore.file",
                         description = "The default truststore file path.",
                         defaultValue = "${carbon.home}/conf/security/client-truststore.jks",
                         possibleParameters = "N/A"
                 ),
                 @SystemParameter(
-                        name = "https.trustStorePass",
-                        description = "The default truststore pass.",
+                        name = "https.truststore.pass",
+                        description = "The default truststore password.",
                         defaultValue = "wso2carbon",
                         possibleParameters = "N/A"
                 )
@@ -162,12 +179,12 @@ public class HttpSink extends Sink {
     private Set<SenderConfiguration> senderConfig;
     private String mapType;
     private Map<String, String> httpStaticProperties;
-    private Set<TransportProperty> nettyTrasportProperty;
+    private Set<TransportProperty> nettyTransportProperty;
     private Option httpHeaderOption;
     private Option httpMethodOption;
-    private String athourizationHeader;
-    private String isAuth;
-
+    private String authorizationHeader;
+    private String userName;
+    private String userPassword;
     @Override
     public Map<String, Object> currentState() {
         return null;
@@ -190,14 +207,11 @@ public class HttpSink extends Sink {
         HttpPayloadDataSource messageDataSource = new HttpPayloadDataSource(messageBody, cMessage.getOutputStream());
         messageDataSource.setOutputStream(cMessage.getOutputStream());
         cMessage = generateCarbonMessage(headersList, messageDataSource, contentType, httpMethod, cMessage);
-        Future future = executorService.submit(new HttpPublisher(cMessage, httpStaticProperties, clientConnector,
-                messageBody, streamID));
         try {
-            future.get();
-        } catch (InterruptedException e) {
-            log.error("Thread interrupted while submitting", e);
-        } catch (ExecutionException e) {
-            log.error("Thread execution terminated unexpectedly while submitting", e);
+            clientConnector.send(cMessage, new HttpSinkCallback(messageBody), httpStaticProperties);
+        } catch (ClientConnectorException e) {
+            log.error("Error sending the HTTP message with payload " + payload + " in " +
+                    HttpConstants.HTTP_SINK_ID + streamID, e);
         }
     }
 
@@ -218,11 +232,9 @@ public class HttpSink extends Sink {
                             EMPTY_STRING);
             httpHeaderOption = optionHolder.validateAndGetOption(HttpConstants.HEADERS);
             httpMethodOption = optionHolder.validateAndGetOption(HttpConstants.METHOD);
-            isAuth = optionHolder.validateAndGetStaticValue(HttpConstants.IS_AUTHENTICATION_REQUIRED,
-                    HttpConstants.IS_AUTHENTICATION_REQUIRED_DEFAULT);
-            String userName = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_USERNAME,
+            userName = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_USERNAME,
                     HttpConstants.EMPTY_STRING);
-            String userPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_PASSWORD,
+            userPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_PASSWORD,
                     HttpConstants.EMPTY_STRING);
             String[] defaultTrustStoreValues = new HttpSinkUtil().trustStoreValues(sinkConfigReader);
             String clientStoreFile = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PATH,
@@ -233,28 +245,30 @@ public class HttpSink extends Sink {
                 throw new ExceptionInInitializerError("Receiver URL found empty but it is Mandatory field in " +
                         "" + HttpConstants.HTTP_SINK_ID + streamID);
             }
-            if ((HttpConstants.TRUE.equalsIgnoreCase(isAuth)) && (userName.equals(HttpConstants.EMPTY_STRING) ||
+            if ((userName.equals(HttpConstants.EMPTY_STRING) ^
                     userPassword.equals(HttpConstants.EMPTY_STRING))) {
-                throw new ExceptionInInitializerError("Please provide user name and password properly in " +
+                throw new ExceptionInInitializerError("Please provide user name and password in " +
                         HttpConstants.HTTP_SINK_ID + streamID);
+            } else if (!(userName.equals(HttpConstants.EMPTY_STRING) || userPassword.equals
+                    (HttpConstants.EMPTY_STRING))) {
+                byte[] val = (userName + ":" + userPassword).getBytes(Charset.defaultCharset());
+                this.authorizationHeader = HttpConstants.AUTHORIZATION_METHOD + Base64.encode
+                        (Unpooled.copiedBuffer(val));
             }
             this.httpStaticProperties = new HttpSinkUtil().getHttpStaticProperties(publisherURL);
             this.executorService = executionPlanContext.getExecutorService();
             this.senderConfig = new HttpSinkUtil().getSenderConfigurations(httpStaticProperties, clientStoreFile,
                     clientStorePass);
-            this.nettyTrasportProperty = new HttpSinkUtil().getTransportConfigurations(sinkConfigReader);
-            byte[] val = (userName + ":" + userPassword).getBytes(Charset.defaultCharset());
-            this.athourizationHeader = HttpConstants.AUTHORIZATION_METHOD + Base64.encode
-                    (Unpooled.copiedBuffer(val));
+            this.nettyTransportProperty = new HttpSinkUtil().getTransportConfigurations(sinkConfigReader);
         }
     }
 
     private CarbonMessage generateCarbonMessage(List<Header> headers, HttpPayloadDataSource payload, String contentType,
                                                 String httpMethod, CarbonMessage cMessage) {
-        //set Static Properties
         //if Authentication enabled
-        if (isAuth.equalsIgnoreCase(HttpConstants.TRUE)) {
-            cMessage.setHeader(HttpConstants.AUTHORIZATION_HEADER, athourizationHeader);
+        if (!(userName.equals(HttpConstants.EMPTY_STRING) || userPassword.equals
+                (HttpConstants.EMPTY_STRING))) {
+            cMessage.setHeader(HttpConstants.AUTHORIZATION_HEADER, authorizationHeader);
         }
         // Set meta data
         cMessage.setProperty(org.wso2.carbon.messaging.Constants.PROTOCOL,
@@ -281,7 +295,6 @@ public class HttpSink extends Sink {
             payload.setOutputStream(cMessage.getOutputStream());
             cMessage.setMessageDataSource(payload);
             cMessage.setAlreadyRead(true);
-
         }
         //Handel Empty Messages
         if (cMessage.isEmpty() && cMessage.getMessageDataSource() == null) {
@@ -292,7 +305,7 @@ public class HttpSink extends Sink {
 
     @Override
     public void connect() {
-        this.clientConnector = new HTTPClientConnector(senderConfig, nettyTrasportProperty);
+        this.clientConnector = new HTTPClientConnector(senderConfig, nettyTransportProperty);
         log.info(streamID + " has successfully connected to ");
     }
 

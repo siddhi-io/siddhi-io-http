@@ -16,7 +16,6 @@
  *  under the License.
  *
  */
-
 package org.wso2.extension.siddhi.io.http.source;
 
 import com.google.common.io.ByteStreams;

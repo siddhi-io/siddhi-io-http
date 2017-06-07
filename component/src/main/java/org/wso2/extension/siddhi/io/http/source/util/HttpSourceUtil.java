@@ -18,7 +18,6 @@
  */
 package org.wso2.extension.siddhi.io.http.source.util;
 
-
 import org.apache.log4j.Logger;
 import org.wso2.carbon.transport.http.netty.config.ListenerConfiguration;
 import org.wso2.carbon.transport.http.netty.config.TransportProperty;
@@ -31,7 +30,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-
 
 /**
  * Handles the http source util functions.
@@ -47,23 +45,36 @@ public class HttpSourceUtil {
      *
      * @return return the set of netty transportation configuration.
      */
-    public Set<TransportProperty> getTransportConfigurations(ConfigReader sourceConfigReader) {
+    public Set<TransportProperty> getTransportConfigurations(ConfigReader sourceConfigReader, String
+            serverBootstrapWorkerThread, String serverBootstrapBossThread) {
         ArrayList<TransportProperty> properties = new ArrayList<>();
-        TransportProperty var1 = new TransportProperty();
-        var1.setName(HttpConstants.LATENCY_METRICS);
-        var1.setValue(sourceConfigReader.readConfig(HttpConstants.LATENCY_METRICS,
+        TransportProperty var = new TransportProperty();
+        var.setName(HttpConstants.LATENCY_METRICS);
+        var.setValue(sourceConfigReader.readConfig(HttpConstants.LATENCY_METRICS,
                 HttpConstants.LATENCY_METRICS_VALUE));
-        properties.add(var1);
-        TransportProperty var2 = new TransportProperty();
-        var2.setName(HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT);
-        var2.setValue(Integer.valueOf(sourceConfigReader.readConfig(HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT,
+        properties.add(var);
+        var = new TransportProperty();
+        var.setName(HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT);
+        var.setValue(Integer.valueOf(sourceConfigReader.readConfig(HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT,
                 HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT_VALUE)));
-        properties.add(var2);
-        TransportProperty var3 = new TransportProperty();
-        var3.setName(HttpConstants.CLIENT_BOOTSTRAP_SOCKET_TIMEOUT);
-        var3.setValue(Integer.valueOf(sourceConfigReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_SOCKET_TIMEOUT,
+        properties.add(var);
+        var = new TransportProperty();
+        var.setName(HttpConstants.CLIENT_BOOTSTRAP_SOCKET_TIMEOUT);
+        var.setValue(Integer.valueOf(sourceConfigReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_SOCKET_TIMEOUT,
                 HttpConstants.CLIENT_BOOTSTRAP_SOCKET_TIMEOUT_VALUE)));
-        properties.add(var3);
+        properties.add(var);
+        if (!HttpConstants.EMPTY_STRING.equals(serverBootstrapBossThread)) {
+            var = new TransportProperty();
+            var.setName(HttpConstants.SERVER_BOOTSTRAP_BOSS_GROUP_SIZE);
+            var.setValue(Integer.valueOf(serverBootstrapBossThread));
+            properties.add(var);
+        }
+        if (!HttpConstants.EMPTY_STRING.equals(serverBootstrapWorkerThread)) {
+            var = new TransportProperty();
+            var.setName(HttpConstants.SERVER_BOOTSTRAP_WORKER_GROUP_SIZE);
+            var.setValue(Integer.valueOf(serverBootstrapWorkerThread));
+            properties.add(var);
+        }
         return new HashSet<>(properties);
     }
 

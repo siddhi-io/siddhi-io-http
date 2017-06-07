@@ -88,8 +88,8 @@ public class HttpSinkTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);" +
-                "@sink(type='http'," + "publisher.url='http://localhost:9009'," + "method='{{method}}'," +
-                "" + "headers='{{headers}}',"
+                "@sink(type='http'," + "publisher.url='http://localhost:9009'," + "method='{{method}}',"
+                + "headers='{{headers}}',"
                 + "@map(type='xml', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
         String query = ("@info(name = 'query1') " +

@@ -31,7 +31,7 @@ import javax.security.auth.login.LoginException;
  */
 public class HttpAuthenticator {
 
-    public HttpAuthenticator() {
+    private HttpAuthenticator() {
     }
 
     /**

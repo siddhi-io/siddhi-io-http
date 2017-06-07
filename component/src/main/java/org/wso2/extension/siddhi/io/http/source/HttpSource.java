@@ -16,7 +16,6 @@
  *  under the License.
  *
  */
-
 package org.wso2.extension.siddhi.io.http.source;
 
 import org.apache.log4j.Logger;
@@ -43,19 +42,30 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Http source for receive the http and https request.
  */
-@Extension(name = "http", namespace = "source", description = "HTTP Source", parameters = {
+@Extension(name = "http", namespace = "source", description = "This is HTTP Source description. Which it " +
+        "receive http or https POST request which has text, xml or json payloads. This component is capable of " +
+        "providing basic authentication if user enabled it as well as user can process events orderly if user set " +
+        "required parameters.", parameters = {
         @Parameter(name = "receiver.url", description = "The URL to which the events should be received. The default " +
                 "value is the URL to the event stream for which the source is configured. This URL is specified in " +
-                "the following format." +
-                " `http://localhost:8080/<streamName>`" +
+                "the following format. `http://localhost:8080/<streamName>`" +
                 "If you want to use SSL authentication for the event flow, you can specify the URL as follows."
-                + "`https://localhost:8080/<streamName>`", type = {DataType.STRING}),
-        @Parameter(name = "is.basic.auth.enabled", description = "If this is set to `true`, basic authentication is " +
+                + "`https://localhost:8080/<streamName>`", type = {DataType.STRING}, optional = true),
+        @Parameter(name = "basic.auth.enabled", description = "If this is set to `true`, basic authentication is " +
                 "enabled for incoming events, and at each event arrival, the system checks whether the use who sent " +
                 "the event is authorised to access the WSO2 DAS server. If basic authentication fails, the event flow" +
-                "is not authenticated and an authentication error is logged in the CLI." , type = {DataType.STRING})},
+                "is not authenticated and an authentication error is logged in the CLI.", type = {DataType.STRING},
+                optional = true),
+        @Parameter(name = "worker.count", description = "Siddhi level thread pool thread count. By default this " +
+                "value is one. If user need to preserve event order then this parameter should be one.", type =
+                {DataType.STRING}, optional = true),
+        @Parameter(name = "server.bootstrap.boss.group.size", description = "Netty level bootstrap boss group size. " +
+                "By default it use configurations in netty-transport.yml.", type = {DataType.STRING}),
+        @Parameter(name = "server.bootstrap.worker.group.size", description = "Netty level bootstrap boss group " +
+                "size. By default it use configurations in netty-transport.yml.", type = {DataType.STRING})},
         examples = {
-                @Example(syntax = "@source(type='http', topic='stock', @map(type='xml'))\n"
+                @Example(syntax = "@source(type='http', receiver.url='http://localhost:9055/endpoints/RecPro', " +
+                        "@map(type='xml'))\n"
                         + "define stream FooStream (symbol string, price float, volume long);\n",
                         description = "Above configuration will do a default XML input mapping. Expected "
                                 + "input will look like below."
@@ -65,7 +75,11 @@ import java.util.concurrent.ConcurrentHashMap;
                                 + "        <price>55.6</price>\n"
                                 + "        <volume>100</volume>\n"
                                 + "    </event>\n"
-                                + "</events>\n")},
+                                + "</events>\n"
+                                + "if user has enabled the basic authentication by parameter basic.auth.enabled="
+                                + "'true'  then it is expected to have header "
+                                + "Authorization:'Basic encodeBase64(username:Password)'"
+                                + "as a header in each event.")},
         systemParameter = {
                 @SystemParameter(
                         name = "latency.metrics.enabled",
@@ -104,19 +118,19 @@ import java.util.concurrent.ConcurrentHashMap;
                         possibleParameters = "N/A"
                 ),
                 @SystemParameter(
-                        name = "https.keyStoreFile",
+                        name = "https.keystore.file",
                         description = "The default keystore file path.",
                         defaultValue = "${carbon.home}/conf/security/wso2carbon.jks",
                         possibleParameters = "N/A"
                 ),
                 @SystemParameter(
-                        name = "https.keyStorePass",
+                        name = "https.keystore.pass",
                         description = "The default keystore pass.",
                         defaultValue = "wso2carbon",
                         possibleParameters = "N/A"
                 ),
                 @SystemParameter(
-                        name = "https.certPass",
+                        name = "https.cert.pass",
                         description = "The default cert pass.",
                         defaultValue = "wso2carbon",
                         possibleParameters = "N/A"
@@ -132,6 +146,9 @@ public class HttpSource extends Source {
     private ListenerConfiguration listenerConfig;
     private String context;
     private ConfigReader configReader;
+    private String workerThread;
+    private String serverBootstrapWorkerThread;
+    private String serverBootstrapBossThread;
 
     @Override
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
@@ -147,6 +164,12 @@ public class HttpSource extends Source {
                 defaultBaseURL + sourceEventListener.getStreamDefinition().getId());
         Boolean isAuth = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants.ISAUTH,
                 HttpConstants.EMPTY_ISAUTH).toLowerCase(Locale.ENGLISH));
+        workerThread = optionHolder.validateAndGetStaticValue(HttpConstants.WORKER_COUNT, HttpConstants
+                .DEFAULT_WORKER_COUNT);
+        serverBootstrapWorkerThread = optionHolder.validateAndGetStaticValue(HttpConstants
+                .SERVER_BOOTSTRAP_WORKER_GROUP_SIZE, HttpConstants.EMPTY_STRING);
+        serverBootstrapBossThread = optionHolder.validateAndGetStaticValue(HttpConstants
+                .SERVER_BOOTSTRAP_BOSS_GROUP_SIZE, HttpConstants.EMPTY_STRING);
         Object[] configuration = new HttpSourceUtil().setListenerProperty(listenerUrl, configReader);
         listenerConfig = (ListenerConfiguration) configuration[0];
         context = (String) configuration[1];
@@ -171,7 +194,8 @@ public class HttpSource extends Source {
     @Override
     public void connect() throws ConnectionUnavailableException {
         if (HttpConnectorRegistry.getInstance().createServerConnector(listenerUrl, context, sourceId, listenerConfig,
-                registeredListenerURL, registeredListenerAuthentication, configReader)) {
+                registeredListenerURL, registeredListenerAuthentication, configReader,
+                workerThread, serverBootstrapWorkerThread, serverBootstrapBossThread)) {
             log.info("New server connector has started on " + listenerUrl.replace(context, HttpConstants.
                     EMPTY_STRING));
         } else {
@@ -207,14 +231,20 @@ public class HttpSource extends Source {
 
     @Override
     public void pause() {
-        HttpConnectorRegistry.getInstance().getMessageProcessor(listenerUrl.replace(context, HttpConstants
-                .EMPTY_STRING)).pause();
+        if (HttpConnectorRegistry.getInstance().getMessageProcessor(listenerUrl.replace(context, HttpConstants
+                .EMPTY_STRING)).isRunning()) {
+            HttpConnectorRegistry.getInstance().getMessageProcessor(listenerUrl.replace(context, HttpConstants
+                    .EMPTY_STRING)).pause();
+        }
     }
 
     @Override
     public void resume() {
-        HttpConnectorRegistry.getInstance().getMessageProcessor(listenerUrl.replace(context, HttpConstants
-                .EMPTY_STRING)).resume();
+        if (HttpConnectorRegistry.getInstance().getMessageProcessor(listenerUrl.replace(context, HttpConstants
+                .EMPTY_STRING)).isPaused()) {
+            HttpConnectorRegistry.getInstance().getMessageProcessor(listenerUrl.replace(context, HttpConstants
+                    .EMPTY_STRING)).resume();
+        }
     }
 
     @Override

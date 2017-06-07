@@ -64,7 +64,7 @@ public class HttpBasicTests {
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         String inStreamDefinition =
-                "" + "@source(type='http', @map(type='xml'), " + "is.basic.auth.enabled='false'" + ")" +
+                "" + "@source(type='http', @map(type='xml') " + ")" +
                         "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query') " + "from inputStream " + "select *  " + "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
@@ -109,8 +109,7 @@ public class HttpBasicTests {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), " + "receiver.url='http://" +
-                "localhost:9055/endpoints/RecPro', "
-                + "is.basic.auth.enabled='false'" + ")" + "define stream inputStream (name string, age int, " +
+                "localhost:9055/endpoints/RecPro'" + ")" + "define stream inputStream (name string, age int, " +
                 "country string);";
         String query = ("@info(name = 'queryA') " + "from inputStream " + "select *  " + "insert into" +
                 " outputStream;");
@@ -172,14 +171,14 @@ public class HttpBasicTests {
         String inStreamDefinition =
                 "" + "@source(type='http', @map(type='xml'), " + "receiver.url='http://localhost:9005/endpoints/" +
                         "RecPro', "
-                        + "is.basic.auth.enabled='false'" + ")"
+                        + "basic.auth.enabled='false'" + ")"
                         + "define stream inputStreamA (name string, age int, country string);";
         String queryA = ("@info(name = 'queryA') " + "from inputStreamA " + "select *  " + "insert into " +
                 "outputStreamA;");
         String inStreamDefinition2 =
                 "" + "@source(type='http', @map(type='xml'), " + "receiver.url='http://localhost:9005/endpoints" +
                         "/RecPro', "
-                        + "is.basic.auth.enabled='false'" + ")"
+                        + "basic.auth.enabled='false'" + ")"
                         + "define stream inputStreamB (name string, age int, country string);";
         String queryB = ("@info(name = 'queryB') " + "from inputStreamB " + "select *  " + "insert into" +
                 " outputStreamB;");
@@ -203,7 +202,7 @@ public class HttpBasicTests {
                     "=[Attribute{id='name', type=STRING}, Attribute{id='age', type=INT}, Attribute{id='country', " +
                     "type=STRING}], annotations=[Annotation{name='source', elements=[Element{key='type', value='http'}"
                     + ", Element{key='receiver.url', value='http://localhost:9005/endpoints/RecPro'}, Element{key=" +
-                    "'is.basic.auth.enabled', value='false'}], annotations=[Annotation{name='map', " +
+                    "'basic.auth.enabled', value='false'}], annotations=[Annotation{name='map', " +
                     "elements=[Element{key='type', value='xml'}], annotations=[]}]}]}", e.getMessage());
         }
         Assert.assertEquals(1, executionPlanRuntime.getSources().size());
@@ -225,14 +224,14 @@ public class HttpBasicTests {
         String inStreamDefinition =
                 "" + "@source(type='http', @map(type='xml'), " + "receiver.url='http://localhost:8050/endpoints" +
                         "/RecPro', "
-                        + "is.basic.auth.enabled='false'" + ")"
+                        + "basic.auth.enabled='false'" + ")"
                         + "define stream inputStreamA (name string, age int, country string);";
         String query = ("@info(name = 'queryA') " + "from inputStreamA " + "select *  " + "insert into " +
                 "outputStreamA;");
         String inStreamDefinition2 =
                 "" + "@source(type='http', @map(type='xml'), " + "receiver.url='http://localhost:9005/endpoints" +
                         "/RecPro', "
-                        + "is.basic.auth.enabled='false'" + ")"
+                        + "basic.auth.enabled='false'" + ")"
                         + "define stream inputStreamB (name string, age int, country string);";
         String query2 = ("@info(name = 'queryB') " + "from inputStreamB " + "select *  " + "insert into " +
                 "outputStreamB;");
@@ -293,14 +292,14 @@ public class HttpBasicTests {
     @Test
     public void testHTTPInputTransportEmployPayload() throws Exception {
         logger.info("Creating test for publishing events with empty payload.");
-        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 9005));
+        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 9055));
         receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         String inStreamDefinition =
-                "" + "@source(type='http', @map(type='xml'), " + "receiver.url='http://localhost:9005/endpoints" +
+                "" + "@source(type='http', @map(type='xml'), " + "receiver.url='http://localhost:9055/endpoints" +
                         "/RecPro', "
-                        + "is.basic.auth.enabled='false'" + ")"
+                        + "basic.auth.enabled='true'" + ")"
                         + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
@@ -344,7 +343,7 @@ public class HttpBasicTests {
         public void close() {
         }
 
-        public List<LoggingEvent> getLog() {
+        List<LoggingEvent> getLog() {
             return new ArrayList<LoggingEvent>(log);
         }
     }
