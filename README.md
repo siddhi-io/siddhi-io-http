@@ -1,18 +1,19 @@
-siddhi-io-http
+﻿siddhi-io-http
 ======================================
 ---
 ##### New version of Siddhi v4.0.0 is built in Java 8.
 ##### Latest Released Version v4.0.0-m4.
 
-This is a http input and output extension for siddhi source and sink implentation. This extension only works inside the WSO2 Data Analytic Server and cannot be run with standalone siddhi.
-This component allow us to recevie and publish events through http and https transports.
+This is a http input and output extension for siddhi source and sink implementation. This extension only works inside 
+the WSO2 Data Analytic Server and cannot be run with standalone siddhi.
+This component allow us to receive and publish events through http and https transports.
 
 Features Supported
 ------------------
  - http source
-   - Multiple sources can be defined and recevive http messages to the DAS server.
+   - Multiple sources can be defined and receive http messages to the DAS server.
  - https source
-   -  Multiple sources can be defined and recevive https messages to the DAS server.
+   -  Multiple sources can be defined and receive https messages to the DAS server.
  - http sink 
    - Multiple sinks can be defined and publish event to the http endpoints.
  - https sink 
@@ -24,7 +25,7 @@ Features Supported
      
  #### Prerequisites for using the feature
  - Siddhi Stream should be defined
- - If user need to put custom configrations parameters he/she can put those parameters in deployment yml
+ - If user need to put custom configurations parameters he/she can put those parameters in deployment yml
  
   siddhi:
   
@@ -59,9 +60,9 @@ Features Supported
           default.host: 0.0.0.0
           default.port: 9763
           default.scheme: http
-          default.keyStoreFile: ''
-          default.keyStorePass: ''
-          default.certPass: ''
+          default.key.store.file: ''
+          default.key.store.pass: ''
+          default.cert.pass: ''
           https.host: 0.0.0.0
           https.port: 9763
           https.scheme: https
@@ -70,7 +71,7 @@ Features Supported
           https.certPass: wso2carbon
  
  #### Deploying the feature
- Feture can be deploy as a OSGI bundle by putting jar file of component to DAS_HOME/lib directory of DAS 4.0.0 pack. 
+ Feature can be deploy as a OSGI bundle by putting jar file of component to DAS_HOME/lib directory of DAS 4.0.0 pack. 
  #### Example Siddhi Queries
  ##### Event Source
      @source(type='http', @map(type='text'),
