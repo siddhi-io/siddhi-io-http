@@ -302,7 +302,7 @@
         <osgi.test.util.version>5.1.1</osgi.test.util.version>
         <commons.io.version>2.5</commons.io.version>
         <org.apache.commons.version>1.3.2</org.apache.commons.version>
-        <siddhi.io.http.version>4.0.0-SNAPSHOT</siddhi.io.http.version>
+        <siddhi.io.http.version>1.0.0</siddhi.io.http.version>
         <io.netty.version>4.0.25.Final</io.netty.version>
         <carbon.logging.version>5.1.0-m2</carbon.logging.version>
         <testng.version>6.11</testng.version>
