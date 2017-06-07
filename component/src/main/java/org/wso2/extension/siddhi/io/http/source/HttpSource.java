@@ -185,7 +185,7 @@ public class HttpSource extends Source {
             throw new ExecutionPlanCreationException("Listener URL " + listenerUrl + " already connected in "
                     + sourceId);
         } else {
-            registeredListenerURL.put(listenerUrl, sourceEventListener);
+            registeredListenerURL.put(HttpSourceUtil.getPortContext(listenerUrl), sourceEventListener);
             registeredListenerAuthentication.put(sourceEventListener, isAuth);
         }
     }
@@ -214,7 +214,7 @@ public class HttpSource extends Source {
 
     @Override
     public void disconnect() {
-        if (registeredListenerURL.containsKey(listenerUrl)) {
+        if (registeredListenerURL.containsKey(HttpSourceUtil.getPortContext(listenerUrl))) {
             if (!HttpConnectorRegistry.getInstance().destroyServerConnector(registeredListenerURL, listenerUrl,
                     context)) {
                 log.info("Server has already stopped for url " + listenerUrl + " in " + sourceId);
@@ -226,7 +226,7 @@ public class HttpSource extends Source {
 
     @Override
     public void destroy() {
-        if (registeredListenerURL.containsKey(listenerUrl)) {
+        if (registeredListenerURL.containsKey(HttpSourceUtil.getPortContext(listenerUrl))) {
             if (!HttpConnectorRegistry.getInstance().destroyServerConnector(registeredListenerURL, listenerUrl,
                     context)) {
                 log.info("Server has already stopped for url " + listenerUrl + " in " + sourceId);

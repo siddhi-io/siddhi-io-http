@@ -154,8 +154,9 @@ class HttpConnectorRegistry {
      */
     boolean destroyServerConnector(Map<String, SourceEventListener> registeredListenerURL, String listenerUrl,
                                    String context) {
-        HttpSource.getRegisteredListenerAuthentication().remove(registeredListenerURL.get(listenerUrl));
-        registeredListenerURL.remove(listenerUrl);
+        HttpSource.getRegisteredListenerAuthentication().remove(registeredListenerURL.get(HttpSourceUtil.
+                getPortContext(listenerUrl)));
+        registeredListenerURL.remove(HttpSourceUtil.getPortContext(listenerUrl));
         String baseUrl = listenerUrl.replace(context, HttpConstants.EMPTY_STRING);
         if (registeredServerConnectors.containsKey(baseUrl)) {
             for (String url : registeredListenerURL.keySet()) {

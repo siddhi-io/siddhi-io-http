@@ -80,8 +80,12 @@ public class HttpMessageProcessor implements CarbonMessageProcessor {
                     if (HttpConstants.HTTP_METHOD_POST.equalsIgnoreCase((String)
                             carbonMessage.getProperty((HttpConstants.HTTP_METHOD)))) {
                         //For Context Handling
-                        StringBuilder url = new StringBuilder(String.valueOf((Integer) carbonMessage.getProperty
-                                (HttpConstants.LISTENER_PORT))).append(carbonMessage.getProperty(HttpConstants.TO));
+                        StringBuilder url = new StringBuilder((String) carbonMessage.getProperty(HttpConstants.
+                                LISTENER_INTERFACE_ID)).append(HttpConstants.PROTOCOL_HOST_SEPERATOR).
+                                append(carbonMessage.getProperty(HttpConstants.HOST))
+                                .append(HttpConstants.PORT_HOST_SEPERATOR).append(carbonMessage
+                                        .getProperty(HttpConstants.LISTENER_PORT))
+                                .append(carbonMessage.getProperty(HttpConstants.TO));
                         if (!HttpSource.getRegisteredListenerURL().containsKey(url.toString())) {
                             throw new HttpSourceAdaptorRuntimeException("Resource not found.", carbonCallback, 404);
                         } else {

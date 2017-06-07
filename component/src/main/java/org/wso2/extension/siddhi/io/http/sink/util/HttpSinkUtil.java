@@ -56,18 +56,20 @@ public class HttpSinkUtil {
         String protocol = "";
         String host = "";
         String port = "";
+        String path = "/";
         if (!"".equals(publisherURL)) {
             try {
                 URL aURL = new URL(publisherURL);
                 protocol = aURL.getProtocol();
                 host = aURL.getHost();
                 port = Integer.toString(aURL.getPort());
+                path = aURL.getPath();
             } catch (MalformedURLException e) {
                 throw new HttpSinkAdaptorRuntimeException(" Receiver url mandatory. Please insert valid url .");
             }
         }
         httpStaticProperties = new HashMap<>();
-        httpStaticProperties.put(HttpConstants.TO, publisherURL);
+        httpStaticProperties.put(HttpConstants.TO, path);
         httpStaticProperties.put(HttpConstants.HOST, host);
         httpStaticProperties.put(HttpConstants.PORT, port);
         httpStaticProperties.put(HttpConstants.PROTOCOL, protocol);

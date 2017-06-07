@@ -23,6 +23,7 @@ import org.wso2.carbon.transport.http.netty.config.ListenerConfiguration;
 import org.wso2.carbon.transport.http.netty.config.TransportProperty;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
+import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 
 import java.net.MalformedURLException;
@@ -78,6 +79,18 @@ public class HttpSourceUtil {
         return new HashSet<>(properties);
     }
 
+    /**
+     * Get host and port.
+     */
+    public static String getPortContext(String listenerUrl) {
+        URL aURL = null;
+        try {
+            aURL = new URL(listenerUrl);
+        } catch (MalformedURLException e) {
+            throw new ExecutionPlanCreationException("listenerUrl mal format ", e);
+        }
+        return aURL.getPort() + aURL.getPath();
+    }
     /**
      * set http listener properties.
      */

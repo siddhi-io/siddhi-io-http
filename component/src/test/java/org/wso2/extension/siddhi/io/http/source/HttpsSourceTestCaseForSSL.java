@@ -56,9 +56,9 @@ public class HttpsSourceTestCaseForSSL {
     public void testHTTPSInputTransport() throws Exception {
         logger.info("Creating test for publishing events with https protocol.");
         new HttpTestUtil().setCarbonHome();
-        masterConfigs.put("source.http.https.keyStoreFile", "${carbon.home}/conf/security/wso2carbon.jks");
-        masterConfigs.put("source.http.https.keyStorePass", "wso2carbon");
-        masterConfigs.put("source.http.https.certPass", "wso2carbon");
+        masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/conf/security/wso2carbon.jks");
+        masterConfigs.put("source.http.https.keystore.pass", "wso2carbon");
+        masterConfigs.put("source.http.https.cert.pass", "wso2carbon");
         receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
         InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs);
@@ -66,7 +66,7 @@ public class HttpsSourceTestCaseForSSL {
         siddhiManager.setConfigManager(inMemoryConfigManager);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='https://localhost:9090/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
+                + "receiver.url='https://localhost:9095/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
@@ -82,7 +82,6 @@ public class HttpsSourceTestCaseForSSL {
             }
         });
         executionPlanRuntime.start();
-
         // publishing events
         List<String> expected = new ArrayList<>(2);
         expected.add("John");
@@ -90,9 +89,9 @@ public class HttpsSourceTestCaseForSSL {
         String event1 =
                 "<events><event><name>John</name>" + "<age>100</age><country>Sri Lanka</country></event></events>";
         String event2 = "<events><event><name>Mike</name>" + "<age>20</age><country>USA</country></event></events>";
-        new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:9090/endpoints/RecPro", false,
+        new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:9095/endpoints/RecPro", false,
                 "text/plain");
-        new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:9090/endpoints/RecPro", false,
+        new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:9095/endpoints/RecPro", false,
                 "text/plain");
         Thread.sleep(100);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
@@ -107,9 +106,9 @@ public class HttpsSourceTestCaseForSSL {
         logger.info("Creating test for publishing events with https protocol with invalid keystore.");
         new HttpTestUtil().setCarbonHome();
         masterConfigs.clear();
-        masterConfigs.put("source.http.https.keyStoreFile", "${carbon.home}/conf/security/store.jks");
-        masterConfigs.put("source.http.https.keyStorePass", "wso2carbon");
-        masterConfigs.put("source.http.https.certPass", "wso2carbon");
+        masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/conf/security/store.jks");
+        masterConfigs.put("source.http.https.keystore.pass", "wso2carbon");
+        masterConfigs.put("source.http.https.cert.pass", "wso2carbon");
 
         receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -118,7 +117,7 @@ public class HttpsSourceTestCaseForSSL {
         siddhiManager.setConfigManager(inMemoryConfigManager);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='https://localhost:9090/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
+                + "receiver.url='https://localhost:9095/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
@@ -140,9 +139,9 @@ public class HttpsSourceTestCaseForSSL {
                 "<events><event><name>John</name>" + "<age>100</age><country>Sri Lanka</country></event></events>";
         String event2 = "<events><event><name>Mike</name>" + "<age>20</age><country>USA</country></event></events>";
         try {
-            new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:9090/endpoints/RecPro", false,
+            new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:9095/endpoints/RecPro", false,
                     "text/plain");
-            new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:9090/endpoints/RecPro", false,
+            new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:9095/endpoints/RecPro", false,
                     "text/plain");
         } catch (IllegalArgumentException e) {
             e.getClass().getCanonicalName();
@@ -174,9 +173,9 @@ public class HttpsSourceTestCaseForSSL {
         logger.info("Creating test for publishing events with https protocol with invalid keystore pass.");
         new HttpTestUtil().setCarbonHome();
         masterConfigs.clear();
-        masterConfigs.put("source.http.https.keyStoreFile", "${carbon.home}/conf/security/wso2carbon.jks");
-        masterConfigs.put("source.http.https.keyStorePass", "wso2carbon123");
-        masterConfigs.put("source.http.https.certPass", "wso2carbon");
+        masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/conf/security/wso2carbon.jks");
+        masterConfigs.put("source.http.https.keystore.pass", "wso2carbon123");
+        masterConfigs.put("source.http.https.cert.pass", "wso2carbon");
         receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
         InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs);
@@ -184,7 +183,7 @@ public class HttpsSourceTestCaseForSSL {
         siddhiManager.setConfigManager(inMemoryConfigManager);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='https://localhost:9090/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
+                + "receiver.url='https://localhost:9095/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
@@ -206,9 +205,9 @@ public class HttpsSourceTestCaseForSSL {
                 "<events><event><name>John</name>" + "<age>100</age><country>Sri Lanka</country></event></events>";
         String event2 = "<events><event><name>Mike</name>" + "<age>20</age><country>USA</country></event></events>";
         try {
-            new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:9090/endpoints/RecPro", false,
+            new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:9095/endpoints/RecPro", false,
                     "text/plain");
-            new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:9090/endpoints/RecPro", false,
+            new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:9095/endpoints/RecPro", false,
                     "text/plain");
         } catch (IllegalArgumentException e) {
             e.getClass().getCanonicalName();
@@ -241,9 +240,9 @@ public class HttpsSourceTestCaseForSSL {
         logger.info(" Creating test for publishing events with https protocol with invalid cert pass.");
         new HttpTestUtil().setCarbonHome();
         masterConfigs.clear();
-        masterConfigs.put("source.http.https.keyStoreFile", "${carbon.home}/conf/security/wso2carbon.jks");
-        masterConfigs.put("source.http.https.keyStorePass", "wso2carbon");
-        masterConfigs.put("source.http.https.certPass", "wso2carbon123");
+        masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/conf/security/wso2carbon.jks");
+        masterConfigs.put("source.http.https.keystore,pass", "wso2carbon");
+        masterConfigs.put("source.http.https.cert.pass", "wso2carbon123");
         receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
         InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs);
@@ -251,7 +250,7 @@ public class HttpsSourceTestCaseForSSL {
         siddhiManager.setConfigManager(inMemoryConfigManager);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='https://localhost:9090/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
+                + "receiver.url='https://localhost:9095/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
@@ -273,9 +272,9 @@ public class HttpsSourceTestCaseForSSL {
                 "<events><event><name>John</name>" + "<age>100</age><country>Sri Lanka</country></event></events>";
         String event2 = "<events><event><name>Mike</name>" + "<age>20</age><country>USA</country></event></events>";
         try {
-            new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:9090/endpoints/RecPro", false,
+            new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:9095/endpoints/RecPro", false,
                     "text/plain");
-            new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:9090/endpoints/RecPro", false,
+            new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:9095/endpoints/RecPro", false,
                     "text/plain");
         } catch (IllegalArgumentException e) {
             e.getClass().getCanonicalName();

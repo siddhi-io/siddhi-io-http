@@ -30,7 +30,7 @@ public class HttpConstants {
     public static final String DEFAULT_WORKER_COUNT = "1";
     public static final String SERVER_BOOTSTRAP_BOSS_GROUP_SIZE = "server.bootstrap.boss.group.size";
     public static final String SERVER_BOOTSTRAP_WORKER_GROUP_SIZE = "server.bootstrap.worker.group.size";
-
+    public static final String LISTENER_PORT = "LISTENER_PORT";
     //Netty parameter
     public static final String LATENCY_METRICS = "latency.metrics.enabled";
     public static final String LATENCY_METRICS_VALUE = "true";
