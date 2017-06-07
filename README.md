@@ -4,9 +4,8 @@ siddhi-io-http
 ##### New version of Siddhi v4.0.0 is built in Java 8.
 ##### Latest Released Version v4.0.0-m4.
 
-This is an extension for siddhi source and sink implentation. This extension only works inside the WSO2 Data Analityc Server and does not works in any other siddhi formats such as vanila siddhi. 
-
-Siddhi HTTP input and output transport is mainly responsile of handling the http or https transports from and to the Data Analytic Server using http cabon trasport including following features.
+This is a http input and output extension for siddhi source and sink implentation. This extension only works inside the WSO2 Data Analytic Server and cannot be run with standalone siddhi.
+This component allow us to recevie and publish events through http and https transports.
 
 Features Supported
 ------------------
@@ -27,7 +26,11 @@ Features Supported
  - Siddhi Stream should be defined
  - If user need to put custom configrations parameters he/she can put those parameters in deployment yml
  
-        extension:
+  siddhi:
+  
+     extensions:
+     
+       -extension:
         name: 'http'
         namespace: 'source'
         properties:
@@ -46,7 +49,7 @@ Features Supported
           https.keystore.file: ${carbon.home}/conf/security/wso2carbon.jks
           https.keyStore.pass: wso2carbon
           
-        extension:
+       -extension:
         name: 'http'
         namespace: 'sink'
         properties:
@@ -85,7 +88,6 @@ Features Supported
   * https://docs.wso2.com/display/DAS400/Configuring+HTTP+Event+Sources
 
 ## How to Contribute
-* Please report issues at [Siddhi JIRA] (https://wso2.org/jira/browse/SIDDHI)
 * Send your bug fixes pull requests to [master branch] (https://github.com/wso2-extensions/siddhi-io-http/tree/master) 
 
 ## Contact us 
@@ -95,5 +97,4 @@ Siddhi developers can be contacted via the mailing lists:
 
 ### We welcome your feedback and contribution.
 
-Siddhi DAS Team
-
+WSO2 Smart Analytics Team.
