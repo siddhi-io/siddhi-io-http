@@ -47,7 +47,7 @@ public class HttpAuthTest {
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);" +
                 "@sink(type='http'," + "publisher.url='http://localhost:8009'," + "method='{{method}}'," + "headers='" +
                 "{{headers}}',"
-                + "basic.auth.enabled='false'," + "@map(type='xml', @payload('{{message}}'))) "
+                + "@map(type='xml', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
         String query = ("@info(name = 'query') " +
                 "from FooStream select message,method,headers insert into BarStream;");
@@ -81,7 +81,7 @@ public class HttpAuthTest {
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);" +
                 "@sink(type='http'," + "publisher.url='http://localhost:8009'," + "method='{{method}}'," + "headers=" +
                 "'{{headers}}'," + "basic.auth.username='admin',"
-                + "basic.auth.password='admin'," + "basic.auth.enabled='true'," + "@map(type='xml', @payload" +
+                + "basic.auth.password='admin'," + "@map(type='xml', @payload" +
                 "('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
         String query = ("@info(name = 'query') " +
@@ -102,21 +102,20 @@ public class HttpAuthTest {
         executionPlanRuntime.shutdown();
         lst.shutdown();
     }
-
     /**
-     * Creating test for publishing events basic authentication true and user name password is not given.
+     * Creating test for publishing events with username but not password.
      *
      * @throws Exception Interrupted exception
      */
     @Test(expectedExceptions = {HttpSinkAdaptorRuntimeException.class, ExceptionInInitializerError.class})
-    public void testHTTPPublisherBasicAuthTrueCredNotGiven() throws Exception {
-        log.info("Creating test for publishing events basic authentication true and user name password is not given.");
+    public void testHTTPTextMappingBasicAuthTrueIncorrectCredential() throws Exception {
+        log.info("Creating test for publishing events with basic authentication true.");
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);" +
                 "@sink(type='http'," + "publisher.url='http://localhost:8009'," + "method='{{method}}'," + "headers=" +
-                "'{{headers}}',"
-                + "basic.auth.enabled='true'," + "@map(type='xml', @payload" + "('{{message}}'))) "
+                "'{{headers}}'," + "basic.auth.password='admin'," + "@map(type='xml', @payload" +
+                "('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
         String query = ("@info(name = 'query') " +
                 "from FooStream select message,method,headers insert into BarStream;");
@@ -136,7 +135,6 @@ public class HttpAuthTest {
         executionPlanRuntime.shutdown();
         lst.shutdown();
     }
-
     /**
      * Creating test for publishing events without URL.
      *
@@ -147,7 +145,6 @@ public class HttpAuthTest {
         log.info("Creating test for publishing events without URL.");
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
-
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);" +
                 "@sink(type='http'," + "method='{{method}}'," + "headers='{{headers}}',"
                 + "@map(type='xml', @payload('{{message}}'))) "
@@ -170,4 +167,5 @@ public class HttpAuthTest {
         executionPlanRuntime.shutdown();
         lst.shutdown();
     }
+
 }

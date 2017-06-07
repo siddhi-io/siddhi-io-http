@@ -23,7 +23,8 @@ import org.wso2.carbon.transport.http.netty.config.SenderConfiguration;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 
 import javax.xml.bind.annotation.XmlAttribute;
-
+// TODO: 6/7/17 This should remove after fix setter methods for trustStoreFile and trustStorePass  in http
+// carbon transport.
 /**
  * {@code HttpConstants } Handling the setter and getter methods of truststore File and truststore Pass which is
  * currently private.

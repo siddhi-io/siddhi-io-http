@@ -45,6 +45,7 @@ import javax.inject.Inject;
 
 
 import static org.ops4j.pax.exam.CoreOptions.maven;
+import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.wso2.carbon.container.options.CarbonDistributionOption.copyFile;
 import static org.wso2.carbon.container.options.CarbonDistributionOption.copyOSGiLibBundle;
 
@@ -110,7 +111,8 @@ public class BasicAuthTrue {
     public Option[] createConfiguration() {
         return new Option[]{copyCarbonYAMLOption(), copyCarbonClientTrustStoreOption(), copyCarbonKeyStoreOption(),
                 copyOSGiLibBundle(maven().artifactId("siddhi-io-http").groupId("org.wso2.extension.siddhi.io.http")
-                        .versionAsInProject())};
+                        .versionAsInProject()), systemProperty("java.security.auth.login.config").value(Paths.get
+                ("conf", "security", "carbon-jaas.config").toString())};
     }
 
     @Test
@@ -122,7 +124,7 @@ public class BasicAuthTrue {
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='http://localhost:8055/endpoints/RecPro', " + "is.basic.auth.enabled='false'" + ")"
+                + "receiver.url='http://localhost:8055/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
@@ -153,83 +155,82 @@ public class BasicAuthTrue {
         Assert.assertEquals(receivedEventNameList, expected);
         executionPlanRuntime.shutdown();
     }
-//
-//    @Test
-//    public void testHTTPInputTransportBasicAuthTrue() throws Exception {
-//        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8055));
-//        receivedEventNameList = new ArrayList<>(2);
-//        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
-//        SiddhiManager siddhiManager = new SiddhiManager();
-//        siddhiManager.setPersistenceStore(persistenceStore);
-//        //siddhiManager.setExtension("json-input-mapper", JsonSourceMapper.class);
-//        siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
-//        String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
-//                + "receiver.url='http://localhost:8055/endpoints/RecPro', " + "is.basic.auth.enabled='true'" + ")"
-//                + "define stream inputStream (name string, age int, country string);";
-//        String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
-//        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-//                .createExecutionPlanRuntime(inStreamDefinition + query);
-//        executionPlanRuntime.addCallback("query1", new QueryCallback() {
-//            @Override
-//            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-//                EventPrinter.print(timeStamp, inEvents, removeEvents);
-//                for (Event event : inEvents) {
-//                    receivedEventNameList.add(event.getData(0).toString());
-//                }
-//            }
-//        });
-//        executionPlanRuntime.start();
-//        // publishing events
-//        List<String> expected = new ArrayList<>(2);
-//        expected.add("John");
-//        expected.add("Mike");
-//        String event1 =
-//                "<events><event><name>John</name>" + "<age>100</age><country>Sri Lanka</country></event></events>";
-//        String event2 = "<events><event><name>Mike</name>" + "<age>20</age><country>USA</country></event></events>";
-//        new TestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro", true, "text/xml",
-//                "POST");
-//        new TestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", true, "text/xml",
-//                "POST");
-//        Thread.sleep(200);
-//        logger.info(receivedEventNameList);
-//        Assert.assertEquals(receivedEventNameList, expected);
-//        executionPlanRuntime.shutdown();
-//    }
-//
-//    @Test
-//    public void testBasicAuthTrueWrongConf()
-//            throws Exception {
-//        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 9005));
-//        receivedEventNameList = new ArrayList<>(2);
-//        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
-//        SiddhiManager siddhiManager = new SiddhiManager();
-//        siddhiManager.setPersistenceStore(persistenceStore);
-//        siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
-//        String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
-//                + "receiver.url='http://localhost:9005/endpoints/RecPro', " + "is.basic.auth.enabled='true'" + ")"
-//                + "define stream inputStream (name string, age int, country string);";
-//        String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
-//        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-//                .createExecutionPlanRuntime(inStreamDefinition + query);
-//        executionPlanRuntime.addCallback("query1", new QueryCallback() {
-//            @Override
-//            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-//                EventPrinter.print(timeStamp, inEvents, removeEvents);
-//                for (Event event : inEvents) {
-//                    receivedEventNameList.add(event.getData(0).toString());
-//                }
-//            }
-//        });
-//        executionPlanRuntime.start();
-//        // publishing events
-//        List<String> expected = new ArrayList<>();
-//        String event1 =
-//                "<events><event><name>John</name>" + "<age>100</age><country>Sri Lanka</country></event></events>";
-//        String event2 = "<events><event><name>Mike</name>" + "<age>20</age><country>USA</country></event></events>";
-//        new TestUtil().httpPublishEventAuthIncorrect(event1, baseURI, true, "text/xml");
-//        new TestUtil().httpPublishEventAuthIncorrect(event2, baseURI, true, "text/xml");
-//        Thread.sleep(100);
-//        Assert.assertEquals(receivedEventNameList, expected);
-//        executionPlanRuntime.shutdown();
-//    }
+
+    @Test
+    public void testHTTPInputTransportBasicAuthTrue() throws Exception {
+        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
+        receivedEventNameList = new ArrayList<>(2);
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+        //siddhiManager.setExtension("json-input-mapper", JsonSourceMapper.class);
+        siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
+        String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
+                + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "basic.auth.enabled='true'" + ")"
+                + "define stream inputStream (name string, age int, country string);";
+        String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(inStreamDefinition + query);
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event event : inEvents) {
+                    receivedEventNameList.add(event.getData(0).toString());
+                }
+            }
+        });
+        executionPlanRuntime.start();
+        // publishing events
+        List<String> expected = new ArrayList<>(2);
+        expected.add("John");
+        expected.add("Mike");
+        String event1 =
+                "<events><event><name>John</name>" + "<age>100</age><country>Sri Lanka</country></event></events>";
+        String event2 = "<events><event><name>Mike</name>" + "<age>20</age><country>USA</country></event></events>";
+        new TestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro", true, "text/xml",
+                "POST");
+        new TestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", true, "text/xml",
+                "POST");
+        Thread.sleep(200);
+        logger.info(receivedEventNameList);
+        Assert.assertEquals(receivedEventNameList, expected);
+        executionPlanRuntime.shutdown();
+    }
+
+    @Test
+    public void testBasicAuthTrueWrongConf() throws Exception {
+        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 9055));
+        receivedEventNameList = new ArrayList<>(2);
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+        siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
+        String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
+                + "receiver.url='http://localhost:9055/endpoints/RecPro', " + "basic.auth.enabled='true'" + ")"
+                + "define stream inputStream (name string, age int, country string);";
+        String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+                .createExecutionPlanRuntime(inStreamDefinition + query);
+        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event event : inEvents) {
+                    receivedEventNameList.add(event.getData(0).toString());
+                }
+            }
+        });
+        executionPlanRuntime.start();
+        // publishing events
+        List<String> expected = new ArrayList<>();
+        String event1 =
+                "<events><event><name>John</name>" + "<age>100</age><country>Sri Lanka</country></event></events>";
+        String event2 = "<events><event><name>Mike</name>" + "<age>20</age><country>USA</country></event></events>";
+        new TestUtil().httpPublishEventAuthIncorrect(event1, baseURI, true, "text/xml");
+        new TestUtil().httpPublishEventAuthIncorrect(event2, baseURI, true, "text/xml");
+        Thread.sleep(100);
+        Assert.assertEquals(receivedEventNameList, expected);
+        executionPlanRuntime.shutdown();
+    }
 }

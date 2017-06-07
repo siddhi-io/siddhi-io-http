@@ -64,6 +64,7 @@ public class HttpMessageProcessor implements CarbonMessageProcessor {
                 condition.await();
             } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
+                logger.error("Thread interrupted while pausing ", ie);
             } finally {
                 lock.unlock();
             }

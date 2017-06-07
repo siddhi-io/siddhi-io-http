@@ -63,7 +63,7 @@ public class HttpOrderProcess {
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         siddhiManager.setExtension("xml-input-mapper", TextSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "is.basic.auth.enabled='false',worker" +
+                + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "basic.auth.enabled='false',worker" +
                 ".count='1',server.bootstrap.boss.group.size='4',server.bootstrap.worker.group.size='8'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query') " + "from inputStream " + "select *  " + "insert into outputStream;");

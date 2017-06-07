@@ -62,18 +62,18 @@ public class HttpMultipleEventDifferentFormatTest {
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         String inStreamDefinitionA = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='http://localhost:9005/endpoints/RecPro', " + "is.basic.auth.enabled='false'" + ")"
+                + "receiver.url='http://localhost:9005/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStreamA (name string, age int, country string);";
         String queryA = ("@info(name = 'queryA') " + "from inputStreamA " + "select *  " + "insert into " +
                 "outputStreamA;");
         String inStreamDefinitionB = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='http://localhost:9005/endpoints/RecPro1', " + "is.basic.auth.enabled='false'" + ")"
+                + "receiver.url='http://localhost:9005/endpoints/RecPro1', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStreamB (name string, age int, country string);";
         String queryB = ("@info(name = 'queryB') " + "from inputStreamB " + "select *  " + "insert into " +
                 "outputStreamB;");
 
         String inStreamDefinitionC = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='http://localhost:7005/endpoints/RecPro', " + "is.basic.auth.enabled='false'" + ")"
+                + "receiver.url='http://localhost:7005/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStreamC (name string, age int, country string);";
         String queryC = ("@info(name = 'queryC') " + "from inputStreamC " + "select *  " + "insert into" +
                 " outputStreamC;");

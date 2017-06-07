@@ -16,7 +16,6 @@
  *  under the License.
  *
  */
-
 package org.wso2.extension.siddhi.io.http.source;
 
 import org.wso2.carbon.messaging.CarbonCallback;

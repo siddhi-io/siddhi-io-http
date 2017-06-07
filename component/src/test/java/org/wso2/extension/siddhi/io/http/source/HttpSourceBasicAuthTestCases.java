@@ -55,7 +55,7 @@ public class HttpSourceBasicAuthTestCases {
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='http://localhost:9005/endpoints/RecPro', " + "is.basic.auth.enabled='false'" + ")"
+                + "receiver.url='http://localhost:9005/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager

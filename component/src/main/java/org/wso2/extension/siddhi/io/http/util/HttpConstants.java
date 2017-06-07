@@ -43,9 +43,7 @@ public class HttpConstants {
     public static final String HEADERSPLITER = "#";
     public static final String HEADERNAMEVALUESPLITER = ":";
     public static final String HTTP_SINK_ID = "http sink";
-    public static final String TRUE = "TRUE";
     public static final String METHOD_DEFAULT = "POST";
-    public static final String IS_AUTHENTICATION_REQUIRED_DEFAULT = "false";
     public static final String PROTOCOL = "PROTOCOL";
     public static final String PORT = "PORT";
     public static final String AUTHORIZATION_HEADER = "Authorization";
@@ -70,7 +68,6 @@ public class HttpConstants {
     public static final String METHOD = "method";
     public static final String PUBLISHER_URL = "publisher.url";
     public static final String HEADERS = "headers";
-    public static final String IS_AUTHENTICATION_REQUIRED = "basic.auth.enabled";
     public static final String RECEIVER_USERNAME = "basic.auth.username";
     public static final String RECEIVER_PASSWORD = "basic.auth.password";
     public static final String CLIENT_TRUSTSTORE_PATH = "client.truststore.path";
@@ -102,6 +99,6 @@ public class HttpConstants {
 
     //Http siddhi source properties
     public static final String RECEIVER_URL = "receiver.url";
-    public static final String ISAUTH = "is.basic.auth.enabled";
+    public static final String ISAUTH = "basic.auth.enabled";
     public static final String EMPTY_ISAUTH = "false";
 }

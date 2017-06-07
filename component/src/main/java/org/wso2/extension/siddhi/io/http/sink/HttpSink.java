@@ -60,26 +60,30 @@ import java.util.concurrent.TimeUnit;
                 "method types such as POST, GET, PUT, DELETE  via http or https protocols. As the additional features" +
                 " this component can provide basic authentication as well as user can publish events using custom " +
                 "client truststore files when publishing events via https protocol. And also user can add any number" +
-                " of headers for each event dynamically."
-        , parameters = {
-        @Parameter(name = "publisher.url", description = "URL of http end pont which events should be send. It is " +
-                "mandatory field", type = {DataType.STRING}),
-        @Parameter(name = "basic.auth.enabled", description = "by this user can enable the basic " +
-                "authentication if ths parameter is true then basic authentication is enables", type =
-                {DataType.STRING}),
-        @Parameter(name = "basic.auth.username", description = "by this user can enable give their username. If basic" +
-                " auth enable then this is a mandatory argument", type = {DataType.STRING}),
-        @Parameter(name = "basic.auth.password", description = "by this user can enable give their password of server" +
-                " to be send data. If basic auth enable then this is a mandatory argument", type =
-                {DataType.STRING}),
-        @Parameter(name = "client.truststore.path", description = "user can give custom client truststore if user " +
-                "never " +
-                "mention such then system use default client-trusts-sore in ${carbon.home}/conf/security folder", type =
-                {DataType.STRING}),
-        @Parameter(name = "client.truststore.pass", description = "user can give custom client truststore pass if " +
-                "user " +
-                "never mention such then system use default in deployment YML", type =
-                {DataType.STRING})},
+                " of headers for each event dynamically.",
+        parameters = {
+                @Parameter(name = "publisher.url", description = "The URL to which the outgoing events published via " +
+                        "HTTP must be sent. If this is not specified, an error is logged in the CLI. If you want to " +
+                        "enable SSO authentication for the event flow, use `https` instead of `http` in the URL." +
+                        "e.g., `http://localhost:8080/EndPoint`, `https://localhost:8080/EndPoint`",
+                        type = {DataType.STRING}),
+                @Parameter(name = "basic.auth.username", description = "The username to include in the authentication" +
+                        " header of the events to be published if basic authentication is enabled for the event flow" +
+                        " (i.e., via the `basic.auth.enabled` parameter). It is required to specify a username when " +
+                        "basic authentication is enabled.", type = {DataType.STRING}, optional = true),
+                @Parameter(name = "basic.auth.password", description = "The password to include in the authentication" +
+                        " header of the events to be published if basic authentication is enabled for the event flow " +
+                        "(i.e., via the `basic.auth.enabled` parameter). It is required to specify a password when " +
+                        "basic authentication is enabled.", type = {DataType.STRING}, optional = true),
+                @Parameter(name = "client.truststore.path", description = "The file path to the location of the " +
+                        "truststore of the WSO2 DAS client at sends the HTTP events. A custom client trust store can " +
+                        "be specified if required. If no custom trust store is specified, the system uses the default" +
+                        "client-trustore in the`${carbon.home}/conf/security` directory.", type = {DataType.STRING},
+                        optional = true),
+                @Parameter(name = "client.truststore.pass", description = "The password to access the client " +
+                        "truststore. A custom password can be specified if required. If no custom password is " +
+                        "specified, the system uses the default password in the deployment YML.",
+                        type = {DataType.STRING}, optional = true)},
         examples = {
                 @Example(syntax = "@sink(type='http',publisher.url='http://localhost:8009', method='{{method}}'," +
                         "headers='{{headers}}', @map(type='xml' , @payload('{{payloadBody}}')))" +
@@ -98,8 +102,8 @@ import java.util.concurrent.TimeUnit;
                                 + "Content-Length:24#Content-Location:USA#Retry-After:120"
                                 + "}"
                                 + "Above configuration will do a default XML input mapping which will "
-                                + "generate as below " +
-                                "~Output payload"
+                                + "generate as below "
+                                + "~Output payload"
                                 + "<events>\n"
                                 + "    <event>\n"
                                 + "        <symbol>WSO2</symbol>\n"
@@ -179,8 +183,8 @@ public class HttpSink extends Sink {
     private Option httpHeaderOption;
     private Option httpMethodOption;
     private String authorizationHeader;
-    private String isAuth;
-
+    private String userName;
+    private String userPassword;
     @Override
     public Map<String, Object> currentState() {
         return null;
@@ -228,11 +232,9 @@ public class HttpSink extends Sink {
                             EMPTY_STRING);
             httpHeaderOption = optionHolder.validateAndGetOption(HttpConstants.HEADERS);
             httpMethodOption = optionHolder.validateAndGetOption(HttpConstants.METHOD);
-            isAuth = optionHolder.validateAndGetStaticValue(HttpConstants.IS_AUTHENTICATION_REQUIRED,
-                    HttpConstants.IS_AUTHENTICATION_REQUIRED_DEFAULT);
-            String userName = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_USERNAME,
+            userName = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_USERNAME,
                     HttpConstants.EMPTY_STRING);
-            String userPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_PASSWORD,
+            userPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_PASSWORD,
                     HttpConstants.EMPTY_STRING);
             String[] defaultTrustStoreValues = new HttpSinkUtil().trustStoreValues(sinkConfigReader);
             String clientStoreFile = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PATH,
@@ -243,26 +245,29 @@ public class HttpSink extends Sink {
                 throw new ExceptionInInitializerError("Receiver URL found empty but it is Mandatory field in " +
                         "" + HttpConstants.HTTP_SINK_ID + streamID);
             }
-            if ((HttpConstants.TRUE.equalsIgnoreCase(isAuth)) && (userName.equals(HttpConstants.EMPTY_STRING) ||
+            if ((userName.equals(HttpConstants.EMPTY_STRING) ^
                     userPassword.equals(HttpConstants.EMPTY_STRING))) {
-                throw new ExceptionInInitializerError("Please provide user name and password properly in " +
+                throw new ExceptionInInitializerError("Please provide user name and password in " +
                         HttpConstants.HTTP_SINK_ID + streamID);
+            } else if (!(userName.equals(HttpConstants.EMPTY_STRING) || userPassword.equals
+                    (HttpConstants.EMPTY_STRING))) {
+                byte[] val = (userName + ":" + userPassword).getBytes(Charset.defaultCharset());
+                this.authorizationHeader = HttpConstants.AUTHORIZATION_METHOD + Base64.encode
+                        (Unpooled.copiedBuffer(val));
             }
             this.httpStaticProperties = new HttpSinkUtil().getHttpStaticProperties(publisherURL);
             this.executorService = executionPlanContext.getExecutorService();
             this.senderConfig = new HttpSinkUtil().getSenderConfigurations(httpStaticProperties, clientStoreFile,
                     clientStorePass);
             this.nettyTransportProperty = new HttpSinkUtil().getTransportConfigurations(sinkConfigReader);
-            byte[] val = (userName + ":" + userPassword).getBytes(Charset.defaultCharset());
-            this.authorizationHeader = HttpConstants.AUTHORIZATION_METHOD + Base64.encode
-                    (Unpooled.copiedBuffer(val));
         }
     }
 
     private CarbonMessage generateCarbonMessage(List<Header> headers, HttpPayloadDataSource payload, String contentType,
                                                 String httpMethod, CarbonMessage cMessage) {
         //if Authentication enabled
-        if (isAuth.equalsIgnoreCase(HttpConstants.TRUE)) {
+        if (!(userName.equals(HttpConstants.EMPTY_STRING) || userPassword.equals
+                (HttpConstants.EMPTY_STRING))) {
             cMessage.setHeader(HttpConstants.AUTHORIZATION_HEADER, authorizationHeader);
         }
         // Set meta data

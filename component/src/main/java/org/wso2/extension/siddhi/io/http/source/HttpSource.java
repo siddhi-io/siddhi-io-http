@@ -16,7 +16,6 @@
  *  under the License.
  *
  */
-
 package org.wso2.extension.siddhi.io.http.source;
 
 import org.apache.log4j.Logger;
@@ -46,12 +45,24 @@ import java.util.concurrent.ConcurrentHashMap;
 @Extension(name = "http", namespace = "source", description = "This is HTTP Source description. Which it " +
         "receive http or https POST request which has text, xml or json payloads. This component is capable of " +
         "providing basic authentication if user enabled it as well as user can process events orderly if user set " +
-        "required parameters.", parameters
-        = {
-        @Parameter(name = "receiver.url", description = "Used to get the listening url. this is an optional parameter "
-                + "and by default it listening to the stream.", type = {DataType.STRING}),
-        @Parameter(name = "is.basic.auth.enabled", description = "Used to specify the whether user need to " +
-                "authenticated with basic authentication " + "or not", type = {DataType.STRING})},
+        "required parameters.", parameters = {
+        @Parameter(name = "receiver.url", description = "The URL to which the events should be received. The default " +
+                "value is the URL to the event stream for which the source is configured. This URL is specified in " +
+                "the following format. `http://localhost:8080/<streamName>`" +
+                "If you want to use SSL authentication for the event flow, you can specify the URL as follows."
+                + "`https://localhost:8080/<streamName>`", type = {DataType.STRING}, optional = true),
+        @Parameter(name = "basic.auth.enabled", description = "If this is set to `true`, basic authentication is " +
+                "enabled for incoming events, and at each event arrival, the system checks whether the use who sent " +
+                "the event is authorised to access the WSO2 DAS server. If basic authentication fails, the event flow" +
+                "is not authenticated and an authentication error is logged in the CLI.", type = {DataType.STRING},
+                optional = true),
+        @Parameter(name = "worker.count", description = "Siddhi level thread pool thread count. By default this " +
+                "value is one. If user need to preserve event order then this parameter should be one.", type =
+                {DataType.STRING}, optional = true),
+        @Parameter(name = "server.bootstrap.boss.group.size", description = "Netty level bootstrap boss group size. " +
+                "By default it use configurations in netty-transport.yml.", type = {DataType.STRING}),
+        @Parameter(name = "server.bootstrap.worker.group.size", description = "Netty level bootstrap boss group " +
+                "size. By default it use configurations in netty-transport.yml.", type = {DataType.STRING})},
         examples = {
                 @Example(syntax = "@source(type='http', receiver.url='http://localhost:9055/endpoints/RecPro', " +
                         "@map(type='xml'))\n"
@@ -65,7 +76,7 @@ import java.util.concurrent.ConcurrentHashMap;
                                 + "        <volume>100</volume>\n"
                                 + "    </event>\n"
                                 + "</events>\n"
-                                + "if user has enabled the basic authentication by parameter is.basic.auth.enabled="
+                                + "if user has enabled the basic authentication by parameter basic.auth.enabled="
                                 + "'true'  then it is expected to have header "
                                 + "Authorization:'Basic encodeBase64(username:Password)'"
                                 + "as a header in each event.")},

@@ -59,7 +59,7 @@ public class HttpSourceMappingTestCases {
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         siddhiManager.setExtension("xml-input-mapper", TextSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "is.basic.auth.enabled='false'" + ")"
+                + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
@@ -106,7 +106,7 @@ public class HttpSourceMappingTestCases {
 
         siddhiManager.setExtension("text-input-mapper", TextSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http',  @map(type='text'), "
-                + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "is.basic.auth.enabled='false'" + ")"
+                + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
@@ -152,7 +152,7 @@ public class HttpSourceMappingTestCases {
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("xml-input-mapper", JsonSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http', @map(type='json'), "
-                + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "is.basic.auth.enabled='false'" + ")"
+                + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
