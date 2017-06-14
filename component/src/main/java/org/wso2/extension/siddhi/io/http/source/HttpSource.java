@@ -43,34 +43,26 @@ import java.util.concurrent.ConcurrentHashMap;
  * Http source for receive the http and https request.
  */
 @Extension(name = "http", namespace = "source", description = "The HTTP source receives POST requests via HTTP or " +
-        "HTTPS in `text`, `XML` or `JSON` format. If required, you can enable basic authentication to ensure that " +
-        "events are received only from users who are authorized to access WSO2 DAS.",
+        "HTTPS in format such as `text`, `XML` and `JSON`. If required, you can enable basic authentication to " +
+        "ensure that events are received only from users who are authorized to access the service.",
         parameters = {
-                @Parameter(name = "receiver.url", description = "The URL to which the events should be received. The " +
-                        "default value is the URL to the event stream for which the source is configured. This URL " +
-                        "is specified in the following format. " +
-                        "`http://localhost:8080/<streamName>`" +
-                        "If you want to use SSL authentication for the event flow, you can specify the URL as " +
-                        "follows." +
+                @Parameter(name = "receiver.url", description = "The URL to which the events should be received. " +
+                        "User can provide any valid url and if the url is not provided the system will use the " +
+                        "following format `http://0.0.0.0:9763/<streamName>`" +
+                        "If the user want to use SSL the url should be given in following format " +
                         "`https://localhost:8080/<streamName>`", type = {DataType.STRING}, optional = true),
                 @Parameter(name = "basic.auth.enabled", description = "If this is set to `true`, " +
                         "basic authentication is enabled for incoming events, and the credentials with which each " +
-                        "event is sent are verified to ensure that the user is authorized to access the WSO2 DAS " +
-                        "server. If basic authentication fails, the event flow is not authenticated and an " +
-                        "authentication error is logged in the CLI.",
-                        type = {DataType.STRING},
-                        optional = true),
-                @Parameter(name = "worker.count", description = "The number of active threads in the Siddhi level " +
-                        "thread pool. The value is 1 by default. If you want to ensure that the events are directed " +
-                        "to the event stream in the same order in which they arrive, the value for this parameter " +
-                        "must be 1 so that events are not delivered via multiple threads, distorting the order.",
+                        "event is sent are verified to ensure that the user is authorized to access the service. " +
+                        "If basic authentication fails, the event is not authenticated and an " +
+                        "authentication error is logged in the CLI. By default this values 'false' ",
                         type = {DataType.STRING}, optional = true),
-                @Parameter(name = "server.bootstrap.boss.group.size", description = "The Netty level bootstrap boss " +
-                        "group size. This uses the configurations in the `netty-transport.yml` file by default.",
-                        type = {DataType.STRING}),
-                @Parameter(name = "server.bootstrap.worker.group.size", description = "The Netty level bootstrap " +
-                        "boss group size. This uses the configurations in the `netty-transport.yml` file by default.",
-                        type = {DataType.STRING})},
+                @Parameter(name = "worker.count", description = "The number of active worker threads to serve the " +
+                        "incoming events. The value is 1 by default. This will ensure that the events are directed " +
+                        "to the event stream in the same order in which they arrive. By increasing this value " +
+                        "the performance might increase at the cost of loosing event ordering.",
+                        type = {DataType.STRING}, optional = true)
+        },
         examples = {
                 @Example(syntax = "@source(type='http', receiver.url='http://localhost:9055/endpoints/RecPro', " +
                         "@map(type='xml'))\n"
@@ -90,172 +82,156 @@ import java.util.concurrent.ConcurrentHashMap;
         systemParameter = {
                 @SystemParameter(
                         name = "latency.metrics.enabled",
-                        description = "Netty transportation property.",
+                        description = "Property to enable metrics logs to monitor transport latency for netty.",
                         defaultValue = "true",
-                        possibleParameters = "N/A"
+                        possibleParameters = {"true", "false"}
                 ),
                 @SystemParameter(
                         name = "server.bootstrap.socket.timeout",
-                        description = "Netty transportation property.",
+                        description = "property to configure specified timeout in milliseconds which server socket " +
+                                "will block for this amount of time for http message content to be received.",
                         defaultValue = "15",
-                        possibleParameters = "N/A"
+                        possibleParameters = "Any integer"
                 ),
                 @SystemParameter(
                         name = "client.bootstrap.socket.timeout",
-                        description = "Netty transportation property.",
+                        description = "property to configure specified timeout in milliseconds which client " +
+                                "socket will block for this amount of time for http message content to be received",
                         defaultValue = "15",
-                        possibleParameters = "N/A"
+                        possibleParameters = "Any integer"
+                ),
+                @SystemParameter(
+                        name = "server.bootstrap.boss.group.size",
+                        description = "property to configure number of boss threads, which accepts incoming " +
+                                "connections until the ports are unbound. Once connection accepts successfully, " +
+                                "boss thread passes the accepted channel to one of the worker threads.",
+                        defaultValue = "4",
+                        possibleParameters = "Any integer"
+                ),
+                @SystemParameter(
+                        name = "server.bootstrap.worker.group.size",
+                        description = "property to configure number of worker threads, which performs non " +
+                                "blocking read and write for one or more channels in non-blocking mode.",
+                        defaultValue = "8",
+                        possibleParameters = "Any integer"
                 ),
                 @SystemParameter(
                         name = "default.host",
                         description = "The default host.",
                         defaultValue = "0.0.0.0",
-                        possibleParameters = "N/A"
+                        possibleParameters = "Any valid host"
                 ),
                 @SystemParameter(
                         name = "default.port",
                         description = "The default port.",
                         defaultValue = "9763",
-                        possibleParameters = "N/A"
+                        possibleParameters = "Any valid port"
                 ),
                 @SystemParameter(
                         name = "default.protocol",
                         description = "The default protocol.",
                         defaultValue = "http",
-                        possibleParameters = "N/A"
+                        possibleParameters = {"http", "https"}
                 ),
                 @SystemParameter(
                         name = "https.keystore.file",
                         description = "The default keystore file path.",
-                        defaultValue = "${carbon.home}/conf/security/wso2carbon.jks",
-                        possibleParameters = "N/A"
+                        defaultValue = "${carbon.home}/resources/security/wso2carbon.jks",
+                        possibleParameters = "Path to wso2carbon.jks file"
                 ),
                 @SystemParameter(
-                        name = "https.keystore.pass",
-                        description = "The default keystore pass.",
+                        name = "https.keystore.password",
+                        description = "The default keystore password.",
                         defaultValue = "wso2carbon",
-                        possibleParameters = "N/A"
+                        possibleParameters = "String of keystore password"
                 ),
                 @SystemParameter(
-                        name = "https.cert.pass",
-                        description = "The default cert pass.",
+                        name = "https.cert.password",
+                        description = "The default cert password.",
                         defaultValue = "wso2carbon",
-                        possibleParameters = "N/A"
+                        possibleParameters = "String of cert password"
                 )
         }
 )
 public class HttpSource extends Source {
-    private static final Map<String, SourceEventListener> registeredListenerURL = new ConcurrentHashMap<>();
-    private static final Map<SourceEventListener, Boolean> registeredListenerAuthentication = new ConcurrentHashMap<>();
+    private static final Map<String, HttpSourceListener> registeredSourceListenersMap =
+            new ConcurrentHashMap<>();
     private static final Logger log = Logger.getLogger(HttpSource.class);
     private String sourceId;
     private String listenerUrl;
     private ListenerConfiguration listenerConfig;
-    private String context;
     private ConfigReader configReader;
-    private String workerThread;
-    private String serverBootstrapWorkerThread;
-    private String serverBootstrapBossThread;
 
     @Override
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
                      ConfigReader configReader, ExecutionPlanContext executionPlanContext) {
         sourceId = sourceEventListener.getStreamDefinition().toString();
-        String defaultBaseURL = configReader.readConfig(HttpConstants.DEFAULT_PROTOCOL, HttpConstants
-                .DEFAULT_PROTOCOL_VALUE) + HttpConstants.PROTOCOL_HOST_SEPERATOR + configReader.
+        String defaultURL = configReader.readConfig(HttpConstants.DEFAULT_PROTOCOL, HttpConstants
+                .DEFAULT_PROTOCOL_VALUE) + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
                 readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
-                HttpConstants.PORT_HOST_SEPERATOR + configReader.readConfig(HttpConstants.
+                HttpConstants.PORT_HOST_SEPARATOR + configReader.readConfig(HttpConstants.
                 DEFAULT_PORT, HttpConstants.DEFAULT_PORT_VALUE) + HttpConstants.
-                PORT_CONTEXT_SEPERATOR;
-        listenerUrl = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_URL,
-                defaultBaseURL + sourceEventListener.getStreamDefinition().getId());
+                PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
+        listenerUrl = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_URL, defaultURL);
         Boolean isAuth = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants.ISAUTH,
                 HttpConstants.EMPTY_ISAUTH).toLowerCase(Locale.ENGLISH));
-        workerThread = optionHolder.validateAndGetStaticValue(HttpConstants.WORKER_COUNT, HttpConstants
+        String workerThread = optionHolder.validateAndGetStaticValue(HttpConstants.WORKER_COUNT, HttpConstants
                 .DEFAULT_WORKER_COUNT);
-        serverBootstrapWorkerThread = optionHolder.validateAndGetStaticValue(HttpConstants
-                .SERVER_BOOTSTRAP_WORKER_GROUP_SIZE, HttpConstants.EMPTY_STRING);
-        serverBootstrapBossThread = optionHolder.validateAndGetStaticValue(HttpConstants
-                .SERVER_BOOTSTRAP_BOSS_GROUP_SIZE, HttpConstants.EMPTY_STRING);
-        Object[] configuration = new HttpSourceUtil().setListenerProperty(listenerUrl, configReader);
-        listenerConfig = (ListenerConfiguration) configuration[0];
-        context = (String) configuration[1];
+        listenerConfig = new HttpSourceUtil().setListenerProperty(listenerUrl, configReader);
         this.configReader = configReader;
-        if (registeredListenerURL.containsKey(listenerUrl)) {
-            throw new ExecutionPlanCreationException("Listener URL " + listenerUrl + " already connected in "
-                    + sourceId);
-        } else {
-            registeredListenerURL.put(HttpSourceUtil.getPortContext(listenerUrl), sourceEventListener);
-            registeredListenerAuthentication.put(sourceEventListener, isAuth);
+        synchronized (registeredSourceListenersMap) {
+            if (registeredSourceListenersMap.containsKey(HttpSourceUtil.getSourceListenerKey(listenerUrl))) {
+                throw new ExecutionPlanCreationException("Listener URL " + listenerUrl + " already connected in "
+                        + sourceId);
+            } else {
+                registeredSourceListenersMap.put(HttpSourceUtil.getSourceListenerKey(listenerUrl),
+                        new HttpSourceListener(Integer.valueOf(workerThread),
+                                listenerUrl, isAuth, sourceEventListener));
+            }
         }
     }
 
-    static Map<SourceEventListener, Boolean> getRegisteredListenerAuthentication() {
-        return registeredListenerAuthentication;
-    }
-
-    static Map<String, SourceEventListener> getRegisteredListenerURL() {
-        return registeredListenerURL;
+    static Map<String, HttpSourceListener> getRegisteredSourceListenersMap() {
+        return registeredSourceListenersMap;
     }
 
     @Override
     public void connect() throws ConnectionUnavailableException {
-        if (HttpConnectorRegistry.getInstance().createServerConnector(listenerUrl, context, sourceId, listenerConfig,
-                registeredListenerURL, registeredListenerAuthentication, configReader,
-                workerThread, serverBootstrapWorkerThread, serverBootstrapBossThread)) {
-            log.info("New server connector has started on " + listenerUrl.replace(context, HttpConstants.
-                    EMPTY_STRING));
-        } else {
-            log.info(HttpConnectorRegistry.getInstance().getServerConnector(listenerUrl.replace(context,
-                    HttpConstants.EMPTY_STRING)).toString() + " is already exists for url "
-                    + listenerUrl.replace(context, HttpConstants.EMPTY_STRING));
-        }
+        HttpConnectorRegistry.getInstance().createServerConnector(listenerUrl, sourceId, listenerConfig,
+                configReader);
     }
 
     @Override
     public void disconnect() {
-        if (registeredListenerURL.containsKey(HttpSourceUtil.getPortContext(listenerUrl))) {
-            if (!HttpConnectorRegistry.getInstance().destroyServerConnector(registeredListenerURL, listenerUrl,
-                    context)) {
-                log.info("Server has already stopped for url " + listenerUrl + " in " + sourceId);
-            } else {
-                log.info("Server has stop for url " + listenerUrl + " in " + sourceId);
-            }
-        }
+       HttpConnectorRegistry.getInstance().clearServerConnector(listenerUrl);
     }
 
     @Override
     public void destroy() {
-        if (registeredListenerURL.containsKey(HttpSourceUtil.getPortContext(listenerUrl))) {
-            if (!HttpConnectorRegistry.getInstance().destroyServerConnector(registeredListenerURL, listenerUrl,
-                    context)) {
-                log.info("Server has already stopped for url " + listenerUrl + " in " + sourceId);
-            } else {
-                log.info("Server has stop for url " + listenerUrl + " in " + sourceId);
-            }
-        }
+        HttpConnectorRegistry.getInstance().clearServerConnector(listenerUrl);
     }
 
     @Override
     public void pause() {
-        if (HttpConnectorRegistry.getInstance().getMessageProcessor(listenerUrl.replace(context, HttpConstants
-                .EMPTY_STRING)).isRunning()) {
-            HttpConnectorRegistry.getInstance().getMessageProcessor(listenerUrl.replace(context, HttpConstants
-                    .EMPTY_STRING)).pause();
+        HttpSourceListener httpSourceListener = registeredSourceListenersMap.get(HttpSourceUtil.getSourceListenerKey
+                (listenerUrl));
+        if (httpSourceListener.isRunning()) {
+            httpSourceListener.pause();
         }
     }
 
     @Override
     public void resume() {
-        if (HttpConnectorRegistry.getInstance().getMessageProcessor(listenerUrl.replace(context, HttpConstants
-                .EMPTY_STRING)).isPaused()) {
-            HttpConnectorRegistry.getInstance().getMessageProcessor(listenerUrl.replace(context, HttpConstants
-                    .EMPTY_STRING)).resume();
+        HttpSourceListener httpSourceListener = registeredSourceListenersMap.get(HttpSourceUtil.getSourceListenerKey
+                (listenerUrl));
+        if (httpSourceListener.isPaused()) {
+            httpSourceListener.resume();
         }
     }
 
     @Override
     public Map<String, Object> currentState() {
+        //no current state
         return null;
     }
 

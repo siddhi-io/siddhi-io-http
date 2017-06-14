@@ -47,7 +47,7 @@ Features Supported
           https.host: 0.0.0.0
           https.port: 9763
           https.scheme: https
-          https.keystore.file: ${carbon.home}/conf/security/wso2carbon.jks
+          https.keystore.file: ${carbon.home}/resources/security/wso2carbon.jks
           https.keyStore.pass: wso2carbon
           
        -extension:
@@ -66,7 +66,7 @@ Features Supported
           https.host: 0.0.0.0
           https.port: 9763
           https.scheme: https
-          https.truststore.file: ${carbon.home}/conf/security/client-truststore.jks
+          https.truststore.file: ${carbon.home}/resources/security/client-truststore.jks
           https.truststore.pass: wso2carbon
           https.certPass: wso2carbon
  

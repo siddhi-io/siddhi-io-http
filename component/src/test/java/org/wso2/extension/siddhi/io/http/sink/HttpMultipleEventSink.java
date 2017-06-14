@@ -18,13 +18,20 @@
  */
 package org.wso2.extension.siddhi.io.http.sink;
 
+import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Logger;
+import org.apache.log4j.spi.LoggingEvent;
+import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.wso2.extension.siddhi.io.http.sink.util.HttpServerListener;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpServerListenerHandler;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.extension.output.mapper.xml.XMLSinkMapper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Test cases for multiple event sink synchronously.
@@ -39,37 +46,94 @@ public class HttpMultipleEventSink {
     @Test
     public void testHTTPMultipleEvents() throws Exception {
         logger.info("Creating test for multiple event sink synchronously.");
+        final TestAppender appender = new TestAppender();
+        final Logger logger = Logger.getLogger(HttpServerListener.class);
+        logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
 
-        String inStreamDefinition = "Define stream FooStreamA (message String,method String,headers String);" +
-                "@sink(type='http'," + "publisher.url='http://localhost:8009'," + "method='{{method}}'," + "headers=" +
-                "'{{headers}}',"
-                + "@map(type='xml', @payload('{{message}}'))) "
+        String inStreamDefinition1 = "Define stream FooStreamA (message String,method String,headers String);"
+                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}'," +
+                "headers='{{headers}}',"
+                + "@map(type='xml', "
+                + "@payload('{{message}}'))) "
                 + "Define stream BarStreamA (message String,method String,headers String);";
-        String query = ("@info(name = 'queryA') " +
-                "from FooStreamA select message,method,headers insert into BarStreamA;");
+        String query1 = ("@info(name = 'queryA') " +
+                "from FooStreamA "
+                + "select message,method,headers "
+                + "insert into BarStreamA;"
+                );
 
-        String inStreamDefinition2 = "Define stream FooStreamB (message String,method String,headers String);" +
-                "@sink(type='http'," + "publisher.url='http://localhost:8009'," + "method='{{method}}'," + "headers=" +
-                "'{{headers}}',"
-                + "@map(type='xml', @payload('{{message}}'))) "
+        String inStreamDefinition2 = "Define stream FooStreamB (message String,method String,headers String);"
+                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}'," +
+                "headers='{{headers}}',"
+                + "@map(type='xml', "
+                + "@payload('{{message}}'))) "
                 + "Define stream BarStreamB (message String,method String,headers String);";
         String query2 = ("@info(name = 'queryB') " +
-                "from FooStreamB select message,method,headers insert into BarStreamB;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
-                inStreamDefinition2 + query + query2);
+                "from FooStreamB "
+                + "select message,method,headers "
+                + "insert into BarStreamB;"
+        );
+        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition1 +
+                inStreamDefinition2 + query1 + query2);
         InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStreamA");
         InputHandler fooStream2 = executionPlanRuntime.getInputHandler("FooStreamB");
-        HttpServerListenerHandler lst = new HttpServerListenerHandler(8009);
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        lst.run();
         executionPlanRuntime.start();
-        fooStream.send(new Object[]{"<events><event><symbol>WSO2</symbol>" +
-                "<price>55.645</price><volume>100</volume></event></events>", "GET", "Name:John#Age:23"});
-        fooStream2.send(new Object[]{"<events><event><symbol>WSO2</symbol>" +
-                "<price>55.645</price><volume>100</volume></event></events>", "GET", "Name:John#Age:23"});
-
+        String event1 = "<events>"
+                            + "<event>"
+                                + "<symbol>WSO2</symbol>"
+                                + "<price>55.645</price>"
+                                + "<volume>100</volume>"
+                            + "</event>"
+                        + "</events>";
+        String event2 = "<events>"
+                            + "<event>"
+                                + "<symbol>IFS</symbol>"
+                                + "<price>55.645</price>"
+                                + "<volume>100</volume>"
+                            + "</event>"
+                        + "</events>";
+        fooStream.send(new Object[]{event1, "GET", "Name:John#Age:23"});
+        fooStream2.send(new Object[]{event2, "GET", "Name:John#Age:23"});
+        Thread.sleep(1000);
+        final List<LoggingEvent> log = appender.getLog();
+        ArrayList<String> expected = new ArrayList<>();
+        expected.add("Event Arrived: " + event1 + "\n");
+        expected.add("Event Arrived: " + event2 + "\n");
+        if (log.size() > 0) {
+            Assert.assertEquals(true, expected.contains(log.get(0).getMessage().toString()));
+        }
+        if (log.size() > 1) {
+            Assert.assertEquals(true, expected.contains(log.get(1).getMessage().toString()));
+        }
         Thread.sleep(500);
         executionPlanRuntime.shutdown();
         lst.shutdown();
+    }
+
+    private static class TestAppender extends AppenderSkeleton {
+
+        private final List<LoggingEvent> log = new ArrayList<>();
+
+        @Override
+        public boolean requiresLayout() {
+            return false;
+        }
+
+        @Override
+        protected void append(final LoggingEvent loggingEvent) {
+            log.add(loggingEvent);
+        }
+
+        @Override
+        public void close() {
+        }
+
+        List<LoggingEvent> getLog() {
+            return new ArrayList<>(log);
+        }
     }
 }

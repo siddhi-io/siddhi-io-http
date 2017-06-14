@@ -20,6 +20,7 @@ package org.wso2.extension.siddhi.io.http.sink;
 
 import org.apache.log4j.Logger;
 import org.testng.Assert;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpServerListenerHandler;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -32,6 +33,26 @@ import org.wso2.siddhi.extension.output.mapper.xml.XMLSinkMapper;
  */
 public class HttpMethodType {
     private static final Logger log = Logger.getLogger(HttpMethodType.class);
+    private String payload;
+    private String expected;
+
+    @BeforeTest
+    public void init() {
+        payload = "<events>"
+                    + "<event>"
+                        + "<symbol>WSO2</symbol>"
+                        + "<price>55.645</price>"
+                        + "<volume>100</volume>"
+                    + "</event>"
+                + "</events>";
+        expected = "<events>"
+                    + "<event>"
+                        + "<symbol>WSO2</symbol>"
+                        + "<price>55.645</price>"
+                        + "<volume>100</volume>"
+                    + "</event>"
+                + "</events>\n";
+    }
 
     /**
      * Creating test for publishing events from GET method.
@@ -42,29 +63,33 @@ public class HttpMethodType {
         log.info("Creating test for publishing events from GET method.");
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
-
-        String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);" +
-                "@sink(type='http'," + "publisher.url='http://localhost:8009'," + "method='{{method}}'," + "headers=" +
-                "'{{headers}}',"
-                + "@map(type='xml', @payload('{{message}}'))) "
+        String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
+                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
+                + "headers='{{headers}}',"
+                + "@map(type='xml', "
+                + "@payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
         String query = ("@info(name = 'query') " +
-                "from FooStream select message,method,headers insert into BarStream;");
+                "from FooStream "
+                + "select message,method,headers "
+                + "insert into BarStream;"
+                );
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
                 query);
         InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
         executionPlanRuntime.start();
-        HttpServerListenerHandler lst = new HttpServerListenerHandler(8009);
-        fooStream.send(new Object[]{"<events><event><symbol>WSO2</symbol>" +
-                "<price>55.645</price><volume>100</volume></event></events>", "GET", "Name:John#Age:23"});
-        while (!lst.getServerListner().iaMessageArrive()) {
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        lst.run();
+        fooStream.send(new Object[]{payload, "GET", "Name:John#Age:23"});
+        while (!lst.getServerListener().iaMessageArrive()) {
+            Thread.sleep(10);
         }
-        String eventData = lst.getServerListner().getData();
-        Assert.assertEquals(eventData, "<events><event><symbol>WSO2</symbol>" +
-                        "<price>55.645</price><volume>100</volume></event></events>\n");
+        String eventData = lst.getServerListener().getData();
+        Assert.assertEquals(eventData, expected);
         executionPlanRuntime.shutdown();
         lst.shutdown();
     }
+
     /**
      * Creating test for publishing events from PUT method.
      * @throws Exception Interrupted exception
@@ -74,30 +99,33 @@ public class HttpMethodType {
         log.info("Creating test for publishing events from PUT method.");
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
-
-        String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);" +
-                "@sink(type='http'," + "publisher.url='http://localhost:8009'," + "method='{{method}}'," + "headers='" +
-                "{{headers}}',"
-                + "@map(type='xml', @payload('{{message}}'))) "
+        String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
+                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
+                + "headers='{{headers}}',"
+                + "@map(type='xml', "
+                + "@payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
         String query = ("@info(name = 'query') " +
-                "from FooStream select message,method,headers insert into BarStream;");
+                "from FooStream "
+                + "select message,method,headers "
+                + "insert into BarStream;"
+                );
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
                 query);
         InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
         executionPlanRuntime.start();
-        HttpServerListenerHandler lst = new HttpServerListenerHandler(8009);
-        fooStream.send(new Object[]{"<events><event><symbol>WSO2</symbol>" +
-                "<price>55.645</price><volume>100</volume></event></events>", "PUT", "Name:John#Age:23"});
-        while (!lst.getServerListner().iaMessageArrive()) {
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        lst.run();
+        fooStream.send(new Object[]{payload, "PUT", "Name:John#Age:23"});
+        while (!lst.getServerListener().iaMessageArrive()) {
+            Thread.sleep(10);
         }
-        String eventData = lst.getServerListner().getData();
-        Assert.assertEquals(eventData,
-                "<events><event><symbol>WSO2</symbol>" +
-                        "<price>55.645</price><volume>100</volume></event></events>\n");
+        String eventData = lst.getServerListener().getData();
+        Assert.assertEquals(eventData, eventData);
         executionPlanRuntime.shutdown();
         lst.shutdown();
     }
+
     /**
      * Creating test for publishing events from DELETE method.
      * @throws Exception Interrupted exception
@@ -108,30 +136,31 @@ public class HttpMethodType {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
 
-        String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);" +
-                "@sink(type='http'," + "publisher.url='http://localhost:8009'," + "method='{{method}}'," + "headers='" +
-                "{{headers}}',"
-                + "@map(type='xml', @payload('{{message}}'))) "
+        String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
+                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
+                + "headers='{{headers}}',"
+                + "@map(type='xml', "
+                + "@payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
         String query = ("@info(name = 'query') " +
-                "from FooStream select message,method,headers insert into BarStream;");
+                "from FooStream "
+                + "select message,method,headers "
+                + "insert into BarStream;"
+                );
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
                 query);
         InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
         executionPlanRuntime.start();
-        HttpServerListenerHandler lst = new HttpServerListenerHandler(8009);
-        fooStream.send(new Object[]{"<events><event><symbol>WSO2</symbol>" +
-                "<price>55.645</price><volume>100</volume></event></events>", "DELETE", "Name:John#Age:23"});
-        while (!lst.getServerListner().iaMessageArrive()) {
-
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        lst.run();
+        fooStream.send(new Object[]{payload, "DELETE", "Name:John#Age:23"});
+        while (!lst.getServerListener().iaMessageArrive()) {
+        Thread.sleep(10);
         }
-        String eventData = lst.getServerListner().getData();
-        Assert.assertEquals(eventData,
-                "<events><event><symbol>WSO2</symbol>" +
-                        "<price>55.645</price><volume>100</volume></event></events>\n");
+        String eventData = lst.getServerListener().getData();
+        Assert.assertEquals(eventData, expected);
         executionPlanRuntime.shutdown();
         lst.shutdown();
-
     }
 
 }

@@ -18,9 +18,7 @@
  */
 package org.wso2.extension.siddhi.io.http.source.util;
 
-import com.google.common.io.ByteStreams;
 import io.netty.handler.codec.http.HttpMethod;
-import org.apache.commons.io.Charsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,16 +31,11 @@ import java.net.URL;
 /**
  * A util class to be used for tests.
  */
-public class HttpServerUtil {
+class HttpServerUtil {
 
-    public static final String TEST_HOST = "localhost";
     private static final Logger log = LoggerFactory.getLogger(HttpServerUtil.class);
 
     HttpServerUtil() {
-    }
-
-    public static String getContent(HttpURLConnection urlConn) throws IOException {
-        return new String(ByteStreams.toByteArray(urlConn.getInputStream()), Charsets.UTF_8);
     }
 
     static void writeContent(HttpURLConnection urlConn, String content) throws IOException {
@@ -72,8 +65,6 @@ public class HttpServerUtil {
 
     static void handleException(String msg, Exception ex) {
         log.error(msg, ex);
-        // fail(msg);
     }
-
 }
 

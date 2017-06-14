@@ -26,87 +26,55 @@ import org.wso2.carbon.messaging.CarbonMessageProcessor;
 import org.wso2.carbon.messaging.ClientConnector;
 import org.wso2.carbon.messaging.Constants;
 import org.wso2.carbon.messaging.TransportSender;
-import org.wso2.extension.siddhi.io.http.source.auth.HttpAuthenticator;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
+import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * {@code HttpMessageProcessor } Code is responsible for handling the http message which is sent by http carbon
  * transport.
  */
 public class HttpMessageProcessor implements CarbonMessageProcessor {
-    private ExecutorService executorService;
-    private boolean paused;
-    private ReentrantLock lock;
-    private Condition condition;
-    private static final Logger logger = LoggerFactory.getLogger(HttpMessageProcessor.class);
-    private String id;
 
-    HttpMessageProcessor(String id, String workerThread) {
-        this.id = id;
-        lock = new ReentrantLock();
-        condition = lock.newCondition();
-        this.executorService = Executors.newFixedThreadPool(Integer.valueOf(workerThread));
-        logger.info("Message processor for url " + id + "has deployed.");
-    }
+    private static final Logger logger = LoggerFactory.getLogger(HttpMessageProcessor.class);
+
+    HttpMessageProcessor() { }
 
     @Override
     public boolean receive(CarbonMessage carbonMessage, CarbonCallback carbonCallback) throws IOException {
-        if (paused) {
-            lock.lock();
-            try {
-                condition.await();
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-                logger.error("Thread interrupted while pausing ", ie);
-            } finally {
-                lock.unlock();
-            }
-        }
-        try {
-            String channelID = (String) carbonMessage.getProperty(HttpConstants.CHANNEL_ID);
-            //Check the channel type is http or https
-            if ((channelID != null) && ((channelID.equals(HttpConstants.PROTOCOL_HTTP)) || (channelID.equals
-                    (HttpConstants.PROTOCOL_HTTPS)))) {
+      //Check the channel type is http
+        if (HttpConstants.PROTOCOL_ID.equals(carbonMessage.getProperty(HttpConstants.PROTOCOL))) {
                 //Check the message is a response or direct message
-                String direction = (String) carbonMessage.getProperty(Constants.DIRECTION);
-                if (!((direction != null) && ((direction.equals(Constants.DIRECTION_RESPONSE))))) {
+            if (!Constants.DIRECTION_RESPONSE.equals(carbonMessage.getProperty(Constants.DIRECTION))) {
                     if (HttpConstants.HTTP_METHOD_POST.equalsIgnoreCase((String)
                             carbonMessage.getProperty((HttpConstants.HTTP_METHOD)))) {
-                        //For Context Handling
-                        StringBuilder url = new StringBuilder(String.valueOf((Integer) carbonMessage.getProperty
-                                (HttpConstants.LISTENER_PORT))).append(carbonMessage.getProperty(HttpConstants.TO));
-                        if (!HttpSource.getRegisteredListenerURL().containsKey(url.toString())) {
-                            throw new HttpSourceAdaptorRuntimeException("Resource not found.", carbonCallback, 404);
+                        //get the required source listener
+                        StringBuilder url = new StringBuilder(String.valueOf(carbonMessage.getProperty
+                                (HttpConstants.LISTENER_PORT))).append(HttpConstants.PORT_CONTEXT_KEY_SEPARATOR)
+                                .append(carbonMessage.getProperty(HttpConstants.TO));
+                        HttpSourceListener sourceListener = HttpSource.getRegisteredSourceListenersMap().get(url
+                                .toString());
+                        if (sourceListener != null) {
+                            HttpSource.getRegisteredSourceListenersMap().get(url.toString()).send(carbonMessage,
+                                    carbonCallback, url);
                         } else {
-                            if (HttpSource.getRegisteredListenerAuthentication().get(HttpSource.
-                                    getRegisteredListenerURL().get(url.toString()))) {
-                                try {
-                                    HttpAuthenticator.authenticate(carbonMessage, carbonCallback);
-                                } catch (HttpSourceAdaptorRuntimeException e) {
-                                    throw new HttpSourceAdaptorRuntimeException("Failed in authentication ",
-                                            carbonCallback, 401, e);
-                                }
-                            }
-                            executorService.execute(new HttpWorkerThread(carbonMessage, carbonCallback,
-                                    HttpSource.getRegisteredListenerURL().get(url.toString()), HttpSource
-                                    .getRegisteredListenerURL().get(url.toString()).getStreamDefinition().toString()));
+                            HttpSourceUtil.handleCallback("Resource not found ", carbonCallback, 404);
                         }
                     } else {
                         throw new HttpSourceAdaptorRuntimeException("Request type is not a type of POST ",
                                 carbonCallback, 400);
                     }
-                }
+            } else {
+                carbonCallback.done(carbonMessage);
             }
-        } catch (RuntimeException e) {
-            throw new HttpSourceAdaptorRuntimeException("Failed to process HTTP message.", carbonCallback,
-                    500, e);
+        } else {
+            if (logger.isDebugEnabled()) {
+                logger.debug("Event is not type of http which has received to the uri '" + String
+                        .valueOf(carbonMessage.getProperty(HttpConstants.LISTENER_PORT)) +
+                        carbonMessage.getProperty(HttpConstants.TO));
+            }
         }
         return true;
     }
@@ -115,53 +83,12 @@ public class HttpMessageProcessor implements CarbonMessageProcessor {
     public void setTransportSender(TransportSender transportSender) {
     }
 
+    @Override
     public void setClientConnector(ClientConnector clientConnector) {
     }
 
     @Override
     public String getId() {
-        return id + " HTTP-message-processor";
-    }
-
-    boolean isRunning() {
-        return !paused;
-    }
-
-    boolean isPaused() {
-        return paused;
-    }
-
-    /**
-     * Pause the execution.
-     */
-    void pause() {
-        lock.lock();
-        try {
-            paused = true;
-            logger.info("Event input has paused for " + id);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    /**
-     * Resume pool execution.
-     */
-    void resume() {
-        lock.lock();
-        try {
-            paused = false;
-            logger.info("Event input has resume for " + id);
-            condition.signalAll();
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    /**
-     * Disconnect pool execution.
-     */
-    void disconnect() {
-        executorService.shutdown();
+        return HttpConstants.MESSAGEPROCESSOR_ID;
     }
 }

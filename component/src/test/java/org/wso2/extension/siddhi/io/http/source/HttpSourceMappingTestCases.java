@@ -42,7 +42,6 @@ import java.util.List;
 public class HttpSourceMappingTestCases {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger
             (HttpSourceMappingTestCases.class);
-    private List<String> receivedEventNameList;
 
     /**
      * Creating test for publishing events with XML mapping.
@@ -52,7 +51,7 @@ public class HttpSourceMappingTestCases {
     public void testXmlMapping() throws Exception {
         logger.info("Creating test for publishing events with XML mapping.");
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
-        receivedEventNameList = new ArrayList<>(2);
+        List<String> receivedEventNameList = new ArrayList<>(2);
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
@@ -61,11 +60,16 @@ public class HttpSourceMappingTestCases {
         String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
                 + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
-        String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
+        String query = (
+                "@info(name = 'query') "
+                        + "from inputStream "
+                        + "select *  "
+                        + "insert into outputStream;"
+                        );
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+        executionPlanRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -79,9 +83,20 @@ public class HttpSourceMappingTestCases {
         List<String> expected = new ArrayList<>(2);
         expected.add("John");
         expected.add("Mike");
-        String event1 =
-                "<events><event><name>John</name>" + "<age>100</age><country>Sri Lanka</country></event></events>";
-        String event2 = "<events><event><name>Mike</name>" + "<age>20</age><country>USA</country></event></events>";
+        String event1 = "<events>"
+                            + "<event>"
+                                + "<name>John</name>"
+                                + "<age>100</age>"
+                                + "<country>AUS</country>"
+                            + "</event>"
+                        + "</events>";
+        String event2 = "<events>"
+                            + "<event>"
+                                + "<name>Mike</name>"
+                                + "<age>20</age>"
+                                + "<country>USA</country>"
+                            + "</event>"
+                        + "</events>";
         new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro", false, "text/xml",
                 "POST");
         new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", false, "text/xml",
@@ -99,7 +114,7 @@ public class HttpSourceMappingTestCases {
     public void testTextMapping() throws Exception {
         logger.info("Creating test for publishing events with Text mapping.");
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
-        receivedEventNameList = new ArrayList<>(2);
+        List<String> receivedEventNameList = new ArrayList<>(2);
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
@@ -108,11 +123,16 @@ public class HttpSourceMappingTestCases {
         String inStreamDefinition = "" + "@source(type='http',  @map(type='text'), "
                 + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
-        String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
+        String query = (
+                "@info(name = 'query') "
+                        + "from inputStream "
+                        + "select *  "
+                        + "insert into outputStream;"
+                    );
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+        executionPlanRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -137,6 +157,7 @@ public class HttpSourceMappingTestCases {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         executionPlanRuntime.shutdown();
     }
+
     /**
      * Creating test for publishing events with Json mapping.
      * @throws Exception Interrupted exception
@@ -146,7 +167,7 @@ public class HttpSourceMappingTestCases {
         logger.info("Creating test for publishing events with Json mapping.");
         new HttpTestUtil().setCarbonHome();
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
-        receivedEventNameList = new ArrayList<>(2);
+        List<String> receivedEventNameList = new ArrayList<>(2);
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
@@ -154,11 +175,15 @@ public class HttpSourceMappingTestCases {
         String inStreamDefinition = "" + "@source(type='http', @map(type='json'), "
                 + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
-        String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
+        String query = ("@info(name = 'query') "
+                + "from inputStream "
+                + "select *  "
+                + "insert into outputStream;"
+                );
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+        executionPlanRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -168,7 +193,6 @@ public class HttpSourceMappingTestCases {
             }
         });
         executionPlanRuntime.start();
-
         // publishing events
         List<String> expected = new ArrayList<>(2);
         expected.add("John");
@@ -195,5 +219,4 @@ public class HttpSourceMappingTestCases {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         executionPlanRuntime.shutdown();
     }
-
 }
