@@ -132,13 +132,15 @@ public class HttpSinkUtil {
             clientStoreFile, String clientStorePass) {
         Set<SenderConfiguration> senderConf;
         if (httpStaticProperties.get(HttpConstants.PROTOCOL).equals(HttpConstants.PROTOCOL_HTTPS)) {
-            SiddhiHttpSenderConfiguration httpsSender = new SiddhiHttpSenderConfiguration(clientStoreFile,
-                    clientStorePass);
+            SenderConfiguration httpsSender = new SenderConfiguration(httpStaticProperties
+                    .get(HttpConstants.PORT));
+            httpsSender.setTrustStoreFile(clientStoreFile);
+            httpsSender.setTrustStorePass(clientStorePass);
             httpsSender.setId(httpStaticProperties.get(HttpConstants.TO));
             httpsSender.setScheme(httpStaticProperties.get(HttpConstants.PROTOCOL));
             senderConf = new HashSet<>(Collections.singletonList(httpsSender));
         } else {
-            SenderConfiguration httpSender = new SenderConfiguration(httpStaticProperties.get(HttpConstants.TO));
+            SenderConfiguration httpSender = new SenderConfiguration(httpStaticProperties.get(HttpConstants.PORT));
             httpSender.setScheme(httpStaticProperties.get(HttpConstants.PROTOCOL));
             senderConf = new HashSet<>(Collections.singletonList(httpSender));
         }
