@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.messaging.CarbonCallback;
 import org.wso2.carbon.messaging.CarbonMessage;
+import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 
@@ -54,20 +55,20 @@ public class HttpWorkerThread implements Runnable {
             String response = new String(ByteStreams.toByteArray(inputStream));
             if (!response.equals(HttpConstants.EMPTY_STRING)) {
                 sourceEventListeners.onEvent(response);
-                new HttpSourceCallbackHandler("OK", carbonCallback, 200).handleCallback();
+                HttpSourceUtil.handleCallback("OK", carbonCallback, 200);
                 if (logger.isDebugEnabled()) {
-                    logger.info("Submitted Event " + response + " Stream");
+                    logger.debug("Submitted Event " + response + " Stream");
                 }
             } else {
-                new HttpSourceCallbackHandler("Empty payload event", carbonCallback, 405).handleCallback();
+                HttpSourceUtil.handleCallback("Empty payload event", carbonCallback, 405);
                 if (logger.isDebugEnabled()) {
-                    logger.info("Empty payload event, hence dropping the event chunk in " + sourceID);
+                    logger.debug("Empty payload event, hence dropping the event chunk in " + sourceID);
                 }
             }
         } catch (IOException e) {
             logger.error("Event format is not equal to the expected in " + sourceID);
-            new HttpSourceCallbackHandler("Event format is not equal to the expected", carbonCallback, 405)
-                    .handleCallback();
+            HttpSourceUtil.handleCallback("Event format " +
+                    "is not equal to the expected", carbonCallback, 405);
         }
     }
 }

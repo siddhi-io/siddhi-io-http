@@ -18,9 +18,12 @@
  */
 package org.wso2.extension.siddhi.io.http.source.exception;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
 import org.wso2.carbon.messaging.CarbonCallback;
 import org.wso2.carbon.messaging.DefaultCarbonMessage;
 import org.wso2.carbon.transport.http.netty.common.Constants;
+
+import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
  * HTTP source adaptor specific exception.
@@ -30,22 +33,19 @@ public class HttpSourceAdaptorRuntimeException extends RuntimeException {
     public HttpSourceAdaptorRuntimeException(String message, Throwable e) {
         super(message, e);
     }
+
     public HttpSourceAdaptorRuntimeException(String message) {
         super(message);
     }
 
-    public HttpSourceAdaptorRuntimeException(String message, CarbonCallback carbonCallback, int code, Throwable cause) {
-        super(message, cause);
-        DefaultCarbonMessage defaultCarbonMessage = new DefaultCarbonMessage();
-        defaultCarbonMessage.setStringMessageBody(message);
-        defaultCarbonMessage.setProperty(Constants.HTTP_STATUS_CODE, code);
-        carbonCallback.done(defaultCarbonMessage);
-    }
     public HttpSourceAdaptorRuntimeException(String message, CarbonCallback carbonCallback, int code) {
         super(message);
         DefaultCarbonMessage defaultCarbonMessage = new DefaultCarbonMessage();
         defaultCarbonMessage.setStringMessageBody(message);
         defaultCarbonMessage.setProperty(Constants.HTTP_STATUS_CODE, code);
+        defaultCarbonMessage.setProperty(Constants.HTTP_REASON_PHRASE, HttpResponseStatus.valueOf(code).reasonPhrase());
+        defaultCarbonMessage.setHeader(Constants.HTTP_CONNECTION, Constants.CONNECTION_CLOSE);
+        defaultCarbonMessage.setHeader(Constants.HTTP_VERSION, HTTP_1_1.text());
         carbonCallback.done(defaultCarbonMessage);
     }
 
@@ -54,14 +54,9 @@ public class HttpSourceAdaptorRuntimeException extends RuntimeException {
         DefaultCarbonMessage defaultCarbonMessage = new DefaultCarbonMessage();
         defaultCarbonMessage.setStringMessageBody(message + cause.getMessage());
         defaultCarbonMessage.setProperty(Constants.HTTP_STATUS_CODE, (code));
-        carbonCallback.done(defaultCarbonMessage);
-    }
-
-    public HttpSourceAdaptorRuntimeException(Throwable cause, CarbonCallback carbonCallback, int code) {
-        super(cause);
-        DefaultCarbonMessage defaultCarbonMessage = new DefaultCarbonMessage();
-        defaultCarbonMessage.setStringMessageBody(cause.getMessage());
-        defaultCarbonMessage.setProperty(Constants.HTTP_STATUS_CODE, (code));
+        defaultCarbonMessage.setProperty(Constants.HTTP_REASON_PHRASE, HttpResponseStatus.valueOf(code).reasonPhrase());
+        defaultCarbonMessage.setHeader(Constants.HTTP_CONNECTION, Constants.CONNECTION_CLOSE);
+        defaultCarbonMessage.setHeader(Constants.HTTP_VERSION, HTTP_1_1.text());
         carbonCallback.done(defaultCarbonMessage);
     }
 }

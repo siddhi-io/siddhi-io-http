@@ -19,7 +19,7 @@
     <parent>
         <artifactId>siddhi-io-http-tests</artifactId>
         <groupId>org.wso2.extension.siddhi.io.http</groupId>
-        <version>4.0.0-SNAPSHOT</version>
+        <version>1.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -249,7 +249,7 @@
                                     <version>${carbon.kernel.version}</version>
                                 </feature>
                                 <feature>
-                                    <id>org.wso2.carbon.transport.http.netty.feature</id>
+                                    <id>org.wso2.carbon.transport.http.netty.feature.group</id>
                                     <version>${carbon.transport.version}</version>
                                 </feature>
                             </features>

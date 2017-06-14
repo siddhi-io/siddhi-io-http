@@ -40,9 +40,6 @@ import java.util.List;
 public class HttpMultipleEventDifferentFormatTest {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger
             .getLogger(HttpMultipleEventDifferentFormatTest.class);
-    private List<String> receivedEventNameListA;
-    private List<String> receivedEventNameListB;
-    private List<String> receivedEventNameListC;
 
     /**
      * Creating test for publishing events with multiple formats synchronously.
@@ -50,37 +47,63 @@ public class HttpMultipleEventDifferentFormatTest {
      * @throws Exception Interrupted exception
      */
     @Test
-    public void testHTTPInputTransport() throws Exception {
-        logger.info("Creating test for publishing events with multiple formats synchronously.");
-        URI baseURIA = URI.create(String.format("http://%s:%d", "localhost", 9005));
-        URI baseURIC = URI.create(String.format("http://%s:%d", "localhost", 7005));
-        receivedEventNameListA = new ArrayList<>(2);
-        receivedEventNameListB = new ArrayList<>(2);
-        receivedEventNameListC = new ArrayList<>(2);
+    public void testHTTPInputTransportDifferentFormat() throws Exception {
+        logger.info("Creating test case for different configuration sources together.");
+        URI baseURIA = URI.create(String.format("http://%s:%d", "localhost", 8005));
+        URI baseURIC = URI.create(String.format("http://%s:%d", "localhost", 8009));
+        List<String> receivedEventNameListA = new ArrayList<>(2);
+        List<String> receivedEventNameListB = new ArrayList<>(2);
+        List<String> receivedEventNameListC = new ArrayList<>(2);
+        List<String> receivedEventNameListD = new ArrayList<>(2);
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
-        String inStreamDefinitionA = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='http://localhost:9005/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
+        String inStreamDefinitionA = "@source(type='http', @map(type='xml'), " +
+                "receiver.url='http://localhost:8005/endpoints/RecPro', basic.auth.enabled='false', server.bootstrap" +
+                ".boss.group.size='20', server." +
+                "bootstrap.worker.group.size='20')"
                 + "define stream inputStreamA (name string, age int, country string);";
-        String queryA = ("@info(name = 'queryA') " + "from inputStreamA " + "select *  " + "insert into " +
-                "outputStreamA;");
-        String inStreamDefinitionB = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='http://localhost:9005/endpoints/RecPro1', " + "basic.auth.enabled='false'" + ")"
-                + "define stream inputStreamB (name string, age int, country string);";
-        String queryB = ("@info(name = 'queryB') " + "from inputStreamB " + "select *  " + "insert into " +
-                "outputStreamB;");
+        String queryA = (
+                "@info(name = 'queryA') "
+                        + "from inputStreamA "
+                        + "select *  "
+                        + "insert into outputStreamA;"
+                        );
 
-        String inStreamDefinitionC = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='http://localhost:7005/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
+        String inStreamDefinitionB = "@source(type='http', @map(type='xml'), "
+                + "receiver.url='http://localhost:8005/endpoints/RecPro1', basic.auth.enabled='false')"
+                + "define stream inputStreamB (name string, age int, country string);";
+        String queryB = (
+                "@info(name = 'queryB') "
+                        + "from inputStreamB "
+                        + "select *  "
+                        + "insert into outputStreamB;"
+                        );
+
+        String inStreamDefinitionC = "@source(type='http', @map(type='xml'), "
+                + "receiver.url='http://localhost:8009/endpoints/RecPro', basic.auth.enabled='false')"
                 + "define stream inputStreamC (name string, age int, country string);";
-        String queryC = ("@info(name = 'queryC') " + "from inputStreamC " + "select *  " + "insert into" +
-                " outputStreamC;");
+        String queryC = (
+                "@info(name = 'queryC') "
+                        + "from inputStreamC "
+                        + "select *  "
+                        + "insert into outputStreamC;"
+                        );
+
+        String inStreamDefinitionD = "@source(type='http', @map(type='xml'), "
+                + "receiver.url='http://localhost:8005/endpoints/RecPro2', basic.auth.enabled='false')"
+                + "define stream inputStreamD (name string, age int, country string);";
+        String queryD = (
+                "@info(name = 'queryD') "
+                        + "from inputStreamD "
+                        + "select *  "
+                        + "insert into outputStreamD;"
+                         );
+
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinitionA + inStreamDefinitionB + inStreamDefinitionC +
-                        queryA + queryB
-                        + queryC);
+                .createExecutionPlanRuntime(inStreamDefinitionA + inStreamDefinitionB +
+                        inStreamDefinitionC + inStreamDefinitionD + queryA + queryB + queryC + queryD);
 
         executionPlanRuntime.addCallback("queryA", new QueryCallback() {
             @Override
@@ -109,15 +132,34 @@ public class HttpMultipleEventDifferentFormatTest {
                 }
             }
         });
+        executionPlanRuntime.addCallback("queryD", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event event : inEvents) {
+                    receivedEventNameListD.add(event.getData(0).toString());
+                }
+            }
+        });
         executionPlanRuntime.start();
-
         // publishing events
         List<String> expectedA = new ArrayList<>(2);
         expectedA.add("JohnA");
         expectedA.add("MikeA");
-        String event1 =
-                "<events><event><name>JohnA</name>" + "<age>100</age><country>Sri Lanka</country></event></events>";
-        String event2 = "<events><event><name>MikeA</name>" + "<age>20</age><country>USA</country></event></events>";
+        String event1 = "<events>"
+                            + "<event>"
+                                + "<name>JohnA</name>"
+                                + "<age>100</age>"
+                                + "<country>AUS</country>"
+                            + "</event>"
+                        + "</events>";
+        String event2 = "<events>"
+                            + "<event>"
+                                + "<name>MikeA</name>"
+                                + "<age>20</age>"
+                                + "<country>USA</country>"
+                            + "</event>"
+                        + "</events>";
         new HttpTestUtil().httpPublishEvent(event1, baseURIA, "/endpoints/RecPro", false,
                 "application/xml", "POST");
         new HttpTestUtil().httpPublishEvent(event2, baseURIA, "/endpoints/RecPro", false,
@@ -128,9 +170,20 @@ public class HttpMultipleEventDifferentFormatTest {
         List<String> expectedB = new ArrayList<>(2);
         expectedB.add("JohnB");
         expectedB.add("MikeB");
-        String event3 =
-                "<events><event><name>JohnB</name>" + "<age>100</age><country>Sri Lanka</country></event></events>";
-        String event4 = "<events><event><name>MikeB</name>" + "<age>20</age><country>USA</country></event></events>";
+        String event3 = "<events>"
+                            + "<event>"
+                                + "<name>JohnB</name>"
+                                + "<age>100</age>"
+                                + "<country>AUS</country>"
+                            + "</event>"
+                        + "</events>";
+        String event4 = "<events>"
+                            + "<event>"
+                                + "<name>MikeB</name>"
+                                + "<age>20</age>"
+                                + "<country>USA</country>"
+                            + "</event>"
+                        + "</events>";
         new HttpTestUtil().httpPublishEvent(event3, baseURIA, "/endpoints/RecPro1", false,
                 "application/xml", "POST");
         new HttpTestUtil().httpPublishEvent(event4, baseURIA, "/endpoints/RecPro1", false,
@@ -141,17 +194,50 @@ public class HttpMultipleEventDifferentFormatTest {
         List<String> expectedC = new ArrayList<>(2);
         expectedC.add("JohnC");
         expectedC.add("MikeC");
-        String event5 =
-                "<events><event><name>JohnC</name>" + "<age>100</age><country>Sri Lanka</country></event></events>";
-        String event6 = "<events><event><name>MikeC</name>" + "<age>20</age><country>USA</country></event></events>";
+        String event5 = "<events>"
+                            + "<event>"
+                                + "<name>JohnC</name>"
+                                + "<age>100</age>"
+                                + "<country>AUS</country>"
+                            + "</event>"
+                        + "</events>";
+        String event6 = "<events>"
+                            + "<event>"
+                                + "<name>MikeC</name>"
+                                + "<age>20</age>"
+                                + "<country>USA</country>"
+                            + "</event>"
+                        + "</events>";
         new HttpTestUtil().httpPublishEvent(event5, baseURIC, "/endpoints/RecPro", false,
                 "application/xml", "POST");
         new HttpTestUtil().httpPublishEvent(event6, baseURIC, "/endpoints/RecPro", false,
                 "application/xml", "POST");
         Thread.sleep(100);
         Assert.assertEquals(receivedEventNameListC.toString(), expectedC.toString());
-
+        // publishing events
+        List<String> expectedD = new ArrayList<>(2);
+        expectedD.add("JohnD");
+        expectedD.add("MikeD");
+        String event7 = "<events>"
+                            + "<event>"
+                                + "<name>JohnD</name>"
+                                + "<age>100</age>"
+                                + "<country>AUS</country>"
+                            + "</event>"
+                        + "</events>";
+        String event8 = "<events>"
+                            + "<event>"
+                                + "<name>MikeD</name>"
+                                + "<age>20</age>"
+                                + "<country>USA</country>"
+                            + "</event>"
+                        + "</events>";
+        new HttpTestUtil().httpPublishEvent(event7, baseURIA, "/endpoints/RecPro2", false,
+                "application/xml", "POST");
+        new HttpTestUtil().httpPublishEvent(event8, baseURIA, "/endpoints/RecPro2", false,
+                "application/xml", "POST");
+        Thread.sleep(100);
+        Assert.assertEquals(receivedEventNameListD.toString(), expectedD.toString());
         executionPlanRuntime.shutdown();
     }
-
 }

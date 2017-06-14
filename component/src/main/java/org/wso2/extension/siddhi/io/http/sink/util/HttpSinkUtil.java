@@ -51,12 +51,12 @@ public class HttpSinkUtil {
      * @param publisherURL the publisher url.
      * @return map that contains the host,port,context and complete url.
      */
-    public Map<String, String> getHttpStaticProperties(String publisherURL) {
+    public Map<String, String> getURLProperties(String publisherURL) {
         Map<String, String> httpStaticProperties;
-        String protocol = "";
-        String host = "";
-        String port = "";
-        String path = "/";
+        String protocol = HttpConstants.DEFAULT_PROTOCOL_VALUE;
+        String host = HttpConstants.DEFAULT_HOST_VALUE;
+        String port = HttpConstants.EMPTY_STRING;
+        String path = HttpConstants.DEFAULT_CONTEXT_VALUE;
         if (!"".equals(publisherURL)) {
             try {
                 URL aURL = new URL(publisherURL);
@@ -65,7 +65,7 @@ public class HttpSinkUtil {
                 port = Integer.toString(aURL.getPort());
                 path = aURL.getPath();
             } catch (MalformedURLException e) {
-                throw new HttpSinkAdaptorRuntimeException(" Receiver url mandatory. Please insert valid url .");
+                throw new HttpSinkAdaptorRuntimeException(" Receiver url mandatory. Please insert valid url .", e);
             }
         }
         httpStaticProperties = new HashMap<>();
@@ -85,9 +85,9 @@ public class HttpSinkUtil {
     public List<Header> getHeaders(String headers) {
         List<Header> headersList = new ArrayList<>();
         if (!"".equals(headers)) {
-            String[] spam = headers.split(HttpConstants.HEADERSPLITER);
+            String[] spam = headers.split(HttpConstants.HEADER_SPLITER);
             for (String aSpam : spam) {
-                String[] header = aSpam.split(HttpConstants.HEADERNAMEVALUESPLITER, 2);
+                String[] header = aSpam.split(HttpConstants.HEADER_NAME_VALUE_SPLITER, 2);
                 if (header.length > 1) {
                     headersList.add(new Header(header[0], header[1]));
                 } else {
@@ -100,18 +100,26 @@ public class HttpSinkUtil {
     }
 
     /**
-     * user can give custom trust store file and trust store pass if user did not give then custom then system read
+     * user can give custom truststore file if user did not give then custom then system read
      * the default values which is in the deployment yaml.
      *
-     * @return default trust store file and pass which is in deployment yml.
+     * @return default trust store file path.
      */
-    public String[] trustStoreValues(ConfigReader sinkConfigReader) {
-        return new String[]{sinkConfigReader.readConfig(HttpConstants.TRUSTSTORE_FILE, HttpConstants
-                .TRUSTSTORE_FILE_VALUE),
-                sinkConfigReader.readConfig(HttpConstants.TRUSTSTORE_PASS, HttpConstants.
-                        TRUSTSTORE_PASS_VALUE)};
+    public String trustStorePath(ConfigReader sinkConfigReader) {
+        return sinkConfigReader.readConfig(HttpConstants.TRUSTSTORE_FILE, HttpConstants
+                .TRUSTSTORE_FILE_VALUE);
     }
 
+    /**
+     * user can give custom truststore password if user did not give then custom then system read
+     * the default values which is in the deployment yaml.
+     *
+     * @return default trust password.
+     */
+    public String trustStorePassword(ConfigReader sinkConfigReader) {
+        return sinkConfigReader.readConfig(HttpConstants.TRUSTSTORE_PASSWORD, HttpConstants.
+                        TRUSTSTORE_PASSWORD_VALUE);
+    }
     /**
      * Method is responsible for set sender configuration values .
      *
@@ -144,21 +152,37 @@ public class HttpSinkUtil {
      */
     public Set<TransportProperty> getTransportConfigurations(ConfigReader sourceConfigReader) {
         ArrayList<TransportProperty> properties = new ArrayList<>();
-        TransportProperty var1 = new TransportProperty();
-        var1.setName(HttpConstants.LATENCY_METRICS);
-        var1.setValue(sourceConfigReader.readConfig(HttpConstants.LATENCY_METRICS,
+        TransportProperty var = new TransportProperty();
+        var.setName(HttpConstants.LATENCY_METRICS);
+        var.setValue(sourceConfigReader.readConfig(HttpConstants.LATENCY_METRICS,
                 HttpConstants.LATENCY_METRICS_VALUE));
-        properties.add(var1);
-        TransportProperty var2 = new TransportProperty();
-        var2.setName(HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT);
-        var2.setValue(Integer.valueOf(sourceConfigReader.readConfig(HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT,
+        properties.add(var);
+        var = new TransportProperty();
+        var.setName(HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT);
+        var.setValue(Integer.valueOf(sourceConfigReader.readConfig(HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT,
                 HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT_VALUE)));
-        properties.add(var2);
-        TransportProperty var3 = new TransportProperty();
-        var3.setName(HttpConstants.CLIENT_BOOTSTRAP_SOCKET_TIMEOUT);
-        var3.setValue(Integer.valueOf(sourceConfigReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_SOCKET_TIMEOUT,
+        properties.add(var);
+        var = new TransportProperty();
+        var.setName(HttpConstants.CLIENT_BOOTSTRAP_SOCKET_TIMEOUT);
+        var.setValue(Integer.valueOf(sourceConfigReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_SOCKET_TIMEOUT,
                 HttpConstants.CLIENT_BOOTSTRAP_SOCKET_TIMEOUT_VALUE)));
-        properties.add(var3);
+        properties.add(var);
+        String bootstrapBossThreads = sourceConfigReader.readConfig(HttpConstants
+                .SERVER_BOOTSTRAP_BOSS_GROUP_SIZE, HttpConstants.EMPTY_STRING);
+        if (!HttpConstants.EMPTY_STRING.equals(bootstrapBossThreads)) {
+            var = new TransportProperty();
+            var.setName(HttpConstants.SERVER_BOOTSTRAP_BOSS_GROUP_SIZE);
+            var.setValue(Integer.valueOf(bootstrapBossThreads));
+            properties.add(var);
+        }
+        String bootstrapWorkerThreads = sourceConfigReader.readConfig(HttpConstants
+                .SERVER_BOOTSTRAP_WORKER_GROUP_SIZE, HttpConstants.EMPTY_STRING);
+        if (!HttpConstants.EMPTY_STRING.equals(bootstrapWorkerThreads)) {
+            var = new TransportProperty();
+            var.setName(HttpConstants.SERVER_BOOTSTRAP_WORKER_GROUP_SIZE);
+            var.setValue(Integer.valueOf(bootstrapWorkerThreads));
+            properties.add(var);
+        }
         return new HashSet<>(properties);
     }
 
@@ -185,15 +209,11 @@ public class HttpSinkUtil {
             case HttpConstants.MAP_JSON:
                 return HttpConstants.APPLICATION_JSON;
 
-            case HttpConstants.MAP_WSO2EVENT:
-                return HttpConstants.MAP_WSO2EVENT;
-
             default: {
                 log.info("Invalid payload map type. System support only text," +
                         "Json and XML type hence proceed with default text mapping");
                 return HttpConstants.TEXT_PLAIN;
             }
         }
-
     }
 }

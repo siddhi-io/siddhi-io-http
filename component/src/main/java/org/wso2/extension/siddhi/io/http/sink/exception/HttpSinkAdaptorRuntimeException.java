@@ -18,20 +18,12 @@
  */
 package org.wso2.extension.siddhi.io.http.sink.exception;
 
-import org.wso2.carbon.transport.http.netty.message.HTTPCarbonMessage;
-
 /**
  * {@code HttpSinkAdaptorRuntimeException }HTTP output adaptor specific exception.
  */
 public class HttpSinkAdaptorRuntimeException extends RuntimeException {
-    public HttpSinkAdaptorRuntimeException() {
-    }
 
     public HttpSinkAdaptorRuntimeException(String message) {
-        super(message);
-    }
-
-    public HttpSinkAdaptorRuntimeException(String message, HTTPCarbonMessage cMsg) {
         super(message);
     }
 

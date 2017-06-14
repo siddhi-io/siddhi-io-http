@@ -34,18 +34,13 @@ import org.wso2.siddhi.extension.input.mapper.xml.XmlSourceMapper;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Test case for HTTPS protocol.
  */
 public class HttpOrderProcess {
-    private static final Logger logger = Logger
-            .getLogger(HttpOrderProcess.class);
-    private List<String> receivedEventNameList;
-    private Map<String, String> masterConfigs = new HashMap<>();
+    private static final Logger logger = Logger.getLogger(HttpOrderProcess.class);
 
     /**
      * Creating test for publishing events with XML mapping.
@@ -56,17 +51,22 @@ public class HttpOrderProcess {
     public void testCustomPoolConfig() throws Exception {
         logger.info("Creating test for publishing events with XML mapping.");
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
-        receivedEventNameList = new ArrayList<>(2);
+        List<String> receivedEventNameList = new ArrayList<>(2);
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         siddhiManager.setExtension("xml-input-mapper", TextSourceMapper.class);
-        String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "basic.auth.enabled='false',worker" +
-                ".count='1',server.bootstrap.boss.group.size='4',server.bootstrap.worker.group.size='8'" + ")"
+        String inStreamDefinition = "@source(type='http', @map(type='xml'), "
+                + "receiver.url='http://localhost:8005/endpoints/RecPro', basic.auth.enabled='false',worker"
+                + ".count='1',server.bootstrap.boss.group.size='4',server.bootstrap.worker.group.size='8')"
                 + "define stream inputStream (name string, age int, country string);";
-        String query = ("@info(name = 'query') " + "from inputStream " + "select *  " + "insert into outputStream;");
+        String query = (
+                "@info(name = 'query') "
+                        + "from inputStream "
+                        + "select *  "
+                        + "insert into outputStream;"
+                        );
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
 
@@ -87,10 +87,34 @@ public class HttpOrderProcess {
         expected.add("C");
         expected.add("D");
         expected.add("A");
-        String event1 = "<events><event><name>A</name>" + "<age>100</age><country>Sri Lanka</country></event></events>";
-        String event2 = "<events><event><name>B</name>" + "<age>20</age><country>USA</country></event></events>";
-        String event3 = "<events><event><name>C</name>" + "<age>100</age><country>Sri Lanka</country></event></events>";
-        String event4 = "<events><event><name>D</name>" + "<age>20</age><country>USA</country></event></events>";
+        String event1 = "<events>" +
+                            "<event>" +
+                                    "<name>A</name>" +
+                                    "<age>100</age>" +
+                                    "<country>USA</country>" +
+                            "</event>" +
+                        "</events>";
+        String event2 = "<events>" +
+                            "<event>" +
+                                "<name>B</name>" +
+                                "<age>100</age>" +
+                                "<country>USA</country>" +
+                            "</event>" +
+                        "</events>";
+        String event3 = "<events>" +
+                            "<event>" +
+                                "<name>C</name>" +
+                                "<age>100</age>" +
+                                "<country>USA</country>" +
+                            "</event>" +
+                        "</events>";
+        String event4 = "<events>" +
+                            "<event>" +
+                                "<name>D</name>" +
+                                "<age>100</age>" +
+                                "<country>USA</country>" +
+                            "</event>" +
+                        "</events>";
         String[] events = {event1, event2, event3, event4};
         int k = 0;
         for (int i = 0; i < 5; i++) {
@@ -104,6 +128,4 @@ public class HttpOrderProcess {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         executionPlanRuntime.shutdown();
     }
-
-
 }

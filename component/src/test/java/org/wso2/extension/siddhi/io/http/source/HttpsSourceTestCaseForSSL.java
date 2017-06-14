@@ -46,150 +46,181 @@ import static org.hamcrest.CoreMatchers.is;
 public class HttpsSourceTestCaseForSSL {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger
             .getLogger(HttpsSourceTestCaseForSSL.class);
-    private List<String> receivedEventNameList;
-    private Map<String, String> masterConfigs = new HashMap<>();
-    /**
-     * Creating test for publishing events with https protocol.
-     * @throws Exception Interrupted exception
-     */
-    @Test
-    public void testHTTPSInputTransport() throws Exception {
-        logger.info("Creating test for publishing events with https protocol.");
-        new HttpTestUtil().setCarbonHome();
-        masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/conf/security/wso2carbon.jks");
-        masterConfigs.put("source.http.https.keystore.pass", "wso2carbon");
-        masterConfigs.put("source.http.https.cert.pass", "wso2carbon");
-        receivedEventNameList = new ArrayList<>(2);
-        SiddhiManager siddhiManager = new SiddhiManager();
-        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs);
-        inMemoryConfigManager.generateConfigReader("source", "http");
-        siddhiManager.setConfigManager(inMemoryConfigManager);
-        siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
-        String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='https://localhost:9095/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
-                + "define stream inputStream (name string, age int, country string);";
-        String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timeStamp, inEvents, removeEvents);
-                for (Event event : inEvents) {
-                    receivedEventNameList.add(event.getData(0).toString());
-                }
-            }
-        });
-        executionPlanRuntime.start();
-        // publishing events
-        List<String> expected = new ArrayList<>(2);
-        expected.add("John");
-        expected.add("Mike");
-        String event1 =
-                "<events><event><name>John</name>" + "<age>100</age><country>Sri Lanka</country></event></events>";
-        String event2 = "<events><event><name>Mike</name>" + "<age>20</age><country>USA</country></event></events>";
-        new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:9095/endpoints/RecPro", false,
-                "text/plain");
-        new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:9095/endpoints/RecPro", false,
-                "text/plain");
-        Thread.sleep(100);
-        Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
-        executionPlanRuntime.shutdown();
-    }
-    /**
-     * Creating test for publishing events with https protocol with invalid keystore.
-     * @throws Exception Interrupted exception
-     */
-    @Test
-    public void testHTTPSInputTransportInvalidKeyStore() throws Exception {
-        logger.info("Creating test for publishing events with https protocol with invalid keystore.");
-        new HttpTestUtil().setCarbonHome();
-        masterConfigs.clear();
-        masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/conf/security/store.jks");
-        masterConfigs.put("source.http.https.keystore.pass", "wso2carbon");
-        masterConfigs.put("source.http.https.cert.pass", "wso2carbon");
+//    /**
+//     * Creating test for publishing events with https protocol.
+//     * @throws Exception Interrupted exception
+//     */
+//    @Test
+//    public void testHTTPSInputTransport() throws Exception {
+//        logger.info("Creating test for publishing events with https protocol.");
+//        new HttpTestUtil().setCarbonHome();
+//        Map<String, String> masterConfigs = new HashMap<>();
+//        masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/resources/security/wso2carbon.jks");
+//        masterConfigs.put("source.http.https.keystore.password", "wso2carbon");
+//        masterConfigs.put("source.http.https.cert.password", "wso2carbon");
+//        List<String> receivedEventNameList = new ArrayList<>(2);
+//        SiddhiManager siddhiManager = new SiddhiManager();
+//        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs);
+//        inMemoryConfigManager.generateConfigReader("source", "http");
+//        siddhiManager.setConfigManager(inMemoryConfigManager);
+//        siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
+//        String inStreamDefinition = "@source(type='http', @map(type='xml'), receiver.url='https://localhost:8005"
+//                + "/endpoints/RecPro')"
+//                + "define stream inputStream (name string, age int, country string);";
+//        String query = ("@info(name = 'query') "
+//                + "from inputStream "
+//                + "select *  "
+//                + "insert into outputStream;"
+//                );
+//        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+//                .createExecutionPlanRuntime(inStreamDefinition + query);
+//
+//        executionPlanRuntime.addCallback("query", new QueryCallback() {
+//            @Override
+//            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+//                EventPrinter.print(timeStamp, inEvents, removeEvents);
+//                for (Event event : inEvents) {
+//                    receivedEventNameList.add(event.getData(0).toString());
+//                }
+//            }
+//        });
+//        executionPlanRuntime.start();
+//        // publishing events
+//        List<String> expected = new ArrayList<>(2);
+//        expected.add("John");
+//        expected.add("Mike");
+//        String event1 = "<events>"
+//                            + "<event>"
+//                                + "<name>John</name>"
+//                                + "<age>100</age>"
+//                                + "<country>AUS</country>"
+//                            + "</event>"
+//                        + "</events>";
+//        String event2 = "<events>"
+//                            + "<event>"
+//                                + "<name>Mike</name>"
+//                                + "<age>20</age>"
+//                                + "<country>USA</country>"
+//                            + "</event>"
+//                        + "</events>";
+//        new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:8005/endpoints/RecPro", false,
+//                "text/plain");
+//        new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:8005/endpoints/RecPro", false,
+//                "text/plain");
+//        Thread.sleep(100);
+//        Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
+//        executionPlanRuntime.shutdown();
+//    }
+//
+//    /**
+//     * Creating test for publishing events with https protocol with invalid keystore.
+//     * @throws Exception Interrupted exception
+//     */
+//    @Test
+//    public void testHTTPSInputTransportInvalidKeyStore() throws Exception {
+//        final TestAppender appender = new TestAppender();
+//        final Logger logger = Logger.getRootLogger();
+//        logger.addAppender(appender);
+//        logger.info("Creating test for publishing events with https protocol with invalid keystore.");
+//        new HttpTestUtil().setCarbonHome();
+//        Map<String, String> masterConfigs = new HashMap<>();
+//        masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/resources/security/store.jks");
+//        masterConfigs.put("source.http.https.keystore.password", "wso2carbon");
+//        masterConfigs.put("source.http.https.cert.password", "wso2carbon");
+//
+//        List<String> receivedEventNameList = new ArrayList<>(2);
+//        SiddhiManager siddhiManager = new SiddhiManager();
+//        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs);
+//        inMemoryConfigManager.generateConfigReader("source", "http");
+//        siddhiManager.setConfigManager(inMemoryConfigManager);
+//        siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
+//        String inStreamDefinition = "@source(type='http', @map(type='xml'), receiver.url='https://localhost:8005/"
+//                + "endpoints/RecPro')"
+//                + "define stream inputStream (name string, age int, country string);";
+//        String query = (
+//                "@info(name = 'query') " +
+//                "from inputStream " +
+//                "select *  " +
+//                "insert into outputStream;"
+//                );
+//        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+//                .createExecutionPlanRuntime(inStreamDefinition + query);
+//
+//        executionPlanRuntime.addCallback("query", new QueryCallback() {
+//            @Override
+//            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+//                EventPrinter.print(timeStamp, inEvents, removeEvents);
+//                for (Event event : inEvents) {
+//                    receivedEventNameList.add(event.getData(0).toString());
+//                }
+//            }
+//        });
+//        executionPlanRuntime.start();
+//        // publishing events
+//        List<String> expected = new ArrayList<>(2);
+//        String event1 = "<events>"
+//                            + "<event>"
+//                                + "<name>John</name>"
+//                                + "<age>100</age>"
+//                                + "<country>AUS</country>"
+//                            + "</event>"
+//                        + "</events>";
+//        String event2 = "<events>"
+//                            + "<event>"
+//                                + "<name>Mike</name>"
+//                                + "<age>20</age>"
+//                                + "<country>USA</country>"
+//                            + "</event>"
+//                        + "</events>";
+//        new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:8005/endpoints/RecPro", false,
+//                    "text/plain");
+//        new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:8005/endpoints/RecPro", false,
+//                    "text/plain");
+//        final List<LoggingEvent> log = appender.getLog();
+//        org.hamcrest.MatcherAssert.assertThat(log.get(3).getLevel(), is(Level.ERROR));
+//        org.hamcrest.MatcherAssert.assertThat(log.get(4).getLevel(), is(Level.ERROR));
+//        org.hamcrest.MatcherAssert.assertThat(log.get(3).getLoggerName(), is("org.wso2.extension.siddhi.io" +
+//                ".http.source.util.HttpTestUtil"));
+//        Thread.sleep(100);
+//        Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
+//        executionPlanRuntime.shutdown();
+//    }
 
-        receivedEventNameList = new ArrayList<>(2);
-        SiddhiManager siddhiManager = new SiddhiManager();
-        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs);
-        inMemoryConfigManager.generateConfigReader("source", "http");
-        siddhiManager.setConfigManager(inMemoryConfigManager);
-        siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
-        String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='https://localhost:9095/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
-                + "define stream inputStream (name string, age int, country string);";
-        String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timeStamp, inEvents, removeEvents);
-                for (Event event : inEvents) {
-                    receivedEventNameList.add(event.getData(0).toString());
-                }
-            }
-        });
-        executionPlanRuntime.start();
-        // publishing events
-        List<String> expected = new ArrayList<>(2);
-        String event1 =
-                "<events><event><name>John</name>" + "<age>100</age><country>Sri Lanka</country></event></events>";
-        String event2 = "<events><event><name>Mike</name>" + "<age>20</age><country>USA</country></event></events>";
-        try {
-            new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:9095/endpoints/RecPro", false,
-                    "text/plain");
-            new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:9095/endpoints/RecPro", false,
-                    "text/plain");
-        } catch (IllegalArgumentException e) {
-            e.getClass().getCanonicalName();
-        }
-        final TestAppender appender = new TestAppender();
-        final Logger logger = Logger.getRootLogger();
-        logger.addAppender(appender);
-        try {
-            Logger.getLogger(HttpsSourceTestCaseForSSL.class).error("Test");
-        } finally {
-            logger.removeAppender(appender);
-        }
-        final List<LoggingEvent> log = appender.getLog();
-        final LoggingEvent firstLogEntry = log.get(0);
-        org.hamcrest.MatcherAssert.assertThat(firstLogEntry.getLevel(), is(Level.ERROR));
-        org.hamcrest.MatcherAssert.assertThat(firstLogEntry.getMessage(), is("Test"));
-        org.hamcrest.MatcherAssert.assertThat(firstLogEntry.getLoggerName(), is("org.wso2.extension.siddhi.io" +
-                ".http.source.HttpsSourceTestCaseForSSL"));
-        Thread.sleep(100);
-        Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
-        executionPlanRuntime.shutdown();
-    }
     /**
      * Creating test for publishing events with https protocol with invalid keystore pass.
      * @throws Exception Interrupted exception
      */
     @Test
     public void testHTTPSInputTransportInvalidKeyStorePass() throws Exception {
+        final TestAppender appender = new TestAppender();
+        final Logger logger = Logger.getRootLogger();
+        logger.addAppender(appender);
         logger.info("Creating test for publishing events with https protocol with invalid keystore pass.");
         new HttpTestUtil().setCarbonHome();
-        masterConfigs.clear();
-        masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/conf/security/wso2carbon.jks");
-        masterConfigs.put("source.http.https.keystore.pass", "wso2carbon123");
-        masterConfigs.put("source.http.https.cert.pass", "wso2carbon");
-        receivedEventNameList = new ArrayList<>(2);
+        Map<String, String> masterConfigs = new HashMap<>();
+        masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/resources/security/wso2carbon.jks");
+        masterConfigs.put("source.http.https.keystore.password", "wso2carbon123");
+        masterConfigs.put("source.http.https.cert.password", "wso2carbon");
+        List<String> receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
         InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs);
         inMemoryConfigManager.generateConfigReader("source", "http");
         siddhiManager.setConfigManager(inMemoryConfigManager);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
-        String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='https://localhost:9095/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
+        String inStreamDefinition = "@source(type='http', @map(type='xml'), receiver.url='https://localhost:8005/" +
+                "endpoints/RecPro')"
                 + "define stream inputStream (name string, age int, country string);";
-        String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
+        String query = (
+                "@info(name = 'query') "
+                + "from inputStream "
+                + "select *  "
+                + "insert into outputStream;"
+        );
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+        executionPlanRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -201,103 +232,108 @@ public class HttpsSourceTestCaseForSSL {
         executionPlanRuntime.start();
         // publishing events
         List<String> expected = new ArrayList<>(2);
-        String event1 =
-                "<events><event><name>John</name>" + "<age>100</age><country>Sri Lanka</country></event></events>";
-        String event2 = "<events><event><name>Mike</name>" + "<age>20</age><country>USA</country></event></events>";
-        try {
-            new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:9095/endpoints/RecPro", false,
+        String event1 = "<events>"
+                            + "<event>"
+                                + "<name>John</name>"
+                                + "<age>100</age>"
+                                + "<country>AUS</country>"
+                            + "</event>"
+                        + "</events>";
+        String event2 = "<events>"
+                            + "<event>"
+                                + "<name>Mike</name>"
+                                + "<age>20</age>"
+                                + "<country>USA</country>"
+                            + "</event>"
+                        + "</events>";
+        new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:8005/endpoints/RecPro", false,
                     "text/plain");
-            new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:9095/endpoints/RecPro", false,
+        new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:8005/endpoints/RecPro", false,
                     "text/plain");
-        } catch (IllegalArgumentException e) {
-            e.getClass().getCanonicalName();
-        }
-        final TestAppender appender = new TestAppender();
-        final Logger logger = Logger.getRootLogger();
-        logger.addAppender(appender);
-        try {
-            Logger.getLogger(HttpsSourceTestCaseForSSL.class).error("Test");
-        } finally {
-            logger.removeAppender(appender);
-        }
-
         final List<LoggingEvent> log = appender.getLog();
-        final LoggingEvent firstLogEntry = log.get(0);
-        org.hamcrest.MatcherAssert.assertThat(firstLogEntry.getLevel(), is(Level.ERROR));
-        org.hamcrest.MatcherAssert.assertThat(firstLogEntry.getMessage(), is("Test"));
-        org.hamcrest.MatcherAssert.assertThat(firstLogEntry.getLoggerName(), is("org.wso2.extension.siddhi.io" +
-                ".http.source.HttpsSourceTestCaseForSSL"));
+        org.hamcrest.MatcherAssert.assertThat(log.get(3).getLevel(), is(Level.ERROR));
+        org.hamcrest.MatcherAssert.assertThat(log.get(4).getLevel(), is(Level.ERROR));
+        org.hamcrest.MatcherAssert.assertThat(log.get(3).getLoggerName(), is("org.wso2.extension.siddhi.io" +
+                ".http.source.util.HttpTestUtil"));
         Thread.sleep(100);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         executionPlanRuntime.shutdown();
     }
-    /**
-     * Creating test for publishing events with https protocol with invalid cert pass.
-     * @throws Exception Interrupted exception
-     */
-    @Test
-    public void testHTTPSInputTransportInvalidCertpass() throws Exception {
-        logger.info(" Creating test for publishing events with https protocol with invalid cert pass.");
-        new HttpTestUtil().setCarbonHome();
-        masterConfigs.clear();
-        masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/conf/security/wso2carbon.jks");
-        masterConfigs.put("source.http.https.keystore,pass", "wso2carbon");
-        masterConfigs.put("source.http.https.cert.pass", "wso2carbon123");
-        receivedEventNameList = new ArrayList<>(2);
-        SiddhiManager siddhiManager = new SiddhiManager();
-        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs);
-        inMemoryConfigManager.generateConfigReader("source", "http");
-        siddhiManager.setConfigManager(inMemoryConfigManager);
-        siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
-        String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='https://localhost:9095/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
-                + "define stream inputStream (name string, age int, country string);";
-        String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
 
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
-            @Override
-            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timeStamp, inEvents, removeEvents);
-                for (Event event : inEvents) {
-                    receivedEventNameList.add(event.getData(0).toString());
-                }
-            }
-        });
-        executionPlanRuntime.start();
-        // publishing events
-        List<String> expected = new ArrayList<>(2);
-        String event1 =
-                "<events><event><name>John</name>" + "<age>100</age><country>Sri Lanka</country></event></events>";
-        String event2 = "<events><event><name>Mike</name>" + "<age>20</age><country>USA</country></event></events>";
-        try {
-            new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:9095/endpoints/RecPro", false,
-                    "text/plain");
-            new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:9095/endpoints/RecPro", false,
-                    "text/plain");
-        } catch (IllegalArgumentException e) {
-            e.getClass().getCanonicalName();
-        }
-        final TestAppender appender = new TestAppender();
-        final Logger logger = Logger.getRootLogger();
-        logger.addAppender(appender);
-        try {
-            Logger.getLogger(HttpsSourceTestCaseForSSL.class).error("Test");
-        } finally {
-            logger.removeAppender(appender);
-        }
-        final List<LoggingEvent> log = appender.getLog();
-        final LoggingEvent firstLogEntry = log.get(0);
-        org.hamcrest.MatcherAssert.assertThat(firstLogEntry.getLevel(), is(Level.ERROR));
-        org.hamcrest.MatcherAssert.assertThat(firstLogEntry.getMessage(), is("Test"));
-        org.hamcrest.MatcherAssert.assertThat(firstLogEntry.getLoggerName(), is("org.wso2.extension.siddhi.io" +
-                ".http.source.HttpsSourceTestCaseForSSL"));
-        Thread.sleep(100);
-        Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
-        executionPlanRuntime.shutdown();
-    }
-    class TestAppender extends AppenderSkeleton {
+//    /**
+//     * Creating test for publishing events with https protocol with invalid cert pass.
+//     *
+//     * @throws Exception Interrupted exception
+//     */
+//    @Test
+//    public void testHTTPSInputTransportInvalidCertPassword() throws Exception {
+//        final TestAppender appender = new TestAppender();
+//        final Logger logger = Logger.getRootLogger();
+//        logger.addAppender(appender);
+//        logger.info(" Creating test for publishing events with https protocol with invalid cert pass.");
+//        new HttpTestUtil().setCarbonHome();
+//        Map<String, String> masterConfigs = new HashMap<>();
+//        masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/resources/security/wso2carbon.jks");
+//        masterConfigs.put("source.http.https.keystore,password", "wso2carbon");
+//        masterConfigs.put("source.http.https.cert.password", "wso2carbon123");
+//        List<String> receivedEventNameList = new ArrayList<>(2);
+//        SiddhiManager siddhiManager = new SiddhiManager();
+//        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs);
+//        inMemoryConfigManager.generateConfigReader("source", "http");
+//        siddhiManager.setConfigManager(inMemoryConfigManager);
+//        siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
+//        String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), receiver.url='https://localhost:" +
+//                "8005/endpoints/RecPro' )"
+//                + "define stream inputStream (name string, age int, country string);";
+//        String query = ("@info(name = 'query') "
+//                + "from inputStream "
+//                + "select *  "
+//                + "insert into outputStream;"
+//                );
+//        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
+//                .createExecutionPlanRuntime(inStreamDefinition + query);
+//
+//        executionPlanRuntime.addCallback("query", new QueryCallback() {
+//            @Override
+//            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+//                EventPrinter.print(timeStamp, inEvents, removeEvents);
+//                for (Event event : inEvents) {
+//                    receivedEventNameList.add(event.getData(0).toString());
+//                }
+//            }
+//        });
+//        executionPlanRuntime.start();
+//        // publishing events
+//        List<String> expected = new ArrayList<>(2);
+//        String event1 = "<events>"
+//                            + "<event>"
+//                                + "<name>John</name>"
+//                                + "<age>100</age>"
+//                                + "<country>AUS</country>"
+//                            + "</event>"
+//                        + "</events>";
+//        String event2 = "<events>"
+//                            + "<event>"
+//                                + "<name>Mike</name>"
+//                                + "<age>20</age>"
+//                                + "<country>USA</country>"
+//                            + "</event>"
+//                        + "</events>";
+//        new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:8005/endpoints/RecPro", false,
+//                "text/plain");
+//        new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:8005/endpoints/RecPro", false,
+//                "text/plain");
+//        final List<LoggingEvent> log = appender.getLog();
+//        org.hamcrest.MatcherAssert.assertThat(log.get(3).getLevel(), is(Level.ERROR));
+//        org.hamcrest.MatcherAssert.assertThat(log.get(4).getLevel(), is(Level.ERROR));
+//        org.hamcrest.MatcherAssert.assertThat(log.get(3).getLoggerName(), is("org.wso2.extension.siddhi.io" +
+//                ".http.source.util.HttpTestUtil"));
+//        Thread.sleep(100);
+//        Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
+//        executionPlanRuntime.shutdown();
+//    }
+
+    private class TestAppender extends AppenderSkeleton {
         private final List<LoggingEvent> log = new ArrayList<>();
 
         @Override
@@ -318,5 +354,4 @@ public class HttpsSourceTestCaseForSSL {
             return new ArrayList<LoggingEvent>(log);
         }
     }
-
 }

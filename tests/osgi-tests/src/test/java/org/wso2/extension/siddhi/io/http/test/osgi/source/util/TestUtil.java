@@ -1,4 +1,4 @@
-package org.wso2.extension.siddhi.io.http.test.osgi.util;
+package org.wso2.extension.siddhi.io.http.test.osgi.source.util;
 
 import io.netty.handler.codec.http.HttpMethod;
 import org.wso2.carbon.kernel.Constants;

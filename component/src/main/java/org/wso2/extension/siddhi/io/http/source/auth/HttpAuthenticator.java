@@ -18,10 +18,12 @@
  */
 package org.wso2.extension.siddhi.io.http.source.auth;
 
+
 import org.wso2.carbon.messaging.CarbonCallback;
 import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.carbon.security.caas.api.ProxyCallbackHandler;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
+import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
@@ -44,11 +46,11 @@ public class HttpAuthenticator {
      */
     public static synchronized void authenticate(CarbonMessage carbonMessage, CarbonCallback carbonCallback) throws
             HttpSourceAdaptorRuntimeException {
-        if (carbonMessage.getHeaders().contains("Authorization")) {
+        if (carbonMessage.getHeaders().contains(HttpConstants.ATHORIZATION_HEADER)) {
             ProxyCallbackHandler callbackHandler = new ProxyCallbackHandler(carbonMessage);
             LoginContext loginContext;
             try {
-                loginContext = new LoginContext("CarbonSecurityConfig", callbackHandler);
+                loginContext = new LoginContext(HttpConstants.CARBON_SECURITY_CONFIGURATION, callbackHandler);
                 loginContext.login();
             } catch (LoginException e) {
                 throw new HttpSourceAdaptorRuntimeException("Username and password is not included when trying to " +

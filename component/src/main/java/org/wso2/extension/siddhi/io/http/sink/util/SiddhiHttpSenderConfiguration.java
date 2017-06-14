@@ -57,5 +57,4 @@ public class SiddhiHttpSenderConfiguration extends SenderConfiguration {
                         .getSSLConfigForSender(getCertPass(), getKeyStorePass(), getKeyStoreFile(),
                                 getTrustStoreFile(), getTrustStorePass(), getParameters()) : null;
     }
-
 }

@@ -34,18 +34,14 @@ import org.wso2.siddhi.extension.input.mapper.xml.XmlSourceMapper;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Test case for HTTPS protocol.
  */
-public class HttpCustomThreadpoolConfigTest {
-    private static final Logger logger = Logger
-            .getLogger(HttpCustomThreadpoolConfigTest.class);
-    private List<String> receivedEventNameList;
-    private Map<String, String> masterConfigs = new HashMap<>();
+public class HttpCustomThreadPoolConfigTest {
+    private static final Logger logger = Logger.getLogger(HttpCustomThreadPoolConfigTest.class);
+
     /**
      * Creating test for publishing events with XML mapping.
      * @throws Exception Interrupted exception
@@ -54,20 +50,25 @@ public class HttpCustomThreadpoolConfigTest {
     public void testCustomPoolConfig() throws Exception {
         logger.info("Creating test for publishing events with XML mapping.");
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
-        receivedEventNameList = new ArrayList<>(2);
+        List<String> receivedEventNameList = new ArrayList<>(2);
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         siddhiManager.setExtension("xml-input-mapper", TextSourceMapper.class);
-        String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
+        String inStreamDefinition = "@source(type='http', @map(type='xml'), "
                 + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "basic.auth.enabled='false',worker" +
-                ".count='8',server.bootstrap.boss.group.size='10',server.bootstrap.worker.group.size='10'" + ")"
+                ".count='8'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
-        String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
+        String query = (
+                "@info(name = 'query') "
+                        + "from inputStream "
+                        + "select *  "
+                        + "insert into outputStream;"
+                        );
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager
                 .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+        executionPlanRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -81,9 +82,20 @@ public class HttpCustomThreadpoolConfigTest {
         List<String> expected = new ArrayList<>(2);
         expected.add("John");
         expected.add("Mike");
-        String event1 =
-                "<events><event><name>John</name>" + "<age>100</age><country>Sri Lanka</country></event></events>";
-        String event2 = "<events><event><name>Mike</name>" + "<age>20</age><country>USA</country></event></events>";
+        String event1 = "<events>"
+                            + "<event>"
+                                + "<name>John</name>"
+                                + "<age>100</age>"
+                                + "<country>AUS</country>"
+                            + "</event>"
+                        + "</events>";
+        String event2 = "<events>"
+                            + "<event>"
+                                + "<name>Mike</name>"
+                                + "<age>20</age>"
+                                + "<country>USA</country>"
+                            + "</event>"
+                        + "</events>";
         new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro", false, "text/xml",
                 "POST");
         new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", false, "text/xml",
@@ -92,6 +104,4 @@ public class HttpCustomThreadpoolConfigTest {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         executionPlanRuntime.shutdown();
     }
-
-
 }

@@ -21,6 +21,7 @@ package org.wso2.extension.siddhi.io.http.sink;
 import com.sun.net.httpserver.Headers;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpServerListenerHandler;
 import org.wso2.siddhi.core.ExecutionPlanRuntime;
@@ -36,6 +37,26 @@ import java.util.LinkedList;
  */
 public class HttpSinkTestCase {
     private static final Logger log = Logger.getLogger(HttpSinkTestCase.class);
+    private String payload;
+    private String expected;
+
+    @BeforeTest
+    public void init() {
+        payload = "<events>"
+                    + "<event>"
+                        + "<symbol>WSO2</symbol>"
+                        + "<price>55.645</price>"
+                        + "<volume>100</volume>"
+                    + "</event>"
+                + "</events>";
+        expected = "<events>"
+                        + "<event>"
+                            + "<symbol>WSO2</symbol>"
+                            + "<price>55.645</price>"
+                            + "<volume>100</volume>"
+                        + "</event>"
+                    + "</events>\n";
+    }
 
     /**
      * Creating test for publishing events without Content-Type header include.
@@ -46,21 +67,26 @@ public class HttpSinkTestCase {
         log.info("Creating test for publishing events without Content-Type header include.");
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
-        String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);" +
-                "@sink(type='http'," + "publisher.url='http://localhost:8009'," + "method='{{method}}'," + "headers=" +
-                "'{{headers}}',"
+        String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
+                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
+                + "headers='{{headers}}',"
                 + "@map(type='xml', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
-        String query = ("@info(name = 'query1') " +
-                "from FooStream select message,method,headers insert into BarStream;");
+        String query = (
+                "@info(name = 'query') "
+                + "from FooStream "
+                + "select message,method,headers "
+                + "insert into BarStream;"
+                );
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
                 query);
         InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
         executionPlanRuntime.start();
-        HttpServerListenerHandler lst = new HttpServerListenerHandler(8009);
-        fooStream.send(new Object[]{"<events><event><symbol>WSO2</symbol>" +
-                "<price>55.645</price><volume>100</volume></event></events>", "GET", "Name:John#Age:23"});
-        while (!lst.getServerListner().iaMessageArrive()) {
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        lst.run();
+        fooStream.send(new Object[]{payload, "GET", "Name:John#Age:23"});
+        while (!lst.getServerListener().iaMessageArrive()) {
+            Thread.sleep(10);
         }
         ArrayList<String> headerName = new ArrayList<>();
         headerName.add("John");
@@ -68,16 +94,16 @@ public class HttpSinkTestCase {
         headerAge.add("23");
         ArrayList<String> headerContentType = new ArrayList<>();
         headerContentType.add("application/xml");
-        Headers headers = lst.getServerListner().getHeaders();
-        String eventData = lst.getServerListner().getData();
-        Assert.assertEquals("<events><event><symbol>WSO2</symbol>" +
-                        "<price>55.645</price><volume>100</volume></event></events>\n", eventData);
+        Headers headers = lst.getServerListener().getHeaders();
+        String eventData = lst.getServerListener().getData();
+        Assert.assertEquals(expected, eventData);
         Assert.assertEquals(headers.get("Name").toString(), headerName.toString());
         Assert.assertEquals(headers.get("Age").toString(), headerAge.toString());
         Assert.assertEquals(headers.get("Content-Type").toString(), headerContentType.toString());
         executionPlanRuntime.shutdown();
         lst.shutdown();
     }
+
     /**
      * Creating test for publishing events including Content-Type header at header list.
      * @throws Exception Interrupted exception
@@ -87,22 +113,25 @@ public class HttpSinkTestCase {
         log.info("Creating test for publishing events including Content-Type header at header list.");
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
-        String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);" +
-                "@sink(type='http'," + "publisher.url='http://localhost:9009'," + "method='{{method}}',"
+        String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
+                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
                 + "headers='{{headers}}',"
                 + "@map(type='xml', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
-        String query = ("@info(name = 'query1') " +
-                "from FooStream select message,method,headers insert into BarStream;");
+        String query = ("@info(name = 'query') "
+                + "from FooStream "
+                + "select message,method,headers "
+                + "insert into BarStream;"
+                );
         ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
                 query);
         InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
         executionPlanRuntime.start();
-        HttpServerListenerHandler lst = new HttpServerListenerHandler(9009);
-        fooStream.send(new Object[]{"<events><event><symbol>WSO2</symbol>" +
-                "<price>55.645</price><volume>100</volume></event></events>", "GET",
-                "Name:John#Age:23#Content-Type:text"});
-        while (!lst.getServerListner().iaMessageArrive()) {
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        lst.run();
+        fooStream.send(new Object[]{payload, "GET", "Name:John#Age:23#Content-Type:text"});
+        while (!lst.getServerListener().iaMessageArrive()) {
+            Thread.sleep(10);
         }
         ArrayList<String> headerName = new ArrayList<>();
         headerName.add("John");
@@ -110,10 +139,9 @@ public class HttpSinkTestCase {
         headerAge.add("23");
         ArrayList<String> headerContentType = new ArrayList<>();
         headerContentType.add("text");
-        Headers headers = lst.getServerListner().getHeaders();
-        String eventData = lst.getServerListner().getData();
-        Assert.assertEquals("<events><event><symbol>WSO2</symbol>" +
-                        "<price>55.645</price><volume>100</volume></event></events>\n", eventData);
+        Headers headers = lst.getServerListener().getHeaders();
+        String eventData = lst.getServerListener().getData();
+        Assert.assertEquals(expected, eventData);
         Assert.assertEquals(headers.get("Name").toString(), headerName.toString());
         Assert.assertEquals(headers.get("Age").toString(), headerAge.toString());
         Assert.assertEquals(headers.get("Content-Type").toString(), headerContentType.toString());

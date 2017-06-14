@@ -39,17 +39,16 @@ import javax.net.ssl.TrustManagerFactory;
 /**
  * Https test sever listener.
  */
-public class HttpsServerListnerHandler implements Runnable {
-    private static final Logger logger = Logger.getLogger(HttpsServerListnerHandler.class);
+public class HttpsServerListenerHandler implements Runnable {
+    private static final Logger logger = Logger.getLogger(HttpsServerListenerHandler.class);
     private HttpServerListener sl;
     private int port;
     private KeyStore ks;
     private  HttpsServer server;;
-    public HttpsServerListnerHandler(int port) throws KeyStoreException {
+    public HttpsServerListenerHandler(int port) throws KeyStoreException {
         this.sl = new HttpServerListener();
         this.port = port;
         ks = KeyStore.getInstance("JKS");
-        run();
     }
 
     public HttpServerListener getServerListner() {
@@ -60,7 +59,7 @@ public class HttpsServerListnerHandler implements Runnable {
     public void run() {
         try {
             char[] passphrase = "wso2carbon".toCharArray();
-            ks.load(new FileInputStream(System.getProperty("carbon.home") + "/conf/security/wso2carbon.jks"),
+            ks.load(new FileInputStream(System.getProperty("carbon.home") + "/resources/security/wso2carbon.jks"),
                     passphrase);
             KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
             kmf.init(ks, passphrase);
@@ -76,11 +75,9 @@ public class HttpsServerListnerHandler implements Runnable {
                     // get the default parameters
                     SSLParameters sslparams = c.getDefaultSSLParameters();
                     params.setSSLParameters(sslparams);
-                    // statement above could throw IAE if any params invalid.
-
                 }
             });
-            server.createContext("/", sl);
+            server.createContext("/abc", sl);
             server.start();
         } catch (IOException | CertificateException | NoSuchAlgorithmException | UnrecoverableKeyException |
                 KeyStoreException | KeyManagementException e) {

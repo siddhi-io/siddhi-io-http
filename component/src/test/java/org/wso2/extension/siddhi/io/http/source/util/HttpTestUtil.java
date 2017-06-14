@@ -51,7 +51,7 @@ public class HttpTestUtil {
 
     public void setCarbonHome() {
         Path carbonHome = Paths.get("");
-        carbonHome = Paths.get(carbonHome.toString(), "src", "test", "resources");
+        carbonHome = Paths.get(carbonHome.toString(), "src", "test");
         System.setProperty(Constants.CARBON_HOME, carbonHome.toString());
         logger.info("Carbon Home Absolute path set to: " + carbonHome.toAbsolutePath());
     }
@@ -131,14 +131,14 @@ public class HttpTestUtil {
     public void httpsPublishEvent(String event, String baseURI, Boolean auth, String mapping)
             throws KeyManagementException {
         try {
-            System.setProperty("javax.net.ssl.trustStore", System.getProperty("carbon.home") + "/conf/security/" +
+            System.setProperty("javax.net.ssl.trustStore", System.getProperty("carbon.home") + "/resources/security/" +
                     "client-truststore.jks");
             System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
             Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
             char[] passphrase = "wso2carbon".toCharArray(); //password
             KeyStore keystore = KeyStore.getInstance("JKS");
-            keystore.load(new FileInputStream(System.getProperty("carbon.home") + "/conf/security/client-trusts" +
-                    "tore.jks"), passphrase); //path
+            keystore.load(new FileInputStream(System.getProperty("carbon.home") + "/resources/security/" +
+                    "client-truststore.jks"), passphrase); //path
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(keystore);
             SSLContext context = SSLContext.getInstance("TLS");
