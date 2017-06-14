@@ -51,7 +51,6 @@ import java.util.concurrent.ConcurrentHashMap;
                         "following format `http://0.0.0.0:9763/<streamName>`" +
                         "If the user want to use SSL the url should be given in following format " +
                         "`https://localhost:8080/<streamName>`", type = {DataType.STRING}, optional = true),
-                // TODO: 6/13/17 default values
                 @Parameter(name = "basic.auth.enabled", description = "If this is set to `true`, " +
                         "basic authentication is enabled for incoming events, and the credentials with which each " +
                         "event is sent are verified to ensure that the user is authorized to access the service. " +
@@ -204,34 +203,29 @@ public class HttpSource extends Source {
 
     @Override
     public void disconnect() {
-        if (!HttpConnectorRegistry.getInstance().clearServerConnector(listenerUrl
-        )) {
-            log.info("Server has already stopped for url " + listenerUrl + " in " + sourceId);
-        } else {
-            log.info("Server has stop for url " + listenerUrl + " in " + sourceId);
-        }
+       HttpConnectorRegistry.getInstance().clearServerConnector(listenerUrl);
     }
 
     @Override
     public void destroy() {
-        if (!HttpConnectorRegistry.getInstance().clearServerConnector(listenerUrl)) {
-            log.info("Server has already stopped for url " + listenerUrl + " in " + sourceId);
-        } else {
-            log.info("Server has stop for url " + listenerUrl + " in " + sourceId);
-        }
+        HttpConnectorRegistry.getInstance().clearServerConnector(listenerUrl);
     }
 
     @Override
     public void pause() {
-        if (registeredSourceListenersMap.get(HttpSourceUtil.getSourceListenerKey(listenerUrl)).isRunning()) {
-            registeredSourceListenersMap.get(HttpSourceUtil.getSourceListenerKey(listenerUrl)).pause();
+        HttpSourceListener httpSourceListener = registeredSourceListenersMap.get(HttpSourceUtil.getSourceListenerKey
+                (listenerUrl));
+        if (httpSourceListener.isRunning()) {
+            httpSourceListener.pause();
         }
     }
 
     @Override
     public void resume() {
-        if (registeredSourceListenersMap.get(HttpSourceUtil.getSourceListenerKey(listenerUrl)).isPaused()) {
-            registeredSourceListenersMap.get(HttpSourceUtil.getSourceListenerKey(listenerUrl)).resume();
+        HttpSourceListener httpSourceListener = registeredSourceListenersMap.get(HttpSourceUtil.getSourceListenerKey
+                (listenerUrl));
+        if (httpSourceListener.isPaused()) {
+            httpSourceListener.resume();
         }
     }
 

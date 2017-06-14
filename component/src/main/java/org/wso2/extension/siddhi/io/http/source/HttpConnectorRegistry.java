@@ -101,9 +101,9 @@ class HttpConnectorRegistry {
      * destroy the already started listener.
      *
      * @param listenerUrl the listener full url.
-     * @return return the boolean value to indicate destroying of new server connector is successful or not.
      */
-    boolean clearServerConnector(String listenerUrl) {
+    void clearServerConnector(String listenerUrl) {
+        Boolean isContainedAnotherDependentListener = false;
         HttpSourceListener httpSourceListener = HttpSource.getRegisteredSourceListenersMap().get
                 (HttpSourceUtil.getSourceListenerKey(listenerUrl));
         if (httpSourceListener != null) {
@@ -114,20 +114,20 @@ class HttpConnectorRegistry {
             if (registeredServerConnectors.containsKey(port)) {
                 for (String url : HttpSource.getRegisteredSourceListenersMap().keySet()) {
                     if (url.contains(port)) {
-                        return false;
+                        isContainedAnotherDependentListener = true;
                     }
                 }
-                ServerConnector serverConnector = registeredServerConnectors.remove(port);
-                if (serverConnector != null) {
-                    try {
-                        serverConnector.stop();
-                    } catch (ServerConnectorException e) {
-                        log.error("Failed to shutdown server connector for port " + port);
+                if (!isContainedAnotherDependentListener) {
+                    ServerConnector serverConnector = registeredServerConnectors.remove(port);
+                    if (serverConnector != null) {
+                        try {
+                            serverConnector.stop();
+                        } catch (ServerConnectorException e) {
+                            log.error("Failed to shutdown server connector for port " + port);
+                        }
                     }
                 }
             }
-            return true;
         }
-        return false;
     }
 }

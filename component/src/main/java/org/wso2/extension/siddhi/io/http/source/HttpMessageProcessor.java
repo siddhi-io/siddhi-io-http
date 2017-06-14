@@ -40,9 +40,7 @@ public class HttpMessageProcessor implements CarbonMessageProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpMessageProcessor.class);
 
-    HttpMessageProcessor() {
-        logger.info("HTTP Message processor has deployed successfully.");
-    }
+    HttpMessageProcessor() { }
 
     @Override
     public boolean receive(CarbonMessage carbonMessage, CarbonCallback carbonCallback) throws IOException {
