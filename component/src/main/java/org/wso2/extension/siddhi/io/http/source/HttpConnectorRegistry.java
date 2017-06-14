@@ -122,6 +122,7 @@ class HttpConnectorRegistry {
                     if (serverConnector != null) {
                         try {
                             serverConnector.stop();
+                            log.info("Server connector for port '" + port + "' has successfully shutdown.");
                         } catch (ServerConnectorException e) {
                             log.error("Failed to shutdown server connector for port " + port);
                         }
