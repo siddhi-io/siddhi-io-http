@@ -96,7 +96,7 @@ public class HttpsSinkTestCase {
         executionPlanRuntime.start();
         HttpsServerListenerHandler lst = new HttpsServerListenerHandler(8009);
         lst.run();
-        fooStream.send(new Object[]{payload, "POST", "Name:John#Age:23"});
+        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListner().iaMessageArrive()) {
             Thread.sleep(10);
         }
@@ -134,7 +134,7 @@ public class HttpsSinkTestCase {
         executionPlanRuntime.start();
         HttpsServerListenerHandler lst = new HttpsServerListenerHandler(8009);
         lst.run();
-        fooStream.send(new Object[]{payload, "POST", "Name:John#Age:23"});
+        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListner().iaMessageArrive()) {
             Thread.sleep(10);
         }

@@ -38,6 +38,8 @@ Features Supported
           latency.metrics.enabled: true
           server.bootstrap.socket.timeout: 15
           client.bootstrap.socket.timeout: 15
+          server.bootstrap.worker.group.size: 8
+          server.bootstrap.boss.group.size: 4
           default.host: 0.0.0.0
           default.port: 9763
           default.scheme: http
@@ -57,6 +59,8 @@ Features Supported
           latency.metrics.enabled: true
           server.bootstrap.socket.timeout: 15
           client.bootstrap.socket.timeout: 15
+          server.bootstrap.worker.group.size: 8
+          server.bootstrap.boss.group.size: 4
           default.host: 0.0.0.0
           default.port: 9763
           default.scheme: http

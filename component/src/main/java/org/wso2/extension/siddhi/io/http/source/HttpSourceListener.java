@@ -78,7 +78,7 @@ class HttpSourceListener {
             }
         }
         try {
-            if (!HttpSource.getRegisteredSourceListenersMap().containsKey(url.toString())) {
+            if (!HttpConnectorRegistry.getInstance().isContainedListener(url.toString())) {
                 throw new HttpSourceAdaptorRuntimeException("Resource not found.", carbonCallback, 404);
             } else {
                 if (isAuthenticated) {

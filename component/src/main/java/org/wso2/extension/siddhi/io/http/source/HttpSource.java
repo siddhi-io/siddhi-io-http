@@ -18,7 +18,6 @@
  */
 package org.wso2.extension.siddhi.io.http.source;
 
-import org.apache.log4j.Logger;
 import org.wso2.carbon.transport.http.netty.config.ListenerConfiguration;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
@@ -29,7 +28,6 @@ import org.wso2.siddhi.annotation.SystemParameter;
 import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.ExecutionPlanContext;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
-import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
 import org.wso2.siddhi.core.stream.input.source.Source;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.siddhi.core.util.config.ConfigReader;
@@ -37,7 +35,6 @@ import org.wso2.siddhi.core.util.transport.OptionHolder;
 
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Http source for receive the http and https request.
@@ -154,77 +151,64 @@ import java.util.concurrent.ConcurrentHashMap;
         }
 )
 public class HttpSource extends Source {
-    private static final Map<String, HttpSourceListener> registeredSourceListenersMap =
-            new ConcurrentHashMap<>();
-    private static final Logger log = Logger.getLogger(HttpSource.class);
     private String sourceId;
     private String listenerUrl;
     private ListenerConfiguration listenerConfig;
-    private ConfigReader configReader;
 
     @Override
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
                      ConfigReader configReader, ExecutionPlanContext executionPlanContext) {
-        sourceId = sourceEventListener.getStreamDefinition().toString();
+        this.sourceId = sourceEventListener.getStreamDefinition().toString();
         String defaultURL = configReader.readConfig(HttpConstants.DEFAULT_PROTOCOL, HttpConstants
                 .DEFAULT_PROTOCOL_VALUE) + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
                 readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
                 HttpConstants.PORT_HOST_SEPARATOR + configReader.readConfig(HttpConstants.
                 DEFAULT_PORT, HttpConstants.DEFAULT_PORT_VALUE) + HttpConstants.
                 PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
-        listenerUrl = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_URL, defaultURL);
+        this.listenerUrl = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_URL, defaultURL);
         Boolean isAuth = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants.ISAUTH,
                 HttpConstants.EMPTY_ISAUTH).toLowerCase(Locale.ENGLISH));
         String workerThread = optionHolder.validateAndGetStaticValue(HttpConstants.WORKER_COUNT, HttpConstants
                 .DEFAULT_WORKER_COUNT);
-        listenerConfig = new HttpSourceUtil().setListenerProperty(listenerUrl, configReader);
-        this.configReader = configReader;
-        synchronized (registeredSourceListenersMap) {
-            if (registeredSourceListenersMap.containsKey(HttpSourceUtil.getSourceListenerKey(listenerUrl))) {
-                throw new ExecutionPlanCreationException("Listener URL " + listenerUrl + " already connected in "
-                        + sourceId);
-            } else {
-                registeredSourceListenersMap.put(HttpSourceUtil.getSourceListenerKey(listenerUrl),
-                        new HttpSourceListener(Integer.valueOf(workerThread),
-                                listenerUrl, isAuth, sourceEventListener));
-            }
-        }
-    }
-
-    static Map<String, HttpSourceListener> getRegisteredSourceListenersMap() {
-        return registeredSourceListenersMap;
+        this.listenerConfig = new HttpSourceUtil().setListenerProperty(this.listenerUrl, configReader);
+        HttpConnectorRegistry.getInstance().initHttpServerConnector(configReader);
+        HttpConnectorRegistry.getInstance().registerSourceListener(sourceEventListener, this.listenerUrl,
+                Integer.valueOf(workerThread), isAuth);
     }
 
     @Override
     public void connect() throws ConnectionUnavailableException {
-        HttpConnectorRegistry.getInstance().createServerConnector(listenerUrl, sourceId, listenerConfig,
-                configReader);
+        HttpConnectorRegistry.getInstance()
+                .registerServerConnector(this.listenerUrl, this.sourceId, this.listenerConfig);
     }
 
     @Override
     public void disconnect() {
-       HttpConnectorRegistry.getInstance().clearServerConnector(listenerUrl);
+        HttpConnectorRegistry.getInstance().unregisterServerConnector(this.listenerUrl);
     }
 
     @Override
     public void destroy() {
-        HttpConnectorRegistry.getInstance().clearServerConnector(listenerUrl);
+        HttpConnectorRegistry.getInstance().unregisterSourceListener(this.listenerUrl);
+        HttpConnectorRegistry.getInstance().stopHttpServerConnectorController();
     }
 
     @Override
     public void pause() {
-        HttpSourceListener httpSourceListener = registeredSourceListenersMap.get(HttpSourceUtil.getSourceListenerKey
+        HttpSourceListener httpSourceListener = HttpConnectorRegistry.getInstance()
+                .getSourceListenersMap().get(HttpSourceUtil.getSourceListenerKey
                 (listenerUrl));
-        if (httpSourceListener.isRunning()) {
+        if ((httpSourceListener != null) && (httpSourceListener.isRunning())) {
             httpSourceListener.pause();
         }
     }
 
     @Override
     public void resume() {
-        HttpSourceListener httpSourceListener = registeredSourceListenersMap.get(HttpSourceUtil.getSourceListenerKey
+        HttpSourceListener httpSourceListener = HttpConnectorRegistry.getInstance()
+                .getSourceListenersMap().get(HttpSourceUtil.getSourceListenerKey
                 (listenerUrl));
-        if (httpSourceListener.isPaused()) {
+        if ((httpSourceListener != null) && (httpSourceListener.isPaused())) {
             httpSourceListener.resume();
         }
     }
