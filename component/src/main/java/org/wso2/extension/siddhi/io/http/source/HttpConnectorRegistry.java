@@ -49,6 +49,7 @@ class HttpConnectorRegistry {
 
     /**
      * Get the source listener map.
+     *
      * @return the source listener map
      */
     Map<String, HttpSourceListener> getSourceListenersMap() {
@@ -72,6 +73,7 @@ class HttpConnectorRegistry {
 
     /**
      * Register new source listener.
+     *
      * @param sourceEventListener the source event listener.
      * @param listenerUrl the listener url.
      * @param workerThread the worker thread count of siddhi level thread pool executor.
@@ -91,6 +93,7 @@ class HttpConnectorRegistry {
 
     /**
      * Unregister the source listener.
+     *
      * @param listenerUrl the listener url
      */
     void unregisterSourceListener(String listenerUrl) {
@@ -104,6 +107,7 @@ class HttpConnectorRegistry {
 
     /**
      * Register the new server connector.
+     *
      * @param listenerUrl the listener url
      */
     void unregisterServerConnector(String listenerUrl) {
@@ -134,10 +138,11 @@ class HttpConnectorRegistry {
 
     /**
      * Check whether that particular source listener is there.
+     *
      * @param key unique key (port-context) of the source listener
      * @return contain or not
      */
-    boolean isContainedListener(String key) {
+    boolean isListenerContain(String key) {
         return this.sourceListenersMap.containsKey(key);
     }
 
