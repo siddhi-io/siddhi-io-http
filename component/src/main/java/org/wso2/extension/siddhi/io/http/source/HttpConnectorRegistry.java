@@ -97,11 +97,13 @@ class HttpConnectorRegistry {
      * @param listenerUrl the listener url
      */
     void unregisterSourceListener(String listenerUrl) {
-        String key = HttpSourceUtil.getSourceListenerKey(listenerUrl);
-        HttpSourceListener httpSourceListener = this.sourceListenersMap.get(key);
-        if (httpSourceListener != null) {
-            httpSourceListener.disconnect();
-            this.sourceListenersMap.remove(key);
+        synchronized (this.sourceListenersMap) {
+            String key = HttpSourceUtil.getSourceListenerKey(listenerUrl);
+            HttpSourceListener httpSourceListener = this.sourceListenersMap.get(key);
+            if (httpSourceListener != null) {
+                httpSourceListener.disconnect();
+                this.sourceListenersMap.remove(key);
+            }
         }
     }
 
