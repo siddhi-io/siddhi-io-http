@@ -27,10 +27,10 @@ import org.wso2.carbon.transport.http.netty.listener.HTTPServerConnector;
 import org.wso2.carbon.transport.http.netty.listener.ServerConnectorController;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
+import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
+import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -38,26 +38,90 @@ import java.util.concurrent.ConcurrentHashMap;
  * {@code HttpConnectorRegistry} The code is responsible for maintaining the all active server connectors.
  */
 class HttpConnectorRegistry {
-    private static final Logger log = Logger.getLogger(HttpConnectorRegistry.class);
     private static HttpConnectorRegistry instance = new HttpConnectorRegistry();
-    private final Map<String, HTTPServerConnector> registeredServerConnectors = new ConcurrentHashMap<>();
+    private final Logger log = Logger.getLogger(HttpConnectorRegistry.class);
+    private final Map<String, HTTPServerConnector> serverConnectorMap = new ConcurrentHashMap<>();
+    private final Map<String, HttpSourceListener> sourceListenersMap = new ConcurrentHashMap<>();
     private HttpMessageProcessor httpMessageProcessor = new HttpMessageProcessor();
+    private ServerConnectorController serverConnectorController;
 
-    private HttpConnectorRegistry() {
-    }
+    private HttpConnectorRegistry() {}
 
+    /**
+     * Get HttpConnectorRegistry instance.
+     *
+     * @return HttpConnectorRegistry instance
+     */
     static HttpConnectorRegistry getInstance() {
         return instance;
     }
 
     /**
-     * Returns the server connector instance associated with the given protocol.
+     * Get the source listener map.
      *
-     * @param baseURL the identifier of the server connector.
-     * @return server connector instance.
+     * @return the source listener map
      */
-    HTTPServerConnector getServerConnector(String baseURL) {
-        return registeredServerConnectors.get(HttpSourceUtil.getPort(baseURL));
+    Map<String, HttpSourceListener> getSourceListenersMap() {
+        return this.sourceListenersMap;
+    }
+
+    /**
+     * Register new source listener.
+     *
+     * @param sourceEventListener the source event listener.
+     * @param listenerUrl the listener url.
+     * @param workerThread the worker thread count of siddhi level thread pool executor.
+     * @param isAuth the authentication is required for source listener.
+     */
+    void registerSourceListener(SourceEventListener sourceEventListener, String listenerUrl, int
+            workerThread, Boolean isAuth) {
+        synchronized (this) {
+            String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl);
+            if (this.sourceListenersMap.putIfAbsent(listenerKey,
+                    new HttpSourceListener(workerThread, listenerUrl, isAuth, sourceEventListener)) != null) {
+                throw new ExecutionPlanCreationException("Listener URL " + listenerUrl + " already connected.");
+            }
+        }
+    }
+
+    /**
+     * Unregister the source listener.
+     *
+     * @param listenerUrl the listener url
+     */
+    void unregisterSourceListener(String listenerUrl) {
+        String key = HttpSourceUtil.getSourceListenerKey(listenerUrl);
+        HttpSourceListener httpSourceListener = this.sourceListenersMap.remove(key);
+        if (httpSourceListener != null) {
+            httpSourceListener.disconnect();
+        }
+    }
+
+    /**
+     * Initialize and start the server connector controller.
+     *
+     * @param sourceConfigReader the siddhi source config reader.
+     */
+    void initHttpServerConnector(ConfigReader sourceConfigReader) {
+        if (this.serverConnectorController == null) {
+            TransportsConfiguration configuration = new TransportsConfiguration();
+            configuration.setTransportProperties(new HttpSourceUtil().getTransportConfigurations
+                    (sourceConfigReader));
+            this.serverConnectorController = new ServerConnectorController(configuration);
+            this.serverConnectorController.start();
+        }
+    }
+
+    /**
+     * Stop server connector controller.
+     */
+    void stopHttpServerConnectorController() {
+        synchronized (this) {
+            if (this.sourceListenersMap.isEmpty()) {
+                this.serverConnectorController.stop();
+                this.serverConnectorController = null;
+            }
+        }
     }
 
     /**
@@ -67,58 +131,46 @@ class HttpConnectorRegistry {
      * @param sourceId                         source unique Id .
      * @param listenerConfig                   set of listeners configurations.
      */
-    void createServerConnector(String listenerUrl, String sourceId,
-                               ListenerConfiguration listenerConfig, ConfigReader
-                                       sourceConfigReader) {
+    void registerServerConnector(String listenerUrl, String sourceId,
+                                 ListenerConfiguration listenerConfig) {
         String port = HttpSourceUtil.getPort(listenerUrl);
-        synchronized (registeredServerConnectors) {
-            if (!registeredServerConnectors.containsKey(port)) {
-                TransportsConfiguration configuration = new TransportsConfiguration();
-                configuration.setTransportProperties(new HttpSourceUtil().getTransportConfigurations
-                        (sourceConfigReader));
-                configuration.setListenerConfigurations(new HashSet<>(Collections.singletonList(listenerConfig)));
-                ServerConnectorController serverConnectorController = new ServerConnectorController(configuration);
-                serverConnectorController.start();
+        synchronized (this) {
+            if (!this.serverConnectorMap.containsKey(port)) {
                 HTTPServerConnector httpServerConnector = new HTTPServerConnector(port);
                 httpServerConnector.setMessageProcessor(this.httpMessageProcessor);
+                httpServerConnector.setServerConnectorController(this.serverConnectorController);
                 httpServerConnector.setListenerConfiguration(listenerConfig);
-                httpServerConnector.setServerConnectorController(serverConnectorController);
                 try {
                     httpServerConnector.init();
                     httpServerConnector.start();
-                    registeredServerConnectors.put(port, httpServerConnector);
+                    this.serverConnectorMap.put(port, httpServerConnector);
                     log.info("Http server connector is started on port '" + port + "'");
                 } catch (ServerConnectorException e) {
                     throw new HttpSourceAdaptorRuntimeException("Failed to initialized server for URL " + listenerUrl +
                             " in " + sourceId + "connection refuse in " + sourceId, e);
                 }
             }
-
         }
     }
 
     /**
-     * destroy the already started listener.
+     * Register the new server connector.
      *
-     * @param listenerUrl the listener full url.
+     * @param listenerUrl the listener url
      */
-    void clearServerConnector(String listenerUrl) {
+    void unregisterServerConnector(String listenerUrl) {
         Boolean isContainedAnotherDependentListener = false;
-        HttpSourceListener httpSourceListener = HttpSource.getRegisteredSourceListenersMap().get
-                (HttpSourceUtil.getSourceListenerKey(listenerUrl));
-        if (httpSourceListener != null) {
-            httpSourceListener.disconnect();
-            HttpSource.getRegisteredSourceListenersMap().remove(HttpSourceUtil
-                    .getSourceListenerKey(listenerUrl));
-            String port = HttpSourceUtil.getPort(listenerUrl);
-            if (registeredServerConnectors.containsKey(port)) {
-                for (String url : HttpSource.getRegisteredSourceListenersMap().keySet()) {
-                    if (url.contains(port)) {
+        String port = HttpSourceUtil.getPort(listenerUrl);
+        String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl);
+        synchronized (this) {
+            if (this.serverConnectorMap.containsKey(port)) {
+                for (String url : this.sourceListenersMap.keySet()) {
+                    if ((url.contains(port) && !(url.contains(listenerKey)))) {
                         isContainedAnotherDependentListener = true;
                     }
                 }
                 if (!isContainedAnotherDependentListener) {
-                    ServerConnector serverConnector = registeredServerConnectors.remove(port);
+                    ServerConnector serverConnector = this.serverConnectorMap.remove(port);
                     if (serverConnector != null) {
                         try {
                             serverConnector.stop();

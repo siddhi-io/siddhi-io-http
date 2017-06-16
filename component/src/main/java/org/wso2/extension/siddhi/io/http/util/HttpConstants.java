@@ -42,8 +42,8 @@ public class HttpConstants {
 
     //util values
     public static final String PROTOCOL_ID = "http";
-    public static final String HEADER_SPLITER = "#";
-    public static final String HEADER_NAME_VALUE_SPLITER = ":";
+    public static final String HEADER_SPLITTER = "','";
+    public static final String HEADER_NAME_VALUE_SPLITTER = ":";
     public static final String HTTP_SINK_ID = "http sink";
     public static final String METHOD_DEFAULT = "POST";
     public static final String PROTOCOL = "PROTOCOL";

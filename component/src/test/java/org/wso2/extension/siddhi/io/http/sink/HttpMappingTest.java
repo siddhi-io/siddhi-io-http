@@ -64,7 +64,7 @@ public class HttpMappingTest {
                                 + "<volume>100</volume>"
                             + "</event>"
                         + "</events>";
-        fooStream.send(new Object[]{payload, "GET", "Name:John#Age:23"});
+        fooStream.send(new Object[]{payload, "GET", "'Name:John','Age:23'"});
         while (!lst.getServerListener().iaMessageArrive()) {
             Thread.sleep(10);
         }
@@ -111,7 +111,7 @@ public class HttpMappingTest {
                         + "\"price\":55.6,"
                         + "\"volume\":100"
                         + "}}"
-                , "GET", "Name:John#Age:23"});
+                , "GET", "Name:John,Age:23"});
         while (!lst.getServerListener().iaMessageArrive()) {
             Thread.sleep(10);
         }
@@ -149,7 +149,7 @@ public class HttpMappingTest {
         executionPlanRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[]{"WSO2,55.6,100", "GET", "Name:John#Age:23"});
+        fooStream.send(new Object[]{"WSO2,55.6,100", "GET", "'Name:John','Age:23'"});
         while (!lst.getServerListener().iaMessageArrive()) {
             Thread.sleep(10);
         }

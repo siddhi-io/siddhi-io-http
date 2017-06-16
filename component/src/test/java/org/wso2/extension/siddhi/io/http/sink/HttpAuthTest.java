@@ -68,7 +68,7 @@ public class HttpAuthTest {
                                 + "<volume>100</volume>"
                             + "</event>"
                         + "</events>";
-        fooStream.send(new Object[]{payload, "GET", "Name:John#Age:23"});
+        fooStream.send(new Object[]{payload, "GET", "'Name:John','Age:23','Country:USA'"});
         while (!lst.getServerListener().iaMessageArrive()) {
             Thread.sleep(10);
         }
@@ -119,7 +119,7 @@ public class HttpAuthTest {
                                 + "<volume>100</volume>"
                             + "</event>"
                         + "</events>";
-        fooStream.send(new Object[]{payload, "GET", "Name:John#Age:23"});
+        fooStream.send(new Object[]{payload, "GET", "'Name:John','Age:23'"});
         while (!lst.getServerListener().iaMessageArrive()) {
             Thread.sleep(10);
         }
@@ -167,7 +167,7 @@ public class HttpAuthTest {
                                 + "<volume>100</volume>"
                             + "</event>"
                         + "</events>";
-        fooStream.send(new Object[]{payload, "GET", "Name:John#Age:23"});
+        fooStream.send(new Object[]{payload, "GET", "Name:John,Age:23"});
         while (!lst.getServerListener().iaMessageArrive()) {
             Thread.sleep(10);
         }
@@ -214,7 +214,7 @@ public class HttpAuthTest {
                                 + "<volume>100</volume>"
                             + "</event>"
                         + "</events>";
-        fooStream.send(new Object[]{payload, "GET", "Name:John#Age:23"});
+        fooStream.send(new Object[]{payload, "GET", "'Name:John','Age:23'"});
         while (!lst.getServerListener().iaMessageArrive()) {
             Thread.sleep(10);
         }

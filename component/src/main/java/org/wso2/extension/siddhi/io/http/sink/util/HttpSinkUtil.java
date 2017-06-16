@@ -78,21 +78,23 @@ public class HttpSinkUtil {
 
     /**
      * Method is responsible of to convert string of headers to list of headers.
-     *
+     *  Example header format : 'name1:value1','name2:value2'
      * @param headers string of headers list.
      * @return list of headers.
      */
     public List<Header> getHeaders(String headers) {
+        headers = headers.trim();
+        headers = headers.substring(1, headers.length() - 1);
         List<Header> headersList = new ArrayList<>();
         if (!"".equals(headers)) {
-            String[] spam = headers.split(HttpConstants.HEADER_SPLITER);
+            String[] spam = headers.split(HttpConstants.HEADER_SPLITTER);
             for (String aSpam : spam) {
-                String[] header = aSpam.split(HttpConstants.HEADER_NAME_VALUE_SPLITER, 2);
+                String[] header = aSpam.split(HttpConstants.HEADER_NAME_VALUE_SPLITTER, 2);
                 if (header.length > 1) {
                     headersList.add(new Header(header[0], header[1]));
                 } else {
                     throw new HttpSinkAdaptorRuntimeException(
-                            "Invalid header format. Please include as key1:value1,key2:value2,..");
+                            "Invalid header format. Please include as 'key1:value1','key2:value2',..");
                 }
             }
         }

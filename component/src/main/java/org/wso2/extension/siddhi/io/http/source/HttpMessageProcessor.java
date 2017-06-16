@@ -51,14 +51,13 @@ public class HttpMessageProcessor implements CarbonMessageProcessor {
                     if (HttpConstants.HTTP_METHOD_POST.equalsIgnoreCase((String)
                             carbonMessage.getProperty((HttpConstants.HTTP_METHOD)))) {
                         //get the required source listener
-                        StringBuilder url = new StringBuilder(String.valueOf(carbonMessage.getProperty
+                        StringBuilder sourceListenerKey = new StringBuilder(String.valueOf(carbonMessage.getProperty
                                 (HttpConstants.LISTENER_PORT))).append(HttpConstants.PORT_CONTEXT_KEY_SEPARATOR)
                                 .append(carbonMessage.getProperty(HttpConstants.TO));
-                        HttpSourceListener sourceListener = HttpSource.getRegisteredSourceListenersMap().get(url
-                                .toString());
+                        HttpSourceListener sourceListener = HttpConnectorRegistry.getInstance()
+                                .getSourceListenersMap().get(sourceListenerKey.toString());
                         if (sourceListener != null) {
-                            HttpSource.getRegisteredSourceListenersMap().get(url.toString()).send(carbonMessage,
-                                    carbonCallback, url);
+                            sourceListener.send(carbonMessage, carbonCallback, sourceListenerKey);
                         } else {
                             HttpSourceUtil.handleCallback("Resource not found ", carbonCallback, 404);
                         }
