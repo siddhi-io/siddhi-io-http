@@ -78,7 +78,7 @@ public class HttpSinkUtil {
 
     /**
      * Method is responsible of to convert string of headers to list of headers.
-     *
+     *  Example header format : 'name1:value1','name2:value2'
      * @param headers string of headers list.
      * @return list of headers.
      */

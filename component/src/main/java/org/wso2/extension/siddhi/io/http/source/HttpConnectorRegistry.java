@@ -48,12 +48,53 @@ class HttpConnectorRegistry {
     private HttpConnectorRegistry() {}
 
     /**
+     * Get HttpConnectorRegistry instance.
+     *
+     * @return HttpConnectorRegistry instance
+     */
+    static HttpConnectorRegistry getInstance() {
+        return instance;
+    }
+
+    /**
      * Get the source listener map.
      *
      * @return the source listener map
      */
     Map<String, HttpSourceListener> getSourceListenersMap() {
         return this.sourceListenersMap;
+    }
+
+    /**
+     * Register new source listener.
+     *
+     * @param sourceEventListener the source event listener.
+     * @param listenerUrl the listener url.
+     * @param workerThread the worker thread count of siddhi level thread pool executor.
+     * @param isAuth the authentication is required for source listener.
+     */
+    void registerSourceListener(SourceEventListener sourceEventListener, String listenerUrl, int
+            workerThread, Boolean isAuth) {
+        synchronized (this) {
+            String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl);
+            if (this.sourceListenersMap.putIfAbsent(listenerKey,
+                    new HttpSourceListener(workerThread, listenerUrl, isAuth, sourceEventListener)) != null) {
+                throw new ExecutionPlanCreationException("Listener URL " + listenerUrl + " already connected.");
+            }
+        }
+    }
+
+    /**
+     * Unregister the source listener.
+     *
+     * @param listenerUrl the listener url
+     */
+    void unregisterSourceListener(String listenerUrl) {
+        String key = HttpSourceUtil.getSourceListenerKey(listenerUrl);
+        HttpSourceListener httpSourceListener = this.sourceListenersMap.remove(key);
+        if (httpSourceListener != null) {
+            httpSourceListener.disconnect();
+        }
     }
 
     /**
@@ -72,111 +113,15 @@ class HttpConnectorRegistry {
     }
 
     /**
-     * Register new source listener.
-     *
-     * @param sourceEventListener the source event listener.
-     * @param listenerUrl the listener url.
-     * @param workerThread the worker thread count of siddhi level thread pool executor.
-     * @param isAuth the authentication is required for source listener.
-     */
-    void registerSourceListener(SourceEventListener sourceEventListener, String listenerUrl, int
-            workerThread, Boolean isAuth) {
-        synchronized (this.sourceListenersMap) {
-            if (this.sourceListenersMap.get(HttpSourceUtil.getSourceListenerKey(listenerUrl)) != null) {
-                throw new ExecutionPlanCreationException("Listener URL " + listenerUrl + " already connected.");
-            } else {
-                this.sourceListenersMap.put(HttpSourceUtil.getSourceListenerKey(listenerUrl),
-                        new HttpSourceListener(workerThread, listenerUrl, isAuth, sourceEventListener));
-            }
-        }
-    }
-
-    /**
-     * Unregister the source listener.
-     *
-     * @param listenerUrl the listener url
-     */
-    void unregisterSourceListener(String listenerUrl) {
-        synchronized (this.sourceListenersMap) {
-            String key = HttpSourceUtil.getSourceListenerKey(listenerUrl);
-            HttpSourceListener httpSourceListener = this.sourceListenersMap.get(key);
-            if (httpSourceListener != null) {
-                httpSourceListener.disconnect();
-                this.sourceListenersMap.remove(key);
-            }
-        }
-    }
-
-    /**
-     * Register the new server connector.
-     *
-     * @param listenerUrl the listener url
-     */
-    void unregisterServerConnector(String listenerUrl) {
-        Boolean isContainedAnotherDependentListener = false;
-        String port = HttpSourceUtil.getPort(listenerUrl);
-        String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl);
-        synchronized (this.serverConnectorMap) {
-            if (this.serverConnectorMap.containsKey(port)) {
-                    for (String url : this.sourceListenersMap.keySet()) {
-                        if ((url.contains(port) && !(url.contains(listenerKey)))) {
-                            isContainedAnotherDependentListener = true;
-                        }
-                    }
-                if (!isContainedAnotherDependentListener) {
-                    ServerConnector serverConnector = this.serverConnectorMap.remove(port);
-                    if (serverConnector != null) {
-                        try {
-                            serverConnector.stop();
-                            log.info("Server connector for port '" + port + "' has successfully shutdown.");
-                        } catch (ServerConnectorException e) {
-                            log.error("Failed to shutdown server connector for port " + port);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Check whether that particular source listener is there.
-     *
-     * @param key unique key (port-context) of the source listener
-     * @return contain or not
-     */
-    boolean isListenerContain(String key) {
-        return this.sourceListenersMap.containsKey(key);
-    }
-
-    /**
      * Stop server connector controller.
      */
     void stopHttpServerConnectorController() {
-        synchronized (this.sourceListenersMap) {
-            if (this.sourceListenersMap.size() == 0) {
+        synchronized (this) {
+            if (this.sourceListenersMap.isEmpty()) {
                 this.serverConnectorController.stop();
+                this.serverConnectorController = null;
             }
-            this.serverConnectorController = null;
         }
-    }
-
-    /**
-     * Get HttpConnectorRegistry instance.
-     *
-     * @return HttpConnectorRegistry instance
-     */
-    static HttpConnectorRegistry getInstance() {
-        return instance;
-    }
-
-    /**
-     * Returns the server connector instance associated with the given protocol.
-     *
-     * @param baseURL the identifier of the server connector.
-     * @return server connector instance.
-     */
-    HTTPServerConnector getServerConnector(String baseURL) {
-        return this.serverConnectorMap.get(HttpSourceUtil.getPort(baseURL));
     }
 
     /**
@@ -189,7 +134,7 @@ class HttpConnectorRegistry {
     void registerServerConnector(String listenerUrl, String sourceId,
                                  ListenerConfiguration listenerConfig) {
         String port = HttpSourceUtil.getPort(listenerUrl);
-        synchronized (this.serverConnectorMap) {
+        synchronized (this) {
             if (!this.serverConnectorMap.containsKey(port)) {
                 HTTPServerConnector httpServerConnector = new HTTPServerConnector(port);
                 httpServerConnector.setMessageProcessor(this.httpMessageProcessor);
@@ -203,6 +148,37 @@ class HttpConnectorRegistry {
                 } catch (ServerConnectorException e) {
                     throw new HttpSourceAdaptorRuntimeException("Failed to initialized server for URL " + listenerUrl +
                             " in " + sourceId + "connection refuse in " + sourceId, e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Register the new server connector.
+     *
+     * @param listenerUrl the listener url
+     */
+    void unregisterServerConnector(String listenerUrl) {
+        Boolean isContainedAnotherDependentListener = false;
+        String port = HttpSourceUtil.getPort(listenerUrl);
+        String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl);
+        synchronized (this) {
+            if (this.serverConnectorMap.containsKey(port)) {
+                for (String url : this.sourceListenersMap.keySet()) {
+                    if ((url.contains(port) && !(url.contains(listenerKey)))) {
+                        isContainedAnotherDependentListener = true;
+                    }
+                }
+                if (!isContainedAnotherDependentListener) {
+                    ServerConnector serverConnector = this.serverConnectorMap.remove(port);
+                    if (serverConnector != null) {
+                        try {
+                            serverConnector.stop();
+                            log.info("Server connector for port '" + port + "' has successfully shutdown.");
+                        } catch (ServerConnectorException e) {
+                            log.error("Failed to shutdown server connector for port " + port);
+                        }
+                    }
                 }
             }
         }

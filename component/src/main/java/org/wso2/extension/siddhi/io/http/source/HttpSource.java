@@ -154,6 +154,7 @@ public class HttpSource extends Source {
     private String sourceId;
     private String listenerUrl;
     private ListenerConfiguration listenerConfig;
+    private HttpConnectorRegistry httpConnectorRegistry;
 
     @Override
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
@@ -171,33 +172,32 @@ public class HttpSource extends Source {
         String workerThread = optionHolder.validateAndGetStaticValue(HttpConstants.WORKER_COUNT, HttpConstants
                 .DEFAULT_WORKER_COUNT);
         this.listenerConfig = new HttpSourceUtil().setListenerProperty(this.listenerUrl, configReader);
-        HttpConnectorRegistry.getInstance().initHttpServerConnector(configReader);
-        HttpConnectorRegistry.getInstance().registerSourceListener(sourceEventListener, this.listenerUrl,
+        this.httpConnectorRegistry = HttpConnectorRegistry.getInstance();
+        this.httpConnectorRegistry.initHttpServerConnector(configReader);
+        this.httpConnectorRegistry.registerSourceListener(sourceEventListener, this.listenerUrl,
                 Integer.valueOf(workerThread), isAuth);
     }
 
     @Override
     public void connect() throws ConnectionUnavailableException {
-        HttpConnectorRegistry.getInstance()
-                .registerServerConnector(this.listenerUrl, this.sourceId, this.listenerConfig);
+        this.httpConnectorRegistry.registerServerConnector(this.listenerUrl, this.sourceId, this.listenerConfig);
     }
 
     @Override
     public void disconnect() {
-        HttpConnectorRegistry.getInstance().unregisterServerConnector(this.listenerUrl);
+        this.httpConnectorRegistry.unregisterServerConnector(this.listenerUrl);
     }
 
     @Override
     public void destroy() {
-        HttpConnectorRegistry.getInstance().unregisterSourceListener(this.listenerUrl);
-        HttpConnectorRegistry.getInstance().stopHttpServerConnectorController();
+        this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl);
+        this.httpConnectorRegistry.stopHttpServerConnectorController();
     }
 
     @Override
     public void pause() {
-        HttpSourceListener httpSourceListener = HttpConnectorRegistry.getInstance()
-                .getSourceListenersMap().get(HttpSourceUtil.getSourceListenerKey
-                (listenerUrl));
+        HttpSourceListener httpSourceListener = this.httpConnectorRegistry.getSourceListenersMap().get(HttpSourceUtil
+                .getSourceListenerKey(listenerUrl));
         if ((httpSourceListener != null) && (httpSourceListener.isRunning())) {
             httpSourceListener.pause();
         }
@@ -205,9 +205,8 @@ public class HttpSource extends Source {
 
     @Override
     public void resume() {
-        HttpSourceListener httpSourceListener = HttpConnectorRegistry.getInstance()
-                .getSourceListenersMap().get(HttpSourceUtil.getSourceListenerKey
-                (listenerUrl));
+        HttpSourceListener httpSourceListener = this.httpConnectorRegistry.getSourceListenersMap()
+                .get(HttpSourceUtil.getSourceListenerKey(listenerUrl));
         if ((httpSourceListener != null) && (httpSourceListener.isPaused())) {
             httpSourceListener.resume();
         }
