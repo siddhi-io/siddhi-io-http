@@ -25,13 +25,12 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <modules>
-        <module>tests</module>
+        <!--<module>tests</module>-->
         <module>component</module>
     </modules>
     <groupId>org.wso2.extension.siddhi.io.http</groupId>
     <artifactId>siddhi-io-http-parent</artifactId>
     <version>1.0.1-SNAPSHOT</version>
-
     <name>WSO2 Siddhi IO Extension - HTTP IO Aggregator Pom</name>
     <url>http://wso2.org</url>
     <profiles>
@@ -42,7 +41,7 @@
             </activation>
             <modules>
                 <module>component</module>
-                <module>tests</module>
+                <!--<module>tests</module>-->
             </modules>
         </profile>
     </profiles>
@@ -307,7 +306,7 @@
         <carbon.logging.version>5.1.0-m2</carbon.logging.version>
         <testng.version>6.11</testng.version>
         <maven.shadeplugin.version>2.4.1</maven.shadeplugin.version>
-        <siddhi.version>4.0.0-M5</siddhi.version>
+        <siddhi.version>4.0.0-M7</siddhi.version>
         <org.jacoco.ant.version>0.7.5.201505241946</org.jacoco.ant.version>
         <ow2.jta.spec.version>1.0.12</ow2.jta.spec.version>
         <slf4j.version>1.7.12</slf4j.version>

@@ -23,11 +23,11 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.sink.exception.HttpSinkAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpServerListenerHandler;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.extension.output.mapper.xml.XMLSinkMapper;
-import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 /**
  * test cases for basic authentication.
@@ -55,10 +55,10 @@ public class HttpAuthTest {
                         + "select message,method,headers "
                         + "insert into BarStream;"
                         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition
                 + query);
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-        executionPlanRuntime.start();
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
         String payload = "<events>"
@@ -81,7 +81,7 @@ public class HttpAuthTest {
                             + "</event>"
                         + "</events>\n";
         Assert.assertEquals(eventData, expected);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
 
@@ -106,10 +106,10 @@ public class HttpAuthTest {
                 + "select message,method,headers "
                 + "insert into BarStream;"
                         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
                 query);
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-        executionPlanRuntime.start();
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
         String payload = "<events>"
@@ -132,7 +132,7 @@ public class HttpAuthTest {
                             + "</event>"
                         + "</events>\n";
         Assert.assertEquals(eventData, expected);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
 
@@ -154,10 +154,10 @@ public class HttpAuthTest {
                 + "Define stream BarStream (message String,method String,headers String);";
         String query = ("@info(name = 'query') " +
                 "from FooStream select message,method,headers insert into BarStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
                 query);
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-        executionPlanRuntime.start();
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
         String payload = "<events>"
@@ -180,7 +180,7 @@ public class HttpAuthTest {
                                 + "</event>"
                             + "</events>\n";
         Assert.assertEquals(eventData, expected);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
 
@@ -189,7 +189,7 @@ public class HttpAuthTest {
      *
      * @throws Exception Interrupted exception
      */
-    @Test(expectedExceptions = {ExecutionPlanValidationException.class})
+    @Test(expectedExceptions = {SiddhiAppValidationException.class})
     public void testHTTPWithoutURL() throws Exception {
         log.info("Creating test for publishing events without URL.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -201,10 +201,10 @@ public class HttpAuthTest {
                 + "Define stream BarStream (message String,method String,headers String);";
         String query = ("@info(name = 'query') " +
                 "from FooStream select message,method,headers insert into BarStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition
                 + query);
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-        executionPlanRuntime.start();
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
         String payload = "<events>"
@@ -227,7 +227,7 @@ public class HttpAuthTest {
                             + "</event>"
                         + "</events>\n";
         Assert.assertEquals(eventData, expected);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
 

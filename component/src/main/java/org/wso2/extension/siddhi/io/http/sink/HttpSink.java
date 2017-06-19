@@ -37,7 +37,7 @@ import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.SystemParameter;
 import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.stream.output.sink.Sink;
 import org.wso2.siddhi.core.util.config.ConfigReader;
@@ -79,7 +79,8 @@ import java.util.Set;
                                 "password to enable basic authentication. If one of the parameter is not given " +
                                 "by user then an error is logged in the CLI." ,
                         type = {DataType.STRING},
-                        optional = true),
+                        optional = true,
+                        defaultValue = " "),
                 @Parameter(
                         name = "basic.auth.password",
                         description = "The password to include in the authentication header of the basic " +
@@ -87,23 +88,21 @@ import java.util.Set;
                                 "password to enable basic authentication. If one of the parameter is not given " +
                                 "by user then an error is logged in the CLI.",
                         type = {DataType.STRING},
-                        optional = true),
+                        optional = true, defaultValue = " "),
                 @Parameter(
                         name = "client.truststore.path",
                         description = "The file path to the location of the truststore of the client that sends " +
                                 "the HTTP events through 'https' protocol. A custom client-truststore can be " +
-                                "specified if required. If custom truststore is not specified and the protocol " +
-                                "of URL is 'https' then the system uses the default client-trustore in the " +
-                                "`${carbon.home}/resources/security` directory.",
+                                "specified if required.",
                         type = {DataType.STRING},
-                        optional = true),
+                        optional = true, defaultValue = "${carbon.home}/resources/security/client-truststore.jks"),
                 @Parameter(
                         name = "client.truststore.password",
                         description = "The password for the client-truststore. A custom password can be specified " +
                                 "if required. If no custom password is specified and the protocol of URL is 'https' " +
-                                "then, the system uses 'wso2carbon' as the default password.",
+                                "then, the system uses default password.",
                         type = {DataType.STRING},
-                        optional = true),
+                        optional = true, defaultValue = "wso2carbon"),
                 @Parameter(
                         name = "headers",
                         description = "The headers that should be included as a HTTP request headers. There can be " +
@@ -117,14 +116,14 @@ import java.util.Set;
                                 " as content-length header.",
                         type = {DataType.STRING},
                         optional = true,
-                        dynamic = true),
+                        dynamic = true, defaultValue = " "),
                 @Parameter(
                         name = "method",
                         description = "For HTTP events, HTTP_METHOD header should be included as a request header." +
                                 " If the parameter is null then system uses 'POST' as a default header.",
                         type = {DataType.STRING},
                         optional = true,
-                        dynamic = true)
+                        dynamic = true, defaultValue = "POST")
         },
         examples = {
                 @Example(syntax =
@@ -253,7 +252,7 @@ public class HttpSink extends Sink {
 
     @Override
     protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
-                        ConfigReader sinkConfigReader, ExecutionPlanContext executionPlanContext) {
+                        ConfigReader sinkConfigReader, SiddhiAppContext siddhiAppContext) {
         this.streamID = outputStreamDefinition.toString();
         this.mapType = outputStreamDefinition.getAnnotations().get(0).getAnnotations().get(0).getElements().get(0)
                 .getValue();

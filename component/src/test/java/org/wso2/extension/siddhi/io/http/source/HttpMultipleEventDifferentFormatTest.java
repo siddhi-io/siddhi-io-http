@@ -20,7 +20,7 @@ package org.wso2.extension.siddhi.io.http.source;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.source.util.HttpTestUtil;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
@@ -101,11 +101,11 @@ public class HttpMultipleEventDifferentFormatTest {
                         + "insert into outputStreamD;"
                          );
 
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinitionA + inStreamDefinitionB +
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager
+                .createSiddhiAppRuntime(inStreamDefinitionA + inStreamDefinitionB +
                         inStreamDefinitionC + inStreamDefinitionD + queryA + queryB + queryC + queryD);
 
-        executionPlanRuntime.addCallback("queryA", new QueryCallback() {
+        siddhiAppRuntime.addCallback("queryA", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -114,7 +114,7 @@ public class HttpMultipleEventDifferentFormatTest {
                 }
             }
         });
-        executionPlanRuntime.addCallback("queryC", new QueryCallback() {
+        siddhiAppRuntime.addCallback("queryC", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -123,7 +123,7 @@ public class HttpMultipleEventDifferentFormatTest {
                 }
             }
         });
-        executionPlanRuntime.addCallback("queryB", new QueryCallback() {
+        siddhiAppRuntime.addCallback("queryB", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -132,7 +132,7 @@ public class HttpMultipleEventDifferentFormatTest {
                 }
             }
         });
-        executionPlanRuntime.addCallback("queryD", new QueryCallback() {
+        siddhiAppRuntime.addCallback("queryD", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -141,7 +141,7 @@ public class HttpMultipleEventDifferentFormatTest {
                 }
             }
         });
-        executionPlanRuntime.start();
+        siddhiAppRuntime.start();
         // publishing events
         List<String> expectedA = new ArrayList<>(2);
         expectedA.add("JohnA");
@@ -238,6 +238,6 @@ public class HttpMultipleEventDifferentFormatTest {
                 "application/xml", "POST");
         Thread.sleep(100);
         Assert.assertEquals(receivedEventNameListD.toString(), expectedD.toString());
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
     }
 }

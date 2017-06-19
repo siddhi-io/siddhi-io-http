@@ -26,7 +26,7 @@ import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.SystemParameter;
 import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.core.config.ExecutionPlanContext;
+import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.stream.input.source.Source;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
@@ -43,22 +43,32 @@ import java.util.Map;
         "HTTPS in format such as `text`, `XML` and `JSON`. If required, you can enable basic authentication to " +
         "ensure that events are received only from users who are authorized to access the service.",
         parameters = {
-                @Parameter(name = "receiver.url", description = "The URL to which the events should be received. " +
+                @Parameter(name = "receiver.url",
+                        description = "The URL to which the events should be received. " +
                         "User can provide any valid url and if the url is not provided the system will use the " +
                         "following format `http://0.0.0.0:9763/<streamName>`" +
                         "If the user want to use SSL the url should be given in following format " +
-                        "`https://localhost:8080/<streamName>`", type = {DataType.STRING}, optional = true),
-                @Parameter(name = "basic.auth.enabled", description = "If this is set to `true`, " +
+                        "`https://localhost:8080/<streamName>`",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "http://0.0.0.0:9763/<streamName>"),
+                @Parameter(name = "basic.auth.enabled",
+                        description = "If this is set to `true`, " +
                         "basic authentication is enabled for incoming events, and the credentials with which each " +
                         "event is sent are verified to ensure that the user is authorized to access the service. " +
                         "If basic authentication fails, the event is not authenticated and an " +
                         "authentication error is logged in the CLI. By default this values 'false' ",
-                        type = {DataType.STRING}, optional = true),
-                @Parameter(name = "worker.count", description = "The number of active worker threads to serve the " +
+                        type = {DataType.STRING},
+                        optional = true ,
+                        defaultValue = "false"),
+                @Parameter(name = "worker.count",
+                        description = "The number of active worker threads to serve the " +
                         "incoming events. The value is 1 by default. This will ensure that the events are directed " +
                         "to the event stream in the same order in which they arrive. By increasing this value " +
                         "the performance might increase at the cost of loosing event ordering.",
-                        type = {DataType.STRING}, optional = true)
+                        type = {DataType.STRING},
+                        optional = true ,
+                        defaultValue = "1")
         },
         examples = {
                 @Example(syntax = "@source(type='http', receiver.url='http://localhost:9055/endpoints/RecPro', " +
@@ -155,10 +165,13 @@ public class HttpSource extends Source {
     private String listenerUrl;
     private ListenerConfiguration listenerConfig;
     private HttpConnectorRegistry httpConnectorRegistry;
+    private Boolean isAuth;
+    private String workerThread;
+    private SourceEventListener sourceEventListener;
 
     @Override
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
-                     ConfigReader configReader, ExecutionPlanContext executionPlanContext) {
+                     ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
         this.sourceId = sourceEventListener.getStreamDefinition().toString();
         String defaultURL = configReader.readConfig(HttpConstants.DEFAULT_PROTOCOL, HttpConstants
                 .DEFAULT_PROTOCOL_VALUE) + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
@@ -167,30 +180,31 @@ public class HttpSource extends Source {
                 DEFAULT_PORT, HttpConstants.DEFAULT_PORT_VALUE) + HttpConstants.
                 PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
         this.listenerUrl = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_URL, defaultURL);
-        Boolean isAuth = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants.ISAUTH,
+        this.isAuth = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants.ISAUTH,
                 HttpConstants.EMPTY_ISAUTH).toLowerCase(Locale.ENGLISH));
-        String workerThread = optionHolder.validateAndGetStaticValue(HttpConstants.WORKER_COUNT, HttpConstants
+        this.workerThread = optionHolder.validateAndGetStaticValue(HttpConstants.WORKER_COUNT, HttpConstants
                 .DEFAULT_WORKER_COUNT);
         this.listenerConfig = new HttpSourceUtil().setListenerProperty(this.listenerUrl, configReader);
         this.httpConnectorRegistry = HttpConnectorRegistry.getInstance();
         this.httpConnectorRegistry.initHttpServerConnector(configReader);
-        this.httpConnectorRegistry.registerSourceListener(sourceEventListener, this.listenerUrl,
-                Integer.valueOf(workerThread), isAuth);
+        this.sourceEventListener = sourceEventListener;
     }
 
     @Override
     public void connect() throws ConnectionUnavailableException {
         this.httpConnectorRegistry.registerServerConnector(this.listenerUrl, this.sourceId, this.listenerConfig);
+        this.httpConnectorRegistry.registerSourceListener(sourceEventListener, this.listenerUrl,
+                Integer.valueOf(workerThread), isAuth);
     }
 
     @Override
     public void disconnect() {
+        this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl);
         this.httpConnectorRegistry.unregisterServerConnector(this.listenerUrl);
     }
 
     @Override
     public void destroy() {
-        this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl);
         this.httpConnectorRegistry.stopHttpServerConnectorController();
     }
 

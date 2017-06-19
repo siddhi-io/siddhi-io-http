@@ -45,7 +45,9 @@ public class HttpMessageProcessor implements CarbonMessageProcessor {
     @Override
     public boolean receive(CarbonMessage carbonMessage, CarbonCallback carbonCallback) throws IOException {
       //Check the channel type is http
-        if (HttpConstants.PROTOCOL_ID.equals(carbonMessage.getProperty(HttpConstants.PROTOCOL))) {
+        if (HttpConstants.PROTOCOL_ID.equals(carbonMessage.getProperty(HttpConstants.PROTOCOL)) &&
+                HttpConnectorRegistry.getInstance().getServerConnectorMap().containsKey(String.valueOf(carbonMessage
+                        .getProperty(HttpConstants.LISTENER_PORT)))) {
                 //Check the message is a response or direct message
             if (!Constants.DIRECTION_RESPONSE.equals(carbonMessage.getProperty(Constants.DIRECTION))) {
                     if (HttpConstants.HTTP_METHOD_POST.equalsIgnoreCase((String)

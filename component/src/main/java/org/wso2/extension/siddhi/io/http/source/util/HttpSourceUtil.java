@@ -27,7 +27,7 @@ import org.wso2.carbon.transport.http.netty.config.ListenerConfiguration;
 import org.wso2.carbon.transport.http.netty.config.TransportProperty;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
-import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 
 import java.net.MalformedURLException;
@@ -98,7 +98,7 @@ public class HttpSourceUtil {
         try {
             aURL = new URL(listenerUrl);
         } catch (MalformedURLException e) {
-            throw new ExecutionPlanCreationException("ListenerUrl is not in a proper format ", e);
+            throw new SiddhiAppCreationException("ListenerUrl is not in a proper format ", e);
         }
         return String.valueOf(aURL.getPort()) + HttpConstants.PORT_CONTEXT_KEY_SEPARATOR + aURL.getPath();
     }
@@ -113,7 +113,7 @@ public class HttpSourceUtil {
         try {
             aURL = new URL(listenerUrl);
         } catch (MalformedURLException e) {
-            throw new ExecutionPlanCreationException("ListenerUrl is not in a proper format ", e);
+            throw new SiddhiAppCreationException("ListenerUrl is not in a proper format ", e);
         }
         return String.valueOf(aURL.getPort());
     }

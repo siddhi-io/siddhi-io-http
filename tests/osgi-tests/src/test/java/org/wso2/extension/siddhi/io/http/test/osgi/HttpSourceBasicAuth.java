@@ -29,7 +29,7 @@ import org.wso2.carbon.container.CarbonContainerFactory;
 import org.wso2.carbon.container.options.CarbonDistributionOption;
 import org.wso2.carbon.kernel.utils.CarbonServerInfo;
 import org.wso2.extension.siddhi.io.http.test.osgi.source.util.TestUtil;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
@@ -144,9 +144,9 @@ public class HttpSourceBasicAuth {
                 + "receiver.url='http://localhost:8009/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager
+                .createSiddhiAppRuntime(inStreamDefinition + query);
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -155,7 +155,7 @@ public class HttpSourceBasicAuth {
                 }
             }
         });
-        executionPlanRuntime.start();
+        siddhiAppRuntime.start();
         // publishing events
         List<String> expected = new ArrayList<>(2);
         expected.add("John");
@@ -183,7 +183,7 @@ public class HttpSourceBasicAuth {
         Thread.sleep(200);
         logger.info(receivedEventNameList);
         Assert.assertEquals(receivedEventNameList, expected);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
     }
 
     @Test
@@ -199,9 +199,9 @@ public class HttpSourceBasicAuth {
                 + "receiver.url='http://localhost:8009/endpoints/RecPro', " + "basic.auth.enabled='true'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query') " + "from inputStream " + "select *  " + "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.addCallback("query", new QueryCallback() {
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager
+                .createSiddhiAppRuntime(inStreamDefinition + query);
+        siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -210,7 +210,7 @@ public class HttpSourceBasicAuth {
                 }
             }
         });
-        executionPlanRuntime.start();
+        siddhiAppRuntime.start();
         // publishing events
         List<String> expected = new ArrayList<>(2);
         expected.add("John");
@@ -238,7 +238,7 @@ public class HttpSourceBasicAuth {
         Thread.sleep(200);
         logger.info(receivedEventNameList);
         Assert.assertEquals(receivedEventNameList, expected);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
     }
 
     @Test
@@ -253,9 +253,9 @@ public class HttpSourceBasicAuth {
                 + "receiver.url='http://localhost:8009/endpoints/RecPro', " + "basic.auth.enabled='true'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.addCallback("query1", new QueryCallback() {
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager
+                .createSiddhiAppRuntime(inStreamDefinition + query);
+        siddhiAppRuntime.addCallback("query1", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -264,7 +264,7 @@ public class HttpSourceBasicAuth {
                 }
             }
         });
-        executionPlanRuntime.start();
+        siddhiAppRuntime.start();
         // publishing events
         List<String> expected = new ArrayList<>();
         String event1 =
@@ -287,6 +287,6 @@ public class HttpSourceBasicAuth {
         new TestUtil().httpPublishEventAuthIncorrect(event2, baseURI, true, "text/xml");
         Thread.sleep(100);
         Assert.assertEquals(receivedEventNameList, expected);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
     }
 }

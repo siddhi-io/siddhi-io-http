@@ -27,7 +27,7 @@ import org.wso2.carbon.transport.http.netty.listener.HTTPServerConnector;
 import org.wso2.carbon.transport.http.netty.listener.ServerConnectorController;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
-import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 
@@ -66,6 +66,15 @@ class HttpConnectorRegistry {
     }
 
     /**
+     * Get the Server Connector Map.
+     *
+     * @return ServerConnectorMap
+     */
+    Map<String, HTTPServerConnector> getServerConnectorMap() {
+        return serverConnectorMap;
+    }
+
+    /**
      * Register new source listener.
      *
      * @param sourceEventListener the source event listener.
@@ -77,9 +86,10 @@ class HttpConnectorRegistry {
             workerThread, Boolean isAuth) {
         synchronized (this) {
             String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl);
-            if (this.sourceListenersMap.putIfAbsent(listenerKey,
-                    new HttpSourceListener(workerThread, listenerUrl, isAuth, sourceEventListener)) != null) {
-                throw new ExecutionPlanCreationException("Listener URL " + listenerUrl + " already connected.");
+            HttpSourceListener httpSourceListener = this.sourceListenersMap.putIfAbsent(listenerKey,
+                    new HttpSourceListener(workerThread, listenerUrl, isAuth, sourceEventListener));
+            if (httpSourceListener != null) {
+                throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected.");
             }
         }
     }
@@ -117,7 +127,7 @@ class HttpConnectorRegistry {
      */
     void stopHttpServerConnectorController() {
         synchronized (this) {
-            if (this.sourceListenersMap.isEmpty()) {
+            if ((this.sourceListenersMap.isEmpty()) && (serverConnectorController != null)) {
                 this.serverConnectorController.stop();
                 this.serverConnectorController = null;
             }

@@ -25,7 +25,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpServerListener;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpServerListenerHandler;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.extension.output.mapper.xml.XMLSinkMapper;
@@ -75,13 +75,13 @@ public class HttpMultipleEventSink {
                 + "select message,method,headers "
                 + "insert into BarStreamB;"
         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition1 +
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition1 +
                 inStreamDefinition2 + query1 + query2);
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStreamA");
-        InputHandler fooStream2 = executionPlanRuntime.getInputHandler("FooStreamB");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStreamA");
+        InputHandler fooStream2 = siddhiAppRuntime.getInputHandler("FooStreamB");
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        executionPlanRuntime.start();
+        siddhiAppRuntime.start();
         String event1 = "<events>"
                             + "<event>"
                                 + "<symbol>WSO2</symbol>"
@@ -100,17 +100,14 @@ public class HttpMultipleEventSink {
         fooStream2.send(new Object[]{event2, "GET", "'Name:John','Age:23'"});
         Thread.sleep(1000);
         final List<LoggingEvent> log = appender.getLog();
-        ArrayList<String> expected = new ArrayList<>();
-        expected.add("Event Arrived: " + event1 + "\n");
-        expected.add("Event Arrived: " + event2 + "\n");
-        if (log.size() > 0) {
-            Assert.assertEquals(true, expected.contains(log.get(0).getMessage().toString()));
+        List<String> logMessages = new ArrayList<>();
+        for (LoggingEvent logEvent : log) {
+            logMessages.add(logEvent.getMessage().toString());
         }
-        if (log.size() > 1) {
-            Assert.assertEquals(true, expected.contains(log.get(1).getMessage().toString()));
-        }
+        Assert.assertEquals(logMessages.contains("Event Arrived: " + event1 + "\n"), true);
+        Assert.assertEquals(logMessages.contains("Event Arrived: " + event2 + "\n"), true);
         Thread.sleep(500);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
 
