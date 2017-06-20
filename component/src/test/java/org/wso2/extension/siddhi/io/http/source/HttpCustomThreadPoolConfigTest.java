@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.source.util.HttpTestUtil;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
@@ -57,8 +57,8 @@ public class HttpCustomThreadPoolConfigTest {
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         siddhiManager.setExtension("xml-input-mapper", TextSourceMapper.class);
         String inStreamDefinition = "@source(type='http', @map(type='xml'), "
-                + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "basic.auth.enabled='false',worker" +
-                ".count='8'" + ")"
+                + "receiver.url='http://localhost:8005/endpoints/RecPro', basic.auth.enabled='false',worker" +
+                ".count='8')"
                 + "define stream inputStream (name string, age int, country string);";
         String query = (
                 "@info(name = 'query') "
@@ -66,9 +66,9 @@ public class HttpCustomThreadPoolConfigTest {
                         + "select *  "
                         + "insert into outputStream;"
                         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.addCallback("query", new QueryCallback() {
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager
+                .createSiddhiAppRuntime(inStreamDefinition + query);
+        siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -77,7 +77,7 @@ public class HttpCustomThreadPoolConfigTest {
                 }
             }
         });
-        executionPlanRuntime.start();
+        siddhiAppRuntime.start();
         // publishing events
         List<String> expected = new ArrayList<>(2);
         expected.add("John");
@@ -102,6 +102,6 @@ public class HttpCustomThreadPoolConfigTest {
                 "POST");
         Thread.sleep(100);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
     }
 }

@@ -23,7 +23,7 @@ import org.apache.log4j.spi.LoggingEvent;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.source.util.HttpTestUtil;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
@@ -34,15 +34,15 @@ import org.wso2.siddhi.extension.input.mapper.xml.XmlSourceMapper;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
-import static org.hamcrest.CoreMatchers.is;
 
 /**
  * Basic test cases for http source functions.
  */
 public class HttpBasicTests {
-    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(HttpBasicTests.class);
+    private static final org.apache.log4j.Logger logger = org.apache.log4j
+            .Logger.getLogger(HttpBasicTests.class);
 
     /**
      * Creating test for publishing events without URL.
@@ -64,10 +64,10 @@ public class HttpBasicTests {
                 + "select *  "
                 + "insert into outputStream;"
                         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager
+                .createSiddhiAppRuntime(inStreamDefinition + query);
 
-        executionPlanRuntime.addCallback("query", new QueryCallback() {
+        siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -76,7 +76,7 @@ public class HttpBasicTests {
                 }
             }
         });
-        executionPlanRuntime.start();
+        siddhiAppRuntime.start();
         // publishing events
         List<String> expected = new ArrayList<>(2);
         expected.add("John");
@@ -101,14 +101,14 @@ public class HttpBasicTests {
                 "inputStream");
         Thread.sleep(100);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
     }
 
     /**
      * Creating test for publishing events from PUT method.
      * @throws Exception Interrupted exception
      */
-    @Test(expectedExceptions = {Exception.class})
+    @Test
     public void testHTTPInputTransportPutMethod() throws Exception {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
@@ -125,9 +125,9 @@ public class HttpBasicTests {
                 "from inputStream "
                 + "select *  "
                 + "insert into outputStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.addCallback("query", new QueryCallback() {
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager
+                .createSiddhiAppRuntime(inStreamDefinition + query);
+        siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -136,7 +136,7 @@ public class HttpBasicTests {
                 }
             }
         });
-        executionPlanRuntime.start();
+        siddhiAppRuntime.start();
         // publishing events
         List<String> expected = new ArrayList<>(2);
         String event1 = "<events>"
@@ -158,25 +158,131 @@ public class HttpBasicTests {
         new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", false, "" +
                 "text/xml", "PUT");
         final List<LoggingEvent> log = appender.getLog();
-        org.hamcrest.MatcherAssert.assertThat(log.get(2).getMessage(), is("Event response code 400"));
-        org.hamcrest.MatcherAssert.assertThat(log.get(4).getMessage(), is("Event response code 400"));
+        List<String> logMessages = new ArrayList<>();
+        for (LoggingEvent logEvent : log) {
+            logMessages.add(String.valueOf(logEvent.getMessage()));
+        }
+        Assert.assertEquals(logMessages.contains("Event response code 400"), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "Event response code 400"), 2);
         Thread.sleep(100);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
+    }
+
+    /**
+     * Creating test for publishing events with XML mapping.
+     * @throws Exception Interrupted exception
+     */
+    @Test
+    public void testMultipleListenersSameURL() throws Exception {
+        logger.info("Creating test for same url in different execution plain.");
+        final TestAppender appender = new TestAppender();
+        final Logger logger = Logger.getRootLogger();
+        logger.addAppender(appender);
+        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8008));
+        List<String> receivedEventNameList = new ArrayList<>(2);
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+        SiddhiManager siddhiManager1 = new SiddhiManager();
+        SiddhiManager siddhiManager2 = new SiddhiManager();
+        siddhiManager1.setPersistenceStore(persistenceStore);
+        siddhiManager1.setExtension("xml-input-mapper", XmlSourceMapper.class);
+        siddhiManager2.setPersistenceStore(persistenceStore);
+        siddhiManager2.setExtension("xml-input-mapper", XmlSourceMapper.class);
+        String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
+                + "receiver.url='http://localhost:8008/endpoints/abc', " + "basic.auth.enabled='false'" + ")"
+                + "define stream inputStream (name string, age int, country string);";
+        String query = (
+                "@info(name = 'query') "
+                        + "from inputStream "
+                        + "select *  "
+                        + "insert into outputStream;"
+        );
+        String inStreamDefinition2 = "" + "@source(type='http', @map(type='xml'), "
+                + "receiver.url='http://localhost:8008/endpoints/abc', " + "basic.auth.enabled='false'" + ")"
+                + "define stream inputStream2 (name string, age int, country string);";
+        String query2 = (
+                "@info(name = 'query2') "
+                        + "from inputStream2 "
+                        + "select *  "
+                        + "insert into outputStream2;"
+        );
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager1
+                .createSiddhiAppRuntime(inStreamDefinition + query);
+
+        siddhiAppRuntime.addCallback("query", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event event : inEvents) {
+                    receivedEventNameList.add(event.getData(0).toString());
+                }
+            }
+        });
+        siddhiAppRuntime.start();
+        SiddhiAppRuntime siddhiAppRuntime2 = siddhiManager2
+                .createSiddhiAppRuntime(inStreamDefinition2 + query2);
+
+        siddhiAppRuntime2.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event event : inEvents) {
+                    receivedEventNameList.add(event.getData(0).toString());
+                }
+            }
+        });
+        siddhiAppRuntime2.start();
+        // publishing events
+        List<String> expected = new ArrayList<>(2);
+        expected.add("John");
+        expected.add("Mike");
+        String event1 = "<events>"
+                            + "<event>"
+                                + "<name>John</name>"
+                                + "<age>100</age>"
+                                + "<country>AUS</country>"
+                            + "</event>"
+                        + "</events>";
+        String event2 = "<events>"
+                            + "<event>"
+                                + "<name>Mike</name>"
+                                + "<age>20</age>"
+                                + "<country>USA</country>"
+                            + "</event>"
+                        + "</events>";
+        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/abc", false, "text/xml",
+                "POST");
+        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/abc", false, "text/xml",
+                "POST");
+        final List<LoggingEvent> log = appender.getLog();
+        List<String> logMessages = new ArrayList<>();
+        for (LoggingEvent logEvent : log) {
+            logMessages.add(String.valueOf(logEvent.getMessage()));
+        }
+        Assert.assertEquals(logMessages.contains("Listener URL http://localhost:8008/endpoints/abc already connected.")
+                , true);
+        Assert.assertEquals(Collections.frequency(logMessages, "Listener URL http://localhost:8008/endpoints/abc " +
+                "already connected."), 1);
+        Thread.sleep(100);
+        Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
+        siddhiAppRuntime.shutdown();
     }
 
     /**
      * Creating test for publishing events without URL multiple events with same url.
      */
-    @Test(expectedExceptions = {Exception.class})
-    public void testHTTPInputTransportMultipleListenersSameURL() {
-        logger.info("Creating test for publishing events without URL multiple events with same url.");
+    @Test
+    public void testMultipleListenersSameURLInSameExecutionPlan() {
+        logger.info("Creating test for publishing events same url in same execution plain.");
+        final TestAppender appender = new TestAppender();
+        final Logger logger = Logger.getRootLogger();
+        logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         List<String> receivedEventNameListA = new ArrayList<>(2);
         List<String> receivedEventNameListB = new ArrayList<>(2);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         String inStreamDefinitionA =
-                "" + "@source(type='http', @map(type='xml'),receiver.url='http://localhost:8005/endpoints/" +
+                "" + "@source(type='http', @map(type='xml'),receiver.url='http://localhost:8006/endpoints/" +
                         "RecPro', basic.auth.enabled='false')"
                         + "define stream inputStreamA (name string, age int, country string);";
         String queryA = (
@@ -185,7 +291,7 @@ public class HttpBasicTests {
                         + "select *  "
                         + "insert into outputStreamA;"
                          );
-        String inStreamDefinitionB = "@source(type='http', @map(type='xml'), receiver.url='http://localhost:8005" +
+        String inStreamDefinitionB = "@source(type='http', @map(type='xml'), receiver.url='http://localhost:8006" +
                 "/endpoints/RecPro', basic.auth.enabled='false')"
                 + "define stream inputStreamB (name string, age int, country string);";
         String queryB = (
@@ -194,10 +300,9 @@ public class HttpBasicTests {
                         + "select *  "
                         + "insert into outputStreamB;"
                         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinitionA +  queryA);
-        try {
-            executionPlanRuntime.addCallback("queryA", new QueryCallback() {
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager
+                .createSiddhiAppRuntime(inStreamDefinitionA + inStreamDefinitionB + queryA + queryB);
+        siddhiAppRuntime.addCallback("queryA", new QueryCallback() {
                 @Override
                 public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                     EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -206,9 +311,7 @@ public class HttpBasicTests {
                     }
                 }
             });
-            executionPlanRuntime = siddhiManager
-                    .createExecutionPlanRuntime(inStreamDefinitionB + queryB);
-            executionPlanRuntime.addCallback("queryB", new QueryCallback() {
+        siddhiAppRuntime.addCallback("queryB", new QueryCallback() {
                 @Override
                 public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                     EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -217,12 +320,18 @@ public class HttpBasicTests {
                     }
                 }
             });
-            //To check weather only one is deployed
-            Assert.assertEquals(1, executionPlanRuntime.getSources().size());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        siddhiAppRuntime.start();
+        //To check weather only one is deployed
+        final List<LoggingEvent> log = appender.getLog();
+        List<String> logMessages = new ArrayList<>();
+        for (LoggingEvent logEvent : log) {
+            logMessages.add(String.valueOf(logEvent.getMessage()));
         }
-        executionPlanRuntime.shutdown();
+        Assert.assertEquals(logMessages.contains("Listener URL http://localhost:8006/endpoints/RecPro already " +
+                "connected."), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "Listener URL http://localhost:8006/endpoints" +
+                "/RecPro already connected."), 1);
+        siddhiAppRuntime.shutdown();
     }
 
     /**
@@ -256,9 +365,9 @@ public class HttpBasicTests {
                         + "select *  "
                         + "insert into outputStreamB;"
                         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition1 + inStreamDefinition2 + query1 + query2);
-        executionPlanRuntime.addCallback("queryA", new QueryCallback() {
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager
+                .createSiddhiAppRuntime(inStreamDefinition1 + inStreamDefinition2 + query1 + query2);
+        siddhiAppRuntime.addCallback("queryA", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -267,7 +376,7 @@ public class HttpBasicTests {
                 }
             }
         });
-        executionPlanRuntime.addCallback("queryB", new QueryCallback() {
+        siddhiAppRuntime.addCallback("queryB", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -276,7 +385,7 @@ public class HttpBasicTests {
                 }
             }
         });
-        executionPlanRuntime.start();
+        siddhiAppRuntime.start();
         // publishing events
         List<String> expectedA = new ArrayList<>(2);
         expectedA.add("John");
@@ -323,7 +432,7 @@ public class HttpBasicTests {
         Thread.sleep(100);
         Assert.assertEquals(receivedEventNameListA.toString(), expectedA.toString());
         Assert.assertEquals(receivedEventNameListB.toString(), expectedB.toString());
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
     }
 
     /**
@@ -338,7 +447,7 @@ public class HttpBasicTests {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         String inStreamDefinition = "@source(type='http', @map(type='xml'), receiver.url='http://localhost:8005" +
-                "/endpoints/RecPro', basic.auth.enabled='true')"
+                "/endpoints/RecPro', basic.auth.enabled='false')"
                 + "define stream inputStream (name string, age int, country string);";
         String query = (
                 "@info(name = 'query') "
@@ -346,9 +455,9 @@ public class HttpBasicTests {
                         + "select *  "
                         + "insert into outputStream;"
                         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        executionPlanRuntime.addCallback("query", new QueryCallback() {
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager
+                .createSiddhiAppRuntime(inStreamDefinition + query);
+        siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
@@ -357,14 +466,14 @@ public class HttpBasicTests {
                 }
             }
         });
-        executionPlanRuntime.start();
+        siddhiAppRuntime.start();
         // publishing events
         List<String> expected = new ArrayList<>(2);
         new HttpTestUtil().httpPublishEmptyPayload(baseURI, false, "text/xml", "POST");
         new HttpTestUtil().httpPublishEmptyPayload(baseURI, false, "text/xml", "POST");
         Thread.sleep(100);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
     }
 
     private static class TestAppender extends AppenderSkeleton {

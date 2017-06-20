@@ -23,7 +23,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpServerListenerHandler;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.extension.output.mapper.xml.XMLSinkMapper;
@@ -74,10 +74,10 @@ public class HttpMethodType {
                 + "select message,method,headers "
                 + "insert into BarStream;"
                 );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
                 query);
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-        executionPlanRuntime.start();
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
         fooStream.send(new Object[]{payload, "GET", "Name:John,Age:23"});
@@ -86,7 +86,7 @@ public class HttpMethodType {
         }
         String eventData = lst.getServerListener().getData();
         Assert.assertEquals(eventData, expected);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
 
@@ -110,10 +110,10 @@ public class HttpMethodType {
                 + "select message,method,headers "
                 + "insert into BarStream;"
                 );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
                 query);
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-        executionPlanRuntime.start();
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
         fooStream.send(new Object[]{payload, "PUT", "Name:John,Age:23"});
@@ -122,7 +122,7 @@ public class HttpMethodType {
         }
         String eventData = lst.getServerListener().getData();
         Assert.assertEquals(eventData, eventData);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
 
@@ -147,10 +147,10 @@ public class HttpMethodType {
                 + "select message,method,headers "
                 + "insert into BarStream;"
                 );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
                 query);
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-        executionPlanRuntime.start();
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
         fooStream.send(new Object[]{payload, "DELETE", "'Name:John','Age:23'"});
@@ -159,7 +159,7 @@ public class HttpMethodType {
         }
         String eventData = lst.getServerListener().getData();
         Assert.assertEquals(eventData, expected);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
 

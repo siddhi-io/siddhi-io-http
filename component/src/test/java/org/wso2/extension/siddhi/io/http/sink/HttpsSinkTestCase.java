@@ -24,7 +24,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.wso2.carbon.kernel.Constants;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpsServerListenerHandler;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.extension.output.mapper.xml.XMLSinkMapper;
@@ -90,10 +90,10 @@ public class HttpsSinkTestCase {
                         + "select message,method,headers "
                         + "insert into BarStream;"
         );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-        executionPlanRuntime.start();
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager
+                .createSiddhiAppRuntime(inStreamDefinition + query);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
         HttpsServerListenerHandler lst = new HttpsServerListenerHandler(8009);
         lst.run();
         fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
@@ -102,7 +102,7 @@ public class HttpsSinkTestCase {
         }
         String eventData = lst.getServerListner().getData();
         Assert.assertEquals(eventData, expected);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
 
@@ -128,10 +128,10 @@ public class HttpsSinkTestCase {
                         + "select message,method,headers "
                         + "insert into BarStream;"
                     );
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager
-                .createExecutionPlanRuntime(inStreamDefinition + query);
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-        executionPlanRuntime.start();
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager
+                .createSiddhiAppRuntime(inStreamDefinition + query);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
         HttpsServerListenerHandler lst = new HttpsServerListenerHandler(8009);
         lst.run();
         fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
@@ -140,7 +140,7 @@ public class HttpsSinkTestCase {
         }
         String eventData = lst.getServerListner().getData();
         Assert.assertEquals(eventData, expected);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
 

@@ -29,7 +29,7 @@ import org.wso2.carbon.container.CarbonContainerFactory;
 import org.wso2.carbon.container.options.CarbonDistributionOption;
 import org.wso2.carbon.kernel.utils.CarbonServerInfo;
 import org.wso2.extension.siddhi.io.http.test.osgi.sink.util.HttpServerListenerHandler;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.extension.output.mapper.xml.XMLSinkMapper;
@@ -135,10 +135,10 @@ public class HttpSink {
                 + "Define stream BarStream (message String,method String,headers String);";
         String query = ("@info(name = 'query') " +
                 "from FooStream select message,method,headers insert into BarStream;");
-        ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(inStreamDefinition +
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
                 query);
-        InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-        executionPlanRuntime.start();
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
         String payload = "<events>"
@@ -161,7 +161,7 @@ public class HttpSink {
                             + "</event>"
                         + "</events>\n";
         Assert.assertEquals(eventData, expected);
-        executionPlanRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
 }
