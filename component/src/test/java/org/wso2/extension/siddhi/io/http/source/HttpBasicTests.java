@@ -54,6 +54,7 @@ public class HttpBasicTests {
     public void init() {
         eventCount.set(0);
     }
+
     /**
      * Creating test for publishing events without URL.
      * @throws Exception Interrupted exception

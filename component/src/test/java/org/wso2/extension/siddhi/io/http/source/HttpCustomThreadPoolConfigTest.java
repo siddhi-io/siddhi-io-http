@@ -50,6 +50,7 @@ public class HttpCustomThreadPoolConfigTest {
     public void init() {
         eventCount.set(0);
     }
+
     /**
      * Creating test for publishing events with XML mapping.
      * @throws Exception Interrupted exception
