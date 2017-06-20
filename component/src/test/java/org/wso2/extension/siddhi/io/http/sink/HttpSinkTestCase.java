@@ -85,7 +85,7 @@ public class HttpSinkTestCase {
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
         fooStream.send(new Object[]{payload, "GET", "'Name:John','Age:23'"});
-        while (!lst.getServerListener().iaMessageArrive()) {
+        while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
         ArrayList<String> headerName = new ArrayList<>();
@@ -130,7 +130,7 @@ public class HttpSinkTestCase {
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
         fooStream.send(new Object[]{payload, "GET", "'Name:John','Age:23','Content-Type:text'"});
-        while (!lst.getServerListener().iaMessageArrive()) {
+        while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
         ArrayList<String> headerName = new ArrayList<>();

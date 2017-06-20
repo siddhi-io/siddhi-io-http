@@ -19,6 +19,7 @@
 package org.wso2.extension.siddhi.io.http.source;
 
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.source.util.HttpTestUtil;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
@@ -26,6 +27,7 @@ import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.core.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 import org.wso2.siddhi.extension.input.mapper.json.JsonSourceMapper;
@@ -35,6 +37,7 @@ import org.wso2.siddhi.extension.input.mapper.xml.XmlSourceMapper;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Test cases for mapping types.
@@ -42,6 +45,14 @@ import java.util.List;
 public class HttpSourceMappingTestCases {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger
             (HttpSourceMappingTestCases.class);
+    private AtomicInteger eventCount = new AtomicInteger(0);
+    private int waitTime = 50;
+    private int timeout = 30000;
+
+    @BeforeMethod
+    public void init() {
+        eventCount.set(0);
+    }
 
     /**
      * Creating test for publishing events with XML mapping.
@@ -74,6 +85,7 @@ public class HttpSourceMappingTestCases {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 for (Event event : inEvents) {
+                    eventCount.incrementAndGet();
                     receivedEventNameList.add(event.getData(0).toString());
                 }
             }
@@ -101,7 +113,7 @@ public class HttpSourceMappingTestCases {
                 "POST");
         new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", false, "text/xml",
                 "POST");
-        Thread.sleep(100);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
@@ -118,7 +130,6 @@ public class HttpSourceMappingTestCases {
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
-
         siddhiManager.setExtension("text-input-mapper", TextSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http',  @map(type='text'), "
                 + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
@@ -137,6 +148,7 @@ public class HttpSourceMappingTestCases {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 for (Event event : inEvents) {
+                    eventCount.incrementAndGet();
                     receivedEventNameList.add(event.getData(0).toString());
                 }
             }
@@ -153,7 +165,7 @@ public class HttpSourceMappingTestCases {
                 "POST");
         new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", false, "text",
                 "POST");
-        Thread.sleep(100);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
@@ -188,6 +200,7 @@ public class HttpSourceMappingTestCases {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 for (Event event : inEvents) {
+                    eventCount.incrementAndGet();
                     receivedEventNameList.add(event.getData(0).toString());
                 }
             }
@@ -215,7 +228,7 @@ public class HttpSourceMappingTestCases {
                 "application/json", "POST");
         new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", false,
                 "application/json", "POST");
-        Thread.sleep(100);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
