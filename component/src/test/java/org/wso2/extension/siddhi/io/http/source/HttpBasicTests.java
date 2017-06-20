@@ -21,6 +21,7 @@ import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.source.util.HttpTestUtil;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
@@ -28,6 +29,7 @@ import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.core.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 import org.wso2.siddhi.extension.input.mapper.xml.XmlSourceMapper;
@@ -36,6 +38,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Basic test cases for http source functions.
@@ -43,6 +46,14 @@ import java.util.List;
 public class HttpBasicTests {
     private static final org.apache.log4j.Logger logger = org.apache.log4j
             .Logger.getLogger(HttpBasicTests.class);
+    private AtomicInteger eventCount = new AtomicInteger(0);
+    private int waitTime = 50;
+    private int timeout = 30000;
+
+    @BeforeMethod
+    public void init() {
+        eventCount.set(0);
+    }
 
     /**
      * Creating test for publishing events without URL.
@@ -72,6 +83,7 @@ public class HttpBasicTests {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 for (Event event : inEvents) {
+                    eventCount.incrementAndGet();
                     receivedEventNameList.add(event.getData(0).toString());
                 }
             }
@@ -99,7 +111,7 @@ public class HttpBasicTests {
                 "inputStream");
         new HttpTestUtil().httpPublishEventDefault(event2, baseURI, false, "text/xml",
                 "inputStream");
-        Thread.sleep(100);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
@@ -110,6 +122,7 @@ public class HttpBasicTests {
      */
     @Test
     public void testHTTPInputTransportPutMethod() throws Exception {
+        logger.info("Test case for put method");
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.addAppender(appender);
@@ -162,9 +175,9 @@ public class HttpBasicTests {
         for (LoggingEvent logEvent : log) {
             logMessages.add(String.valueOf(logEvent.getMessage()));
         }
+        SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
         Assert.assertEquals(logMessages.contains("Event response code 400"), true);
         Assert.assertEquals(Collections.frequency(logMessages, "Event response code 400"), 2);
-        Thread.sleep(100);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
@@ -214,6 +227,7 @@ public class HttpBasicTests {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 for (Event event : inEvents) {
+                    eventCount.incrementAndGet();
                     receivedEventNameList.add(event.getData(0).toString());
                 }
             }
@@ -227,6 +241,7 @@ public class HttpBasicTests {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 for (Event event : inEvents) {
+                    eventCount.incrementAndGet();
                     receivedEventNameList.add(event.getData(0).toString());
                 }
             }
@@ -259,11 +274,11 @@ public class HttpBasicTests {
         for (LoggingEvent logEvent : log) {
             logMessages.add(String.valueOf(logEvent.getMessage()));
         }
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(logMessages.contains("Listener URL http://localhost:8008/endpoints/abc already connected.")
                 , true);
         Assert.assertEquals(Collections.frequency(logMessages, "Listener URL http://localhost:8008/endpoints/abc " +
                 "already connected."), 1);
-        Thread.sleep(100);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
@@ -272,7 +287,7 @@ public class HttpBasicTests {
      * Creating test for publishing events without URL multiple events with same url.
      */
     @Test
-    public void testMultipleListenersSameURLInSameExecutionPlan() {
+    public void testMultipleListenersSameURLInSameExecutionPlan() throws InterruptedException {
         logger.info("Creating test for publishing events same url in same execution plain.");
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
@@ -307,6 +322,7 @@ public class HttpBasicTests {
                 public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                     EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
+                        eventCount.incrementAndGet();
                         receivedEventNameListA.add(event.getData(0).toString());
                     }
                 }
@@ -316,6 +332,7 @@ public class HttpBasicTests {
                 public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                     EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
+                        eventCount.incrementAndGet();
                         receivedEventNameListB.add(event.getData(0).toString());
                     }
                 }
@@ -327,6 +344,7 @@ public class HttpBasicTests {
         for (LoggingEvent logEvent : log) {
             logMessages.add(String.valueOf(logEvent.getMessage()));
         }
+        SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
         Assert.assertEquals(logMessages.contains("Listener URL http://localhost:8006/endpoints/RecPro already " +
                 "connected."), true);
         Assert.assertEquals(Collections.frequency(logMessages, "Listener URL http://localhost:8006/endpoints" +
@@ -372,6 +390,7 @@ public class HttpBasicTests {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 for (Event event : inEvents) {
+                    eventCount.incrementAndGet();
                     receivedEventNameListA.add(event.getData(0).toString());
                 }
             }
@@ -381,6 +400,7 @@ public class HttpBasicTests {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 for (Event event : inEvents) {
+                    eventCount.incrementAndGet();
                     receivedEventNameListB.add(event.getData(0).toString());
                 }
             }
@@ -429,7 +449,7 @@ public class HttpBasicTests {
                 "POST");
         new HttpTestUtil().httpPublishEvent(event4, baseURIB, "/endpoints/RecPro", false, "text/xml",
                 "POST");
-        Thread.sleep(100);
+        SiddhiTestHelper.waitForEvents(waitTime, 4, eventCount, timeout);
         Assert.assertEquals(receivedEventNameListA.toString(), expectedA.toString());
         Assert.assertEquals(receivedEventNameListB.toString(), expectedB.toString());
         siddhiAppRuntime.shutdown();
@@ -462,6 +482,7 @@ public class HttpBasicTests {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 for (Event event : inEvents) {
+                    eventCount.incrementAndGet();
                     receivedEventNameList.add(event.getData(0).toString());
                 }
             }
@@ -471,7 +492,7 @@ public class HttpBasicTests {
         List<String> expected = new ArrayList<>(2);
         new HttpTestUtil().httpPublishEmptyPayload(baseURI, false, "text/xml", "POST");
         new HttpTestUtil().httpPublishEmptyPayload(baseURI, false, "text/xml", "POST");
-        Thread.sleep(100);
+        SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }

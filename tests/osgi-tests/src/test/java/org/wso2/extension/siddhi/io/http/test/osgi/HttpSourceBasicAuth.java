@@ -64,6 +64,14 @@ public class HttpSourceBasicAuth {
     private static final String DEPLOYMENT_FILENAME = "deployment.yaml";
     private static final String CLIENTTRUSTSTORE_FILENAME = "client-truststore.jks";
     private static final String KEYSTORESTORE_FILENAME = "wso2carbon.jks";
+    private AtomicInteger eventCount = new AtomicInteger(0);
+    private int waitTime = 50;
+    private int timeout = 30000;
+
+    @BeforeMethod
+    public void init() {
+        eventCount.set(0);
+    }
 
     @Inject
     private CarbonServerInfo carbonServerInfo;
@@ -151,6 +159,7 @@ public class HttpSourceBasicAuth {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 for (Event event : inEvents) {
+                    eventCount.incrementAndGet();
                     receivedEventNameList.add(event.getData(0).toString());
                 }
             }
@@ -180,7 +189,7 @@ public class HttpSourceBasicAuth {
                 "POST");
         new TestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", false, "text/xml",
                 "POST");
-        Thread.sleep(200);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         logger.info(receivedEventNameList);
         Assert.assertEquals(receivedEventNameList, expected);
         siddhiAppRuntime.shutdown();
@@ -206,6 +215,7 @@ public class HttpSourceBasicAuth {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 for (Event event : inEvents) {
+                    eventCount.incrementAndGet();
                     receivedEventNameList.add(event.getData(0).toString());
                 }
             }
@@ -235,7 +245,7 @@ public class HttpSourceBasicAuth {
                 "POST");
         new TestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", true, "text/xml",
                 "POST");
-        Thread.sleep(200);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         logger.info(receivedEventNameList);
         Assert.assertEquals(receivedEventNameList, expected);
         siddhiAppRuntime.shutdown();
@@ -260,6 +270,7 @@ public class HttpSourceBasicAuth {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 EventPrinter.print(timeStamp, inEvents, removeEvents);
                 for (Event event : inEvents) {
+                    eventCount.incrementAndGet();
                     receivedEventNameList.add(event.getData(0).toString());
                 }
             }
@@ -285,7 +296,7 @@ public class HttpSourceBasicAuth {
                         + "</events>";
         new TestUtil().httpPublishEventAuthIncorrect(event1, baseURI, true, "text/xml");
         new TestUtil().httpPublishEventAuthIncorrect(event2, baseURI, true, "text/xml");
-        Thread.sleep(100);
+        SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList, expected);
         siddhiAppRuntime.shutdown();
     }
