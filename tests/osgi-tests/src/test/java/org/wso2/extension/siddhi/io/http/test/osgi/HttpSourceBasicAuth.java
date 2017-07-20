@@ -30,7 +30,7 @@ import org.wso2.carbon.container.CarbonContainerFactory;
 import org.wso2.carbon.container.options.CarbonDistributionOption;
 import org.wso2.carbon.kernel.utils.CarbonServerInfo;
 import org.wso2.extension.siddhi.io.http.test.osgi.source.util.TestUtil;
-import org.wso2.extension.siddhi.map.xml.sourcemapper.XmlSourceMapper;
+import org.wso2.extension.siddhi.map.text.sourcemapper.TextSourceMapper;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.inject.Inject;
+
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.wso2.carbon.container.options.CarbonDistributionOption.copyFile;
@@ -141,6 +142,10 @@ public class HttpSourceBasicAuth {
                         .artifactId("siddhi-map-xml")
                         .groupId("org.wso2.extension.siddhi.map.xml")
                         .versionAsInProject()),
+                copyOSGiLibBundle(maven()
+                        .artifactId("siddhi-map-text")
+                        .groupId("org.wso2.extension.siddhi.map.text")
+                        .versionAsInProject()),
                 systemProperty("java.security.auth.login.config")
                         .value(Paths.get("conf", "security", "carbon-jaas.config").toString())
                 //CarbonDistributionOption.debug(5005)
@@ -154,8 +159,8 @@ public class HttpSourceBasicAuth {
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
-        siddhiManager.setExtension("xml", XmlSourceMapper.class);
-        String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
+        siddhiManager.setExtension("text", TextSourceMapper.class);
+        String inStreamDefinition = "" + "@source(type='http', @map(type='text'), "
                 + "receiver.url='http://localhost:8009/endpoints/RecPro' " + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
@@ -176,25 +181,15 @@ public class HttpSourceBasicAuth {
         List<String> expected = new ArrayList<>(2);
         expected.add("John");
         expected.add("Mike");
-        String event1 =
-                         "<events>"
-                            + "<event>"
-                                + "<name>John</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
-        String event2 =
-                        "<events>"
-                            + "<event>"
-                                + "<name>Mike</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
-        new TestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro", false, "text/xml",
+        String event1 = "name:\"John\",\n" +
+                        "age:100,\n" +
+                        "country:\"USA\"";
+        String event2 = "name:\"Mike\",\n" +
+                        "age:100,\n" +
+                        "country:\"USA\"";
+        new TestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro", false, "plain/text",
                 "POST");
-        new TestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", false, "text/xml",
+        new TestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", false, "plain/text",
                 "POST");
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         logger.info(receivedEventNameList);
@@ -209,8 +204,8 @@ public class HttpSourceBasicAuth {
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
-        siddhiManager.setExtension("xml", XmlSourceMapper.class);
-        String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
+        siddhiManager.setExtension("text", TextSourceMapper.class);
+        String inStreamDefinition = "" + "@source(type='http', @map(type='text'), "
                 + "receiver.url='http://localhost:8009/endpoints/RecPro', " + "basic.auth.enabled='true'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query') " + "from inputStream " + "select *  " + "insert into outputStream;");
@@ -231,25 +226,15 @@ public class HttpSourceBasicAuth {
         List<String> expected = new ArrayList<>(2);
         expected.add("John");
         expected.add("Mike");
-        String event1 =
-                        "<events>"
-                            + "<event>"
-                                + "<name>John</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
-        String event2 =
-                        "<events>"
-                            + "<event>"
-                                + "<name>Mike</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
-        new TestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro", true, "text/xml",
+        String event1 = "name:\"John\",\n" +
+                "age:100,\n" +
+                "country:\"USA\"";
+        String event2 = "name:\"Mike\",\n" +
+                "age:100,\n" +
+                "country:\"USA\"";
+        new TestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro", true, "plain/text",
                 "POST");
-        new TestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", true, "text/xml",
+        new TestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", true, "plain/text",
                 "POST");
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         logger.info(receivedEventNameList);
@@ -264,8 +249,8 @@ public class HttpSourceBasicAuth {
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
-        siddhiManager.setExtension("xml", XmlSourceMapper.class);
-        String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
+        siddhiManager.setExtension("text", TextSourceMapper.class);
+        String inStreamDefinition = "" + "@source(type='http', @map(type='text'), "
                 + "receiver.url='http://localhost:8009/endpoints/RecPro', " + "basic.auth.enabled='true'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
@@ -284,24 +269,14 @@ public class HttpSourceBasicAuth {
         siddhiAppRuntime.start();
         // publishing events
         List<String> expected = new ArrayList<>();
-        String event1 =
-                        "<events>"
-                            + "<event>"
-                                + "<name>John</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
-        String event2 =
-                        "<events>"
-                            + "<event>"
-                                + "<name>Mike</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
-        new TestUtil().httpPublishEventAuthIncorrect(event1, baseURI, true, "text/xml");
-        new TestUtil().httpPublishEventAuthIncorrect(event2, baseURI, true, "text/xml");
+        String event1 = "name:\"John\",\n" +
+                "age:100,\n" +
+                "country:\"USA\"";
+        String event2 = "name:\"Mike\",\n" +
+                "age:100,\n" +
+                "country:\"USA\"";
+        new TestUtil().httpPublishEventAuthIncorrect(event1, baseURI, true, "plain/text");
+        new TestUtil().httpPublishEventAuthIncorrect(event2, baseURI, true, "plain/text");
         SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList, expected);
         siddhiAppRuntime.shutdown();

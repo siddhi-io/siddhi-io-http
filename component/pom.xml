@@ -72,6 +72,8 @@
         <dependency>
             <groupId>org.wso2.extension.siddhi.map.json</groupId>
             <artifactId>siddhi-map-json</artifactId>
+            <version>4.0.2</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.extension.siddhi.map.text</groupId>
