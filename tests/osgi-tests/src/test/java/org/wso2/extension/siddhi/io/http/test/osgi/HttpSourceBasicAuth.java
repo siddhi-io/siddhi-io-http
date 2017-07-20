@@ -23,26 +23,29 @@ import org.ops4j.pax.exam.spi.reactors.PerClass;
 import org.ops4j.pax.exam.testng.listener.PaxExam;
 import org.osgi.framework.BundleContext;
 import org.testng.Assert;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.wso2.carbon.container.CarbonContainerFactory;
 import org.wso2.carbon.container.options.CarbonDistributionOption;
 import org.wso2.carbon.kernel.utils.CarbonServerInfo;
 import org.wso2.extension.siddhi.io.http.test.osgi.source.util.TestUtil;
+import org.wso2.extension.siddhi.map.xml.sourcemapper.XmlSourceMapper;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.core.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
-import org.wso2.siddhi.extension.input.mapper.xml.XmlSourceMapper;
 
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.inject.Inject;
 
 import static org.ops4j.pax.exam.CoreOptions.maven;
@@ -133,6 +136,10 @@ public class HttpSourceBasicAuth {
                 copyOSGiLibBundle(maven()
                         .artifactId("siddhi-io-http")
                         .groupId("org.wso2.extension.siddhi.io.http")
+                        .versionAsInProject()),
+                copyOSGiLibBundle(maven()
+                        .artifactId("siddhi-map-xml")
+                        .groupId("org.wso2.extension.siddhi.map.xml")
                         .versionAsInProject()),
                 systemProperty("java.security.auth.login.config")
                         .value(Paths.get("conf", "security", "carbon-jaas.config").toString())

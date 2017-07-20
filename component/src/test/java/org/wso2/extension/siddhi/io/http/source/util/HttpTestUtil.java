@@ -107,7 +107,8 @@ public class HttpTestUtil {
         try {
             HttpURLConnection urlConn = null;
             try {
-                urlConn = HttpServerUtil.request(baseURI, "/" + streamName, HttpMethod.POST.name(), true);
+                urlConn = HttpServerUtil.request(baseURI, "/TestSiddhiApp/" + streamName, HttpMethod.POST.name(),
+                        true);
             } catch (IOException e) {
                 HttpServerUtil.handleException("IOException occurred while running the HttpsSourceTestCaseForSSL", e);
             }

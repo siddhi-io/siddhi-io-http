@@ -22,6 +22,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.source.util.HttpTestUtil;
+import org.wso2.extension.siddhi.map.xml.sourcemapper.XmlSourceMapper;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
@@ -30,7 +31,6 @@ import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.core.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
-import org.wso2.siddhi.extension.input.mapper.xml.XmlSourceMapper;
 
 import java.net.URI;
 import java.util.ArrayList;

@@ -18,6 +18,7 @@
  */
 package org.wso2.extension.siddhi.io.http.source.util;
 
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.CarbonCallback;
@@ -173,6 +174,8 @@ public class HttpSourceUtil {
         defaultCarbonMessage.setProperty(Constants.HTTP_REASON_PHRASE, HttpResponseStatus.valueOf(code).reasonPhrase());
         defaultCarbonMessage.setHeader(Constants.HTTP_CONNECTION, Constants.CONNECTION_CLOSE);
         defaultCarbonMessage.setHeader(Constants.HTTP_VERSION, HTTP_1_1.text());
+        defaultCarbonMessage.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+        defaultCarbonMessage.setEndOfMsgAdded(true);
         carbonCallback.done(defaultCarbonMessage);
     }
 }

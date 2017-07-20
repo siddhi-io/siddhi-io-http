@@ -46,12 +46,12 @@ import java.util.Map;
                 @Parameter(name = "receiver.url",
                         description = "The URL to which the events should be received. " +
                         "User can provide any valid url and if the url is not provided the system will use the " +
-                        "following format `http://0.0.0.0:9763/<streamName>`" +
+                                "following format `http://0.0.0.0:9763/<appNAme>/<streamName>`" +
                         "If the user want to use SSL the url should be given in following format " +
                         "`https://localhost:8080/<streamName>`",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = "http://0.0.0.0:9763/<streamName>"),
+                        defaultValue = "http://0.0.0.0:9763/<appNAme>/<streamName>"),
                 @Parameter(name = "basic.auth.enabled",
                         description = "If this is set to `true`, " +
                         "basic authentication is enabled for incoming events, and the credentials with which each " +
@@ -168,17 +168,20 @@ public class HttpSource extends Source {
     private Boolean isAuth;
     private String workerThread;
     private SourceEventListener sourceEventListener;
+    private String[] requestedTransportPropertyNames;
 
     @Override
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
-                     ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
+                     String[] requestedTransportPropertyNames, ConfigReader configReader,
+                     SiddhiAppContext siddhiAppContext) {
         this.sourceId = sourceEventListener.getStreamDefinition().toString();
         String defaultURL = configReader.readConfig(HttpConstants.DEFAULT_PROTOCOL, HttpConstants
                 .DEFAULT_PROTOCOL_VALUE) + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
                 readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
                 HttpConstants.PORT_HOST_SEPARATOR + configReader.readConfig(HttpConstants.
                 DEFAULT_PORT, HttpConstants.DEFAULT_PORT_VALUE) + HttpConstants.
-                PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
+                PORT_CONTEXT_SEPARATOR + siddhiAppContext.getName()
+                + HttpConstants.PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
         this.listenerUrl = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_URL, defaultURL);
         this.isAuth = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants.ISAUTH,
                 HttpConstants.EMPTY_ISAUTH).toLowerCase(Locale.ENGLISH));
@@ -188,13 +191,20 @@ public class HttpSource extends Source {
         this.httpConnectorRegistry = HttpConnectorRegistry.getInstance();
         this.httpConnectorRegistry.initHttpServerConnector(configReader);
         this.sourceEventListener = sourceEventListener;
+        this.requestedTransportPropertyNames = requestedTransportPropertyNames;
+    }
+
+    // TODO: 7/17/17 check for byte
+    @Override
+    public Class[] getOutputEventClasses() {
+        return new Class[]{String.class};
     }
 
     @Override
-    public void connect() throws ConnectionUnavailableException {
+    public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
         this.httpConnectorRegistry.registerServerConnector(this.listenerUrl, this.sourceId, this.listenerConfig);
         this.httpConnectorRegistry.registerSourceListener(sourceEventListener, this.listenerUrl,
-                Integer.valueOf(workerThread), isAuth);
+                Integer.valueOf(workerThread), isAuth, requestedTransportPropertyNames);
     }
 
     @Override
@@ -233,7 +243,7 @@ public class HttpSource extends Source {
     }
 
     @Override
-    public void restoreState(Map<String, Object> state) {
+    public void restoreState(Map<String, Object> map) {
         // no state to restore
     }
 }

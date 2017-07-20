@@ -24,10 +24,10 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpServerListenerHandler;
+import org.wso2.extension.siddhi.map.xml.sinkmapper.XMLSinkMapper;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.extension.output.mapper.xml.XMLSinkMapper;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

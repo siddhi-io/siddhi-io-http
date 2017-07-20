@@ -20,6 +20,7 @@ package org.wso2.extension.siddhi.io.http.source.exception;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.wso2.carbon.messaging.CarbonCallback;
+import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.carbon.messaging.DefaultCarbonMessage;
 import org.wso2.carbon.transport.http.netty.common.Constants;
 
@@ -38,7 +39,8 @@ public class HttpSourceAdaptorRuntimeException extends RuntimeException {
         super(message);
     }
 
-    public HttpSourceAdaptorRuntimeException(String message, CarbonCallback carbonCallback, int code) {
+    public HttpSourceAdaptorRuntimeException(CarbonMessage carbonMessage, String message, CarbonCallback
+            carbonCallback, int code) {
         super(message);
         DefaultCarbonMessage defaultCarbonMessage = new DefaultCarbonMessage();
         defaultCarbonMessage.setStringMessageBody(message);
@@ -47,6 +49,7 @@ public class HttpSourceAdaptorRuntimeException extends RuntimeException {
         defaultCarbonMessage.setHeader(Constants.HTTP_CONNECTION, Constants.CONNECTION_CLOSE);
         defaultCarbonMessage.setHeader(Constants.HTTP_VERSION, HTTP_1_1.text());
         carbonCallback.done(defaultCarbonMessage);
+        carbonMessage.release();
     }
 
     public HttpSourceAdaptorRuntimeException(String message, Throwable cause, CarbonCallback carbonCallback, int code) {

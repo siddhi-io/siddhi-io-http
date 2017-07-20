@@ -29,10 +29,11 @@ import org.wso2.carbon.container.CarbonContainerFactory;
 import org.wso2.carbon.container.options.CarbonDistributionOption;
 import org.wso2.carbon.kernel.utils.CarbonServerInfo;
 import org.wso2.extension.siddhi.io.http.test.osgi.sink.util.HttpServerListenerHandler;
+import org.wso2.extension.siddhi.map.xml.sinkmapper.XMLSinkMapper;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.extension.output.mapper.xml.XMLSinkMapper;
+
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -116,6 +117,10 @@ public class HttpSink {
                 copyOSGiLibBundle(maven()
                         .artifactId("siddhi-io-http")
                         .groupId("org.wso2.extension.siddhi.io.http")
+                        .versionAsInProject()),
+                copyOSGiLibBundle(maven()
+                        .artifactId("siddhi-map-xml")
+                        .groupId("org.wso2.extension.siddhi.map.xml")
                         .versionAsInProject()),
                 systemProperty("java.security.auth.login.config")
                         .value(Paths.get("conf", "security", "carbon-jaas.config").toString())

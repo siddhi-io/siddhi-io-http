@@ -24,7 +24,6 @@ import org.wso2.carbon.messaging.CarbonCallback;
 import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.carbon.messaging.CarbonMessageProcessor;
 import org.wso2.carbon.messaging.ClientConnector;
-import org.wso2.carbon.messaging.Constants;
 import org.wso2.carbon.messaging.TransportSender;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
@@ -44,40 +43,46 @@ public class HttpMessageProcessor implements CarbonMessageProcessor {
 
     @Override
     public boolean receive(CarbonMessage carbonMessage, CarbonCallback carbonCallback) throws IOException {
-      //Check the channel type is http
-        if (HttpConstants.PROTOCOL_ID.equals(carbonMessage.getProperty(HttpConstants.PROTOCOL)) &&
-                HttpConnectorRegistry.getInstance().getServerConnectorMap().containsKey(String.valueOf(carbonMessage
-                        .getProperty(HttpConstants.LISTENER_PORT)))) {
-                //Check the message is a response or direct message
-            if (!Constants.DIRECTION_RESPONSE.equals(carbonMessage.getProperty(Constants.DIRECTION))) {
-                    if (HttpConstants.HTTP_METHOD_POST.equalsIgnoreCase((String)
-                            carbonMessage.getProperty((HttpConstants.HTTP_METHOD)))) {
-                        //get the required source listener
-                        StringBuilder sourceListenerKey = new StringBuilder(String.valueOf(carbonMessage.getProperty
-                                (HttpConstants.LISTENER_PORT))).append(HttpConstants.PORT_CONTEXT_KEY_SEPARATOR)
-                                .append(carbonMessage.getProperty(HttpConstants.TO));
-                        HttpSourceListener sourceListener = HttpConnectorRegistry.getInstance()
-                                .getSourceListenersMap().get(sourceListenerKey.toString());
-                        if (sourceListener != null) {
-                            sourceListener.send(carbonMessage, carbonCallback, sourceListenerKey);
-                        } else {
-                            HttpSourceUtil.handleCallback("Resource not found ", carbonCallback, 404);
-                        }
-                    } else {
-                        throw new HttpSourceAdaptorRuntimeException("Request type is not a type of POST ",
-                                carbonCallback, 400);
-                    }
-            } else {
-                carbonCallback.done(carbonMessage);
-            }
-        } else {
-            if (logger.isDebugEnabled()) {
-                logger.debug("Event is not type of http which has received to the uri '" + String
-                        .valueOf(carbonMessage.getProperty(HttpConstants.LISTENER_PORT)) +
-                        carbonMessage.getProperty(HttpConstants.TO));
-            }
-        }
-        return true;
+         //Check the channel type is http
+         if (HttpConstants.PROTOCOL_ID.equals(carbonMessage.getProperty(HttpConstants.PROTOCOL)) &&
+                 HttpConnectorRegistry.getInstance().getServerConnectorMap().containsKey(String.valueOf(carbonMessage
+                         .getProperty(HttpConstants.LISTENER_PORT)))) {
+             //Check the message is a response or direct message
+             if (carbonMessage.getProperty(org.wso2.carbon.messaging.Constants.DIRECTION) != null &&
+                     carbonMessage.getProperty(org.wso2.carbon.messaging.Constants.DIRECTION)
+                             .equals(org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE)) {
+                 carbonCallback.done(carbonMessage);
+                 carbonMessage.release();
+             } else {
+                 if (HttpConstants.HTTP_METHOD_POST.equalsIgnoreCase((String)
+                         carbonMessage.getProperty((HttpConstants.HTTP_METHOD)))) {
+                     //get the required source listener
+                     StringBuilder sourceListenerKey = new StringBuilder(String.valueOf(carbonMessage.getProperty
+                             (HttpConstants.LISTENER_PORT))).append(HttpConstants.PORT_CONTEXT_KEY_SEPARATOR)
+                             .append(carbonMessage.getProperty(HttpConstants.TO));
+                     HttpSourceListener sourceListener = HttpConnectorRegistry.getInstance()
+                             .getSourceListenersMap().get(sourceListenerKey.toString());
+                     if (sourceListener != null) {
+                         sourceListener.send(carbonMessage, carbonCallback, sourceListenerKey);
+                     } else {
+                         HttpSourceUtil.handleCallback("Resource not found.", carbonCallback, 404);
+                         carbonMessage.release();
+                     }
+                 } else {
+                     throw new HttpSourceAdaptorRuntimeException(carbonMessage, "Request type is not a type of POST ",
+                             carbonCallback, 400);
+                 }
+             }
+         } else {
+             if (logger.isDebugEnabled()) {
+                 logger.debug("Event is not type of http which has received to the uri '" + String
+                         .valueOf(carbonMessage.getProperty(HttpConstants.LISTENER_PORT)) +
+                         carbonMessage.getProperty(HttpConstants.TO));
+             }
+             HttpSourceUtil.handleCallback("Resource not found.", carbonCallback, 404);
+             carbonMessage.release();
+         }
+        return false;
     }
 
     @Override
