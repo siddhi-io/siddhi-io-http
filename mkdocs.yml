@@ -11,10 +11,7 @@ extra:
     accent: teal
 pages:
 - Welcome to WSO2 Siddhi IO TCP: index.md
-- Api:
-  - 2.0.0-SNAPSHOT: api/2.0.0-SNAPSHOT.md
 - License: license.md
 - API Docs:
-  - 2.0.0-SNAPSHOT: api/2.0.0-SNAPSHOT.md
   - 1.0.1-SNAPSHOT: api/1.0.1-SNAPSHOT.md
 theme: material
