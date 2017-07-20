@@ -194,7 +194,6 @@ public class HttpSource extends Source {
         this.requestedTransportPropertyNames = requestedTransportPropertyNames;
     }
 
-    // TODO: 7/17/17 check for byte
     @Override
     public Class[] getOutputEventClasses() {
         return new Class[]{String.class};

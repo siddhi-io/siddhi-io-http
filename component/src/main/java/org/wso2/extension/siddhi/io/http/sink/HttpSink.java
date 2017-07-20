@@ -251,7 +251,7 @@ public class HttpSink extends Sink {
     private String publisherURL;
     @Override
     public Class[] getSupportedInputEventClasses() {
-        return new Class[]{String.class, Byte[].class};
+        return new Class[]{String.class};
     }
 
     @Override
