@@ -33,8 +33,6 @@ import org.wso2.extension.siddhi.map.xml.sinkmapper.XMLSinkMapper;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.inject.Inject;
@@ -132,7 +130,7 @@ public class HttpSink {
     public void testHTTPTextMappingXML() throws Exception {
         logger.info("Creating test for publishing events with XML mapping.");
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
+        siddhiManager.setExtension("xml", XMLSinkMapper.class);
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
                 + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
                 + "headers='{{headers}}',"

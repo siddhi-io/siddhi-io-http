@@ -40,6 +40,7 @@ import org.wso2.siddhi.core.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 
+
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -47,7 +48,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.inject.Inject;
-
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.wso2.carbon.container.options.CarbonDistributionOption.copyFile;
@@ -154,9 +154,9 @@ public class HttpSourceBasicAuth {
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
-        siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
+        siddhiManager.setExtension("xml", XmlSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='http://localhost:8009/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
+                + "receiver.url='http://localhost:8009/endpoints/RecPro' " + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
@@ -209,8 +209,7 @@ public class HttpSourceBasicAuth {
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
-        //siddhiManager.setExtension("json-input-mapper", JsonSourceMapper.class);
-        siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
+        siddhiManager.setExtension("xml", XmlSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
                 + "receiver.url='http://localhost:8009/endpoints/RecPro', " + "basic.auth.enabled='true'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
@@ -265,7 +264,7 @@ public class HttpSourceBasicAuth {
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
-        siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
+        siddhiManager.setExtension("xml", XmlSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
                 + "receiver.url='http://localhost:8009/endpoints/RecPro', " + "basic.auth.enabled='true'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
