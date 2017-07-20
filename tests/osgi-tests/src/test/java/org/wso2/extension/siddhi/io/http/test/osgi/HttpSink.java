@@ -29,11 +29,10 @@ import org.wso2.carbon.container.CarbonContainerFactory;
 import org.wso2.carbon.container.options.CarbonDistributionOption;
 import org.wso2.carbon.kernel.utils.CarbonServerInfo;
 import org.wso2.extension.siddhi.io.http.test.osgi.sink.util.HttpServerListenerHandler;
+import org.wso2.extension.siddhi.map.xml.sinkmapper.XMLSinkMapper;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.extension.output.mapper.xml.XMLSinkMapper;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.inject.Inject;
@@ -117,6 +116,10 @@ public class HttpSink {
                         .artifactId("siddhi-io-http")
                         .groupId("org.wso2.extension.siddhi.io.http")
                         .versionAsInProject()),
+                copyOSGiLibBundle(maven()
+                        .artifactId("siddhi-map-xml")
+                        .groupId("org.wso2.extension.siddhi.map.xml")
+                        .versionAsInProject()),
                 systemProperty("java.security.auth.login.config")
                         .value(Paths.get("conf", "security", "carbon-jaas.config").toString())
                 //CarbonDistributionOption.debug(5005)
@@ -127,7 +130,7 @@ public class HttpSink {
     public void testHTTPTextMappingXML() throws Exception {
         logger.info("Creating test for publishing events with XML mapping.");
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
+        siddhiManager.setExtension("xml", XMLSinkMapper.class);
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
                 + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
                 + "headers='{{headers}}',"

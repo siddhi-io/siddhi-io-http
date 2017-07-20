@@ -1,0 +1,17 @@
+site_name: Siddhi-IO-TCP
+extra_css:
+- stylesheets/extra.css
+extra_javascript:
+- javascripts/extra.js
+site_favicon: images/favicon.ico
+extra:
+  logo: images/siddhi-logo-w.svg
+  palette:
+    primary: teal
+    accent: teal
+pages:
+- Welcome to WSO2 Siddhi IO TCP: index.md
+- License: license.md
+- API Docs:
+  - 1.0.1-SNAPSHOT: api/1.0.1-SNAPSHOT.md
+theme: material

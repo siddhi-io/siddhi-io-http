@@ -24,8 +24,15 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
+    <scm>
+        <connection>scm:git:https://github.com/wso2-extensions/siddhi-io-http.git</connection>
+        <url>https://github.com/wso2-extensions/siddhi-io-http.git</url>
+        <developerConnection>scm:git:https://github.com/wso2-extensions/siddhi-io-http.git
+        </developerConnection>
+        <tag>HEAD</tag>
+    </scm>
     <modules>
-        <!--<module>tests</module>-->
+        <module>tests</module>
         <module>component</module>
     </modules>
     <groupId>org.wso2.extension.siddhi.io.http</groupId>
@@ -41,28 +48,106 @@
             </activation>
             <modules>
                 <module>component</module>
-                <!--<module>tests</module>-->
+                <module>tests</module>
             </modules>
         </profile>
     </profiles>
     <dependencyManagement>
         <dependencies>
+            <!--Siddhi Dependencies-->
             <dependency>
                 <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-text-output-mapper</artifactId>
+                <artifactId>siddhi-query-api</artifactId>
                 <version>${siddhi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-annotations</artifactId>
+                <version>${siddhi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-core</artifactId>
+                <version>${siddhi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-query-compiler</artifactId>
+                <version>${siddhi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.extension.siddhi.map.xml</groupId>
+                <artifactId>siddhi-map-xml</artifactId>
+                <version>${siddhi.mapper.xml.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>net.minidev.wso2</groupId>
-                <artifactId>json-smart</artifactId>
-                <version>${json.smart.version}</version>
+                <groupId>org.wso2.extension.siddhi.map.json</groupId>
+                <artifactId>siddhi-map-json</artifactId>
+                <version>${siddhi.mapper.json.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>commons-io.wso2</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>${commons-io.version}</version>
+                <groupId>org.wso2.extension.siddhi.map.text</groupId>
+                <artifactId>siddhi-map-text</artifactId>
+                <version>${siddhi.mapper.text.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <!--<dependency>-->
+                <!--<groupId>org.wso2.siddhi</groupId>-->
+                <!--<artifactId>siddhi-extension-text-input-mapper</artifactId>-->
+                <!--<version>${siddhi.extension.mapper.version}</version>-->
+                <!--<scope>test</scope>-->
+            <!--</dependency>-->
+            <!--Carbon Analytic Dependencies-->
+            <dependency>
+                <groupId>org.wso2.carbon.analytics</groupId>
+                <artifactId>org.wso2.siddhi.feature</artifactId>
+                <version>${org.wso2.siddhi.feature.version}</version>
+                <type>zip</type>
+            </dependency>
+            <!--Carbon Transport Dependencies-->
+            <dependency>
+                <groupId>org.wso2.carbon.transport</groupId>
+                <artifactId>org.wso2.carbon.connector.framework</artifactId>
+                <version>${carbon.transport.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.messaging</groupId>
+                <artifactId>org.wso2.carbon.messaging</artifactId>
+                <version>${org.wso2.carbon.messaging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.transport</groupId>
+                <artifactId>org.wso2.carbon.transport.http.netty</artifactId>
+                <version>${carbon.transport.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.transport</groupId>
+                <artifactId>org.wso2.carbon.transport.http.netty.feature</artifactId>
+                <version>${carbon.transport.version}</version>
+                <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${io.netty.version}</version>
+            </dependency>
+            <!--Carbon  Dependencies-->
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.core</artifactId>
+                <version>${carbon.kernel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.logging</artifactId>
+                <version>${carbon.logging.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.container</artifactId>
+                <version>${carbon.kernel.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
@@ -77,59 +162,6 @@
                 <type>zip</type>
             </dependency>
             <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-query-api</artifactId>
-                <version>${siddhi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-annotations</artifactId>
-                <version>${siddhi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-xml-input-mapper</artifactId>
-                <version>${siddhi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-core</artifactId>
-                <version>${siddhi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-query-compiler</artifactId>
-                <version>${siddhi.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.messaging</groupId>
-                <artifactId>org.wso2.carbon.messaging</artifactId>
-                <version>${org.wso2.carbon.messaging.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.transport</groupId>
-                <artifactId>org.wso2.carbon.transport.http.netty</artifactId>
-                <version>${carbon.transport.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>apache-collections</groupId>
-                <artifactId>commons-collections</artifactId>
-                <version>${commons.collections.version}</version>
-            </dependency>
-            <!--OSGI Test Dependencies-->
-            <dependency>
-                <groupId>org.wso2.carbon.transport</groupId>
-                <artifactId>org.wso2.carbon.transport.http.netty.feature</artifactId>
-                <version>${carbon.transport.version}</version>
-                <type>zip</type>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.security.caas</groupId>
-                <artifactId>org.wso2.carbon.security.caas.feature</artifactId>
-                <version>${carbon.security.caas.version}</version>
-                <type>zip</type>
-            </dependency>
-            <dependency>
                 <groupId>org.wso2.carbon.caching</groupId>
                 <artifactId>org.wso2.carbon.caching.feature</artifactId>
                 <version>${org.wso2.carbon.caching.version}</version>
@@ -141,15 +173,22 @@
                 <version>${org.wso2.carbon.caching.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.eclipse.osgi</groupId>
-                <artifactId>org.eclipse.osgi.services</artifactId>
-                <version>${org.eclipse.osgi.services.version}</version>
-                <optional>true</optional>
+                <groupId>org.wso2.carbon.messaging</groupId>
+                <artifactId>org.wso2.carbon.messaging.feature</artifactId>
+                <version>${org.wso2.carbon.messaging.version}</version>
+                <type>zip</type>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.analytics</groupId>
-                <artifactId>org.wso2.siddhi.feature</artifactId>
-                <version>${org.wso2.siddhi.feature.version}</version>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>osgi-test-util</artifactId>
+                <version>${osgi.test.util.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <!--Carbon security  Dependencies-->
+            <dependency>
+                <groupId>org.wso2.carbon.security.caas</groupId>
+                <artifactId>org.wso2.carbon.security.caas.feature</artifactId>
+                <version>${carbon.security.caas.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
@@ -163,9 +202,53 @@
                 <version>${carbon.security.caas.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.ow2.spec.ee</groupId>
+                <artifactId>ow2-jta-1.1-spec</artifactId>
+                <version>${ow2.jta.spec.version}</version>
+            </dependency>
+            <!--Other Dependencies-->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${org.apache.commons.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons.io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.minidev.wso2</groupId>
+                <artifactId>json-smart</artifactId>
+                <version>${json.smart.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io.wso2</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>${testng.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>apache-collections</groupId>
+                <artifactId>commons-collections</artifactId>
+                <version>${commons.collections.version}</version>
+            </dependency>
+            <!--OSGI Test Dependencies-->
+            <dependency>
+                <groupId>org.wso2.eclipse.osgi</groupId>
+                <artifactId>org.eclipse.osgi.services</artifactId>
+                <version>${org.eclipse.osgi.services.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.exam</groupId>
@@ -194,12 +277,6 @@
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.exam</groupId>
-                <artifactId>pax-exam-junit4</artifactId>
-                <version>${pax.exam.junit4.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.ops4j.pax.exam</groupId>
                 <artifactId>pax-exam-spi</artifactId>
                 <version>${pax.exam.spi.version}</version>
                 <scope>test</scope>
@@ -212,91 +289,9 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.container</artifactId>
-                <version>${carbon.kernel.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.jacoco</groupId>
                 <artifactId>org.jacoco.ant</artifactId>
                 <version>${org.jacoco.ant.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ow2.spec.ee</groupId>
-                <artifactId>ow2-jta-1.1-spec</artifactId>
-                <version>${ow2.jta.spec.version}</version>
-            </dependency>
-            <!--Testing Dependencies-->
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.messaging</groupId>
-                <artifactId>org.wso2.carbon.messaging.feature</artifactId>
-                <version>${org.wso2.carbon.messaging.version}</version>
-                <type>zip</type>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.core</artifactId>
-                <version>${carbon.kernel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-xml-output-mapper</artifactId>
-                <version>${siddhi.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-json-input-mapper</artifactId>
-                <version>${siddhi.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>org.wso2.carbon.logging</artifactId>
-                <version>${carbon.logging.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-json-output-mapper</artifactId>
-                <version>${siddhi.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.transport</groupId>
-                <artifactId>org.wso2.carbon.connector.framework</artifactId>
-                <version>${carbon.transport.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-extension-text-input-mapper</artifactId>
-                <version>${siddhi.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-all</artifactId>
-                <version>${io.netty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>${org.apache.commons.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-io</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>${commons.io.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon</groupId>
-                <artifactId>osgi-test-util</artifactId>
-                <version>${osgi.test.util.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.ops4j.pax.tipi</groupId>
@@ -306,12 +301,15 @@
         </dependencies>
     </dependencyManagement>
     <properties>
-        <pax.exam.junit4.version>3.6.0</pax.exam.junit4.version>
+        <siddhi.mapper.json.version>4.0.2</siddhi.mapper.json.version>
+        <siddhi.mapper.text.version>1.0.1</siddhi.mapper.text.version>
+        <siddhi.mapper.xml.version>4.0.0-M8</siddhi.mapper.xml.version>
+        <siddhi.version>4.0.0-M21</siddhi.version>
         <pax.exam.spi.version>4.10.0</pax.exam.spi.version>
         <commons.collections.version>3.1</commons.collections.version>
         <org.eclipse.osgi.services.version>3.5.100.v20160504-1419</org.eclipse.osgi.services.version>
         <org.ops4j.pax.tipi.version>1.3.0.1</org.ops4j.pax.tipi.version>
-        <org.wso2.siddhi.feature.version>2.0.11</org.wso2.siddhi.feature.version>
+        <org.wso2.siddhi.feature.version>2.0.54</org.wso2.siddhi.feature.version>
         <osgi.test.util.version>5.1.1</osgi.test.util.version>
         <commons.io.version>2.5</commons.io.version>
         <org.apache.commons.version>1.3.2</org.apache.commons.version>
@@ -320,7 +318,6 @@
         <carbon.logging.version>5.1.0-m2</carbon.logging.version>
         <testng.version>6.11</testng.version>
         <maven.shadeplugin.version>2.4.1</maven.shadeplugin.version>
-        <siddhi.version>4.0.0-M7</siddhi.version>
         <org.jacoco.ant.version>0.7.5.201505241946</org.jacoco.ant.version>
         <ow2.jta.spec.version>1.0.12</ow2.jta.spec.version>
         <slf4j.version>1.7.12</slf4j.version>
@@ -333,7 +330,7 @@
         <pax.url.aether.version>1.6.0</pax.url.aether.version>
         <maven.paxexam.plugin.version>1.2.4</maven.paxexam.plugin.version>
         <carbon.kernel.version>5.2.0-m3</carbon.kernel.version>
-        <carbon.transport.version>4.4.4</carbon.transport.version>
+        <carbon.transport.version>4.4.15</carbon.transport.version>
         <org.wso2.carbon.messaging.version>2.3.1</org.wso2.carbon.messaging.version>
         <commons-io.version>2.4.0.wso2v1</commons-io.version>
         <json.smart.version>2.1.0.wso2v1</json.smart.version>
@@ -356,13 +353,6 @@
         <antlr4.maven.plugin.version>4.2.2</antlr4.maven.plugin.version>
         <maven.dependency.plugin.version>2.10</maven.dependency.plugin.version>
     </properties>
-    <scm>
-        <connection>scm:git:https://github.com/wso2-extensions/siddhi-io-http.git</connection>
-        <url>https://github.com/wso2-extensions/siddhi-io-http.git</url>
-        <developerConnection>scm:git:https://github.com/wso2-extensions/siddhi-io-http.git
-        </developerConnection>
-        <tag>HEAD</tag>
-    </scm>
     <build>
         <extensions>
             <extension>
@@ -423,6 +413,17 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>${maven.shadeplugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.wso2.siddhi</groupId>
+                <artifactId>siddhi-doc-gen</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate-md-docs</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
         <pluginManagement>
@@ -491,6 +492,18 @@
                         <forkMode>once</forkMode>
                         <argLine>-ea -Xmx512m</argLine>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.wso2.siddhi</groupId>
+                    <artifactId>siddhi-doc-gen</artifactId>
+                    <version>${siddhi.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>generate-md-docs</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>

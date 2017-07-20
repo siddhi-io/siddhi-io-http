@@ -110,3 +110,7 @@ Siddhi developers can be contacted via the mailing lists:
 We welcome your feedback and contribution.
 ------------------
 WSO2 Smart Analytics Team.
+
+## API Docs:
+
+1. <a href="./api/1.0.1-SNAPSHOT">1.0.1-SNAPSHOT</a>

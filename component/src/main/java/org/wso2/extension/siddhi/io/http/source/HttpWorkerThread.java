@@ -39,25 +39,27 @@ public class HttpWorkerThread implements Runnable {
     private SourceEventListener sourceEventListeners;
     private static final Logger logger = LoggerFactory.getLogger(HttpWorkerThread.class);
     private String sourceID;
+    private String[] trpProperties;
 
     HttpWorkerThread(CarbonMessage cMessage, CarbonCallback cCallback, SourceEventListener sourceEventListener,
-                     String sourceID) {
+                     String sourceID, String[] trpProperties) {
         this.carbonMessage = cMessage;
         this.carbonCallback = cCallback;
         this.sourceEventListeners = sourceEventListener;
         this.sourceID = sourceID;
+        this.trpProperties = trpProperties;
     }
 
     @Override
     public void run() {
         try {
             InputStream inputStream = carbonMessage.getInputStream();
-            String response = new String(ByteStreams.toByteArray(inputStream));
-            if (!response.equals(HttpConstants.EMPTY_STRING)) {
-                sourceEventListeners.onEvent(response);
+            String payload = new String(ByteStreams.toByteArray(inputStream));
+            if (!payload.equals(HttpConstants.EMPTY_STRING)) {
+                sourceEventListeners.onEvent(payload, trpProperties);
                 HttpSourceUtil.handleCallback("OK", carbonCallback, 200);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Submitted Event " + response + " Stream");
+                    logger.debug("Submitted Event " + payload + " Stream");
                 }
             } else {
                 HttpSourceUtil.handleCallback("Empty payload event", carbonCallback, 405);
@@ -69,6 +71,8 @@ public class HttpWorkerThread implements Runnable {
             logger.error("Event format is not equal to the expected in " + sourceID);
             HttpSourceUtil.handleCallback("Event format " +
                     "is not equal to the expected", carbonCallback, 405);
+        } finally {
+            carbonMessage.release();
         }
     }
 }

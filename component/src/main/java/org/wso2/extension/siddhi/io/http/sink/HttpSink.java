@@ -249,10 +249,19 @@ public class HttpSink extends Sink {
     private String userName;
     private String userPassword;
     private String publisherURL;
+    @Override
+    public Class[] getSupportedInputEventClasses() {
+        return new Class[]{String.class};
+    }
+
+    @Override
+    public String[] getSupportedDynamicOptions() {
+        return new String[]{HttpConstants.HEADERS, HttpConstants.METHOD};
+    }
 
     @Override
     protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
-                        ConfigReader sinkConfigReader, SiddhiAppContext siddhiAppContext) {
+                        ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
         this.streamID = outputStreamDefinition.toString();
         this.mapType = outputStreamDefinition.getAnnotations().get(0).getAnnotations().get(0).getElements().get(0)
                 .getValue();
@@ -264,9 +273,9 @@ public class HttpSink extends Sink {
         this.userPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_PASSWORD,
                 HttpConstants.EMPTY_STRING);
         String clientStoreFile = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PATH, new
-                HttpSinkUtil().trustStorePath(sinkConfigReader));
+                HttpSinkUtil().trustStorePath(configReader));
         String clientStorePass = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD,
-                new HttpSinkUtil().trustStorePassword(sinkConfigReader));
+                new HttpSinkUtil().trustStorePassword(configReader));
         if (HttpConstants.EMPTY_STRING.equals(publisherURL)) {
             throw new ExceptionInInitializerError("Receiver URL found empty but it is Mandatory field in " +
                     "" + HttpConstants.HTTP_SINK_ID + "in" + streamID);
@@ -286,26 +295,14 @@ public class HttpSink extends Sink {
         this.httpURLProperties = new HttpSinkUtil().getURLProperties(publisherURL);
         this.senderConfig = new HttpSinkUtil().getSenderConfigurations(httpURLProperties, clientStoreFile,
                 clientStorePass);
-        this.nettyTransportProperty = new HttpSinkUtil().getTransportConfigurations(sinkConfigReader);
+        this.nettyTransportProperty = new HttpSinkUtil().getTransportConfigurations(configReader);
     }
 
     @Override
-    public Map<String, Object> currentState() {
-        //no current state.
-        return null;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        //no need to maintain.
-    }
-
-    @Override
-    public void publish(Object payload, DynamicOptions transportOptions)
-            throws ConnectionUnavailableException {
-        String headers = httpHeaderOption.getValue(transportOptions);
-        String httpMethod = HttpConstants.EMPTY_STRING.equals(httpMethodOption.getValue(transportOptions)) ?
-                HttpConstants.METHOD_DEFAULT : httpMethodOption.getValue(transportOptions);
+    public void publish(Object payload, DynamicOptions dynamicOptions) throws ConnectionUnavailableException {
+        String headers = httpHeaderOption.getValue(dynamicOptions);
+        String httpMethod = HttpConstants.EMPTY_STRING.equals(httpMethodOption.getValue(dynamicOptions)) ?
+                HttpConstants.METHOD_DEFAULT : httpMethodOption.getValue(dynamicOptions);
         List<Header> headersList = new HttpSinkUtil().getHeaders(headers);
         String contentType = new HttpSinkUtil().getContentType(mapType, headersList);
         String messageBody = (String) payload;
@@ -323,10 +320,38 @@ public class HttpSink extends Sink {
     }
 
     @Override
-    public String[] getSupportedDynamicOptions() {
-        return new String[]{HttpConstants.HEADERS, HttpConstants.METHOD};
+    public void connect() throws ConnectionUnavailableException {
+        this.clientConnector = new HTTPClientConnector(senderConfig, nettyTransportProperty);
+        log.info(streamID + " has successfully connected to " + publisherURL);
+
     }
 
+    @Override
+    public void disconnect() {
+        if (clientConnector != null) {
+            clientConnector = null;
+            log.info("Server connector for url " + publisherURL + " disconnected.");
+        }
+    }
+
+    @Override
+    public void destroy() {
+        if (clientConnector != null) {
+            clientConnector = null;
+            log.info("Server connector for url " + publisherURL + " disconnected.");
+        }
+    }
+
+    @Override
+    public Map<String, Object> currentState() {
+        //no current state.
+        return null;
+    }
+
+    @Override
+    public void restoreState(Map<String, Object> map) {
+        //no need to maintain.
+    }
     /**
      * The method is responsible of generating carbon message to send.
      *
@@ -397,27 +422,5 @@ public class HttpSink extends Sink {
             cMessage.setEndOfMsgAdded(true);
         }
         return cMessage;
-    }
-
-    @Override
-    public void connect() {
-        this.clientConnector = new HTTPClientConnector(senderConfig, nettyTransportProperty);
-        log.info(streamID + " has successfully connected to " + publisherURL);
-    }
-
-    @Override
-    public void disconnect() {
-        if (clientConnector != null) {
-            clientConnector = null;
-            log.info("Server connector for url " + publisherURL + " disconnected.");
-        }
-    }
-
-    @Override
-    public void destroy() {
-        if (clientConnector != null) {
-            clientConnector = null;
-            log.info("Server connector for url " + publisherURL + " disconnected.");
-        }
     }
 }

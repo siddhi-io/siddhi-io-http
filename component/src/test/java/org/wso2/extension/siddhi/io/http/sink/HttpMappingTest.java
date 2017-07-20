@@ -22,12 +22,13 @@ import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpServerListenerHandler;
+import org.wso2.extension.siddhi.map.json.sinkmapper.JsonSinkMapper;
+import org.wso2.extension.siddhi.map.text.sinkmapper.TextSinkMapper;
+import org.wso2.extension.siddhi.map.xml.sinkmapper.XMLSinkMapper;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.extension.output.mapper.json.JsonSinkMapper;
-import org.wso2.siddhi.extension.output.mapper.text.TextSinkMapper;
-import org.wso2.siddhi.extension.output.mapper.xml.XMLSinkMapper;
+
 
 /**
  * Test case for mapping type.
@@ -128,6 +129,7 @@ public class HttpMappingTest {
 
     /**
      * Creating test for publishing events with TEXT mapping.
+     *
      * @throws Exception Interrupted exception
      */
     @Test
@@ -139,7 +141,7 @@ public class HttpMappingTest {
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
                 + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
                 + "headers='{{headers}}',"
-                + "@map(type='json', @payload('{{message}}'))) "
+                + "@map(type='text', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
         String query = ("@info(name = 'query1') " +
                 "from FooStream select message,method,headers insert into BarStream;");
@@ -149,7 +151,7 @@ public class HttpMappingTest {
         siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[]{"WSO2,55.6,100", "GET", "'Name:John','Age:23'"});
+        fooStream.send(new Object[]{"WSO2,55.6,100", "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -159,4 +161,41 @@ public class HttpMappingTest {
         siddhiAppRuntime.shutdown();
     }
 
+    /**
+     * Creating test for publishing events with TEXT mapping.
+     *
+     * @throws Exception Interrupted exception
+     */
+    @Test
+    public void testHTTPTextMappingText2() throws Exception {
+        log.info("Creating test for publishing events with TEXT mapping.");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("text-output-mapper", TextSinkMapper.class);
+        String inStreamDefinition = "Define stream FooStream (name String, age int,country" +
+                " String,method String,headers String);"
+                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
+                + "headers='{{headers}}',"
+                + "@map(type='text')) "
+                + "Define stream BarStream (name String, age int,country String,method String,headers String);";
+        String query = ("@info(name = 'query1') " +
+                "from FooStream select * insert into BarStream;");
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
+                query);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        lst.run();
+        fooStream.send(new Object[]{"WSO2", 55.6, "USA", "POST", "'Name:John','Age:23'"});
+        while (!lst.getServerListener().isMessageArrive()) {
+            Thread.sleep(10);
+        }
+        String eventData = lst.getServerListener().getData();
+        Assert.assertEquals(eventData, "name:\"WSO2\",\n" +
+                "age:55.6,\n" +
+                "country:\"USA\",\n" +
+                "method:\"POST\",\n" +
+                "headers:\"'Name:John','Age:23'\"\n");
+        lst.shutdown();
+        siddhiAppRuntime.shutdown();
+    }
 }

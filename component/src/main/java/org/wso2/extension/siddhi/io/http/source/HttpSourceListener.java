@@ -45,8 +45,10 @@ class HttpSourceListener {
     private String url;
     private Boolean isAuthenticated;
     private SourceEventListener sourceEventListener;
+    private String[] requestedTransportPropertyNames;
 
-    HttpSourceListener(int workerThread, String url, Boolean auth, SourceEventListener sourceEventListener) {
+    HttpSourceListener(int workerThread, String url, Boolean auth, SourceEventListener sourceEventListener,
+                       String[] requestedTransportPropertyNames) {
         this.executorService = Executors.newFixedThreadPool(workerThread);
         this.paused = false;
         this.lock = new ReentrantLock();
@@ -54,6 +56,7 @@ class HttpSourceListener {
         this.url = url;
         this.isAuthenticated = auth;
         this.sourceEventListener = sourceEventListener;
+        this.requestedTransportPropertyNames = requestedTransportPropertyNames;
         logger.info("Source Listener has created for url " + this.url);
     }
 
@@ -70,6 +73,7 @@ class HttpSourceListener {
             try {
                 condition.await();
             } catch (InterruptedException ie) {
+                carbonMessage.release();
                 Thread.currentThread().interrupt();
                 logger.error("Thread interrupted while pausing ", ie);
                 HttpSourceUtil.handleCallback("Internal Error", carbonCallback , 500);
@@ -78,26 +82,40 @@ class HttpSourceListener {
             }
         }
         try {
-            if (!HttpConnectorRegistry.getInstance().getSourceListenersMap().containsKey(url.toString())) {
-                throw new HttpSourceAdaptorRuntimeException("Resource not found.", carbonCallback, 404);
-            } else {
-                if (isAuthenticated) {
-                    try {
-                        HttpAuthenticator.authenticate(carbonMessage, carbonCallback);
-                    } catch (HttpSourceAdaptorRuntimeException e) {
-                        throw new HttpSourceAdaptorRuntimeException("Failed in isAuthenticated ",
-                                e , carbonCallback, 401);
-                    }
-                }
-                executorService.execute(new HttpWorkerThread(carbonMessage, carbonCallback,
-                        sourceEventListener, sourceEventListener.getStreamDefinition().toString()));
+            if (isAuthenticated) {
+                HttpAuthenticator.authenticate(carbonMessage, carbonCallback);
             }
+            String[] trpProperties = new String[requestedTransportPropertyNames.length];
+            populateTransportHeaders(carbonMessage, trpProperties);
+            populateTransportProperties(carbonMessage, trpProperties);
+            executorService.execute(new HttpWorkerThread(carbonMessage, carbonCallback,
+                        sourceEventListener, sourceEventListener.getStreamDefinition().toString(), trpProperties));
         } catch (RuntimeException e) {
+            carbonMessage.release();
             throw new HttpSourceAdaptorRuntimeException("Internal Error. Failed to process HTTP message.",
                     e , carbonCallback, 500);
         }
     }
 
+    private void populateTransportHeaders(CarbonMessage carbonMessage, String[] properties) {
+        if (requestedTransportPropertyNames.length > 0) {      //cannot be null according to siddhi impl
+            int i = 0;
+            for (String property : requestedTransportPropertyNames) {
+                properties[i] = carbonMessage.getHeader(property);      //can be null
+                i++;
+            }
+        }
+    }
+
+    private void populateTransportProperties(CarbonMessage carbonMessage, String[] properties) {
+        if (requestedTransportPropertyNames.length > 0) {      //cannot be null according to siddhi impl
+            int i = 0;
+            for (String property : requestedTransportPropertyNames) {
+                properties[i] = String.valueOf(carbonMessage.getProperty(property));      //can be null
+                i++;
+            }
+        }
+    }
     /**
      * State that current Source Listener is paused or not.
      *

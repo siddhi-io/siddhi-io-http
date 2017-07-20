@@ -53,11 +53,14 @@ public class HttpAuthenticator {
                 loginContext = new LoginContext(HttpConstants.CARBON_SECURITY_CONFIGURATION, callbackHandler);
                 loginContext.login();
             } catch (LoginException e) {
+                carbonMessage.release();
                 throw new HttpSourceAdaptorRuntimeException("Username and password is not included when trying to " +
                         "Authentication fail ", e, carbonCallback, 401);
             }
         } else {
-            throw new HttpSourceAdaptorRuntimeException("Authentication header not found when trying to " +
+            carbonMessage.release();
+            throw new HttpSourceAdaptorRuntimeException(carbonMessage , "Authentication header not found when trying " +
+                    "to " +
                     "authenticate with basic authentication ", carbonCallback, 401);
         }
     }
