@@ -93,12 +93,6 @@
                 <version>${siddhi.mapper.text.version}</version>
                 <scope>test</scope>
             </dependency>
-            <!--<dependency>-->
-                <!--<groupId>org.wso2.siddhi</groupId>-->
-                <!--<artifactId>siddhi-extension-text-input-mapper</artifactId>-->
-                <!--<version>${siddhi.extension.mapper.version}</version>-->
-                <!--<scope>test</scope>-->
-            <!--</dependency>-->
             <!--Carbon Analytic Dependencies-->
             <dependency>
                 <groupId>org.wso2.carbon.analytics</groupId>
@@ -301,7 +295,7 @@
         </dependencies>
     </dependencyManagement>
     <properties>
-        <siddhi.mapper.json.version>4.0.2</siddhi.mapper.json.version>
+        <siddhi.mapper.json.version>4.0.3</siddhi.mapper.json.version>
         <siddhi.mapper.text.version>1.0.1</siddhi.mapper.text.version>
         <siddhi.mapper.xml.version>4.0.0-M8</siddhi.mapper.xml.version>
         <siddhi.version>4.0.0-M21</siddhi.version>

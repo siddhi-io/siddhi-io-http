@@ -112,7 +112,7 @@ class HttpConnectorRegistry {
      *
      * @param sourceConfigReader the siddhi source config reader.
      */
-    void initHttpServerConnector(ConfigReader sourceConfigReader) {
+    void initHttpServerConnectorController(ConfigReader sourceConfigReader) {
         if (this.serverConnectorController == null) {
             TransportsConfiguration configuration = new TransportsConfiguration();
             configuration.setTransportProperties(new HttpSourceUtil().getTransportConfigurations

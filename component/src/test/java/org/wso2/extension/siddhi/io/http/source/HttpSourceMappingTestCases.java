@@ -22,6 +22,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.source.util.HttpTestUtil;
+import org.wso2.extension.siddhi.map.json.sourcemapper.JsonSourceMapper;
 import org.wso2.extension.siddhi.map.text.sourcemapper.TextSourceMapper;
 import org.wso2.extension.siddhi.map.xml.sourcemapper.XmlSourceMapper;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
@@ -171,67 +172,67 @@ public class HttpSourceMappingTestCases {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-// TODO: 7/20/17 wait till release
-//    /**
-//     * Creating test for publishing events with Json mapping.
-//     * @throws Exception Interrupted exception
-//     */
-//    @Test
-//    public void testJsonMapping() throws Exception {
-//        logger.info("Creating test for publishing events with Json mapping.");
-//        new HttpTestUtil().setCarbonHome();
-//        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
-//        List<String> receivedEventNameList = new ArrayList<>(2);
-//        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
-//        SiddhiManager siddhiManager = new SiddhiManager();
-//        siddhiManager.setPersistenceStore(persistenceStore);
-//        siddhiManager.setExtension("xml-input-mapper", JsonSourceMapper.class);
-//        String inStreamDefinition = "" + "@source(type='http', @map(type='json'), "
-//                + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
-//                + "define stream inputStream (name string, age int, country string);";
-//        String query = ("@info(name = 'query') "
-//                + "from inputStream "
-//                + "select *  "
-//                + "insert into outputStream;"
-//                );
-//        SiddhiAppRuntime siddhiAppRuntime = siddhiManager
-//                .createSiddhiAppRuntime(inStreamDefinition + query);
-//
-//        siddhiAppRuntime.addCallback("query", new QueryCallback() {
-//            @Override
-//            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-//                EventPrinter.print(timeStamp, inEvents, removeEvents);
-//                for (Event event : inEvents) {
-//                    eventCount.incrementAndGet();
-//                    receivedEventNameList.add(event.getData(0).toString());
-//                }
-//            }
-//        });
-//        siddhiAppRuntime.start();
-//        // publishing events
-//        List<String> expected = new ArrayList<>(2);
-//        expected.add("John");
-//        expected.add("Mike");
-//        String event1 = " {\n" +
-//                "      \"event\":{\n" +
-//                "         \"name\":\"John\",\n" +
-//                "         \"age\":55.6,\n" +
-//                "         \"country\":\"US\"\n" +
-//                "      }\n" +
-//                " }";
-//        String event2 = " {\n" +
-//                "      \"event\":{\n" +
-//                "         \"name\":\"Mike\",\n" +
-//                "         \"age\":55.6,\n" +
-//                "         \"country\":\"US\"\n" +
-//                "      }\n" +
-//                " }";
-//        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro", false,
-//                "application/json", "POST");
-//        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", false,
-//                "application/json", "POST");
-//        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
-//        Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
-//        siddhiAppRuntime.shutdown();
-//    }
+
+    /**
+     * Creating test for publishing events with Json mapping.
+     * @throws Exception Interrupted exception
+     */
+    @Test
+    public void testJsonMapping() throws Exception {
+        logger.info("Creating test for publishing events with Json mapping.");
+        new HttpTestUtil().setCarbonHome();
+        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
+        List<String> receivedEventNameList = new ArrayList<>(2);
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+        siddhiManager.setExtension("xml-input-mapper", JsonSourceMapper.class);
+        String inStreamDefinition = "" + "@source(type='http', @map(type='json'), "
+                + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
+                + "define stream inputStream (name string, age int, country string);";
+        String query = ("@info(name = 'query') "
+                + "from inputStream "
+                + "select *  "
+                + "insert into outputStream;"
+                );
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager
+                .createSiddhiAppRuntime(inStreamDefinition + query);
+
+        siddhiAppRuntime.addCallback("query", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event event : inEvents) {
+                    eventCount.incrementAndGet();
+                    receivedEventNameList.add(event.getData(0).toString());
+                }
+            }
+        });
+        siddhiAppRuntime.start();
+        // publishing events
+        List<String> expected = new ArrayList<>(2);
+        expected.add("John");
+        expected.add("Mike");
+        String event1 = " {\n" +
+                "      \"event\":{\n" +
+                "         \"name\":\"John\",\n" +
+                "         \"age\":55,\n" +
+                "         \"country\":\"US\"\n" +
+                "      }\n" +
+                " }";
+        String event2 = " {\n" +
+                "      \"event\":{\n" +
+                "         \"name\":\"Mike\",\n" +
+                "         \"age\":55,\n" +
+                "         \"country\":\"US\"\n" +
+                "      }\n" +
+                " }";
+        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro", false,
+                "application/json", "POST");
+        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", false,
+                "application/json", "POST");
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
+        siddhiAppRuntime.shutdown();
+    }
 }

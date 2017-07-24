@@ -189,7 +189,7 @@ public class HttpSource extends Source {
                 .DEFAULT_WORKER_COUNT);
         this.listenerConfig = new HttpSourceUtil().setListenerProperty(this.listenerUrl, configReader);
         this.httpConnectorRegistry = HttpConnectorRegistry.getInstance();
-        this.httpConnectorRegistry.initHttpServerConnector(configReader);
+        this.httpConnectorRegistry.initHttpServerConnectorController(configReader);
         this.sourceEventListener = sourceEventListener;
         this.requestedTransportPropertyNames = requestedTransportPropertyNames;
     }
