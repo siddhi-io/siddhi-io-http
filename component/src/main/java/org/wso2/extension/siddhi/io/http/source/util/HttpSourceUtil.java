@@ -175,6 +175,8 @@ public class HttpSourceUtil {
         defaultCarbonMessage.setHeader(Constants.HTTP_CONNECTION, Constants.CONNECTION_CLOSE);
         defaultCarbonMessage.setHeader(Constants.HTTP_VERSION, HTTP_1_1.text());
         defaultCarbonMessage.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+        defaultCarbonMessage.setProperty(org.wso2.carbon.messaging.Constants.DIRECTION,
+                org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE);
         defaultCarbonMessage.setEndOfMsgAdded(true);
         carbonCallback.done(defaultCarbonMessage);
     }

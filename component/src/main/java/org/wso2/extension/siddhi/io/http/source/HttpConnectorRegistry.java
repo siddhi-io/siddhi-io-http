@@ -27,7 +27,6 @@ import org.wso2.carbon.transport.http.netty.listener.HTTPServerConnector;
 import org.wso2.carbon.transport.http.netty.listener.ServerConnectorController;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 
@@ -90,7 +89,7 @@ class HttpConnectorRegistry {
                     new HttpSourceListener(workerThread, listenerUrl, isAuth, sourceEventListener
                             , requestedTransportPropertyNames));
             if (httpSourceListener != null) {
-                throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected.");
+                log.error("Listener URL " + listenerUrl + " already connected.");
             }
         }
     }

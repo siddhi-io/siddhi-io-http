@@ -48,11 +48,14 @@ public class HttpSourceAdaptorRuntimeException extends RuntimeException {
         defaultCarbonMessage.setProperty(Constants.HTTP_REASON_PHRASE, HttpResponseStatus.valueOf(code).reasonPhrase());
         defaultCarbonMessage.setHeader(Constants.HTTP_CONNECTION, Constants.CONNECTION_CLOSE);
         defaultCarbonMessage.setHeader(Constants.HTTP_VERSION, HTTP_1_1.text());
+        defaultCarbonMessage.setProperty(org.wso2.carbon.messaging.Constants.DIRECTION,
+                org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE);
         carbonCallback.done(defaultCarbonMessage);
         carbonMessage.release();
     }
 
-    public HttpSourceAdaptorRuntimeException(String message, Throwable cause, CarbonCallback carbonCallback, int code) {
+    public HttpSourceAdaptorRuntimeException(String message, Throwable cause, CarbonCallback carbonCallback, int code
+    , CarbonMessage carbonMessage) {
         super(message, cause);
         DefaultCarbonMessage defaultCarbonMessage = new DefaultCarbonMessage();
         defaultCarbonMessage.setStringMessageBody(message + cause.getMessage());
@@ -60,6 +63,9 @@ public class HttpSourceAdaptorRuntimeException extends RuntimeException {
         defaultCarbonMessage.setProperty(Constants.HTTP_REASON_PHRASE, HttpResponseStatus.valueOf(code).reasonPhrase());
         defaultCarbonMessage.setHeader(Constants.HTTP_CONNECTION, Constants.CONNECTION_CLOSE);
         defaultCarbonMessage.setHeader(Constants.HTTP_VERSION, HTTP_1_1.text());
+        defaultCarbonMessage.setProperty(org.wso2.carbon.messaging.Constants.DIRECTION,
+                org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE);
         carbonCallback.done(defaultCarbonMessage);
+        carbonMessage.release();
     }
 }

@@ -65,9 +65,8 @@ class HttpSourceListener {
      *
      * @param carbonMessage  the carbon message received from carbon transport.
      * @param carbonCallback the carbon callback received from carbon transport.
-     * @param url            the url that carbon message have to be send.
      */
-    void send(CarbonMessage carbonMessage, CarbonCallback carbonCallback, StringBuilder url) {
+    void send(CarbonMessage carbonMessage, CarbonCallback carbonCallback) {
         if (paused) {
             lock.lock();
             try {
@@ -93,7 +92,7 @@ class HttpSourceListener {
         } catch (RuntimeException e) {
             carbonMessage.release();
             throw new HttpSourceAdaptorRuntimeException("Internal Error. Failed to process HTTP message.",
-                    e , carbonCallback, 500);
+                    e , carbonCallback, 500 , carbonMessage);
         }
     }
 

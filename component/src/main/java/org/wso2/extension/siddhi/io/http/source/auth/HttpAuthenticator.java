@@ -55,7 +55,7 @@ public class HttpAuthenticator {
             } catch (LoginException e) {
                 carbonMessage.release();
                 throw new HttpSourceAdaptorRuntimeException("Username and password is not included when trying to " +
-                        "Authentication fail ", e, carbonCallback, 401);
+                        "Authentication fail ", e, carbonCallback, 401 , carbonMessage);
             }
         } else {
             carbonMessage.release();
