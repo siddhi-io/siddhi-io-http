@@ -96,6 +96,6 @@ public class HttpMessageProcessor implements CarbonMessageProcessor {
 
     @Override
     public String getId() {
-        return HttpConstants.MESSAGEPROCESSOR_ID;
+        return HttpConstants.MESSAGEPROCESSOR_ID_DEFAULT;
     }
 }

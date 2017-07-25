@@ -106,5 +106,6 @@ public class HttpConstants {
     public static final String EMPTY_ISAUTH = "false";
     public static final String ATHORIZATION_HEADER = "Authorization";
     public static final String CARBON_SECURITY_CONFIGURATION = "CarbonSecurityConfig";
-    public static final String MESSAGEPROCESSOR_ID = "Siddhi HTTP-message-processor";
+    public static final String MESSAGEPROCESSOR_ID = "messageProcessorId";
+    public static final String MESSAGEPROCESSOR_ID_DEFAULT = "Siddhi HTTP-message-processor";
 }
