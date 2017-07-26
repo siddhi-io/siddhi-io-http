@@ -214,7 +214,8 @@ public class HttpSource extends Source {
 
     @Override
     public void destroy() {
-        this.httpConnectorRegistry.stopHttpServerConnectorController();
+        // TODO: 7/26/17 Until fix for multiple worker and boss thread loop group
+        //this.httpConnectorRegistry.stopHttpServerConnectorController();
     }
 
     @Override
