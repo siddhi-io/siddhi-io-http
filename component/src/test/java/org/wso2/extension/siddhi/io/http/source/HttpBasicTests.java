@@ -276,10 +276,11 @@ public class HttpBasicTests {
             logMessages.add(String.valueOf(logEvent.getMessage()));
         }
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
-        Assert.assertEquals(logMessages.contains("Listener URL http://localhost:8008/endpoints/abc already connected.")
+        Assert.assertEquals(logMessages.contains("Error while connecting at Source 'http' at 'inputStream2'," +
+                        " Listener URL http://localhost:8008/endpoints/abc already connected.")
                 , true);
-        Assert.assertEquals(Collections.frequency(logMessages, "Listener URL http://localhost:8008/endpoints/" +
-                "abc already connected."), 1);
+        Assert.assertEquals(Collections.frequency(logMessages, "Error while connecting at Source 'http' at " +
+                "'inputStream2', Listener URL http://localhost:8008/endpoints/abc already connected."), 1);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
@@ -346,10 +347,10 @@ public class HttpBasicTests {
             logMessages.add(String.valueOf(logEvent.getMessage()));
         }
         SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
-        Assert.assertEquals(logMessages.contains("Listener URL http://localhost:8006/endpoints/RecPro " +
-                        "already connected."), true);
-        Assert.assertEquals(Collections.frequency(logMessages, "Listener URL http://localhost:8006/" +
-                "endpoints/RecPro already connected."), 1);
+        Assert.assertEquals(logMessages.contains("Error while connecting at Source 'http' at 'inputStreamA', " +
+                "Listener URL http://localhost:8006/endpoints/RecPro already connected."), true);
+        Assert.assertEquals(Collections.frequency(logMessages, "Error while connecting at Source 'http' at " +
+                "'inputStreamA', Listener URL http://localhost:8006/endpoints/RecPro already connected."), 1);
         siddhiAppRuntime.shutdown();
     }
 

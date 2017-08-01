@@ -298,7 +298,7 @@
         <siddhi.mapper.json.version>4.0.3</siddhi.mapper.json.version>
         <siddhi.mapper.text.version>1.0.1</siddhi.mapper.text.version>
         <siddhi.mapper.xml.version>4.0.0-M8</siddhi.mapper.xml.version>
-        <siddhi.version>4.0.0-M21</siddhi.version>
+        <siddhi.version>4.0.0-M28</siddhi.version>
         <pax.exam.spi.version>4.10.0</pax.exam.spi.version>
         <commons.collections.version>3.1</commons.collections.version>
         <org.eclipse.osgi.services.version>3.5.100.v20160504-1419</org.eclipse.osgi.services.version>
