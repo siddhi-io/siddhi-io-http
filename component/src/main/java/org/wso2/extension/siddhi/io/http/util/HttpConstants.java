@@ -102,10 +102,9 @@ public class HttpConstants {
 
     //Http siddhi source properties
     public static final String RECEIVER_URL = "receiver.url";
-    public static final String ISAUTH = "basic.auth.enabled";
-    public static final String EMPTY_ISAUTH = "false";
-    public static final String ATHORIZATION_HEADER = "Authorization";
+    public static final String IS_AUTH = "basic.auth.enabled";
+    public static final String EMPTY_IS_AUTH = "false";
     public static final String CARBON_SECURITY_CONFIGURATION = "CarbonSecurityConfig";
-    public static final String MESSAGEPROCESSOR_ID = "messageProcessorId";
-    public static final String MESSAGEPROCESSOR_ID_DEFAULT = "Siddhi HTTP-message-processor";
+    public static final String MESSAGE_PROCESSOR_ID = "messageProcessorId";
+    public static final String MESSAGE_PROCESSOR_ID_DEFAULT = "Siddhi HTTP-message-processor";
 }

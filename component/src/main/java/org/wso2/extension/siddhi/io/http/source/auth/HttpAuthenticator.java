@@ -46,7 +46,7 @@ public class HttpAuthenticator {
      */
     public static synchronized void authenticate(CarbonMessage carbonMessage, CarbonCallback carbonCallback) throws
             HttpSourceAdaptorRuntimeException {
-        if (carbonMessage.getHeaders().contains(HttpConstants.ATHORIZATION_HEADER)) {
+        if (carbonMessage.getHeaders().contains(HttpConstants.AUTHORIZATION_HEADER)) {
             ProxyCallbackHandler callbackHandler = new ProxyCallbackHandler(carbonMessage);
             LoginContext loginContext;
             try {

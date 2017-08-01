@@ -141,7 +141,7 @@ public class HttpSourceUtil {
                     listenerConfig = new ListenerConfiguration(HttpConstants.PROTOCOL_HTTP, host, port);
                     listenerConfig.setScheme(protocol);
                     listenerConfig.setMessageProcessorId(sourceConfigReader.readConfig(HttpConstants
-                                    .MESSAGEPROCESSOR_ID, HttpConstants.MESSAGEPROCESSOR_ID_DEFAULT));
+                                    .MESSAGE_PROCESSOR_ID, HttpConstants.MESSAGE_PROCESSOR_ID_DEFAULT));
                     break;
                 case HttpConstants.PROTOCOL_HTTPS:
                     listenerConfig = new ListenerConfiguration(HttpConstants.PROTOCOL_HTTPS, host, port);
@@ -153,7 +153,7 @@ public class HttpSourceUtil {
                     listenerConfig.setCertPass(sourceConfigReader.readConfig(HttpConstants.CERT_PASSWORD,
                             HttpConstants.CERT_PASSWORD_VALUE));
                     listenerConfig.setMessageProcessorId(sourceConfigReader.readConfig(HttpConstants
-                            .MESSAGEPROCESSOR_ID, HttpConstants.MESSAGEPROCESSOR_ID_DEFAULT));
+                            .MESSAGE_PROCESSOR_ID, HttpConstants.MESSAGE_PROCESSOR_ID_DEFAULT));
                     break;
                 default:
                     throw new HttpSourceAdaptorRuntimeException("Invalid protocol " + protocol);
