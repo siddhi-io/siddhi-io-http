@@ -34,10 +34,10 @@ import java.io.InputStream;
  * Handles the send data to source listener.
  */
 public class HttpWorkerThread implements Runnable {
+    private static final Logger logger = LoggerFactory.getLogger(HttpWorkerThread.class);
     private CarbonMessage carbonMessage;
     private CarbonCallback carbonCallback;
-    private SourceEventListener sourceEventListeners;
-    private static final Logger logger = LoggerFactory.getLogger(HttpWorkerThread.class);
+    private SourceEventListener sourceEventListener;
     private String sourceID;
     private String[] trpProperties;
 
@@ -45,7 +45,7 @@ public class HttpWorkerThread implements Runnable {
                      String sourceID, String[] trpProperties) {
         this.carbonMessage = cMessage;
         this.carbonCallback = cCallback;
-        this.sourceEventListeners = sourceEventListener;
+        this.sourceEventListener = sourceEventListener;
         this.sourceID = sourceID;
         this.trpProperties = trpProperties;
     }
@@ -56,7 +56,7 @@ public class HttpWorkerThread implements Runnable {
             InputStream inputStream = carbonMessage.getInputStream();
             String payload = new String(ByteStreams.toByteArray(inputStream));
             if (!payload.equals(HttpConstants.EMPTY_STRING)) {
-                sourceEventListeners.onEvent(payload, trpProperties);
+                sourceEventListener.onEvent(payload, trpProperties);
                 HttpSourceUtil.handleCallback("OK", carbonCallback, 200);
                 if (logger.isDebugEnabled()) {
                     logger.debug("Submitted Event " + payload + " Stream");

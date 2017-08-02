@@ -140,6 +140,8 @@ public class HttpSourceUtil {
                 case HttpConstants.PROTOCOL_HTTP:
                     listenerConfig = new ListenerConfiguration(HttpConstants.PROTOCOL_HTTP, host, port);
                     listenerConfig.setScheme(protocol);
+                    listenerConfig.setMessageProcessorId(sourceConfigReader.readConfig(HttpConstants
+                                    .MESSAGE_PROCESSOR_ID, HttpConstants.MESSAGE_PROCESSOR_ID_DEFAULT));
                     break;
                 case HttpConstants.PROTOCOL_HTTPS:
                     listenerConfig = new ListenerConfiguration(HttpConstants.PROTOCOL_HTTPS, host, port);
@@ -150,6 +152,8 @@ public class HttpSourceUtil {
                             HttpConstants.KEYSTORE_PASSWORD_VALUE));
                     listenerConfig.setCertPass(sourceConfigReader.readConfig(HttpConstants.CERT_PASSWORD,
                             HttpConstants.CERT_PASSWORD_VALUE));
+                    listenerConfig.setMessageProcessorId(sourceConfigReader.readConfig(HttpConstants
+                            .MESSAGE_PROCESSOR_ID, HttpConstants.MESSAGE_PROCESSOR_ID_DEFAULT));
                     break;
                 default:
                     throw new HttpSourceAdaptorRuntimeException("Invalid protocol " + protocol);
@@ -175,6 +179,8 @@ public class HttpSourceUtil {
         defaultCarbonMessage.setHeader(Constants.HTTP_CONNECTION, Constants.CONNECTION_CLOSE);
         defaultCarbonMessage.setHeader(Constants.HTTP_VERSION, HTTP_1_1.text());
         defaultCarbonMessage.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+        defaultCarbonMessage.setProperty(org.wso2.carbon.messaging.Constants.DIRECTION,
+                org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE);
         defaultCarbonMessage.setEndOfMsgAdded(true);
         carbonCallback.done(defaultCarbonMessage);
     }

@@ -90,7 +90,7 @@ class HttpConnectorRegistry {
                     new HttpSourceListener(workerThread, listenerUrl, isAuth, sourceEventListener
                             , requestedTransportPropertyNames));
             if (httpSourceListener != null) {
-                throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected.");
+                throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected");
             }
         }
     }
@@ -113,7 +113,9 @@ class HttpConnectorRegistry {
      *
      * @param sourceConfigReader the siddhi source config reader.
      */
-    void initHttpServerConnector(ConfigReader sourceConfigReader) {
+    void initHttpServerConnectorController(ConfigReader sourceConfigReader) {
+        // TODO: 7/26/17 This configurations are not used until multiple boss and worker groups are supported by
+        // carbon transport
         if (this.serverConnectorController == null) {
             TransportsConfiguration configuration = new TransportsConfiguration();
             configuration.setTransportProperties(new HttpSourceUtil().getTransportConfigurations

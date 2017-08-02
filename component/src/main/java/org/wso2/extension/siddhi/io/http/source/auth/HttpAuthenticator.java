@@ -46,7 +46,7 @@ public class HttpAuthenticator {
      */
     public static synchronized void authenticate(CarbonMessage carbonMessage, CarbonCallback carbonCallback) throws
             HttpSourceAdaptorRuntimeException {
-        if (carbonMessage.getHeaders().contains(HttpConstants.ATHORIZATION_HEADER)) {
+        if (carbonMessage.getHeaders().contains(HttpConstants.AUTHORIZATION_HEADER)) {
             ProxyCallbackHandler callbackHandler = new ProxyCallbackHandler(carbonMessage);
             LoginContext loginContext;
             try {
@@ -55,7 +55,7 @@ public class HttpAuthenticator {
             } catch (LoginException e) {
                 carbonMessage.release();
                 throw new HttpSourceAdaptorRuntimeException("Username and password is not included when trying to " +
-                        "Authentication fail ", e, carbonCallback, 401);
+                        "Authentication fail ", e, carbonCallback, 401 , carbonMessage);
             }
         } else {
             carbonMessage.release();

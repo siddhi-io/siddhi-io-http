@@ -183,13 +183,13 @@ public class HttpSource extends Source {
                 PORT_CONTEXT_SEPARATOR + siddhiAppContext.getName()
                 + HttpConstants.PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
         this.listenerUrl = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_URL, defaultURL);
-        this.isAuth = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants.ISAUTH,
-                HttpConstants.EMPTY_ISAUTH).toLowerCase(Locale.ENGLISH));
+        this.isAuth = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants.IS_AUTH,
+                HttpConstants.EMPTY_IS_AUTH).toLowerCase(Locale.ENGLISH));
         this.workerThread = optionHolder.validateAndGetStaticValue(HttpConstants.WORKER_COUNT, HttpConstants
                 .DEFAULT_WORKER_COUNT);
         this.listenerConfig = new HttpSourceUtil().setListenerProperty(this.listenerUrl, configReader);
         this.httpConnectorRegistry = HttpConnectorRegistry.getInstance();
-        this.httpConnectorRegistry.initHttpServerConnector(configReader);
+        this.httpConnectorRegistry.initHttpServerConnectorController(configReader);
         this.sourceEventListener = sourceEventListener;
         this.requestedTransportPropertyNames = requestedTransportPropertyNames;
     }
@@ -214,7 +214,8 @@ public class HttpSource extends Source {
 
     @Override
     public void destroy() {
-        this.httpConnectorRegistry.stopHttpServerConnectorController();
+        // TODO: 7/26/17 Until fix for multiple worker and boss thread loop group
+        //this.httpConnectorRegistry.stopHttpServerConnectorController();
     }
 
     @Override
