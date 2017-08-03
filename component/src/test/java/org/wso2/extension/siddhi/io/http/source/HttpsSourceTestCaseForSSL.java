@@ -71,7 +71,7 @@ public class HttpsSourceTestCaseForSSL {
         masterConfigs.put("source.http.https.cert.password", "wso2carbon");
         List<String> receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
-        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs);
+        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs , null);
         inMemoryConfigManager.generateConfigReader("source", "http");
         siddhiManager.setConfigManager(inMemoryConfigManager);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
@@ -142,7 +142,7 @@ public class HttpsSourceTestCaseForSSL {
 
         List<String> receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
-        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs);
+        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs , null);
         inMemoryConfigManager.generateConfigReader("source", "http");
         siddhiManager.setConfigManager(inMemoryConfigManager);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
@@ -218,7 +218,7 @@ public class HttpsSourceTestCaseForSSL {
         masterConfigs.put("source.http.https.cert.password", "wso2carbon");
         List<String> receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
-        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs);
+        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs , null);
         inMemoryConfigManager.generateConfigReader("source", "http");
         siddhiManager.setConfigManager(inMemoryConfigManager);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
@@ -295,7 +295,7 @@ public class HttpsSourceTestCaseForSSL {
         masterConfigs.put("source.http.https.cert.password", "wso2carbon123");
         List<String> receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
-        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs);
+        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs , null);
         inMemoryConfigManager.generateConfigReader("source", "http");
         siddhiManager.setConfigManager(inMemoryConfigManager);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
