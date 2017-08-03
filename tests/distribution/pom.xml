@@ -285,7 +285,7 @@
                                 <delete dir="target/p2-repo"/>
                                 <!-- Figure out a way to delete tmp.* files -->
                                 <delete file="target/tmp"/>
-                                <delete dir="target/carbon-security-caas" quiet='true'/>
+                                <delete dir="target/carbon-security-caas" failonerror='false'/>
                                 <delete dir="target/antrun"/>
                             </target>
                         </configuration>
