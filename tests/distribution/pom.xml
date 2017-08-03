@@ -200,7 +200,7 @@
                         </goals>
                         <configuration>
                             <repositoryURL>file:${basedir}/target/p2-repo</repositoryURL>
-                            <targetPath>file:${basedir}/target/carbon-security-caas/wso2</targetPath>
+                            <targetPath>file:${basedir}/target/wso2siddhi-io-http-${project.version}/wso2</targetPath>
                             <runtime>default</runtime>
                         </configuration>
                     </execution>
@@ -213,7 +213,7 @@
                         <configuration>
                             <runtime>default</runtime>
                             <repositoryURL>file:${basedir}/target/p2-repo</repositoryURL>
-                            <destination>${basedir}/target/carbon-security-caas/wso2</destination>
+                            <destination>${basedir}/target/wso2siddhi-io-http-${project.version}/wso2</destination>
                             <deleteOldRuntimeFiles>true</deleteOldRuntimeFiles>
                             <features>
                                 <feature>
@@ -265,7 +265,7 @@
                         <phase>package</phase>
                         <configuration>
                             <tasks>
-                                <replace dir="target/carbon-security-caas" token="false" value="true">
+                                <replace dir="target/wso2siddhi-io-http-${project.version}" token="false" value="true">
                                     <include name="**/bundles.info"/>
                                 </replace>
                             </tasks>
@@ -285,7 +285,7 @@
                                 <delete dir="target/p2-repo"/>
                                 <!-- Figure out a way to delete tmp.* files -->
                                 <delete file="target/tmp"/>
-                                <delete dir="target/carbon-security-caas" failonerror='false'/>
+                                <delete dir="target/wso2siddhi-io-http-${project.version}"/>
                                 <delete dir="target/antrun"/>
                             </target>
                         </configuration>
