@@ -158,12 +158,13 @@
         <dependency>
             <groupId>org.wso2.extension.siddhi.io.http</groupId>
             <artifactId>siddhi-io-http</artifactId>
-            <version>${siddhi.io.http.version}</version>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.wso2.extension.siddhi.io.http</groupId>
             <artifactId>org.wso2.extension.io.http.test.distribution</artifactId>
-            <version>${siddhi.io.http.version}</version>
+            <version>${project.version}</version>
             <type>zip</type>
             <scope>test</scope>
         </dependency>
