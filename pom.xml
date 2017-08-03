@@ -324,7 +324,7 @@
         <pax.url.aether.version>1.6.0</pax.url.aether.version>
         <maven.paxexam.plugin.version>1.2.4</maven.paxexam.plugin.version>
         <carbon.kernel.version>5.2.0-m3</carbon.kernel.version>
-        <carbon.transport.version>4.4.23</carbon.transport.version>
+        <carbon.transport.version>4.4.26</carbon.transport.version>
         <org.wso2.carbon.messaging.version>2.3.1</org.wso2.carbon.messaging.version>
         <commons-io.version>2.4.0.wso2v1</commons-io.version>
         <json.smart.version>2.1.0.wso2v1</json.smart.version>
