@@ -33,8 +33,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Test Server Listener Manger.
  */
 public class HttpServerListener implements HttpHandler {
-    private AtomicBoolean isEventArraved = new AtomicBoolean(false);
-    private StringBuilder strBld;
+    private AtomicBoolean isEventArrived = new AtomicBoolean(false);
+    private StringBuilder stringBuilder;
     private Headers headers;
     private static final Logger logger = Logger.getLogger(HttpServerListener.class);
 
@@ -42,26 +42,24 @@ public class HttpServerListener implements HttpHandler {
     }
 
     @Override
-    public void handle(HttpExchange t) throws IOException {
+    public void handle(HttpExchange event) throws IOException {
         // Get the paramString form the request
         String line;
-        headers = t.getRequestHeaders();
-        InputStream is = t.getRequestBody();
+        headers = event.getRequestHeaders();
+        InputStream is = event.getRequestBody();
         // initiating
         BufferedReader in = new BufferedReader(new InputStreamReader(is));
-        strBld = new StringBuilder();
+        stringBuilder = new StringBuilder();
         while ((line = in.readLine()) != null) {
-            strBld = strBld.append(line).append("\n");
-            System.out.print(line + "\n");
+            stringBuilder = stringBuilder.append(line).append("\n");
         }
-        logger.info("Event Arrived: " + strBld.toString());
-        logger.info("Event Headers: "+headers.entrySet().toString());
-        isEventArraved.set(true);
+        logger.info("Event Arrived: " + stringBuilder.toString());
+        isEventArrived.set(true);
     }
 
     public String getData() {
-        String data = strBld.toString();
-        isEventArraved = new AtomicBoolean(false);
+        String data = stringBuilder.toString();
+        isEventArrived = new AtomicBoolean(false);
         return data;
     }
 
@@ -70,7 +68,7 @@ public class HttpServerListener implements HttpHandler {
     }
 
     public boolean isMessageArrive() {
-        return isEventArraved.get();
+        return isEventArrived.get();
     }
 
 }

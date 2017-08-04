@@ -108,9 +108,9 @@ public class HttpSourceMappingTestCases {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro", false, "text/xml",
+        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
                 "POST");
-        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", false, "text/xml",
+        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro",
                 "POST");
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
@@ -164,9 +164,9 @@ public class HttpSourceMappingTestCases {
         String event2 = "name:\"Mike\",\n" +
                 "age:100,\n" +
                 "country:\"USA\"";
-        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro", false, "text",
+        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
                 "POST");
-        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", false, "text",
+        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro",
                 "POST");
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
@@ -227,10 +227,10 @@ public class HttpSourceMappingTestCases {
                 "         \"country\":\"US\"\n" +
                 "      }\n" +
                 " }";
-        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro", false,
-                "application/json", "POST");
-        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", false,
-                "application/json", "POST");
+        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
+                "POST");
+        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro",
+                "POST");
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();

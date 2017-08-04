@@ -128,8 +128,8 @@ public class HttpOrderProcess {
         String[] events = {event1, event2, event3, event4};
         int k = 0;
         for (int i = 0; i < 5; i++) {
-            new HttpTestUtil().httpPublishEvent(events[k++], baseURI, "/endpoints/RecPro", false,
-                    "text/xml", "POST");
+            new HttpTestUtil().httpPublishEvent(events[k++], baseURI, "/endpoints/RecPro",
+                    "POST");
             if (k == 4) {
                 k = 0;
             }

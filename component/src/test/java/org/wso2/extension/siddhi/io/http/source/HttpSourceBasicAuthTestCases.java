@@ -106,9 +106,9 @@ public class HttpSourceBasicAuthTestCases {
                                + "<country>USA</country>"
                              + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro", false, "text/xml",
+        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
                 "POST");
-        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", false, "text/xml",
+        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro",
                 "POST");
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
@@ -169,9 +169,9 @@ public class HttpSourceBasicAuthTestCases {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro", false, "text/xml",
+        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
                 "POST");
-        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", false, "text/xml",
+        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro",
                 "POST");
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());

@@ -20,6 +20,7 @@ package org.wso2.extension.siddhi.io.http.source.util;
 
 import io.netty.handler.codec.http.HttpMethod;
 import org.wso2.carbon.kernel.Constants;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -56,18 +57,14 @@ public class HttpTestUtil {
         logger.info("Carbon Home Absolute path set to: " + carbonHome.toAbsolutePath());
     }
 
-    public void httpPublishEvent(String event, URI baseURI, String path, Boolean auth, String mapping,
+    public void httpPublishEvent(String event, URI baseURI, String path,
                                  String methodType) {
         try {
             HttpURLConnection urlConn = null;
             try {
-                urlConn = HttpServerUtil.request(baseURI, path, methodType, true);
+                urlConn = HttpServerUtil.request(baseURI, path, methodType);
             } catch (IOException e) {
-                HttpServerUtil.handleException("IOException occurred while running the HttpsSourceTestCaseForSSL", e);
-            }
-            if (auth) {
-                HttpServerUtil.setHeader(urlConn, "Authorization",
-                        "Basic " + java.util.Base64.getEncoder().encodeToString(("admin" + ":" + "admin").getBytes()));
+                HttpServerUtil.handleException(e);
             }
             HttpServerUtil.writeContent(urlConn, event);
             assert urlConn != null;
@@ -75,49 +72,39 @@ public class HttpTestUtil {
             logger.info("Event response message " + urlConn.getResponseMessage());
             urlConn.disconnect();
         } catch (IOException e) {
-            HttpServerUtil.handleException("IOException occurred while running the HttpsSourceTestCaseForSSL", e);
+            HttpServerUtil.handleException(e);
         }
     }
 
-    public void httpPublishEmptyPayload(URI baseURI, Boolean auth, String mapping, String methodType) {
+    public void httpPublishEmptyPayload(URI baseURI) {
         try {
             HttpURLConnection urlConn = null;
             try {
-                urlConn = HttpServerUtil.request(baseURI, "/endpoints/RecPro", methodType, true);
+                urlConn = HttpServerUtil.request(baseURI, "/endpoints/RecPro", "POST");
             } catch (IOException e) {
-                HttpServerUtil.handleException("IOException occurred while running the HttpsSourceTestCaseForSSL", e);
+                HttpServerUtil.handleException(e);
             }
-            if (auth) {
-                HttpServerUtil.setHeader(urlConn, "Authorization",
-                        "Basic " + java.util.Base64.getEncoder().encodeToString(("admin" + ":" + "admin").
-                                getBytes()));
-            }
-            HttpServerUtil.setHeader(urlConn, "Content-Type", mapping);
-            HttpServerUtil.setHeader(urlConn, "HTTP_METHOD", methodType);
+            HttpServerUtil.setHeader(urlConn, "Content-Type", "text/xml");
+            HttpServerUtil.setHeader(urlConn, "HTTP_METHOD", "POST");
             assert urlConn != null;
             logger.info("Event response code " + urlConn.getResponseCode());
             logger.info("Event response message " + urlConn.getResponseMessage());
             urlConn.disconnect();
         } catch (IOException e) {
-            HttpServerUtil.handleException("IOException occurred while running the HttpsSourceTestCaseForSSL", e);
+            HttpServerUtil.handleException(e);
         }
     }
 
-    public void httpPublishEventDefault(String event, URI baseURI, Boolean auth, String mapping, String streamName) {
+    public void httpPublishEventDefault(String event, URI baseURI) {
         try {
             HttpURLConnection urlConn = null;
             try {
-                urlConn = HttpServerUtil.request(baseURI, "/TestSiddhiApp/" + streamName, HttpMethod.POST.name(),
-                        true);
+                urlConn = HttpServerUtil.request(baseURI, "/TestSiddhiApp/" + "inputStream", HttpMethod.POST.name()
+                );
             } catch (IOException e) {
-                HttpServerUtil.handleException("IOException occurred while running the HttpsSourceTestCaseForSSL", e);
+                HttpServerUtil.handleException(e);
             }
-            if (auth) {
-                HttpServerUtil.setHeader(urlConn, "Authorization",
-                        "Basic " + java.util.Base64.getEncoder().encodeToString(("admin" + ":" + "admin")
-                                .getBytes()));
-            }
-            HttpServerUtil.setHeader(urlConn, "Content-Type", mapping);
+            HttpServerUtil.setHeader(urlConn, "Content-Type", "text/xml");
             HttpServerUtil.setHeader(urlConn, "HTTP_METHOD", "POST");
             HttpServerUtil.writeContent(urlConn, event);
             assert urlConn != null;
@@ -125,11 +112,11 @@ public class HttpTestUtil {
             logger.info("Event response message " + urlConn.getResponseMessage());
             urlConn.disconnect();
         } catch (IOException e) {
-            HttpServerUtil.handleException("IOException occurred while running the HttpsSourceTestCaseForSSL", e);
+            HttpServerUtil.handleException(e);
         }
     }
 
-    public void httpsPublishEvent(String event, String baseURI, Boolean auth, String mapping)
+    public void httpsPublishEvent(String event)
             throws KeyManagementException {
         try {
             System.setProperty("javax.net.ssl.trustStore", System.getProperty("carbon.home") + "/resources/security/" +
@@ -146,16 +133,12 @@ public class HttpTestUtil {
             TrustManager[] trustManagers = tmf.getTrustManagers();
             context.init(null, trustManagers, null);
             SSLSocketFactory sf = context.getSocketFactory();
-            URL url = new URL(baseURI);
+            URL url = new URL("https://localhost:8005/endpoints/RecPro");
             HttpsURLConnection httpsCon = (HttpsURLConnection) url.openConnection();
             httpsCon.setSSLSocketFactory(sf);
             httpsCon.setRequestMethod("POST");
-            httpsCon.setRequestProperty("Content-Type", mapping);
+            httpsCon.setRequestProperty("Content-Type", "text/plain");
             httpsCon.setRequestProperty("HTTP_METHOD", "POST");
-            if (auth) {
-                httpsCon.setRequestProperty("Authorization",
-                        "Basic " + java.util.Base64.getEncoder().encodeToString(("admin" + ":" + "admin").getBytes()));
-            }
             httpsCon.setDoOutput(true);
             OutputStreamWriter out = new OutputStreamWriter(httpsCon.getOutputStream());
             out.write(event);
@@ -163,9 +146,14 @@ public class HttpTestUtil {
             logger.info("Event response code " + httpsCon.getResponseCode());
             logger.info("Event response message " + httpsCon.getResponseMessage());
             httpsCon.disconnect();
-        } catch (NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException e) {
-            logger.error(e);
+        } catch (NoSuchAlgorithmException e) {
+            logger.error("No such algorithm in while write output in test server connector ", e);
+        } catch (CertificateException e) {
+            logger.error("Certificate exception in basic authentication", e);
+        } catch (KeyStoreException e) {
+            logger.error("Keystore exception in while trying to sent test request " , e);
+        } catch (IOException e) {
+            logger.error("IOException when trying to send test request ", e);
         }
     }
-
 }

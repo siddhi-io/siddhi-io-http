@@ -104,9 +104,9 @@ public class HttpCustomThreadPoolConfigTest {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro", false, "text/xml",
+        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
                 "POST");
-        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", false, "text/xml",
+        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro",
                 "POST");
         int waitTime = 50;
         int timeout = 30000;

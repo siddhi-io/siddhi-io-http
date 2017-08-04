@@ -115,10 +115,10 @@ public class HttpsSourceTestCaseForSSL {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:8005/endpoints/RecPro", false,
-                "text/plain");
-        new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:8005/endpoints/RecPro", false,
-                "text/plain");
+        new HttpTestUtil().httpsPublishEvent(event1
+        );
+        new HttpTestUtil().httpsPublishEvent(event2
+        );
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
@@ -185,10 +185,10 @@ public class HttpsSourceTestCaseForSSL {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:8005/endpoints/RecPro", false,
-                    "text/plain");
-        new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:8005/endpoints/RecPro", false,
-                    "text/plain");
+        new HttpTestUtil().httpsPublishEvent(event1
+        );
+        new HttpTestUtil().httpsPublishEvent(event2
+        );
         final List<LoggingEvent> log = appender.getLog();
         List<Object> logMessages = new ArrayList<>();
         for (LoggingEvent logEvent : log) {
@@ -261,10 +261,10 @@ public class HttpsSourceTestCaseForSSL {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:8005/endpoints/RecPro", false,
-                    "text/plain");
-        new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:8005/endpoints/RecPro", false,
-                    "text/plain");
+        new HttpTestUtil().httpsPublishEvent(event1
+        );
+        new HttpTestUtil().httpsPublishEvent(event2
+        );
         final List<LoggingEvent> log = appender.getLog();
         List<Object> logMessages = new ArrayList<>();
         for (LoggingEvent logEvent : log) {
@@ -337,10 +337,10 @@ public class HttpsSourceTestCaseForSSL {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:8005/endpoints/RecPro", false,
-                "text/plain");
-        new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:8005/endpoints/RecPro", false,
-                "text/plain");
+        new HttpTestUtil().httpsPublishEvent(event1
+        );
+        new HttpTestUtil().httpsPublishEvent(event2
+        );
         final List<LoggingEvent> log = appender.getLog();
         List<Object> logMessages = new ArrayList<>();
         for (LoggingEvent logEvent : log) {
