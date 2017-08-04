@@ -187,7 +187,7 @@ public class HttpBasicTests {
      * Creating test for publishing events with XML mapping.
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test(expectedExceptions = RuntimeException.class)
     public void testMultipleListenersSameURL() throws Exception {
         logger.info("Creating test for same url in different execution plain.");
         final TestAppender appender = new TestAppender();
@@ -288,7 +288,7 @@ public class HttpBasicTests {
     /**
      * Creating test for publishing events without URL multiple events with same url.
      */
-    @Test
+    @Test(expectedExceptions = RuntimeException.class)
     public void testMultipleListenersSameURLInSameExecutionPlan() throws InterruptedException {
         logger.info("Creating test for publishing events same url in same execution plain.");
         final TestAppender appender = new TestAppender();

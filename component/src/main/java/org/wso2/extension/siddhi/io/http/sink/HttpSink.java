@@ -266,8 +266,8 @@ public class HttpSink extends Sink {
         this.mapType = outputStreamDefinition.getAnnotations().get(0).getAnnotations().get(0).getElements().get(0)
                 .getValue();
         this.publisherURL = optionHolder.validateAndGetStaticValue(HttpConstants.PUBLISHER_URL);
-        this.httpHeaderOption = optionHolder.validateAndGetOption(HttpConstants.HEADERS);
-        this.httpMethodOption = optionHolder.validateAndGetOption(HttpConstants.METHOD);
+        this.httpHeaderOption = optionHolder.getOrCreateOption(HttpConstants.HEADERS , HttpConstants.DEFAULT_HEADER);
+        this.httpMethodOption = optionHolder.getOrCreateOption(HttpConstants.METHOD , HttpConstants.DEFAULT_METHOD);
         this.userName = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_USERNAME,
                 HttpConstants.EMPTY_STRING);
         this.userPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_PASSWORD,
