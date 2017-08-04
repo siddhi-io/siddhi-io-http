@@ -83,22 +83,26 @@ public class HttpSinkUtil {
      * @return list of headers.
      */
     public List<Header> getHeaders(String headers) {
-        headers = headers.trim();
-        headers = headers.substring(1, headers.length() - 1);
-        List<Header> headersList = new ArrayList<>();
-        if (!"".equals(headers)) {
-            String[] spam = headers.split(HttpConstants.HEADER_SPLITTER);
-            for (String aSpam : spam) {
-                String[] header = aSpam.split(HttpConstants.HEADER_NAME_VALUE_SPLITTER, 2);
-                if (header.length > 1) {
-                    headersList.add(new Header(header[0], header[1]));
-                } else {
-                    throw new HttpSinkAdaptorRuntimeException(
-                            "Invalid header format. Please include as 'key1:value1','key2:value2',..");
+        if (headers != null) {
+            headers = headers.trim();
+            headers = headers.substring(1, headers.length() - 1);
+            List<Header> headersList = new ArrayList<>();
+            if (!"".equals(headers)) {
+                String[] spam = headers.split(HttpConstants.HEADER_SPLITTER);
+                for (String aSpam : spam) {
+                    String[] header = aSpam.split(HttpConstants.HEADER_NAME_VALUE_SPLITTER, 2);
+                    if (header.length > 1) {
+                        headersList.add(new Header(header[0], header[1]));
+                    } else {
+                        throw new HttpSinkAdaptorRuntimeException(
+                                "Invalid header format. Please include as 'key1:value1','key2:value2',..");
+                    }
                 }
             }
+            return headersList;
+        } else {
+            return null;
         }
-        return headersList;
     }
 
     /**
@@ -198,9 +202,11 @@ public class HttpSinkUtil {
      * @return return the exact map type.
      */
     public String getContentType(String mapType, List<Header> headersList) {
-        for (Header h : headersList) {
-            if (HttpConstants.HTTP_CONTENT_TYPE.equals(h.getName())) {
-                return h.getValue();
+        if (headersList != null) {
+            for (Header h : headersList) {
+                if (HttpConstants.HTTP_CONTENT_TYPE.equals(h.getName())) {
+                    return h.getValue();
+                }
             }
         }
         switch (mapType) {

@@ -64,7 +64,7 @@ public class HttpsSourceTestCaseForSSL {
     @Test
     public void testHTTPSInputTransport() throws Exception {
         logger.info("Creating test for publishing events with https protocol.");
-        new HttpTestUtil().setCarbonHome();
+        HttpTestUtil.setCarbonHome();
         Map<String, String> masterConfigs = new HashMap<>();
         masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/resources/security/wso2carbon.jks");
         masterConfigs.put("source.http.https.keystore.password", "wso2carbon");
@@ -115,10 +115,8 @@ public class HttpsSourceTestCaseForSSL {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:8005/endpoints/RecPro", false,
-                "text/plain");
-        new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:8005/endpoints/RecPro", false,
-                "text/plain");
+        HttpTestUtil.httpsPublishEvent(event1);
+        HttpTestUtil.httpsPublishEvent(event2);
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
@@ -134,7 +132,7 @@ public class HttpsSourceTestCaseForSSL {
         final Logger logger = Logger.getRootLogger();
         logger.addAppender(appender);
         logger.info("Creating test for publishing events with https protocol with invalid keystore.");
-        new HttpTestUtil().setCarbonHome();
+        HttpTestUtil.setCarbonHome();
         Map<String, String> masterConfigs = new HashMap<>();
         masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/resources/security/store.jks");
         masterConfigs.put("source.http.https.keystore.password", "wso2carbon");
@@ -185,10 +183,8 @@ public class HttpsSourceTestCaseForSSL {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:8005/endpoints/RecPro", false,
-                    "text/plain");
-        new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:8005/endpoints/RecPro", false,
-                    "text/plain");
+        HttpTestUtil.httpsPublishEvent(event1);
+        HttpTestUtil.httpsPublishEvent(event2);
         final List<LoggingEvent> log = appender.getLog();
         List<Object> logMessages = new ArrayList<>();
         for (LoggingEvent logEvent : log) {
@@ -211,7 +207,7 @@ public class HttpsSourceTestCaseForSSL {
         final Logger logger = Logger.getRootLogger();
         logger.addAppender(appender);
         logger.info("Creating test for publishing events with https protocol with invalid keystore pass.");
-        new HttpTestUtil().setCarbonHome();
+        HttpTestUtil.setCarbonHome();
         Map<String, String> masterConfigs = new HashMap<>();
         masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/resources/security/wso2carbon.jks");
         masterConfigs.put("source.http.https.keystore.password", "wso2carbon123");
@@ -261,10 +257,8 @@ public class HttpsSourceTestCaseForSSL {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:8005/endpoints/RecPro", false,
-                    "text/plain");
-        new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:8005/endpoints/RecPro", false,
-                    "text/plain");
+        HttpTestUtil.httpsPublishEvent(event1);
+        HttpTestUtil.httpsPublishEvent(event2);
         final List<LoggingEvent> log = appender.getLog();
         List<Object> logMessages = new ArrayList<>();
         for (LoggingEvent logEvent : log) {
@@ -288,7 +282,7 @@ public class HttpsSourceTestCaseForSSL {
         final Logger logger = Logger.getRootLogger();
         logger.addAppender(appender);
         logger.info(" Creating test for publishing events with https protocol with invalid cert pass.");
-        new HttpTestUtil().setCarbonHome();
+        HttpTestUtil.setCarbonHome();
         Map<String, String> masterConfigs = new HashMap<>();
         masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/resources/security/wso2carbon.jks");
         masterConfigs.put("source.http.https.keystore,password", "wso2carbon");
@@ -337,10 +331,8 @@ public class HttpsSourceTestCaseForSSL {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpsPublishEvent(event1, "https://localhost:8005/endpoints/RecPro", false,
-                "text/plain");
-        new HttpTestUtil().httpsPublishEvent(event2, "https://localhost:8005/endpoints/RecPro", false,
-                "text/plain");
+        HttpTestUtil.httpsPublishEvent(event1);
+        HttpTestUtil.httpsPublishEvent(event2);
         final List<LoggingEvent> log = appender.getLog();
         List<Object> logMessages = new ArrayList<>();
         for (LoggingEvent logEvent : log) {

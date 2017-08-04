@@ -41,30 +41,30 @@ import javax.net.ssl.TrustManagerFactory;
  */
 public class HttpsServerListenerHandler implements Runnable {
     private static final Logger logger = Logger.getLogger(HttpsServerListenerHandler.class);
-    private HttpServerListener sl;
+    private HttpServerListener serverListener;
     private int port;
-    private KeyStore ks;
-    private  HttpsServer server;;
+    private KeyStore keyStore;
+    private  HttpsServer server;
     public HttpsServerListenerHandler(int port) throws KeyStoreException {
-        this.sl = new HttpServerListener();
+        this.serverListener = new HttpServerListener();
         this.port = port;
-        ks = KeyStore.getInstance("JKS");
+        keyStore = KeyStore.getInstance("JKS");
     }
 
     public HttpServerListener getServerListner() {
-        return sl;
+        return serverListener;
     }
 
     @Override
     public void run() {
         try {
             char[] passphrase = "wso2carbon".toCharArray();
-            ks.load(new FileInputStream(System.getProperty("carbon.home") + "/resources/security/wso2carbon.jks"),
+            keyStore.load(new FileInputStream(System.getProperty("carbon.home") + "/resources/security/wso2carbon.jks"),
                     passphrase);
             KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-            kmf.init(ks, passphrase);
+            kmf.init(keyStore, passphrase);
             TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-            tmf.init(ks);
+            tmf.init(keyStore);
             SSLContext ssl = SSLContext.getInstance("TLS");
             ssl.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
             server = HttpsServer.create(new InetSocketAddress(port), 5);
@@ -77,11 +77,20 @@ public class HttpsServerListenerHandler implements Runnable {
                     params.setSSLParameters(sslparams);
                 }
             });
-            server.createContext("/abc", sl);
+            server.createContext("/abc", serverListener);
             server.start();
-        } catch (IOException | CertificateException | NoSuchAlgorithmException | UnrecoverableKeyException |
-                KeyStoreException | KeyManagementException e) {
-            logger.error("Error in creating test server ", e);
+        }  catch (NoSuchAlgorithmException e) {
+            logger.error("No such algorithm in  while trying to up test https server.", e);
+        } catch (CertificateException e) {
+            logger.error("Certificate exception in basic authentication", e);
+        } catch (KeyStoreException e) {
+            logger.error("Keystore exception in  while trying to up test https server." , e);
+        } catch (IOException e) {
+            logger.error("IOException  while trying to up test https server. ", e);
+        } catch (UnrecoverableKeyException e) {
+            logger.error("UnrecoverableKeyException while trying to up test https server.", e);
+        } catch (KeyManagementException e) {
+            logger.error("KeyManagementException while trying to up test https server.", e);
         }
     }
     public void shutdown() {

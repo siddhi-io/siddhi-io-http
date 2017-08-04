@@ -108,10 +108,8 @@ public class HttpBasicTests {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpPublishEventDefault(event1, baseURI, false, "text/xml",
-                "inputStream");
-        new HttpTestUtil().httpPublishEventDefault(event2, baseURI, false, "text/xml",
-                "inputStream");
+        HttpTestUtil.httpPublishEventDefault(event1, baseURI);
+        HttpTestUtil.httpPublishEventDefault(event2, baseURI);
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
@@ -167,10 +165,9 @@ public class HttpBasicTests {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro", false,
-                "text/xml", "PUT");
-        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", false, "" +
-                "text/xml", "PUT");
+        HttpTestUtil.httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
+                "PUT");
+        HttpTestUtil.httpPublishEvent(event2, baseURI, "/endpoints/RecPro", "PUT");
         final List<LoggingEvent> log = appender.getLog();
         List<String> logMessages = new ArrayList<>();
         for (LoggingEvent logEvent : log) {
@@ -187,7 +184,7 @@ public class HttpBasicTests {
      * Creating test for publishing events with XML mapping.
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test(expectedExceptions = RuntimeException.class)
     public void testMultipleListenersSameURL() throws Exception {
         logger.info("Creating test for same url in different execution plain.");
         final TestAppender appender = new TestAppender();
@@ -266,9 +263,9 @@ public class HttpBasicTests {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/abc", false, "text/xml",
+        HttpTestUtil.httpPublishEvent(event1, baseURI, "/endpoints/abc",
                 "POST");
-        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/abc", false, "text/xml",
+        HttpTestUtil.httpPublishEvent(event2, baseURI, "/endpoints/abc",
                 "POST");
         final List<LoggingEvent> log = appender.getLog();
         List<String> logMessages = new ArrayList<>();
@@ -288,7 +285,7 @@ public class HttpBasicTests {
     /**
      * Creating test for publishing events without URL multiple events with same url.
      */
-    @Test
+    @Test(expectedExceptions = RuntimeException.class)
     public void testMultipleListenersSameURLInSameExecutionPlan() throws InterruptedException {
         logger.info("Creating test for publishing events same url in same execution plain.");
         final TestAppender appender = new TestAppender();
@@ -443,13 +440,13 @@ public class HttpBasicTests {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpPublishEvent(event1, baseURIA, "/endpoints/RecPro", false, "text/xml",
+        HttpTestUtil.httpPublishEvent(event1, baseURIA, "/endpoints/RecPro",
                 "POST");
-        new HttpTestUtil().httpPublishEvent(event2, baseURIA, "/endpoints/RecPro", false, "text/xml",
+        HttpTestUtil.httpPublishEvent(event2, baseURIA, "/endpoints/RecPro",
                 "POST");
-        new HttpTestUtil().httpPublishEvent(event3, baseURIB, "/endpoints/RecPro", false, "text/xml",
+        HttpTestUtil.httpPublishEvent(event3, baseURIB, "/endpoints/RecPro",
                 "POST");
-        new HttpTestUtil().httpPublishEvent(event4, baseURIB, "/endpoints/RecPro", false, "text/xml",
+        HttpTestUtil.httpPublishEvent(event4, baseURIB, "/endpoints/RecPro",
                 "POST");
         SiddhiTestHelper.waitForEvents(waitTime, 4, eventCount, timeout);
         Assert.assertEquals(receivedEventNameListA.toString(), expectedA.toString());
@@ -492,8 +489,8 @@ public class HttpBasicTests {
         siddhiAppRuntime.start();
         // publishing events
         List<String> expected = new ArrayList<>(2);
-        new HttpTestUtil().httpPublishEmptyPayload(baseURI, false, "text/xml", "POST");
-        new HttpTestUtil().httpPublishEmptyPayload(baseURI, false, "text/xml", "POST");
+        HttpTestUtil.httpPublishEmptyPayload(baseURI);
+        HttpTestUtil.httpPublishEmptyPayload(baseURI);
         SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();

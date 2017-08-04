@@ -45,7 +45,7 @@ class HttpServerUtil {
         out.close();
     }
 
-    static HttpURLConnection request(URI baseURI, String path, String method, boolean keepAlive)
+    static HttpURLConnection request(URI baseURI, String path, String method)
             throws IOException {
         URL url = baseURI.resolve(path).toURL();
         HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
@@ -53,9 +53,7 @@ class HttpServerUtil {
             urlConn.setDoOutput(true);
         }
         urlConn.setRequestMethod(method);
-        if (!keepAlive) {
-            urlConn.setRequestProperty("Connection", "Keep-Alive");
-        }
+        urlConn.setRequestProperty("Connection", "Keep-Alive");
         return urlConn;
     }
 
@@ -63,8 +61,8 @@ class HttpServerUtil {
         urlConnection.setRequestProperty(key, value);
     }
 
-    static void handleException(String msg, Exception ex) {
-        log.error(msg, ex);
+    static void handleException(IOException ex) {
+        log.error("IOException occurred while running the HttpsSourceTestCaseForSSL", ex);
     }
 }
 

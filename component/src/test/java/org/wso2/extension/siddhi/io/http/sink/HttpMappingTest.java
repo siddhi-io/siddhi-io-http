@@ -157,6 +157,7 @@ public class HttpMappingTest {
         }
         String eventData = lst.getServerListener().getData();
         Assert.assertEquals(eventData, "WSO2,55.6,100\n");
+        Thread.sleep(100);
         lst.shutdown();
         siddhiAppRuntime.shutdown();
     }
@@ -195,6 +196,74 @@ public class HttpMappingTest {
                 "country:\"USA\",\n" +
                 "method:\"POST\",\n" +
                 "headers:\"'Name:John','Age:23'\"\n");
+        lst.shutdown();
+        siddhiAppRuntime.shutdown();
+    }
+
+    /**
+     * Creating test for publishing events with TEXT mapping.
+     *
+     * @throws Exception Interrupted exception
+     */
+    @Test
+    public void testHTTPTextMappingText3() throws Exception {
+
+        log.info("Creating test for publishing events with TEXT mapping.");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
+                + "@sink(type='http',publisher.url='http://localhost:8005/abc',"
+                + "@map(type='text', @payload('{{message}}'))) "
+                + "Define stream BarStream (message String,method String,headers String);";
+        String query = ("@info(name = 'query1') " +
+                "from FooStream select message,method,headers insert into BarStream;");
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
+                query);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        lst.run();
+        fooStream.send(new Object[]{"WSO2,55.6,100", "POST", "'Name:John','Age:23'"});
+        while (!lst.getServerListener().isMessageArrive()) {
+            Thread.sleep(10);
+        }
+        String eventData = lst.getServerListener().getData();
+        Assert.assertEquals(eventData, "WSO2,55.6,100\n");
+        Thread.sleep(100);
+        lst.shutdown();
+        siddhiAppRuntime.shutdown();
+    }
+    /**
+     * Creating test for publishing events with TEXT mapping.
+     *
+     * @throws Exception Interrupted exception
+     */
+    @Test
+    public void testHTTPTextMappingText4() throws Exception {
+
+        log.info("Creating test for publishing events with TEXT mapping.");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
+                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='POST',"
+                + "headers=\"'Name:John','Age:23'\","
+                + "@map(type='text')) "
+                + "Define stream BarStream (message String,method String,headers String);";
+        String query = ("@info(name = 'query1') " +
+                "from FooStream select message,method,headers insert into BarStream;");
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
+                query);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        lst.run();
+        fooStream.send(new Object[]{"WSO2,55.6,100", "POST", "'Name:John','Age:23'"});
+        while (!lst.getServerListener().isMessageArrive()) {
+            Thread.sleep(10);
+        }
+        String eventData = lst.getServerListener().getData();
+        Assert.assertEquals(eventData, "message:\"WSO2,55.6,100\",\n" +
+                "method:\"POST\",\n" +
+                "headers:\"'Name:John','Age:23'\"\n");
+        Thread.sleep(100);
         lst.shutdown();
         siddhiAppRuntime.shutdown();
     }

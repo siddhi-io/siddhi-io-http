@@ -107,4 +107,6 @@ public class HttpConstants {
     public static final String CARBON_SECURITY_CONFIGURATION = "CarbonSecurityConfig";
     public static final String MESSAGE_PROCESSOR_ID = "messageProcessorId";
     public static final String MESSAGE_PROCESSOR_ID_DEFAULT = "Siddhi HTTP-message-processor";
+    public static final String DEFAULT_METHOD = "POST";
+    public static final String DEFAULT_HEADER = null;
 }
