@@ -181,9 +181,9 @@ public class HttpMultipleEventDifferentFormatTest {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpPublishEvent(event1, baseURIA, "/endpoints/RecPro",
+        HttpTestUtil.httpPublishEvent(event1, baseURIA, "/endpoints/RecPro",
                 "POST");
-        new HttpTestUtil().httpPublishEvent(event2, baseURIA, "/endpoints/RecPro",
+        HttpTestUtil.httpPublishEvent(event2, baseURIA, "/endpoints/RecPro",
                 "POST");
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCountA, timeout);
         Assert.assertEquals(receivedEventNameListA.toString(), expectedA.toString());
@@ -205,9 +205,9 @@ public class HttpMultipleEventDifferentFormatTest {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpPublishEvent(event3, baseURIA, "/endpoints/RecPro1",
+        HttpTestUtil.httpPublishEvent(event3, baseURIA, "/endpoints/RecPro1",
                 "POST");
-        new HttpTestUtil().httpPublishEvent(event4, baseURIA, "/endpoints/RecPro1",
+        HttpTestUtil.httpPublishEvent(event4, baseURIA, "/endpoints/RecPro1",
                 "POST");
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCountB, timeout);
         Assert.assertEquals(receivedEventNameListB.toString(), expectedB.toString());
@@ -229,9 +229,9 @@ public class HttpMultipleEventDifferentFormatTest {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpPublishEvent(event5, baseURIC, "/endpoints/RecPro",
+        HttpTestUtil.httpPublishEvent(event5, baseURIC, "/endpoints/RecPro",
                 "POST");
-        new HttpTestUtil().httpPublishEvent(event6, baseURIC, "/endpoints/RecPro",
+        HttpTestUtil.httpPublishEvent(event6, baseURIC, "/endpoints/RecPro",
                 "POST");
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCountC, timeout);
         Assert.assertEquals(receivedEventNameListC.toString(), expectedC.toString());
@@ -253,9 +253,9 @@ public class HttpMultipleEventDifferentFormatTest {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpPublishEvent(event7, baseURIA, "/endpoints/RecPro2",
+        HttpTestUtil.httpPublishEvent(event7, baseURIA, "/endpoints/RecPro2",
                 "POST");
-        new HttpTestUtil().httpPublishEvent(event8, baseURIA, "/endpoints/RecPro2",
+        HttpTestUtil.httpPublishEvent(event8, baseURIA, "/endpoints/RecPro2",
                 "POST");
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCountD, timeout);
         Assert.assertEquals(receivedEventNameListD.toString(), expectedD.toString());

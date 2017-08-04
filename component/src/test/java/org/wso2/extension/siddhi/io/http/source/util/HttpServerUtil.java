@@ -61,7 +61,7 @@ class HttpServerUtil {
         urlConnection.setRequestProperty(key, value);
     }
 
-    static void handleException(Exception ex) {
+    static void handleException(IOException ex) {
         log.error("IOException occurred while running the HttpsSourceTestCaseForSSL", ex);
     }
 }

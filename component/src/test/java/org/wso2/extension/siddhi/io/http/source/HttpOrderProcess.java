@@ -44,8 +44,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class HttpOrderProcess {
     private static final Logger logger = Logger.getLogger(HttpOrderProcess.class);
     private AtomicInteger eventCount = new AtomicInteger(0);
-    private int waitTime = 50;
-    private int timeout = 30000;
 
     @BeforeMethod
     public void init() {
@@ -128,12 +126,14 @@ public class HttpOrderProcess {
         String[] events = {event1, event2, event3, event4};
         int k = 0;
         for (int i = 0; i < 5; i++) {
-            new HttpTestUtil().httpPublishEvent(events[k++], baseURI, "/endpoints/RecPro",
+            HttpTestUtil.httpPublishEvent(events[k++], baseURI, "/endpoints/RecPro",
                     "POST");
             if (k == 4) {
                 k = 0;
             }
         }
+        int waitTime = 50;
+        int timeout = 30000;
         SiddhiTestHelper.waitForEvents(waitTime, 5, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();

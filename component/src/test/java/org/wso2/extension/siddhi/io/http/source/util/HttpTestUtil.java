@@ -47,17 +47,14 @@ import javax.net.ssl.TrustManagerFactory;
 public class HttpTestUtil {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(HttpTestUtil.class);
 
-    public HttpTestUtil() {
-    }
-
-    public void setCarbonHome() {
+    public static void setCarbonHome() {
         Path carbonHome = Paths.get("");
         carbonHome = Paths.get(carbonHome.toString(), "src", "test");
         System.setProperty(Constants.CARBON_HOME, carbonHome.toString());
         logger.info("Carbon Home Absolute path set to: " + carbonHome.toAbsolutePath());
     }
 
-    public void httpPublishEvent(String event, URI baseURI, String path,
+    public static void httpPublishEvent(String event, URI baseURI, String path,
                                  String methodType) {
         try {
             HttpURLConnection urlConn = null;
@@ -76,7 +73,7 @@ public class HttpTestUtil {
         }
     }
 
-    public void httpPublishEmptyPayload(URI baseURI) {
+    public static void httpPublishEmptyPayload(URI baseURI) {
         try {
             HttpURLConnection urlConn = null;
             try {
@@ -95,7 +92,7 @@ public class HttpTestUtil {
         }
     }
 
-    public void httpPublishEventDefault(String event, URI baseURI) {
+    public static void httpPublishEventDefault(String event, URI baseURI) {
         try {
             HttpURLConnection urlConn = null;
             try {
@@ -116,7 +113,7 @@ public class HttpTestUtil {
         }
     }
 
-    public void httpsPublishEvent(String event)
+    public static void httpsPublishEvent(String event)
             throws KeyManagementException {
         try {
             System.setProperty("javax.net.ssl.trustStore", System.getProperty("carbon.home") + "/resources/security/" +

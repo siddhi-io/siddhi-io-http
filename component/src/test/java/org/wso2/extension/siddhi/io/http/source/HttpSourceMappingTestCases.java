@@ -108,9 +108,9 @@ public class HttpSourceMappingTestCases {
                                 + "<country>USA</country>"
                             + "</event>"
                         + "</events>";
-        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
+        HttpTestUtil.httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
                 "POST");
-        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro",
+        HttpTestUtil.httpPublishEvent(event2, baseURI, "/endpoints/RecPro",
                 "POST");
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
@@ -164,9 +164,9 @@ public class HttpSourceMappingTestCases {
         String event2 = "name:\"Mike\",\n" +
                 "age:100,\n" +
                 "country:\"USA\"";
-        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
+        HttpTestUtil.httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
                 "POST");
-        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro",
+        HttpTestUtil.httpPublishEvent(event2, baseURI, "/endpoints/RecPro",
                 "POST");
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
@@ -180,7 +180,6 @@ public class HttpSourceMappingTestCases {
     @Test
     public void testJsonMapping() throws Exception {
         logger.info("Creating test for publishing events with Json mapping.");
-        new HttpTestUtil().setCarbonHome();
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
         List<String> receivedEventNameList = new ArrayList<>(2);
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
@@ -227,9 +226,9 @@ public class HttpSourceMappingTestCases {
                 "         \"country\":\"US\"\n" +
                 "      }\n" +
                 " }";
-        new HttpTestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
+        HttpTestUtil.httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
                 "POST");
-        new HttpTestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro",
+        HttpTestUtil.httpPublishEvent(event2, baseURI, "/endpoints/RecPro",
                 "POST");
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
