@@ -55,6 +55,7 @@ public class HttpServerListener implements HttpHandler {
             System.out.print(line + "\n");
         }
         logger.info("Event Arrived: " + strBld.toString());
+        logger.info("Event Headers: "+headers.entrySet().toString());
         isEventArraved.set(true);
     }
 

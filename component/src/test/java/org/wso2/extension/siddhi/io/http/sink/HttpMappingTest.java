@@ -157,6 +157,7 @@ public class HttpMappingTest {
         }
         String eventData = lst.getServerListener().getData();
         Assert.assertEquals(eventData, "WSO2,55.6,100\n");
+        Thread.sleep(100);
         lst.shutdown();
         siddhiAppRuntime.shutdown();
     }
@@ -227,6 +228,7 @@ public class HttpMappingTest {
         }
         String eventData = lst.getServerListener().getData();
         Assert.assertEquals(eventData, "WSO2,55.6,100\n");
+        Thread.sleep(100);
         lst.shutdown();
         siddhiAppRuntime.shutdown();
     }
@@ -241,7 +243,8 @@ public class HttpMappingTest {
         log.info("Creating test for publishing events with TEXT mapping.");
         SiddhiManager siddhiManager = new SiddhiManager();
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
-                + "@sink(type='http',publisher.url='http://localhost:8005/abc',"
+                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='POST',"
+                + "headers=\"'Name:John','Age:23'\","
                 + "@map(type='text')) "
                 + "Define stream BarStream (message String,method String,headers String);";
         String query = ("@info(name = 'query1') " +
@@ -260,6 +263,7 @@ public class HttpMappingTest {
         Assert.assertEquals(eventData, "message:\"WSO2,55.6,100\",\n" +
                 "method:\"POST\",\n" +
                 "headers:\"'Name:John','Age:23'\"\n");
+        Thread.sleep(100);
         lst.shutdown();
         siddhiAppRuntime.shutdown();
     }
