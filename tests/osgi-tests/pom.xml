@@ -26,7 +26,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>siddhi-io-http-osgi-tests</artifactId>
     <name>WSO2 Siddhi IO HTTP - OSGi Tests</name>
-    <description>OSGi Tests for Carbon Security CAAS Implementation</description>
+    <description>OSGi Tests for Siddhi IO HTTP Implementation</description>
     <url>http://wso2.com</url>
 
     <build>

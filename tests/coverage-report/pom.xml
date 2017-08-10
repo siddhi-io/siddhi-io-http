@@ -19,17 +19,22 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
+    <!--<parent>-->
+        <!--<groupId>org.wso2.carbon.security.caas</groupId>-->
+        <!--<artifactId>carbon-security-caas-tests</artifactId>-->
+        <!--<version>1.0.2-SNAPSHOT</version>-->
+        <!--<relativePath>../pom.xml</relativePath>-->
+    <!--</parent>-->
     <parent>
-        <groupId>org.wso2.carbon.security.caas</groupId>
-        <artifactId>carbon-security-caas-tests</artifactId>
+        <artifactId>siddhi-io-http-tests</artifactId>
+        <groupId>org.wso2.extension.siddhi.io.http</groupId>
         <version>1.0.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.carbon.security.caas-coverage-report</artifactId>
-    <name>WSO2 Carbon Security CAAS - Test Coverage</name>
-    <description>Coverage reports for Carbon Security CAAS module</description>
+    <artifactId>org.wso2.extension.siddhi.io.http.coverge.test</artifactId>
+    <name>WSO2 Siddhi IO HTTP - Test Coverage</name>
+    <description>Coverage reports Siddhi IO HTTP module</description>
     <url>http://wso2.com</url>
 
 
@@ -96,7 +101,7 @@
                                                     <include name="jacoco.exec" />
                                                 </fileset>
                                             </executiondata>
-                                            <structure name="Carbon Security Tests">
+                                            <structure name="Siddhi io HTTP Tests">
                                                 <classfiles>
                                                     <fileset dir="../../component/target/classes">
                                                         <exclude name="**/*Constants.class" />
@@ -108,14 +113,8 @@
                                                 </sourcefiles>
                                             </structure>
                                             <html destdir="${project.build.directory}/site/jacoco" />
-                                            <check>
-                                                <rule element="PACKAGE">
-                                                    <limit counter="LINE" value="COVEREDRATIO" minimum="0.00" />
-                                                </rule>
-                                            </check>
                                         </jacoco:report>
                                     </target>
-
                                 </configuration>
                             </execution>
                         </executions>
