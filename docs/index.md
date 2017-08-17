@@ -115,6 +115,7 @@ We welcome your feedback and contribution.
 ------------------
 WSO2 Smart Analytics Team.
 
-## API Docs:
+## API Docs
 
+1. <a href="./api/1.0.2-SNAPSHOT">1.0.2-SNAPSHOT</a>
 1. <a href="./api/1.0.1-SNAPSHOT">1.0.1-SNAPSHOT</a>

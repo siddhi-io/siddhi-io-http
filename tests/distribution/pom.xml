@@ -26,11 +26,6 @@
     <artifactId>org.wso2.extension.io.http.test.distribution</artifactId>
     <packaging>pom</packaging>
     <name>WSO2 HTTP IO - Test Distribution</name>
-    <description>
-        This module generates the product distribution (zip) by installing sample in-memory user store and
-        carbon-security feature on top of kernel core and runtime features and finally assembles product specific
-        configurations files and startup scripts using assembly plugin.
-    </description>
     <url>http://wso2.com</url>
     <dependencies>
         <dependency>

@@ -14,8 +14,8 @@ limitations under the License.
 
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
-<suite name="Carbon-Security-Test-Suite">
-    <test name="carbon-security-tests" preserve-order="true" parallel="false">
+<suite name="Siddhi-io-http-Test-Suite">
+    <test name="Siddhi-io-http-tests" preserve-order="true" parallel="false">
         <classes>
             <class name="BasicAuthTrue"/>
         </classes>
