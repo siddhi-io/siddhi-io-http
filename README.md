@@ -92,7 +92,7 @@ Example Siddhi Queries
 
 #### Event Sink
  
-     @sink(type='http',publisher.url='http://localhost:8009', method='{{method}}',headers='{{headers}}', 
+     @sink(type='http',publisher.url='http://localhost:8039', method='{{method}}',headers='{{headers}}', 
      @map(type='xml' , @payload('{{payloadBody}}')))
      define stream FooStream (method string, headers string);"
 

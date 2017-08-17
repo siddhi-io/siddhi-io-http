@@ -53,7 +53,7 @@ public class HttpMultipleEventSink {
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
 
         String inStreamDefinition1 = "Define stream FooStreamA (message String,method String,headers String);"
-                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}'," +
+                + "@sink(type='http',publisher.url='http://localhost:8035/abc',method='{{method}}'," +
                 "headers='{{headers}}',"
                 + "@map(type='xml', "
                 + "@payload('{{message}}'))) "
@@ -65,7 +65,7 @@ public class HttpMultipleEventSink {
                 );
 
         String inStreamDefinition2 = "Define stream FooStreamB (message String,method String,headers String);"
-                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}'," +
+                + "@sink(type='http',publisher.url='http://localhost:8035/abc',method='{{method}}'," +
                 "headers='{{headers}}',"
                 + "@map(type='xml', "
                 + "@payload('{{message}}'))) "
@@ -79,7 +79,7 @@ public class HttpMultipleEventSink {
                 inStreamDefinition2 + query1 + query2);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStreamA");
         InputHandler fooStream2 = siddhiAppRuntime.getInputHandler("FooStreamB");
-        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8035);
         lst.run();
         siddhiAppRuntime.start();
         String event1 = "<events>"

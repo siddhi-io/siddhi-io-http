@@ -127,7 +127,7 @@ import java.util.Set;
         },
         examples = {
                 @Example(syntax =
-                        "@sink(type='http',publisher.url='http://localhost:8009/foo', method='{{method}}',"
+                        "@sink(type='http',publisher.url='http://localhost:8039/foo', method='{{method}}',"
                         + "headers='{{headers}}', "
                         + "@map(type='xml' , @payload('{{payloadBody}}')))"
                         + "define stream FooStream (payloadBody String, method string, headers string);\n",
@@ -163,7 +163,7 @@ import java.util.Set;
                                 + "~Output http event properties"
                                             + "HTTP_METHOD:'POST',"
                                             + "HOST:'localhost',"
-                                            + "PORT:8009"
+                                            + "PORT:8039"
                                             + "PROTOCOL:'http'"
                                             + "TO:'/foo'"
                         )},

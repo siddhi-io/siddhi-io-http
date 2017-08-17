@@ -68,7 +68,7 @@ public class HttpSinkTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
-                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
+                + "@sink(type='http',publisher.url='http://localhost:8035/abc',method='{{method}}',"
                 + "headers='{{headers}}',"
                 + "@map(type='xml', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
@@ -82,7 +82,7 @@ public class HttpSinkTestCase {
                 query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
-        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8035);
         lst.run();
         fooStream.send(new Object[]{payload, "GET", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
@@ -114,7 +114,7 @@ public class HttpSinkTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
-                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
+                + "@sink(type='http',publisher.url='http://localhost:8035/abc',method='{{method}}',"
                 + "headers='{{headers}}',"
                 + "@map(type='xml', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
@@ -127,7 +127,7 @@ public class HttpSinkTestCase {
                 query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
-        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8035);
         lst.run();
         fooStream.send(new Object[]{payload, "GET", "'Name:John','Age:23','Content-Type:text'"});
         while (!lst.getServerListener().isMessageArrive()) {

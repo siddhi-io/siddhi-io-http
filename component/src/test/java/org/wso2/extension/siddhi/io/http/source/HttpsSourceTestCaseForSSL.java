@@ -75,7 +75,7 @@ public class HttpsSourceTestCaseForSSL {
         inMemoryConfigManager.generateConfigReader("source", "http");
         siddhiManager.setConfigManager(inMemoryConfigManager);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
-        String inStreamDefinition = "@source(type='http', @map(type='xml'), receiver.url='https://localhost:8005"
+        String inStreamDefinition = "@source(type='http', @map(type='xml'), receiver.url='https://localhost:8035"
                 + "/endpoints/RecPro')"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query') "
@@ -144,7 +144,7 @@ public class HttpsSourceTestCaseForSSL {
         inMemoryConfigManager.generateConfigReader("source", "http");
         siddhiManager.setConfigManager(inMemoryConfigManager);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
-        String inStreamDefinition = "@source(type='http', @map(type='xml'), receiver.url='https://localhost:8005/"
+        String inStreamDefinition = "@source(type='http', @map(type='xml'), receiver.url='https://localhost:8035/"
                 + "endpoints/RecPro')"
                 + "define stream inputStream (name string, age int, country string);";
         String query = (
@@ -218,7 +218,7 @@ public class HttpsSourceTestCaseForSSL {
         inMemoryConfigManager.generateConfigReader("source", "http");
         siddhiManager.setConfigManager(inMemoryConfigManager);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
-        String inStreamDefinition = "@source(type='http', @map(type='xml'), receiver.url='https://localhost:8005/" +
+        String inStreamDefinition = "@source(type='http', @map(type='xml'), receiver.url='https://localhost:8035/" +
                 "endpoints/RecPro')"
                 + "define stream inputStream (name string, age int, country string);";
         String query = (
@@ -294,7 +294,7 @@ public class HttpsSourceTestCaseForSSL {
         siddhiManager.setConfigManager(inMemoryConfigManager);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), receiver.url='https://localhost:" +
-                "8005/endpoints/RecPro' )"
+                "8035/endpoints/RecPro' )"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query') "
                 + "from inputStream "

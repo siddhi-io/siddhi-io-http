@@ -46,7 +46,7 @@ public class HttpMappingTest {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
-                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
+                + "@sink(type='http',publisher.url='http://localhost:8035/abc',method='{{method}}',"
                 + "headers='{{headers}}',"
                 + "@map(type='xml', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
@@ -56,7 +56,7 @@ public class HttpMappingTest {
                 query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
-        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8035);
         lst.run();
         String payload = "<events>"
                             + "<event>"
@@ -94,7 +94,7 @@ public class HttpMappingTest {
         siddhiManager.setExtension("xml-output-mapper", JsonSinkMapper.class);
 
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
-                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
+                + "@sink(type='http',publisher.url='http://localhost:8035/abc',method='{{method}}',"
                 + "headers='{{headers}}',"
                 + "@map(type='json', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
@@ -104,7 +104,7 @@ public class HttpMappingTest {
                 query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
-        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8035);
         lst.run();
         fooStream.send(new Object[]{
                 "{\"event\""
@@ -139,7 +139,7 @@ public class HttpMappingTest {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("text-output-mapper", TextSinkMapper.class);
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
-                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
+                + "@sink(type='http',publisher.url='http://localhost:8035/abc',method='{{method}}',"
                 + "headers='{{headers}}',"
                 + "@map(type='text', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
@@ -149,7 +149,7 @@ public class HttpMappingTest {
                 query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
-        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8035);
         lst.run();
         fooStream.send(new Object[]{"WSO2,55.6,100", "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
@@ -174,7 +174,7 @@ public class HttpMappingTest {
         siddhiManager.setExtension("text-output-mapper", TextSinkMapper.class);
         String inStreamDefinition = "Define stream FooStream (name String, age int,country" +
                 " String,method String,headers String);"
-                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
+                + "@sink(type='http',publisher.url='http://localhost:8035/abc',method='{{method}}',"
                 + "headers='{{headers}}',"
                 + "@map(type='text')) "
                 + "Define stream BarStream (name String, age int,country String,method String,headers String);";
@@ -184,7 +184,7 @@ public class HttpMappingTest {
                 query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
-        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8035);
         lst.run();
         fooStream.send(new Object[]{"WSO2", 55.6, "USA", "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
@@ -211,7 +211,7 @@ public class HttpMappingTest {
         log.info("Creating test for publishing events with TEXT mapping.");
         SiddhiManager siddhiManager = new SiddhiManager();
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
-                + "@sink(type='http',publisher.url='http://localhost:8005/abc',"
+                + "@sink(type='http',publisher.url='http://localhost:8035/abc',"
                 + "@map(type='text', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
         String query = ("@info(name = 'query1') " +
@@ -220,7 +220,7 @@ public class HttpMappingTest {
                 query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
-        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8035);
         lst.run();
         fooStream.send(new Object[]{"WSO2,55.6,100", "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
@@ -243,7 +243,7 @@ public class HttpMappingTest {
         log.info("Creating test for publishing events with TEXT mapping.");
         SiddhiManager siddhiManager = new SiddhiManager();
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
-                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='POST',"
+                + "@sink(type='http',publisher.url='http://localhost:8035/abc',method='POST',"
                 + "headers=\"'Name:John','Age:23'\","
                 + "@map(type='text')) "
                 + "Define stream BarStream (message String,method String,headers String);";
@@ -253,7 +253,7 @@ public class HttpMappingTest {
                 query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
-        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8035);
         lst.run();
         fooStream.send(new Object[]{"WSO2,55.6,100", "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {

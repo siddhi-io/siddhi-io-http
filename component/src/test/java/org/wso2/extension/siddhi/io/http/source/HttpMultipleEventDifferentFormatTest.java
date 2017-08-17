@@ -66,8 +66,8 @@ public class HttpMultipleEventDifferentFormatTest {
     @Test
     public void testHTTPInputTransportDifferentFormat() throws Exception {
         logger.info("Creating test case for different configuration sources together.");
-        URI baseURIA = URI.create(String.format("http://%s:%d", "localhost", 8005));
-        URI baseURIC = URI.create(String.format("http://%s:%d", "localhost", 8009));
+        URI baseURIA = URI.create(String.format("http://%s:%d", "localhost", 8035));
+        URI baseURIC = URI.create(String.format("http://%s:%d", "localhost", 8039));
         List<String> receivedEventNameListA = new ArrayList<>(2);
         List<String> receivedEventNameListB = new ArrayList<>(2);
         List<String> receivedEventNameListC = new ArrayList<>(2);
@@ -77,7 +77,7 @@ public class HttpMultipleEventDifferentFormatTest {
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         String inStreamDefinitionA = "@source(type='http', @map(type='xml'), " +
-                "receiver.url='http://localhost:8005/endpoints/RecPro', basic.auth.enabled='false', server.bootstrap" +
+                "receiver.url='http://localhost:8035/endpoints/RecPro', basic.auth.enabled='false', server.bootstrap" +
                 ".boss.group.size='20', server." +
                 "bootstrap.worker.group.size='20')"
                 + "define stream inputStreamA (name string, age int, country string);";
@@ -89,7 +89,7 @@ public class HttpMultipleEventDifferentFormatTest {
                         );
 
         String inStreamDefinitionB = "@source(type='http', @map(type='xml'), "
-                + "receiver.url='http://localhost:8005/endpoints/RecPro1', basic.auth.enabled='false')"
+                + "receiver.url='http://localhost:8035/endpoints/RecPro1', basic.auth.enabled='false')"
                 + "define stream inputStreamB (name string, age int, country string);";
         String queryB = (
                 "@info(name = 'queryB') "
@@ -99,7 +99,7 @@ public class HttpMultipleEventDifferentFormatTest {
                         );
 
         String inStreamDefinitionC = "@source(type='http', @map(type='xml'), "
-                + "receiver.url='http://localhost:8009/endpoints/RecPro', basic.auth.enabled='false')"
+                + "receiver.url='http://localhost:8039/endpoints/RecPro', basic.auth.enabled='false')"
                 + "define stream inputStreamC (name string, age int, country string);";
         String queryC = (
                 "@info(name = 'queryC') "
@@ -109,7 +109,7 @@ public class HttpMultipleEventDifferentFormatTest {
                         );
 
         String inStreamDefinitionD = "@source(type='http', @map(type='xml'), "
-                + "receiver.url='http://localhost:8005/endpoints/RecPro2', basic.auth.enabled='false')"
+                + "receiver.url='http://localhost:8035/endpoints/RecPro2', basic.auth.enabled='false')"
                 + "define stream inputStreamD (name string, age int, country string);";
         String queryD = (
                 "@info(name = 'queryD') "

@@ -57,14 +57,14 @@ public class HttpCustomThreadPoolConfigTest {
     @Test
     public void testCustomPoolConfig() throws Exception {
         logger.info("Creating test for publishing events with XML mapping.");
-        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
+        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8035));
         List<String> receivedEventNameList = new ArrayList<>(2);
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         String inStreamDefinition = "@source(type='http', @map(type='xml'), "
-                + "receiver.url='http://localhost:8005/endpoints/RecPro', basic.auth.enabled='false',worker" +
+                + "receiver.url='http://localhost:8035/endpoints/RecPro', basic.auth.enabled='false',worker" +
                 ".count='8')"
                 + "define stream inputStream (name string, age int, country string);";
         String query = (
