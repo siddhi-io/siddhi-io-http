@@ -154,14 +154,14 @@ public class HttpSourceBasicAuth {
 
     @Test
     public void testHTTPInputTransportBasicAuthFalse() throws Exception {
-        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8009));
+        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8039));
         receivedEventNameList = new ArrayList<>(2);
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("text", TextSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http', @map(type='text'), "
-                + "receiver.url='http://localhost:8009/endpoints/RecPro' " + ")"
+                + "receiver.url='http://localhost:8039/endpoints/RecPro' " + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
@@ -199,14 +199,14 @@ public class HttpSourceBasicAuth {
 
     @Test
     public void testHTTPInputTransportBasicAuthTrue() throws Exception {
-        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8009));
+        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8039));
         receivedEventNameList = new ArrayList<>(2);
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("text", TextSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http', @map(type='text'), "
-                + "receiver.url='http://localhost:8009/endpoints/RecPro', " + "basic.auth.enabled='true'" + ")"
+                + "receiver.url='http://localhost:8039/endpoints/RecPro', " + "basic.auth.enabled='true'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query') " + "from inputStream " + "select *  " + "insert into outputStream;");
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
@@ -244,14 +244,14 @@ public class HttpSourceBasicAuth {
 
     @Test
     public void testBasicAuthTrueWrongConf() throws Exception {
-        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8009));
+        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8039));
         receivedEventNameList = new ArrayList<>(2);
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("text", TextSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http', @map(type='text'), "
-                + "receiver.url='http://localhost:8009/endpoints/RecPro', " + "basic.auth.enabled='true'" + ")"
+                + "receiver.url='http://localhost:8039/endpoints/RecPro', " + "basic.auth.enabled='true'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query1') " + "from inputStream " + "select *  " + "insert into outputStream;");
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager

@@ -130,7 +130,7 @@ public class HttpTestUtil {
             TrustManager[] trustManagers = tmf.getTrustManagers();
             context.init(null, trustManagers, null);
             SSLSocketFactory sf = context.getSocketFactory();
-            URL url = new URL("https://localhost:8005/endpoints/RecPro");
+            URL url = new URL("https://localhost:8035/endpoints/RecPro");
             HttpsURLConnection httpsCon = (HttpsURLConnection) url.openConnection();
             httpsCon.setSSLSocketFactory(sf);
             httpsCon.setRequestMethod("POST");

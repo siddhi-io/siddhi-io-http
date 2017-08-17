@@ -126,11 +126,11 @@ public class HttpBasicTests {
         final Logger logger = Logger.getRootLogger();
         logger.addAppender(appender);
         logger.info("Creating test for publishing events from PUT method.");
-        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
+        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8035));
         List<String> receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
-        String inStreamDefinition = "@source(type='http', @map(type='xml'), receiver.url='http://localhost:8005" +
+        String inStreamDefinition = "@source(type='http', @map(type='xml'), receiver.url='http://localhost:8035" +
                 "/endpoints/RecPro') " +
                 "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query') " +
@@ -358,13 +358,13 @@ public class HttpBasicTests {
     @Test
     public void testHTTPInputTransportDifferentURL() throws Exception {
         logger.info("Creating test for publishing events with different url with same context.");
-        URI baseURIA = URI.create(String.format("http://%s:%d", "localhost", 8005));
-        URI baseURIB = URI.create(String.format("http://%s:%d", "localhost", 8009));
+        URI baseURIA = URI.create(String.format("http://%s:%d", "localhost", 8035));
+        URI baseURIB = URI.create(String.format("http://%s:%d", "localhost", 8039));
         List<String> receivedEventNameListA = new ArrayList<>(2);
         List<String> receivedEventNameListB = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
-        String inStreamDefinition1 = "@source(type='http', @map(type='xml'), receiver.url='http://localhost:8005" +
+        String inStreamDefinition1 = "@source(type='http', @map(type='xml'), receiver.url='http://localhost:8035" +
                 "/endpoints/RecPro', basic.auth.enabled='false' )"
                 + "define stream inputStreamA (name string, age int, country string);";
         String query1 = (
@@ -373,7 +373,7 @@ public class HttpBasicTests {
                         + "select *  "
                         + "insert into outputStreamA;"
                         );
-        String inStreamDefinition2 = "@source(type='http', @map(type='xml'), receiver.url='http://localhost:8009/" +
+        String inStreamDefinition2 = "@source(type='http', @map(type='xml'), receiver.url='http://localhost:8039/" +
                 "endpoints/RecPro', basic.auth.enabled='false' )"
                 + "define stream inputStreamB (name string, age int, country string);";
         String query2 = (
@@ -461,11 +461,11 @@ public class HttpBasicTests {
     @Test
     public void testHTTPInputTransportEmployPayload() throws Exception {
         logger.info("Creating test for publishing events with empty payload.");
-        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
+        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8035));
         List<String> receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
-        String inStreamDefinition = "@source(type='http', @map(type='xml'), receiver.url='http://localhost:8005" +
+        String inStreamDefinition = "@source(type='http', @map(type='xml'), receiver.url='http://localhost:8035" +
                 "/endpoints/RecPro', basic.auth.enabled='false')"
                 + "define stream inputStream (name string, age int, country string);";
         String query = (

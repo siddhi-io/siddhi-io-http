@@ -132,7 +132,7 @@ public class HttpSink {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml", XMLSinkMapper.class);
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
-                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
+                + "@sink(type='http',publisher.url='http://localhost:8035/abc',method='{{method}}',"
                 + "headers='{{headers}}',"
                 + "@map(type='xml', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
@@ -142,7 +142,7 @@ public class HttpSink {
                 query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
-        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8035);
         lst.run();
         String payload = "<events>"
                             + "<event>"
