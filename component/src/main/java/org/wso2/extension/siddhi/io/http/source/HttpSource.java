@@ -169,6 +169,16 @@ public class HttpSource extends Source {
     private SourceEventListener sourceEventListener;
     private String[] requestedTransportPropertyNames;
 
+    /**
+     * The initialization method for {@link Source}, which will be called before other methods and validate
+     * the all configuration and getting the intial values.
+     * @param sourceEventListener After receiving events, the source should trigger onEvent() of this listener.
+     *                            Listener will then pass on the events to the appropriate mappers for processing .
+     * @param optionHolder        Option holder containing static configuration related to the {@link Source}
+     * @param configReader        to read the {@link Source} related system configuration.
+     * @param siddhiAppContext    the context of the {@link org.wso2.siddhi.query.api.SiddhiApp} used to get siddhi
+     *                            related utilty functions.
+     */
     @Override
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
                      String[] requestedTransportPropertyNames, ConfigReader configReader,
@@ -204,11 +214,24 @@ public class HttpSource extends Source {
         this.requestedTransportPropertyNames = requestedTransportPropertyNames;
     }
 
+    /**
+     * Returns the list of classes which this source can output.
+     *
+     * @return Array of classes that will be output by the source.
+     * Null or empty array if it can produce any type of class.
+     */
     @Override
     public Class[] getOutputEventClasses() {
         return new Class[]{String.class};
     }
 
+    /**
+     * Intialy Called to connect to the end point for start  retriving the messages asynchronisly .
+     *
+     * @param connectionCallback Callback to pass the ConnectionUnavailableException in case of connection failure after
+     *                           initial successful connection(can be used when events are receving asynchronasily)
+     * @throws ConnectionUnavailableException if it cannot connect to the source backend immediately.
+     */
     @Override
     public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
         this.httpConnectorRegistry.registerServerConnector(this.listenerUrl, this.sourceId, this.listenerConfig);
@@ -216,18 +239,27 @@ public class HttpSource extends Source {
                 Integer.valueOf(workerThread), isAuth, requestedTransportPropertyNames);
     }
 
+    /**
+     * This method can be called when it is needed to disconnect from the end point.
+     */
     @Override
     public void disconnect() {
         this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl);
         this.httpConnectorRegistry.unregisterServerConnector(this.listenerUrl);
     }
 
+    /**
+     * Called at the end to clean all the resources consumed by the {@link Source}
+     */
     @Override
     public void destroy() {
         // TODO: 7/26/17 Until fix for multiple worker and boss thread loop group
         //this.httpConnectorRegistry.stopHttpServerConnectorController();
     }
 
+    /**
+     * Called to pause event consumption
+     */
     @Override
     public void pause() {
         HttpSourceListener httpSourceListener = this.httpConnectorRegistry.getSourceListenersMap().get(HttpSourceUtil
@@ -237,6 +269,9 @@ public class HttpSource extends Source {
         }
     }
 
+    /**
+     * Called to resume event consumption
+     */
     @Override
     public void resume() {
         HttpSourceListener httpSourceListener = this.httpConnectorRegistry.getSourceListenersMap()
@@ -246,12 +281,24 @@ public class HttpSource extends Source {
         }
     }
 
+    /**
+     * Used to collect the serializable state of the processing element, that need to be
+     * persisted for the reconstructing the element to the same state on a different point of time
+     *
+     * @return stateful objects of the processing element as a map
+     */
     @Override
     public Map<String, Object> currentState() {
         //no current state
         return null;
     }
 
+    /**
+     * Used to restore serialized state of the processing element, for reconstructing
+     *
+     * @param map stateful objects of the element as a map.
+     *              This is the same map that is created upon calling currentState() method.
+     */
     @Override
     public void restoreState(Map<String, Object> map) {
         // no state to restore
