@@ -39,44 +39,28 @@ Prerequisites for using the feature
         name: 'http'
         namespace: 'source'
         properties:
-          latency.metrics.enabled: true
-          server.bootstrap.socket.timeout: 15
-          client.bootstrap.socket.timeout: 15
-          server.bootstrap.worker.group.size: 8
-          server.bootstrap.boss.group.size: 4
-          default.host: 0.0.0.0
-          default.port: 9763
-          default.scheme: http
-          default.keyStoreFile: ''
-          default.keyStorePass: ''
-          default.certPass: ''
-          https.host: 0.0.0.0
-          https.port: 9763
-          https.scheme: https
-          https.keystore.file: ${carbon.home}/resources/security/wso2carbon.jks
-          https.keyStore.pass: wso2carbon
+             trp.latency.metrics.enabled: true
+             trp.server.bootstrap.boss.group.size: 4
+             trp.server.bootstrap.worker.group.size: 8
+             trp.server.bootstrap.socket.timeout: 15
+             default.host: 0.0.0.0
+             http.port: 9763
+             https.port: 9443
+             default.scheme: http
+             https.keystore.file: ${carbon.home}/resources/security/wso2carbon.jks
+             https.keystore.password: wso2carbon
+             https.cert.password: wso2carbon
           
        -extension:
         name: 'http'
         namespace: 'sink'
         properties:
-          latency.metrics.enabled: true
-          server.bootstrap.socket.timeout: 15
-          client.bootstrap.socket.timeout: 15
-          server.bootstrap.worker.group.size: 8
-          server.bootstrap.boss.group.size: 4
-          default.host: 0.0.0.0
-          default.port: 9763
-          default.scheme: http
-          default.key.store.file: ''
-          default.key.store.pass: ''
-          default.cert.pass: ''
-          https.host: 0.0.0.0
-          https.port: 9763
-          https.scheme: https
-          https.truststore.file: ${carbon.home}/resources/security/client-truststore.jks
-          https.truststore.pass: wso2carbon
-          https.certPass: wso2carbon
+              trp.client.bootstrap.socket.timeout: 15
+              trp.latency.metrics.enabled: true
+              default.scheme: http
+              client.truststore.path: ${carbon.home}/resources/security/client-truststore.jks
+              client.truststore.password: wso2carbon
+
  
 Deploying the feature
 ------------------
@@ -114,8 +98,3 @@ Siddhi developers can be contacted via the mailing lists:
 We welcome your feedback and contribution.
 ------------------
 WSO2 Smart Analytics Team.
-
-## API Docs
-
-1. <a href="./api/1.0.2-SNAPSHOT">1.0.2-SNAPSHOT</a>
-1. <a href="./api/1.0.1-SNAPSHOT">1.0.1-SNAPSHOT</a>

@@ -182,13 +182,6 @@ import java.util.Set;
                         possibleParameters = "Any Integer"
                 ),
                 @SystemParameter(
-                        name = "client.bootstrap.socket.timeout",
-                        description = "property to configure specified timeout in milliseconds which client " +
-                                "socket will block for this amount of time for http message content to be received.",
-                        defaultValue = "15",
-                        possibleParameters = "Any Integer"
-                ),
-                @SystemParameter(
                         name = "server.bootstrap.boss.group.size",
                         description = "Property to configure number of boss threads, which accepts incoming " +
                                 "connections until the ports are unbound. Once connection accepts successfully, " +
@@ -202,18 +195,6 @@ import java.util.Set;
                                 "blocking read and write for one or more channels in non-blocking mode.",
                         defaultValue = "8",
                         possibleParameters = "Any integer"
-                ),
-                @SystemParameter(
-                        name = "default.host",
-                        description = "The default host.",
-                        defaultValue = "0.0.0.0",
-                        possibleParameters = "Any Valid host"
-                ),
-                @SystemParameter(
-                        name = "default.port",
-                        description = "The default port.",
-                        defaultValue = "9763",
-                        possibleParameters = "Integer Port"
                 ),
                 @SystemParameter(
                         name = "default.protocol",
@@ -262,7 +243,7 @@ public class HttpSink extends Sink {
     @Override
     protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
                         ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
-        this.streamID = outputStreamDefinition.toString();
+        this.streamID = siddhiAppContext.getName() + ":" + outputStreamDefinition.toString();
         this.mapType = outputStreamDefinition.getAnnotations().get(0).getAnnotations().get(0).getElements().get(0)
                 .getValue();
         this.publisherURL = optionHolder.validateAndGetStaticValue(HttpConstants.PUBLISHER_URL);
@@ -276,6 +257,13 @@ public class HttpSink extends Sink {
                 HttpSinkUtil().trustStorePath(configReader));
         String clientStorePass = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD,
                 new HttpSinkUtil().trustStorePassword(configReader));
+        String scheme = configReader.readConfig(HttpConstants.DEFAULT_SINK_SCHEME, HttpConstants
+                .DEFAULT_SINK_SCHEME_VALUE);
+        if (HttpConstants.SCHEME_HTTPS.equals(scheme) && ((clientStoreFile == null) || (clientStorePass == null))) {
+            throw new ExceptionInInitializerError("Client truststore file path or password are empty while " +
+                    "default scheme is 'https'. Please provide client " +
+                    "truststore file path and password in" + streamID);
+        }
         if (HttpConstants.EMPTY_STRING.equals(publisherURL)) {
             throw new ExceptionInInitializerError("Receiver URL found empty but it is Mandatory field in " +
                     "" + HttpConstants.HTTP_SINK_ID + "in" + streamID);
@@ -373,11 +361,10 @@ public class HttpSink extends Sink {
         /*
          * set carbon message properties which is to be used in carbon transport.
          */
-            // Set protocol type http or https
-        cMessage.setProperty(org.wso2.carbon.messaging.Constants.PROTOCOL,
-                httpURLProperties.get(HttpConstants.PROTOCOL));
+        // Set protocol type http or https
+        cMessage.setProperty(Constants.PROTOCOL, httpURLProperties.get(HttpConstants.SCHEME));
             // Set uri
-        cMessage.setProperty(org.wso2.carbon.messaging.Constants.TO, httpURLProperties.get(HttpConstants.TO));
+        cMessage.setProperty(Constants.TO, httpURLProperties.get(HttpConstants.TO));
             // set Host
         cMessage.setProperty(Constants.HOST, httpURLProperties.get(HttpConstants.HOST));
             //set port

@@ -101,13 +101,6 @@ import java.util.Map;
                         possibleParameters = "Any integer"
                 ),
                 @SystemParameter(
-                        name = "client.bootstrap.socket.timeout",
-                        description = "property to configure specified timeout in milliseconds which client " +
-                                "socket will block for this amount of time for http message content to be received",
-                        defaultValue = "15",
-                        possibleParameters = "Any integer"
-                ),
-                @SystemParameter(
                         name = "server.bootstrap.boss.group.size",
                         description = "property to configure number of boss threads, which accepts incoming " +
                                 "connections until the ports are unbound. Once connection accepts successfully, " +
@@ -124,14 +117,20 @@ import java.util.Map;
                 ),
                 @SystemParameter(
                         name = "default.host",
-                        description = "The default host.",
+                        description = "The default host of the transport.",
                         defaultValue = "0.0.0.0",
                         possibleParameters = "Any valid host"
                 ),
                 @SystemParameter(
-                        name = "default.port",
-                        description = "The default port.",
+                        name = "http.port",
+                        description = "The default port if the default scheme is 'http'.",
                         defaultValue = "9763",
+                        possibleParameters = "Any valid port"
+                ),
+                @SystemParameter(
+                        name = "https.port",
+                        description = "The default port if the default scheme is 'https'.",
+                        defaultValue = "9443",
                         possibleParameters = "Any valid port"
                 ),
                 @SystemParameter(
@@ -175,13 +174,24 @@ public class HttpSource extends Source {
                      String[] requestedTransportPropertyNames, ConfigReader configReader,
                      SiddhiAppContext siddhiAppContext) {
         this.sourceId = sourceEventListener.getStreamDefinition().toString();
-        String defaultURL = configReader.readConfig(HttpConstants.DEFAULT_PROTOCOL, HttpConstants
-                .DEFAULT_PROTOCOL_VALUE) + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
-                readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
-                HttpConstants.PORT_HOST_SEPARATOR + configReader.readConfig(HttpConstants.
-                DEFAULT_PORT, HttpConstants.DEFAULT_PORT_VALUE) + HttpConstants.
-                PORT_CONTEXT_SEPARATOR + siddhiAppContext.getName()
-                + HttpConstants.PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
+        String scheme = configReader.readConfig(HttpConstants.DEFAULT_SOURCE_SCHEME, HttpConstants
+                .DEFAULT_SOURCE_SCHEME_VALUE);
+        String defaultURL;
+        if (HttpConstants.SCHEME_HTTP.equals(scheme)) {
+            defaultURL = HttpConstants.SCHEME_HTTP + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
+                    readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
+                    HttpConstants.PORT_HOST_SEPARATOR + configReader.readConfig(HttpConstants.
+                    HTTP_PORT, HttpConstants.HTTP_PORT_VALUE) + HttpConstants.
+                    PORT_CONTEXT_SEPARATOR + siddhiAppContext.getName()
+                    + HttpConstants.PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
+        } else {
+            defaultURL = HttpConstants.SCHEME_HTTPS + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
+                    readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
+                    HttpConstants.PORT_HOST_SEPARATOR + configReader.readConfig(HttpConstants.
+                    HTTPS_PORT, HttpConstants.HTTPS_PORT_VALUE) + HttpConstants.
+                    PORT_CONTEXT_SEPARATOR + siddhiAppContext.getName()
+                    + HttpConstants.PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
+        }
         this.listenerUrl = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_URL, defaultURL);
         this.isAuth = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants.IS_AUTH,
                 HttpConstants.EMPTY_IS_AUTH).toLowerCase(Locale.ENGLISH));

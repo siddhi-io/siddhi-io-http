@@ -35,6 +35,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
@@ -54,26 +55,21 @@ public class HttpSourceUtil {
      * @return return the set of netty transportation configuration.
      */
     public Set<TransportProperty> getTransportConfigurations(ConfigReader sourceConfigReader) {
+        Map<String, String> configsMap = sourceConfigReader.getAllConfigs();
         ArrayList<TransportProperty> properties = new ArrayList<>();
-        TransportProperty var = new TransportProperty();
-        var.setName(HttpConstants.LATENCY_METRICS);
-        var.setValue(sourceConfigReader.readConfig(HttpConstants.LATENCY_METRICS,
-                HttpConstants.LATENCY_METRICS_VALUE));
-        properties.add(var);
-        var = new TransportProperty();
-        var.setName(HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT);
-        var.setValue(Integer.valueOf(sourceConfigReader.readConfig(HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT,
-                HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT_VALUE)));
-        properties.add(var);
-        var = new TransportProperty();
-        var.setName(HttpConstants.CLIENT_BOOTSTRAP_SOCKET_TIMEOUT);
-        var.setValue(Integer.valueOf(sourceConfigReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_SOCKET_TIMEOUT,
-                HttpConstants.CLIENT_BOOTSTRAP_SOCKET_TIMEOUT_VALUE)));
-        properties.add(var);
+        configsMap.forEach((key, value) -> {
+            if (key.contains("trp.")) {
+                TransportProperty trpProperty = new TransportProperty();
+                trpProperty.setName(key);
+                trpProperty.setValue(value);
+                properties.add(trpProperty);
+            }
+        });
+        // to make default order preserve
         String bootstrapBoss = sourceConfigReader.readConfig(HttpConstants
                 .SERVER_BOOTSTRAP_BOSS_GROUP_SIZE, HttpConstants.EMPTY_STRING);
         if (!HttpConstants.EMPTY_STRING.equals(bootstrapBoss)) {
-            var = new TransportProperty();
+            TransportProperty var = new TransportProperty();
             var.setName(HttpConstants.SERVER_BOOTSTRAP_BOSS_GROUP_SIZE);
             var.setValue(Integer.valueOf(bootstrapBoss));
             properties.add(var);
@@ -81,7 +77,7 @@ public class HttpSourceUtil {
         String bootstrapWorker = sourceConfigReader.readConfig(HttpConstants
                 .SERVER_BOOTSTRAP_WORKER_GROUP_SIZE, HttpConstants.EMPTY_STRING);
         if (!HttpConstants.EMPTY_STRING.equals(bootstrapWorker)) {
-            var = new TransportProperty();
+            TransportProperty var = new TransportProperty();
             var.setName(HttpConstants.SERVER_BOOTSTRAP_WORKER_GROUP_SIZE);
             var.setValue(Integer.valueOf(bootstrapWorker));
             properties.add(var);
@@ -137,14 +133,14 @@ public class HttpSourceUtil {
             host = aURL.getHost();
             port = (aURL.getPort());
             switch (protocol) {
-                case HttpConstants.PROTOCOL_HTTP:
-                    listenerConfig = new ListenerConfiguration(HttpConstants.PROTOCOL_HTTP, host, port);
+                case HttpConstants.SCHEME_HTTP:
+                    listenerConfig = new ListenerConfiguration(HttpConstants.SCHEME_HTTP, host, port);
                     listenerConfig.setScheme(protocol);
                     listenerConfig.setMessageProcessorId(sourceConfigReader.readConfig(HttpConstants
-                                    .MESSAGE_PROCESSOR_ID, HttpConstants.MESSAGE_PROCESSOR_ID_DEFAULT));
+                            .MESSAGE_PROCESSOR_ID, HttpConstants.MESSAGE_PROCESSOR_ID_VALUE));
                     break;
-                case HttpConstants.PROTOCOL_HTTPS:
-                    listenerConfig = new ListenerConfiguration(HttpConstants.PROTOCOL_HTTPS, host, port);
+                case HttpConstants.SCHEME_HTTPS:
+                    listenerConfig = new ListenerConfiguration(HttpConstants.SCHEME_HTTPS, host, port);
                     listenerConfig.setScheme(protocol);
                     listenerConfig.setKeyStoreFile(sourceConfigReader.readConfig(HttpConstants.KEYSTORE_FILE,
                             HttpConstants.KEYSTORE_FILE_VALUE));
@@ -153,7 +149,7 @@ public class HttpSourceUtil {
                     listenerConfig.setCertPass(sourceConfigReader.readConfig(HttpConstants.CERT_PASSWORD,
                             HttpConstants.CERT_PASSWORD_VALUE));
                     listenerConfig.setMessageProcessorId(sourceConfigReader.readConfig(HttpConstants
-                            .MESSAGE_PROCESSOR_ID, HttpConstants.MESSAGE_PROCESSOR_ID_DEFAULT));
+                            .MESSAGE_PROCESSOR_ID, HttpConstants.MESSAGE_PROCESSOR_ID_VALUE));
                     break;
                 default:
                     throw new HttpSourceAdaptorRuntimeException("Invalid protocol " + protocol);
