@@ -158,7 +158,7 @@ public class HttpSinkUtil {
         configsMap.forEach((key, value) -> {
             if (key.contains("trp.")) {
                 TransportProperty trpProperty = new TransportProperty();
-                trpProperty.setName(key);
+                trpProperty.setName(key.replaceFirst("trp.", ""));
                 trpProperty.setValue(value);
                 properties.add(trpProperty);
             }
