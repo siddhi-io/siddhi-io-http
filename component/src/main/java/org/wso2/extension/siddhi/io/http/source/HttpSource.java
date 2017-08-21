@@ -187,18 +187,18 @@ public class HttpSource extends Source {
         String scheme = configReader.readConfig(HttpConstants.DEFAULT_SOURCE_SCHEME, HttpConstants
                 .DEFAULT_SOURCE_SCHEME_VALUE);
         String defaultURL;
-        if (HttpConstants.SCHEME_HTTP.equals(scheme)) {
-            defaultURL = HttpConstants.SCHEME_HTTP + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
-                    readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
-                    HttpConstants.PORT_HOST_SEPARATOR + configReader.readConfig(HttpConstants.
-                    HTTP_PORT, HttpConstants.HTTP_PORT_VALUE) + HttpConstants.
-                    PORT_CONTEXT_SEPARATOR + siddhiAppContext.getName()
-                    + HttpConstants.PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
-        } else {
+        if (HttpConstants.SCHEME_HTTPS.equals(scheme)) {
             defaultURL = HttpConstants.SCHEME_HTTPS + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
                     readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
                     HttpConstants.PORT_HOST_SEPARATOR + configReader.readConfig(HttpConstants.
                     HTTPS_PORT, HttpConstants.HTTPS_PORT_VALUE) + HttpConstants.
+                    PORT_CONTEXT_SEPARATOR + siddhiAppContext.getName()
+                    + HttpConstants.PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
+        } else {
+            defaultURL = HttpConstants.SCHEME_HTTP + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
+                    readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
+                    HttpConstants.PORT_HOST_SEPARATOR + configReader.readConfig(HttpConstants.
+                    HTTP_PORT, HttpConstants.HTTP_PORT_VALUE) + HttpConstants.
                     PORT_CONTEXT_SEPARATOR + siddhiAppContext.getName()
                     + HttpConstants.PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
         }
