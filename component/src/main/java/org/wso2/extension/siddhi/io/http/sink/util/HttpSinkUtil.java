@@ -53,26 +53,20 @@ public class HttpSinkUtil {
      */
     public Map<String, String> getURLProperties(String publisherURL) {
         Map<String, String> httpStaticProperties;
-        String protocol = HttpConstants.DEFAULT_PROTOCOL_VALUE;
-        String host = HttpConstants.DEFAULT_HOST_VALUE;
-        String port = HttpConstants.EMPTY_STRING;
-        String path = HttpConstants.DEFAULT_CONTEXT_VALUE;
-        if (!"".equals(publisherURL)) {
             try {
                 URL aURL = new URL(publisherURL);
-                protocol = aURL.getProtocol();
-                host = aURL.getHost();
-                port = Integer.toString(aURL.getPort());
-                path = aURL.getPath();
+                String scheme = aURL.getProtocol();
+                String host = aURL.getHost();
+                String port = Integer.toString(aURL.getPort());
+                String path = aURL.getPath();
+                httpStaticProperties = new HashMap<>();
+                httpStaticProperties.put(HttpConstants.TO, path);
+                httpStaticProperties.put(HttpConstants.HOST, host);
+                httpStaticProperties.put(HttpConstants.PORT, port);
+                httpStaticProperties.put(HttpConstants.SCHEME, scheme);
             } catch (MalformedURLException e) {
                 throw new HttpSinkAdaptorRuntimeException(" Receiver url mandatory. Please insert valid url .", e);
             }
-        }
-        httpStaticProperties = new HashMap<>();
-        httpStaticProperties.put(HttpConstants.TO, path);
-        httpStaticProperties.put(HttpConstants.HOST, host);
-        httpStaticProperties.put(HttpConstants.PORT, port);
-        httpStaticProperties.put(HttpConstants.PROTOCOL, protocol);
         return httpStaticProperties;
     }
 
@@ -88,7 +82,7 @@ public class HttpSinkUtil {
             headers = headers.substring(1, headers.length() - 1);
             List<Header> headersList = new ArrayList<>();
             if (!"".equals(headers)) {
-                String[] spam = headers.split(HttpConstants.HEADER_SPLITTER);
+                String[] spam = headers.split(HttpConstants.HEADER_SPLITTER_REGEX);
                 for (String aSpam : spam) {
                     String[] header = aSpam.split(HttpConstants.HEADER_NAME_VALUE_SPLITTER, 2);
                     if (header.length > 1) {
@@ -112,8 +106,8 @@ public class HttpSinkUtil {
      * @return default trust store file path.
      */
     public String trustStorePath(ConfigReader sinkConfigReader) {
-        return sinkConfigReader.readConfig(HttpConstants.TRUSTSTORE_FILE, HttpConstants
-                .TRUSTSTORE_FILE_VALUE);
+        return sinkConfigReader.readConfig(HttpConstants.CLIENT_TRUSTSTORE_PATH,
+                HttpConstants.CLIENT_TRUSTSTORE_PATH_VALUE);
     }
 
     /**
@@ -123,8 +117,8 @@ public class HttpSinkUtil {
      * @return default trust password.
      */
     public String trustStorePassword(ConfigReader sinkConfigReader) {
-        return sinkConfigReader.readConfig(HttpConstants.TRUSTSTORE_PASSWORD, HttpConstants.
-                        TRUSTSTORE_PASSWORD_VALUE);
+        return sinkConfigReader.readConfig(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD,
+                HttpConstants.CLIENT_TRUSTSTORE_PASSWORD_VALUE);
     }
     /**
      * Method is responsible for set sender configuration values .
@@ -137,17 +131,17 @@ public class HttpSinkUtil {
     public Set<SenderConfiguration> getSenderConfigurations(Map<String, String> httpStaticProperties, String
             clientStoreFile, String clientStorePass) {
         Set<SenderConfiguration> senderConf;
-        if (httpStaticProperties.get(HttpConstants.PROTOCOL).equals(HttpConstants.PROTOCOL_HTTPS)) {
+        if (httpStaticProperties.get(HttpConstants.SCHEME).equals(HttpConstants.SCHEME_HTTPS)) {
             SenderConfiguration httpsSender = new SenderConfiguration(httpStaticProperties
                     .get(HttpConstants.PORT));
             httpsSender.setTrustStoreFile(clientStoreFile);
             httpsSender.setTrustStorePass(clientStorePass);
             httpsSender.setId(httpStaticProperties.get(HttpConstants.TO));
-            httpsSender.setScheme(httpStaticProperties.get(HttpConstants.PROTOCOL));
+            httpsSender.setScheme(httpStaticProperties.get(HttpConstants.SCHEME));
             senderConf = new HashSet<>(Collections.singletonList(httpsSender));
         } else {
             SenderConfiguration httpSender = new SenderConfiguration(httpStaticProperties.get(HttpConstants.PORT));
-            httpSender.setScheme(httpStaticProperties.get(HttpConstants.PROTOCOL));
+            httpSender.setScheme(httpStaticProperties.get(HttpConstants.SCHEME));
             senderConf = new HashSet<>(Collections.singletonList(httpSender));
         }
         return senderConf;
@@ -158,39 +152,17 @@ public class HttpSinkUtil {
      *
      * @return return the set of netty transportation configuration.
      */
-    public Set<TransportProperty> getTransportConfigurations(ConfigReader sourceConfigReader) {
+    public Set<TransportProperty> getTransportConfigurations(ConfigReader sinkConfigReader) {
+        Map<String, String> configsMap = sinkConfigReader.getAllConfigs();
         ArrayList<TransportProperty> properties = new ArrayList<>();
-        TransportProperty var = new TransportProperty();
-        var.setName(HttpConstants.LATENCY_METRICS);
-        var.setValue(sourceConfigReader.readConfig(HttpConstants.LATENCY_METRICS,
-                HttpConstants.LATENCY_METRICS_VALUE));
-        properties.add(var);
-        var = new TransportProperty();
-        var.setName(HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT);
-        var.setValue(Integer.valueOf(sourceConfigReader.readConfig(HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT,
-                HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT_VALUE)));
-        properties.add(var);
-        var = new TransportProperty();
-        var.setName(HttpConstants.CLIENT_BOOTSTRAP_SOCKET_TIMEOUT);
-        var.setValue(Integer.valueOf(sourceConfigReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_SOCKET_TIMEOUT,
-                HttpConstants.CLIENT_BOOTSTRAP_SOCKET_TIMEOUT_VALUE)));
-        properties.add(var);
-        String bootstrapBossThreads = sourceConfigReader.readConfig(HttpConstants
-                .SERVER_BOOTSTRAP_BOSS_GROUP_SIZE, HttpConstants.EMPTY_STRING);
-        if (!HttpConstants.EMPTY_STRING.equals(bootstrapBossThreads)) {
-            var = new TransportProperty();
-            var.setName(HttpConstants.SERVER_BOOTSTRAP_BOSS_GROUP_SIZE);
-            var.setValue(Integer.valueOf(bootstrapBossThreads));
-            properties.add(var);
-        }
-        String bootstrapWorkerThreads = sourceConfigReader.readConfig(HttpConstants
-                .SERVER_BOOTSTRAP_WORKER_GROUP_SIZE, HttpConstants.EMPTY_STRING);
-        if (!HttpConstants.EMPTY_STRING.equals(bootstrapWorkerThreads)) {
-            var = new TransportProperty();
-            var.setName(HttpConstants.SERVER_BOOTSTRAP_WORKER_GROUP_SIZE);
-            var.setValue(Integer.valueOf(bootstrapWorkerThreads));
-            properties.add(var);
-        }
+        configsMap.forEach((key, value) -> {
+            if (key.contains("trp.")) {
+                TransportProperty trpProperty = new TransportProperty();
+                trpProperty.setName(key.replaceFirst("trp.", ""));
+                trpProperty.setValue(value);
+                properties.add(trpProperty);
+            }
+        });
         return new HashSet<>(properties);
     }
 

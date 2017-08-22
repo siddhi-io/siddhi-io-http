@@ -49,18 +49,12 @@ siddhi:
         properties:
           latency.metrics.enabled: true
           server.bootstrap.socket.timeout: 15
-          client.bootstrap.socket.timeout: 15
           server.bootstrap.boss.group.size: 4
           server.bootstrap.worker.group.size: 8
           default.host: 0.0.0.0
-          default.port: 9763
+          http.port: 9763
+          https.port: 9443
           default.scheme: http
-          default.keyStoreFile: ''
-          default.keyStorePass: ''
-          default.certPass: ''
-          https.host: 0.0.0.0
-          https.port: 9763
-          https.scheme: https
           https.keystore.file: ${carbon.home}/resources/security/wso2carbon.jks
           https.keyStore.pass: wso2carbon
           https.certPass: wso2carbon
@@ -74,22 +68,12 @@ siddhi:
           # Extension properties
         properties:
           latency.metrics.enabled: true
-          server.bootstrap.socket.timeout: 15
           client.bootstrap.socket.timeout: 15
-          server.bootstrap.boss.group.size: 4
-          server.bootstrap.worker.group.size: 8
-          default.host: 0.0.0.0
-          default.port: 9763
           default.scheme: http
-          default.keyStoreFile: ''
-          default.keyStorePass: ''
-          default.certPass: ''
           https.host: 0.0.0.0
           https.port: 9763
-          https.scheme: https
-          https.truststore.file: ${carbon.home}/resources/security/client-truststore.jks
-          https.truststore.pass: wso2carbon
-          https.certPass: wso2carbon
+          client.truststore.file: ${carbon.home}/resources/security/client-truststore.jks
+          client.truststore.pass: wso2carbon
     -
         # Extension configuration for rdbms store
       extension:

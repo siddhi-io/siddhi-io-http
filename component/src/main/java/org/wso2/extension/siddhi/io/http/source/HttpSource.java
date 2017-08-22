@@ -101,13 +101,6 @@ import java.util.Map;
                         possibleParameters = "Any integer"
                 ),
                 @SystemParameter(
-                        name = "client.bootstrap.socket.timeout",
-                        description = "property to configure specified timeout in milliseconds which client " +
-                                "socket will block for this amount of time for http message content to be received",
-                        defaultValue = "15",
-                        possibleParameters = "Any integer"
-                ),
-                @SystemParameter(
                         name = "server.bootstrap.boss.group.size",
                         description = "property to configure number of boss threads, which accepts incoming " +
                                 "connections until the ports are unbound. Once connection accepts successfully, " +
@@ -124,14 +117,20 @@ import java.util.Map;
                 ),
                 @SystemParameter(
                         name = "default.host",
-                        description = "The default host.",
+                        description = "The default host of the transport.",
                         defaultValue = "0.0.0.0",
                         possibleParameters = "Any valid host"
                 ),
                 @SystemParameter(
-                        name = "default.port",
-                        description = "The default port.",
+                        name = "http.port",
+                        description = "The default port if the default scheme is 'http'.",
                         defaultValue = "9763",
+                        possibleParameters = "Any valid port"
+                ),
+                @SystemParameter(
+                        name = "https.port",
+                        description = "The default port if the default scheme is 'https'.",
+                        defaultValue = "9443",
                         possibleParameters = "Any valid port"
                 ),
                 @SystemParameter(
@@ -170,18 +169,39 @@ public class HttpSource extends Source {
     private SourceEventListener sourceEventListener;
     private String[] requestedTransportPropertyNames;
 
+    /**
+     * The initialization method for {@link Source}, which will be called before other methods and validate
+     * the all configuration and getting the intial values.
+     * @param sourceEventListener After receiving events, the source should trigger onEvent() of this listener.
+     *                            Listener will then pass on the events to the appropriate mappers for processing .
+     * @param optionHolder        Option holder containing static configuration related to the {@link Source}
+     * @param configReader        to read the {@link Source} related system configuration.
+     * @param siddhiAppContext    the context of the {@link org.wso2.siddhi.query.api.SiddhiApp} used to get siddhi
+     *                            related utilty functions.
+     */
     @Override
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
                      String[] requestedTransportPropertyNames, ConfigReader configReader,
                      SiddhiAppContext siddhiAppContext) {
         this.sourceId = sourceEventListener.getStreamDefinition().toString();
-        String defaultURL = configReader.readConfig(HttpConstants.DEFAULT_PROTOCOL, HttpConstants
-                .DEFAULT_PROTOCOL_VALUE) + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
-                readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
-                HttpConstants.PORT_HOST_SEPARATOR + configReader.readConfig(HttpConstants.
-                DEFAULT_PORT, HttpConstants.DEFAULT_PORT_VALUE) + HttpConstants.
-                PORT_CONTEXT_SEPARATOR + siddhiAppContext.getName()
-                + HttpConstants.PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
+        String scheme = configReader.readConfig(HttpConstants.DEFAULT_SOURCE_SCHEME, HttpConstants
+                .DEFAULT_SOURCE_SCHEME_VALUE);
+        String defaultURL;
+        if (HttpConstants.SCHEME_HTTPS.equals(scheme)) {
+            defaultURL = HttpConstants.SCHEME_HTTPS + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
+                    readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
+                    HttpConstants.PORT_HOST_SEPARATOR + configReader.readConfig(HttpConstants.
+                    HTTPS_PORT, HttpConstants.HTTPS_PORT_VALUE) + HttpConstants.
+                    PORT_CONTEXT_SEPARATOR + siddhiAppContext.getName()
+                    + HttpConstants.PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
+        } else {
+            defaultURL = HttpConstants.SCHEME_HTTP + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
+                    readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
+                    HttpConstants.PORT_HOST_SEPARATOR + configReader.readConfig(HttpConstants.
+                    HTTP_PORT, HttpConstants.HTTP_PORT_VALUE) + HttpConstants.
+                    PORT_CONTEXT_SEPARATOR + siddhiAppContext.getName()
+                    + HttpConstants.PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
+        }
         this.listenerUrl = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_URL, defaultURL);
         this.isAuth = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants.IS_AUTH,
                 HttpConstants.EMPTY_IS_AUTH).toLowerCase(Locale.ENGLISH));
@@ -194,11 +214,24 @@ public class HttpSource extends Source {
         this.requestedTransportPropertyNames = requestedTransportPropertyNames;
     }
 
+    /**
+     * Returns the list of classes which this source can output.
+     *
+     * @return Array of classes that will be output by the source.
+     * Null or empty array if it can produce any type of class.
+     */
     @Override
     public Class[] getOutputEventClasses() {
         return new Class[]{String.class};
     }
 
+    /**
+     * Intialy Called to connect to the end point for start  retriving the messages asynchronisly .
+     *
+     * @param connectionCallback Callback to pass the ConnectionUnavailableException in case of connection failure after
+     *                           initial successful connection(can be used when events are receving asynchronasily)
+     * @throws ConnectionUnavailableException if it cannot connect to the source backend immediately.
+     */
     @Override
     public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
         this.httpConnectorRegistry.registerServerConnector(this.listenerUrl, this.sourceId, this.listenerConfig);
@@ -206,18 +239,27 @@ public class HttpSource extends Source {
                 Integer.valueOf(workerThread), isAuth, requestedTransportPropertyNames);
     }
 
+    /**
+     * This method can be called when it is needed to disconnect from the end point.
+     */
     @Override
     public void disconnect() {
         this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl);
         this.httpConnectorRegistry.unregisterServerConnector(this.listenerUrl);
     }
 
+    /**
+     * Called at the end to clean all the resources consumed by the {@link Source}
+     */
     @Override
     public void destroy() {
         // TODO: 7/26/17 Until fix for multiple worker and boss thread loop group
         //this.httpConnectorRegistry.stopHttpServerConnectorController();
     }
 
+    /**
+     * Called to pause event consumption
+     */
     @Override
     public void pause() {
         HttpSourceListener httpSourceListener = this.httpConnectorRegistry.getSourceListenersMap().get(HttpSourceUtil
@@ -227,6 +269,9 @@ public class HttpSource extends Source {
         }
     }
 
+    /**
+     * Called to resume event consumption
+     */
     @Override
     public void resume() {
         HttpSourceListener httpSourceListener = this.httpConnectorRegistry.getSourceListenersMap()
@@ -236,12 +281,24 @@ public class HttpSource extends Source {
         }
     }
 
+    /**
+     * Used to collect the serializable state of the processing element, that need to be
+     * persisted for the reconstructing the element to the same state on a different point of time
+     *
+     * @return stateful objects of the processing element as a map
+     */
     @Override
     public Map<String, Object> currentState() {
         //no current state
         return null;
     }
 
+    /**
+     * Used to restore serialized state of the processing element, for reconstructing
+     *
+     * @param map stateful objects of the element as a map.
+     *              This is the same map that is created upon calling currentState() method.
+     */
     @Override
     public void restoreState(Map<String, Object> map) {
         // no state to restore
