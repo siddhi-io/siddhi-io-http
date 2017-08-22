@@ -19,7 +19,7 @@
     <parent>
         <artifactId>siddhi-io-http-tests</artifactId>
         <groupId>org.wso2.extension.siddhi.io.http</groupId>
-        <version>1.0.2-SNAPSHOT</version>
+        <version>1.0.2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -319,22 +319,22 @@
                                 <configuration>
                                     <target xmlns:jacoco="antlib:org.jacoco.ant">
                                         <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
-                                            <classpath path="${project.build.directory}"/>
+                                            <classpath path="${project.build.directory}" />
                                         </taskdef>
                                         <!-- OSGi Test coverage only enabled for org.wso2.carbon.stream.core module-->
                                         <jacoco:report>
                                             <executiondata>
-                                                <file file="${project.build.directory}/jacoco.exec"/>
+                                                <file file="${project.build.directory}/jacoco.exec" />
                                             </executiondata>
                                             <structure name="HTTP io OSGi Tests">
                                                 <classfiles>
-                                                    <fileset dir="../../component/target/classes"/>
+                                                    <fileset dir="../../component/target/classes" />
                                                 </classfiles>
                                                 <sourcefiles encoding="UTF-8">
-                                                    <fileset dir="../../component/src"/>
+                                                    <fileset dir="../../component/src" />
                                                 </sourcefiles>
                                             </structure>
-                                            <html destdir="${project.build.directory}"/>
+                                            <html destdir="${project.build.directory}" />
                                         </jacoco:report>
                                     </target>
                                 </configuration>
