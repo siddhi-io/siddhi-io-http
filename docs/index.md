@@ -1,100 +1,74 @@
 ﻿siddhi-io-http
 ======================================
+
+The **siddhi-io-http extension** is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a> that allow us to receive and publish events through http and https transports.This extension only works inside 
+the WSO2 Data Analytic Server and cannot be run with standalone siddhi.
+
+Find some useful links below:
+
+* <a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-http">Source code</a>
+* <a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-http/releases">Releases</a>
+* <a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-http/issues">Issue tracker</a>
+
+## Latest API Docs 
+
+Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/api/1.0.3-SNAPSHOT">1.0.3-SNAPSHOT</a>.
+
+## How to use 
+
+**Using the extension in <a target="_blank" href="https://github.com/wso2/product-sp">WSO2 Stream Processor</a>**
+
+* You can use this extension in the latest <a target="_blank" href="https://github.com/wso2/product-sp/releases">WSO2 Stream Processor</a> that is a part of <a target="_blank" href="http://wso2.com/analytics?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">WSO2 Analytics</a> offering, with editor, debugger and simulation support. 
+
+* This extension is shipped by default with WSO2 Stream Processor, if you wish to use an alternative version of this extension you can replace the component <a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-http/releases">jar</a> that can be found in the `<STREAM_PROCESSOR_HOME>/lib` directory.
+
+**Using the extension as a <a target="_blank" href="https://wso2.github.io/siddhi/documentation/running-as-a-java-library">java library</a>**
+
+* This extension can be added as a maven dependency along with other Siddhi dependencies to your project.
+
+```
+     <dependency>
+        <groupId>org.wso2.extension.siddhi.io.http</groupId>
+        <artifactId>siddhi-io-http</artifactId>
+        <version>x.x.x</version>
+     </dependency>
+```
+
+## Jenkins Build Status
+
 ---
+
 |  Branch | Build Status |
 | :------ |:------------ | 
-| master  | [![Build Status](https://wso2.org/jenkins/view/All%20Builds/job/siddhi/job/siddhi-io-http/badge/icon)](https://wso2.org/jenkins/view/All%20Builds/job/siddhi/job/siddhi-io-http/) |
+| master  | [![Build Status](https://wso2.org/jenkins/view/All%20Builds/job/siddhi/job/siddhi-io-http/badge/icon)](https://wso2.org/jenkins/view/All%20Builds/job/siddhi/job/siddhi-io-http/)|
+
 ---
-##### New version of Siddhi v4.0.0 is built in Java 8.
 
-This is a http input and output extension for siddhi source and sink implementation. This extension only works inside 
-the WSO2 Data Analytic Server and cannot be run with standalone siddhi.
-This component allow us to receive and publish events through http and https transports.
+## Features
 
-Features Supported
-------------------
- - http source
-   -- Multiple sources can be defined and receive http messages to the DAS server.
- - https source
-   -- Multiple sources can be defined and receive https messages to the DAS server.
- - http sink 
-   -- Multiple sinks can be defined and publish event to the http endpoints.
- - https sink 
-   -- Multiple sinks can be defined and publish event to the https endpoints using custom client trusts-store.
- - basic authentication
-   - component able provide basic authentication.
- - process event with order preserving
-   -- component capable of preserving the event order in http source
-     
-Prerequisites for using the feature
-------------------
- - Siddhi Stream should be defined
- - If user need to put custom configurations parameters he/she can put those parameters in deployment yml
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/api/1.0.3-SNAPSHOT/#http-source">http</a> *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sources">Source</a>)*<br><div style="padding-left: 1em;"><p>The HTTP source receives POST requests via HTTP or HTTPS in format such as <code>text</code>, <code>XML</code> and <code>JSON</code>. If required, you can enable basic authentication to ensure that events are received only from users who are authorized to access the service.</p></div>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/api/1.0.3-SNAPSHOT/#http-sink">http</a> *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sinks">Sink</a>)*<br><div style="padding-left: 1em;"><p>This extension publish the HTTP events in any HTTP method  POST, GET, PUT, DELETE  via HTTP or https protocols. As the additional features this component can provide basic authentication as well as user can publish events using custom client truststore files when publishing events via https protocol. And also user can add any number of headers including HTTP_METHOD header for each event dynamically.</p></div>
+
+## How to Contribute
  
-  siddhi:
+  * Please report issues at <a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-http/issues">GitHub Issue Tracker</a>.
   
-     extensions:
-     
-       -extension:
-        name: 'http'
-        namespace: 'source'
-        properties:
-             trp.latency.metrics.enabled: true
-             trp.server.bootstrap.boss.group.size: 4
-             trp.server.bootstrap.worker.group.size: 8
-             trp.server.bootstrap.socket.timeout: 15
-             default.host: 0.0.0.0
-             http.port: 9763
-             https.port: 9443
-             default.scheme: http
-             https.keystore.file: ${carbon.home}/resources/security/wso2carbon.jks
-             https.keystore.password: wso2carbon
-             https.cert.password: wso2carbon
-          
-       -extension:
-        name: 'http'
-        namespace: 'sink'
-        properties:
-              trp.client.bootstrap.socket.timeout: 15
-              trp.latency.metrics.enabled: true
-              default.scheme: http
-              client.truststore.path: ${carbon.home}/resources/security/client-truststore.jks
-              client.truststore.password: wso2carbon
-
+  * Send your contributions as pull requests to <a target="_blank" href="https://github.com/wso2-extensions/siddhi-io-http/tree/master">master branch</a>. 
  
-Deploying the feature
-------------------
- Feature can be deploy as a OSGI bundle by putting jar file of component to DAS_HOME/lib directory of DAS 4.0.0 pack. 
+## Contact us 
+
+ * Post your questions with the <a target="_blank" href="http://stackoverflow.com/search?q=siddhi">"Siddhi"</a> tag in <a target="_blank" href="http://stackoverflow.com/search?q=siddhi">Stackoverflow</a>. 
  
-Example Siddhi Queries
------------------- 
-#### Event Source
+ * Siddhi developers can be contacted via the mailing lists:
  
-     @source(type='http', @map(type='text'),
-     receiver.url='http://localhost:8080/streamName', is.basic.auth.enabled='true')
-     define stream inputStream (name string, age int, country string);
-
-#### Event Sink
+    Developers List   : [dev@wso2.org](mailto:dev@wso2.org)
+    
+    Architecture List : [architecture@wso2.org](mailto:architecture@wso2.org)
  
-     @sink(type='http',publisher.url='http://localhost:8009', method='{{method}}',headers='{{headers}}', 
-     @map(type='xml' , @payload('{{payloadBody}}')))
-     define stream FooStream (method string, headers string);"
+## Support 
 
-Documentation 
-------------------
-  * https://docs.wso2.com/display/DAS400/Configuring+HTTP+Event+Sinks
-  * https://docs.wso2.com/display/DAS400/Configuring+HTTP+Event+Sources
+* We are committed to ensuring support for this extension in production. Our unique approach ensures that all support 
+leverages our open development methodology and is provided by the very same engineers who build the technology. 
 
-How to Contribute
-------------------
-* Send your bug fixes pull requests to [master branch] (https://github.com/wso2-extensions/siddhi-io-http/tree/master) 
-
-Contact us 
-----------
-Siddhi developers can be contacted via the mailing lists:
-  * Carbon Developers List : dev@wso2.org
-  * Carbon Architecture List : architecture@wso2.org
-
-#### We welcome your feedback and contribution.
-
-WSO2 Smart Analytics Team.
+* For more details and to take advantage of this unique opportunity contact us via <a target="_blank" href="http://wso2
+.com/support?utm_source=gitanalytics&utm_campaign=gitanalytics_Jul17">http://wso2.com/support/</a>. 
