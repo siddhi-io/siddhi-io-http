@@ -211,7 +211,7 @@ public class HttpSource extends Source {
         this.httpConnectorRegistry = HttpConnectorRegistry.getInstance();
         this.httpConnectorRegistry.initHttpServerConnectorController(configReader);
         this.sourceEventListener = sourceEventListener;
-        this.requestedTransportPropertyNames = requestedTransportPropertyNames;
+        this.requestedTransportPropertyNames = requestedTransportPropertyNames.clone();
     }
 
     /**
@@ -236,7 +236,7 @@ public class HttpSource extends Source {
     public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
         this.httpConnectorRegistry.registerServerConnector(this.listenerUrl, this.sourceId, this.listenerConfig);
         this.httpConnectorRegistry.registerSourceListener(sourceEventListener, this.listenerUrl,
-                Integer.valueOf(workerThread), isAuth, requestedTransportPropertyNames);
+                Integer.parseInt(workerThread), isAuth, requestedTransportPropertyNames);
     }
 
     /**

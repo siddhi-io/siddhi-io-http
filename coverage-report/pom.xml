@@ -42,9 +42,9 @@
         <profile>
             <id>with-tests</id>
             <activation>
-                <property>
-                    <name>!maven.test.skip</name>
-                </property>
+                <file>
+                    <exists>../component/target/coverage-reports</exists>
+                </file>
             </activation>
             <build>
                 <plugins>
@@ -67,7 +67,6 @@
                             </execution>
                         </executions>
                     </plugin>
-
                     <!--Ant plugin - Merge Jacoco Reports-->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -84,12 +83,18 @@
                                         <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
                                             <classpath path="${project.build.directory}" />
                                         </taskdef>
+                                        <jacoco:merge destfile="${project.build.directory}/merged.exec">
+                                            <fileset dir="../component/target/coverage-reports"
+                                                     includes="*.exec"/>
+                                            <fileset dir="../tests/osgi-tests/target/coverage-reports"
+                                                     includes="*.exec"/>
+                                        </jacoco:merge>
                                         <jacoco:report>
                                             <executiondata>
-                                                <fileset dir="../component/target">
+                                                <fileset dir="../component/target/coverage-reports">
                                                     <include name="jacoco.exec" />
                                                 </fileset>
-                                                <fileset dir="../tests/osgi-tests/target">
+                                                <fileset dir="../tests/osgi-tests/target/coverage-reports">
                                                     <include name="jacoco.exec" />
                                                 </fileset>
                                             </executiondata>
@@ -104,7 +109,7 @@
                                                     <fileset dir="../component/src/main/java" />
                                                 </sourcefiles>
                                             </structure>
-                                            <html destdir="${project.build.directory}/site/jacoco" />
+                                            <html destdir="${project.build.directory}" />
                                         </jacoco:report>
                                     </target>
                                 </configuration>

@@ -113,7 +113,7 @@ class HttpConnectorRegistry {
      *
      * @param sourceConfigReader the siddhi source config reader.
      */
-    void initHttpServerConnectorController(ConfigReader sourceConfigReader) {
+    synchronized void initHttpServerConnectorController(ConfigReader sourceConfigReader) {
         // TODO: 7/26/17 This configurations are not used until multiple boss and worker groups are supported by
         // carbon transport
         if (this.serverConnectorController == null) {
