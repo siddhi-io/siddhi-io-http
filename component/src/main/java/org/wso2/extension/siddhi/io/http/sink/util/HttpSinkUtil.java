@@ -150,7 +150,7 @@ public class HttpSinkUtil {
     /**
      * Method is responsible for set transportation configuration values.
      *
-     * @return return the set of netty transportation configuration.
+     * @return return the set of config transportation configuration.
      */
     public Set<TransportProperty> getTransportConfigurations(ConfigReader sinkConfigReader) {
         Map<String, String> configsMap = sinkConfigReader.getAllConfigs();

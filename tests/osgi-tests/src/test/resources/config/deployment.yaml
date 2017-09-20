@@ -74,46 +74,15 @@ siddhi:
           https.port: 9763
           client.truststore.file: ${carbon.home}/resources/security/client-truststore.jks
           client.truststore.pass: wso2carbon
-    -
-        # Extension configuration for rdbms store
-      extension:
-          # Extension name
-        name: 'rdbms'
-          # Extension namespace
-        namespace: 'store'
-          # Extension properties
-        properties:
-            #h2 configuration
-          h2.tableCreateQuery: CREATE TABLE {{TABLE_NAME}} ({{COLUMNS, PRIMARY_KEYS}})
-          h2.tableCheckQuery: SELECT 1 FROM {{TABLE_NAME}} LIMIT 1
-          h2.indexCreateQuery: CREATE INDEX {{TABLE_NAME}}_INDEX ON {{TABLE_NAME}} ({{INDEX_COLUMNS}})
-          h2.recordExistsQuery: SELECT TOP 1 1 FROM {{TABLE_NAME}} {{CONDITION}}
-          h2.recordSelectQuery: SELECT * FROM {{TABLE_NAME}} {{CONDITION}}
-          h2.recordInsertQuery: INSERT INTO {{TABLE_NAME}} VALUES ({{Q}})
-          h2.recordUpdateQuery: UPDATE {{TABLE_NAME}} SET {{COLUMNS_AND_VALUES}} {{CONDITION}}
-          h2.recordDeleteQuery: DELETE FROM {{TABLE_NAME}} {{CONDITION}}
-          h2.stringSize: 254
-          h2.typeMapping.binaryType: BLOB
-          h2.typeMapping.booleanType: TINYINT(1)
-          h2.typeMapping.doubleType: DOUBLE
-          h2.typeMapping.floatType: FLOAT
-          h2.typeMapping.integerType: INTEGER
-          h2.typeMapping.longType: BIGINT
-          h2.typeMapping.stringType: VARCHAR
-            #mysql configuration
-          mysql.tableCreateQuery: CREATE TABLE {{TABLE_NAME}} ({{COLUMNS, PRIMARY_KEYS}})
-          mysql.tableCheckQuery: SELECT 1 FROM {{TABLE_NAME}} LIMIT 1
-          mysql.indexCreateQuery: CREATE INDEX {{TABLE_NAME}}_INDEX ON {{TABLE_NAME}} ({{INDEX_COLUMNS}})
-          mysql.recordExistsQuery: SELECT 1 FROM {{TABLE_NAME}} {{CONDITION}}
-          mysql.recordSelectQuery: SELECT * FROM {{TABLE_NAME}} {{CONDITION}}
-          mysql.recordInsertQuery: INSERT INTO {{TABLE_NAME}} VALUES ({{Q}})
-          mysql.recordUpdateQuery: UPDATE {{TABLE_NAME}} SET {{COLUMNS_AND_VALUES}} {{CONDITION}}
-          mysql.recordDeleteQuery: DELETE FROM {{TABLE_NAME}} {{CONDITION}}
-          mysql.stringSize: 254
-          mysql.typeMapping.binaryType: BLOB
-          mysql.typeMapping.booleanType: TINYINT(1)
-          mysql.typeMapping.doubleType: DOUBLE
-          mysql.typeMapping.floatType: FLOAT
-          mysql.typeMapping.integerType: INTEGER
-          mysql.typeMapping.longType: BIGINT
-          mysql.typeMapping.stringType: VARCHAR
+
+wso2.securevault:
+  secretRepository:
+    type: org.wso2.carbon.secvault.repository.DefaultSecretRepository
+    parameters:
+      privateKeyAlias: wso2carbon
+      keystoreLocation: ../../resources/security/securevault.jks
+      secretPropertiesFile: ../../conf/${sys:wso2.runtime}/secrets.properties
+  masterKeyReader:
+    type: org.wso2.carbon.secvault.reader.DefaultMasterKeyReader
+    parameters:
+      masterKeyReaderFile: ../../conf/${sys:wso2.runtime}/master-keys.yaml

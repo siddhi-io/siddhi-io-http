@@ -52,7 +52,7 @@ public class HttpSourceUtil {
     /**
      * Method is responsible for set transportation configuration values.
      *
-     * @return return the set of netty transportation configuration.
+     * @return return the set of config transportation configuration.
      */
     public Set<TransportProperty> getTransportConfigurations(ConfigReader sourceConfigReader) {
         Map<String, String> configsMap = sourceConfigReader.getAllConfigs();

@@ -19,7 +19,6 @@
 package org.wso2.extension.siddhi.io.http.source.util;
 
 import io.netty.handler.codec.http.HttpMethod;
-import org.wso2.carbon.kernel.Constants;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -35,6 +34,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.security.cert.CertificateException;
+
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -46,11 +46,11 @@ import javax.net.ssl.TrustManagerFactory;
  */
 public class HttpTestUtil {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(HttpTestUtil.class);
-
+    private static final String CARBON_HOME = "carbon.home";
     public static void setCarbonHome() {
         Path carbonHome = Paths.get("");
         carbonHome = Paths.get(carbonHome.toString(), "src", "test");
-        System.setProperty(Constants.CARBON_HOME, carbonHome.toString());
+        System.setProperty(CARBON_HOME, carbonHome.toString());
         logger.info("Carbon Home Absolute path set to: " + carbonHome.toAbsolutePath());
     }
 

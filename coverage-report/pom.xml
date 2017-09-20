@@ -29,15 +29,6 @@
     <name>WSO2 Siddhi IO HTTP - Test Coverage</name>
     <description>Coverage reports Siddhi IO HTTP module</description>
     <url>http://wso2.com</url>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.jacoco</groupId>
-            <artifactId>org.jacoco.ant</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-
     <profiles>
         <profile>
             <id>with-tests</id>

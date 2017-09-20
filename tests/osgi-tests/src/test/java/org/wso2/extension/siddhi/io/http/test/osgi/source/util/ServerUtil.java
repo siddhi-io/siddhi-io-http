@@ -18,7 +18,6 @@ import java.net.URL;
  */
 public class ServerUtil {
 
-    public static final String TEST_HOST = "localhost";
     private static final Logger log = LoggerFactory.getLogger(ServerUtil.class);
 
     ServerUtil() {

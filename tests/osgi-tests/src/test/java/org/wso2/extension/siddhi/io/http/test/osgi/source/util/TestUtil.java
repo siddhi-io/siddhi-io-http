@@ -1,7 +1,6 @@
 package org.wso2.extension.siddhi.io.http.test.osgi.source.util;
 
 import io.netty.handler.codec.http.HttpMethod;
-import org.wso2.carbon.kernel.Constants;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -15,14 +14,14 @@ import java.nio.file.Paths;
  */
 public class TestUtil {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TestUtil.class);
-
+    private static final String CARBON_HOME = "carbon.home";
     public TestUtil() {
     }
 
     public void setCarbonHome() {
         Path carbonHome = Paths.get("");
         carbonHome = Paths.get(carbonHome.toString(), "src", "test", "resources");
-        System.setProperty(Constants.CARBON_HOME, carbonHome.toString());
+        System.setProperty(CARBON_HOME, carbonHome.toString());
         logger.info("Carbon Home Absolute path set to: " + carbonHome.toAbsolutePath());
 
     }

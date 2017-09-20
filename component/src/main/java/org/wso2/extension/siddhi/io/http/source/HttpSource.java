@@ -89,7 +89,7 @@ import java.util.Map;
         systemParameter = {
                 @SystemParameter(
                         name = "latency.metrics.enabled",
-                        description = "Property to enable metrics logs to monitor transport latency for netty.",
+                        description = "Property to enable metrics logs to monitor transport latency for config.",
                         defaultValue = "true",
                         possibleParameters = {"true", "false"}
                 ),

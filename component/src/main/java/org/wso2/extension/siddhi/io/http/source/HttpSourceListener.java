@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.messaging.CarbonCallback;
 import org.wso2.carbon.messaging.CarbonMessage;
-import org.wso2.extension.siddhi.io.http.source.auth.HttpAuthenticator;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
@@ -70,7 +69,9 @@ class HttpSourceListener {
         if (paused) {
             lock.lock();
             try {
-                condition.await();
+                while (paused) {
+                    condition.await();
+                }
             } catch (InterruptedException ie) {
                 carbonMessage.release();
                 Thread.currentThread().interrupt();
@@ -81,9 +82,10 @@ class HttpSourceListener {
             }
         }
         try {
-            if (isAuthenticated) {
-                HttpAuthenticator.authenticate(carbonMessage, carbonCallback);
-            }
+            // TODO: 9/19/17 Basic auth support from globe interceptor
+//            if (isAuthenticated) {
+//                HttpAuthenticator.authenticate(carbonMessage, carbonCallback);
+//            }
             String[] trpProperties = new String[requestedTransportPropertyNames.length];
             populateTransportHeaders(carbonMessage, trpProperties);
             populateTransportProperties(carbonMessage, trpProperties);

@@ -54,10 +54,6 @@
             <artifactId>commons-collections</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.security.caas</groupId>
-            <artifactId>org.wso2.carbon.security.caas</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <scope>test</scope>
@@ -135,66 +131,6 @@
                     <argLine>${surefireArgLine} -ea -Xmx512m</argLine>
                 </configuration>
             </plugin>
-            <!--<plugin>-->
-                <!--<groupId>org.jacoco</groupId>-->
-                <!--<artifactId>jacoco-maven-plugin</artifactId>-->
-                <!--<executions>-->
-                    <!--&lt;!&ndash;Prepares the property pointing to the JaCoCo runtime agent which-->
-                    <!--is passed as VM argument when Maven the Surefire plugin is executed.&ndash;&gt;-->
-                    <!--<execution>-->
-                        <!--<id>pre-unit-test</id>-->
-                        <!--<goals>-->
-                            <!--<goal>prepare-agent</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--&lt;!&ndash; Sets the path to the file which contains the execution data. &ndash;&gt;-->
-                            <!--<destFile>${project.build.directory}/coverage-reports/jacoco.exec-->
-                            <!--</destFile>-->
-                            <!--&lt;!&ndash;Sets the name of the property containing the settings-->
-                            <!--for JaCoCo runtime agent.&ndash;&gt;-->
-                            <!--<propertyName>surefireArgLine</propertyName>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                    <!--&lt;!&ndash;Ensures that the code coverage report for unit tests is created after-->
-                    <!--unit tests have been run.&ndash;&gt;-->
-                    <!--<execution>-->
-                        <!--<id>post-unit-test</id>-->
-                        <!--<phase>test</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>report</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--&lt;!&ndash; Sets the path to the file which contains the execution data. &ndash;&gt;-->
-                            <!--<dataFile>${project.build.directory}/coverage-reports/jacoco.exec-->
-                            <!--</dataFile>-->
-                            <!--&lt;!&ndash; Sets the output directory for the code coverage report. &ndash;&gt;-->
-                            <!--<outputDirectory>${project.reporting.outputDirectory}-->
-                            <!--</outputDirectory>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                    <!--<execution>-->
-                        <!--<id>jacoco-initialize</id>-->
-                        <!--<goals>-->
-                            <!--<goal>prepare-agent</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<destFile>${basedir}/target/coverage-reports/jacoco.exec</destFile>-->
-                            <!--<propertyName>surefireArgLine</propertyName>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                    <!--<execution>-->
-                        <!--<id>jacoco-site</id>-->
-                        <!--<phase>post-integration-test</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>report</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<dataFile>${basedir}/target/coverage-reports/jacoco.exec</dataFile>-->
-                            <!--<outputDirectory>${basedir}/target/coverage-reports/</outputDirectory>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
