@@ -22,13 +22,11 @@ import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-import org.wso2.carbon.kernel.Constants;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpsServerListenerHandler;
 import org.wso2.extension.siddhi.map.xml.sinkmapper.XMLSinkMapper;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,6 +36,7 @@ import java.nio.file.Paths;
  */
 public class HttpsSinkTestCase {
     private static final Logger logger = Logger.getLogger(HttpsSinkTestCase.class);
+    public static final String CARBON_HOME = "carbon.home";
     private String payload;
     private String expected;
 
@@ -65,7 +64,7 @@ public class HttpsSinkTestCase {
     private void setCarbonHome() {
         Path carbonHome = Paths.get("");
         carbonHome = Paths.get(carbonHome.toString(), "src", "test");
-        System.setProperty(Constants.CARBON_HOME, carbonHome.toString());
+        System.setProperty(CARBON_HOME, carbonHome.toString());
         logger.info("Carbon Home Absolute path set to: " + carbonHome.toAbsolutePath());
 
     }

@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  *{@code HTTPSinkConstants } This class is handling the structuring the payload of http sink.
  */
-public class HttpPayloadDataSource implements MessageDataSource {
+public class HttpPayloadDataSource implements MessageDataSource , Cloneable {
     private String value;
     private OutputStream outputStream;
 
@@ -56,7 +56,8 @@ public class HttpPayloadDataSource implements MessageDataSource {
     }
 
     @Override
-    public HttpPayloadDataSource clone() {
+    public HttpPayloadDataSource clone() throws CloneNotSupportedException {
+        super.clone();
         String clonedContent = this.getMessageAsString();
         return new HttpPayloadDataSource(clonedContent);
     }

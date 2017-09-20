@@ -28,7 +28,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.wso2.carbon.container.CarbonContainerFactory;
 import org.wso2.carbon.container.options.CarbonDistributionOption;
-import org.wso2.carbon.kernel.utils.CarbonServerInfo;
+import org.wso2.carbon.kernel.CarbonServerInfo;
 import org.wso2.extension.siddhi.io.http.test.osgi.source.util.TestUtil;
 import org.wso2.extension.siddhi.map.text.sourcemapper.TextSourceMapper;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
@@ -72,6 +72,7 @@ public class HttpSourceBasicAuth {
     private int waitTime = 50;
     private int timeout = 30000;
 
+    // TODO: 9/19/17 Fix after set globe interceptor
     @BeforeMethod
     public void init() {
         eventCount.set(0);
@@ -92,8 +93,8 @@ public class HttpSourceBasicAuth {
         if (basedir == null) {
             basedir = Paths.get(".").toString();
         }
-        carbonYmlFilePath = Paths.get(basedir, "src", "test", "resources", "netty", DEPLOYMENT_FILENAME);
-        return copyFile(carbonYmlFilePath, Paths.get("conf", DEPLOYMENT_FILENAME));
+        carbonYmlFilePath = Paths.get(basedir, "src", "test", "resources", "config", DEPLOYMENT_FILENAME);
+        return copyFile(carbonYmlFilePath, Paths.get("conf", "default", DEPLOYMENT_FILENAME));
     }
 
     /**

@@ -29,6 +29,7 @@ import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Handles the send data to source listener.
@@ -54,7 +55,7 @@ public class HttpWorkerThread implements Runnable {
     public void run() {
         try {
             InputStream inputStream = carbonMessage.getInputStream();
-            String payload = new String(ByteStreams.toByteArray(inputStream));
+            String payload = new String(ByteStreams.toByteArray(inputStream), StandardCharsets.UTF_8);
             if (!payload.equals(HttpConstants.EMPTY_STRING)) {
                 sourceEventListener.onEvent(payload, trpProperties);
                 HttpSourceUtil.handleCallback("OK", carbonCallback, 200);
