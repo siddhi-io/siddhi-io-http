@@ -312,7 +312,7 @@
         <siddhi.mapper.json.version>4.0.5</siddhi.mapper.json.version>
         <siddhi.mapper.text.version>1.0.5</siddhi.mapper.text.version>
         <siddhi.mapper.xml.version>4.0.2</siddhi.mapper.xml.version>
-        <siddhi.version>4.0.0-M107</siddhi.version>
+        <siddhi.version>4.0.0-M106</siddhi.version>
         <pax.exam.spi.version>4.10.0</pax.exam.spi.version>
         <commons.collections.version>3.1</commons.collections.version>
         <org.eclipse.osgi.services.version>3.5.100.v20160504-1419</org.eclipse.osgi.services.version>
@@ -417,20 +417,17 @@
                 <version>${maven.shadeplugin.version}</version>
             </plugin>
             <plugin>
-                <groupId>org.wso2.siddhi</groupId>
-                <artifactId>siddhi-doc-gen</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate-md-docs</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.maven.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <preparationGoals>clean install -Pdocumentation-deploy</preparationGoals>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                </configuration>
             </plugin>
         </plugins>
         <pluginManagement>
@@ -445,14 +442,6 @@
                     <artifactId>maven-deploy-plugin</artifactId>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <configuration>
-                        <preparationGoals>clean install</preparationGoals>
-                        <autoVersionSubmodules>true</autoVersionSubmodules>
-                    </configuration>
-                </plugin>
-                <plugin>
                     <groupId>org.antlr</groupId>
                     <artifactId>antlr4-maven-plugin</artifactId>
                     <version>${antlr4.maven.plugin.version}</version>
@@ -461,18 +450,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>${maven.dependency.plugin.version}</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <configuration>
-                        <preparationGoals>clean install -Pdocumentation-deploy</preparationGoals>
-                        <autoVersionSubmodules>true</autoVersionSubmodules>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-deploy-plugin</artifactId>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
