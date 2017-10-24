@@ -1,4 +1,4 @@
-?siddhi-io-http
+siddhi-io-http
 ======================================
 
 The **siddhi-io-http extension** is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a> that allow us to receive and publish events through http and https transports.This extension only works inside 
