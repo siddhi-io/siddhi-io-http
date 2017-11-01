@@ -26,6 +26,7 @@ import org.wso2.extension.siddhi.io.http.sink.util.HttpServerListenerHandler;
 import org.wso2.extension.siddhi.map.xml.sinkmapper.XMLSinkMapper;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
@@ -141,7 +142,8 @@ public class HttpAuthTest {
      *
      * @throws Exception Interrupted exception
      */
-    @Test(expectedExceptions = {HttpSinkAdaptorRuntimeException.class, ExceptionInInitializerError.class})
+    @Test(expectedExceptions = {HttpSinkAdaptorRuntimeException.class, ExceptionInInitializerError.class,
+            SiddhiAppCreationException.class})
     public void testHTTPTextMappingBasicAuthTrueIncorrectCredential() throws Exception {
         log.info("Creating test for publishing events with basic authentication true.");
         SiddhiManager siddhiManager = new SiddhiManager();
