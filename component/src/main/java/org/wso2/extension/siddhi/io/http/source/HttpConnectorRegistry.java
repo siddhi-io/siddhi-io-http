@@ -262,6 +262,7 @@ class HttpConnectorRegistry {
                         ConnectionManager.getInstance().getTargetChannelPool().clear();
                     }
                     log.info("Server connector for port '" + port + "' has successfully shutdown.");
+                    context.decrementReferenceCount();
                     return context.getServerConnector().stop();
                 }
                 context.decrementReferenceCount();

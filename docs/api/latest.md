@@ -8,7 +8,7 @@
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-@sink(type="http", publisher.url="<STRING>", basic.auth.username="<STRING>", basic.auth.password="<STRING>", client.truststore.path="<STRING>", client.truststore.password="<STRING>", headers="<STRING>", method="<STRING>", @map(...)))
+@sink(type="http", publisher.url="<STRING>", basic.auth.username="<STRING>", basic.auth.password="<STRING>", https.truststore.file="<STRING>", https.truststore.password="<STRING>", headers="<STRING>", method="<STRING>", socket.idle.timeout="<INT>", chunk.disabled="<BOOL>", ssl.protocol="<STRING>", ciphers="<STRING>", ssl.enabled.protocols="<STRING>", client.enable.session.creation="<STRING>", follow.redirect="<BOOL>", max.redirect.count="<INT>", tls.store.type="<STRING>", proxy.host="<STRING>", proxy.port="<STRING>", proxy.username="<STRING>", proxy.password="<STRING>", client.bootstrap.nodelay="<STRING>", client.bootstrap.keepalive="<STRING>", client.bootstrap.sendbuffersize="<STRING>", client.bootstrap.recievebuffersize="<STRING>", client.bootstrap.connect.timeout="<STRING>", client.bootstrap.socket.reuse="<STRING>", client.bootstrap.socket.timeout="<STRING>", client.bootstrap.worker.group.size="<STRING>", client.connection.pool.count="<STRING>", client.max.active.connections.per.pool="<STRING>", client.min.idle.connections.per.pool="<STRING>", client.max.idle.connections.per.pool="<STRING>", client.min.eviction.idle.time="<STRING>", sender.thread.count="<STRING>", event.group.executor.thread.size="<STRING>", max.wait.for.client.connection.pool="<STRING>", @map(...)))
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -46,7 +46,7 @@
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">client.truststore.path</td>
+        <td style="vertical-align: top">https.truststore.file</td>
         <td style="vertical-align: top; word-wrap: break-word">The file path to the location of the truststore of the client that sends the HTTP events through 'https' protocol. A custom client-truststore can be specified if required.</td>
         <td style="vertical-align: top">${carbon.home}/resources/security/client-truststore.jks</td>
         <td style="vertical-align: top">STRING</td>
@@ -54,7 +54,7 @@
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">client.truststore.password</td>
+        <td style="vertical-align: top">https.truststore.password</td>
         <td style="vertical-align: top; word-wrap: break-word">The password for the client-truststore. A custom password can be specified if required. If no custom password is specified and the protocol of URL is 'https' then, the system uses default password.</td>
         <td style="vertical-align: top">wso2carbon</td>
         <td style="vertical-align: top">STRING</td>
@@ -77,6 +77,238 @@
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">Yes</td>
     </tr>
+    <tr>
+        <td style="vertical-align: top">socket.idle.timeout</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">6000</td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">chunk.disabled</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">false</td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ssl.protocol</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TLS</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ciphers</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ssl.enabled.protocols</td>
+        <td style="vertical-align: top; word-wrap: break-word">ssl.enabled.protocols -&gt; sslEnabledProtocols</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">client.enable.session.creation</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">follow.redirect</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">true</td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">max.redirect.count</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">5</td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">tls.store.type</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">JKS</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">proxy.host</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">proxy.port</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">proxy.username</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">proxy.password</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">client.bootstrap.nodelay</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">client.bootstrap.keepalive</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">client.bootstrap.sendbuffersize</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">client.bootstrap.recievebuffersize</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">client.bootstrap.connect.timeout</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">client.bootstrap.socket.reuse</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">client.bootstrap.socket.timeout</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">client.bootstrap.worker.group.size</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">client.connection.pool.count</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">client.max.active.connections.per.pool</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">client.min.idle.connections.per.pool</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">client.max.idle.connections.per.pool</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">client.min.eviction.idle.time</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">sender.thread.count</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">event.group.executor.thread.size</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">max.wait.for.client.connection.pool</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
 </table>
 
 <span id="system-parameters" class="md-typeset" style="display: block; font-weight: bold;">System Parameters</span>
@@ -88,13 +320,13 @@
         <th>Possible Parameters</th>
     </tr>
     <tr>
-        <td style="vertical-align: top">serverBootstrapBossGroupSize</td>
+        <td style="vertical-align: top">clientBootstrapBossGroupSize</td>
         <td style="vertical-align: top; word-wrap: break-word">property to configure number of boss threads, which accepts incoming connections until the ports are unbound. Once connection accepts successfully, boss thread passes the accepted channel to one of the worker threads.</td>
         <td style="vertical-align: top">4</td>
         <td style="vertical-align: top">Any integer</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">serverBootstrapWorkerGroupSize</td>
+        <td style="vertical-align: top">clientBootstrapWorkerGroupSize</td>
         <td style="vertical-align: top; word-wrap: break-word">property to configure number of worker threads, which performs non blocking read and write for one or more channels in non-blocking mode.</td>
         <td style="vertical-align: top">8</td>
         <td style="vertical-align: top">Any integer</td>
@@ -116,7 +348,7 @@
 <span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
 ```
-@sink(type='http',publisher.url='http://localhost:8009/foo', method='{{method}}',headers='{{headers}}', @map(type='xml' , @payload('{{payloadBody}}')))define stream FooStream (payloadBody String, method string, headers string);
+@sink(type='http',publisher.url='http://localhost:8009/foo', method='{{method}}',headers='{{headers}}',client.bootstrap.configuration="'client.bootstrap.socket.timeout:20','client.bootstrap.worker.group.size:10'",client.pool.configuration="'client.connection.pool.count:10','client.max.active.connections.per.pool:1'" @map(type='xml' , @payload('{{payloadBody}}')))define stream FooStream (payloadBody String, method string, headers string);
 
 ```
 <p style="word-wrap: break-word">If it is xml mapping expected input should be in following format for FooStream:{&lt;events&gt;    &lt;event&gt;        &lt;symbol&gt;WSO2&lt;/symbol&gt;        &lt;price&gt;55.6&lt;/price&gt;        &lt;volume&gt;100&lt;/volume&gt;    &lt;/event&gt;&lt;/events&gt;,POST,Content-Length:24#Content-Location:USA#Retry-After:120}Above event will generate output as below.~Output http event payload&lt;events&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;event&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;symbol&gt;WSO2&lt;/symbol&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;price&gt;55.6&lt;/price&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;volume&gt;100&lt;/volume&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/event&gt;<br>&lt;/events&gt;<br>~Output http event headersContent-Length:24,Content-Location:'USA',Retry-After:120,Content-Type:'application/xml',HTTP_METHOD:'POST',~Output http event propertiesHTTP_METHOD:'POST',HOST:'localhost',PORT:8009PROTOCOL:'http'TO:'/foo'</p>
@@ -129,7 +361,7 @@
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-@source(type="http", receiver.url="<STRING>", basic.auth.enabled="<STRING>", worker.count="<STRING>", @map(...)))
+@source(type="http", receiver.url="<STRING>", basic.auth.enabled="<STRING>", worker.count="<STRING>", socket.idle.timeout="<INT>", verify.client="<STRING>", ssl.protocol="<STRING>", tls.store.type="<STRING>", ciphers="<STRING>", ssl.enabled.protocols="<STRING>", server.enable.session.creation="<STRING>", server.supported.snimatchers="<STRING>", server.suported.server.names="<STRING>", request.size.validation="<STRING>", request.size.validation.maximum.value="<STRING>", request.size.validation.reject.status.code="<STRING>", request.size.validation.reject.message="<STRING>", request.size.validation.reject.message.content.type="<STRING>", header.size.validation="<STRING>", header.validation.maximum.request.line="<STRING>", header.validation.maximum.size="<STRING>", header.validation.maximum.chunk.size="<STRING>", header.validation.reject.status.code="<STRING>", header.validation.reject.message="<STRING>", header.validation.reject.message.content.type="<STRING>", server.bootstrap.nodelay="<BOOL>", server.bootstrap.keepalive="<BOOL>", server.bootstrap.sendbuffersize="<INT>", server.bootstrap.recievebuffersize="<INT>", server.bootstrap.connect.timeout="<INT>", server.bootstrap.socket.reuse="<BOOL>", server.bootstrap.socket.timeout="<BOOL>", server.bootstrap.socket.backlog="<BOOL>", @map(...)))
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -163,6 +395,238 @@
         <td style="vertical-align: top; word-wrap: break-word">The number of active worker threads to serve the incoming events. The value is 1 by default. This will ensure that the events are directed to the event stream in the same order in which they arrive. By increasing this value the performance might increase at the cost of loosing event ordering.</td>
         <td style="vertical-align: top">1</td>
         <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">socket.idle.timeout</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">120000</td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">verify.client</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ssl.protocol</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TLS</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">tls.store.type</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">JKS</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ciphers</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ssl.enabled.protocols</td>
+        <td style="vertical-align: top; word-wrap: break-word">sslEnabledProtocols-&gt;ssl.enabled.protocols</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.enable.session.creation</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.supported.snimatchers</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.suported.server.names</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">request.size.validation</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">request.size.validation.maximum.value</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">request.size.validation.reject.status.code</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">request.size.validation.reject.message</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">request.size.validation.reject.message.content.type</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">header.size.validation</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">header.validation.maximum.request.line</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">header.validation.maximum.size</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">header.validation.maximum.chunk.size</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">header.validation.reject.status.code</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">header.validation.reject.message</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">header.validation.reject.message.content.type</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">TODO</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.nodelay</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">true</td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.keepalive</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">true</td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.sendbuffersize</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">1048576</td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.recievebuffersize</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">1048576</td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.connect.timeout</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">15000</td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.socket.reuse</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">false</td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.socket.timeout</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">15</td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.socket.backlog</td>
+        <td style="vertical-align: top; word-wrap: break-word">TODO</td>
+        <td style="vertical-align: top">100</td>
+        <td style="vertical-align: top">BOOL</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
@@ -207,7 +671,7 @@
         <td style="vertical-align: top">Any valid port</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">defaultListenerScheme</td>
+        <td style="vertical-align: top">defaultScheme</td>
         <td style="vertical-align: top; word-wrap: break-word">The default protocol.</td>
         <td style="vertical-align: top">http</td>
         <td style="vertical-align: top">http<br>https</td>
@@ -230,12 +694,18 @@
         <td style="vertical-align: top">wso2carbon</td>
         <td style="vertical-align: top">String of cert password</td>
     </tr>
+    <tr>
+        <td style="vertical-align: top">httpTraceLogEnabled</td>
+        <td style="vertical-align: top; word-wrap: break-word">Http traffic monitoring.</td>
+        <td style="vertical-align: top">wso2carbon</td>
+        <td style="vertical-align: top">String of cert password</td>
+    </tr>
 </table>
 
 <span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
 ```
-@source(type='http', receiver.url='http://localhost:9055/endpoints/RecPro', @map(type='xml'))
+@source(type='http', receiver.url='http://localhost:9055/endpoints/RecPro', socketIdleTimeout='150000', parameters="'ciphers : TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256', 'sslEnabledProtocols:TLSv1.1,TLSv1.2'",request.size.validation.configuration="request.size.validation:true",server.bootstrap.configuration="server.bootstrap.socket.timeout:25"”  @map(type='xml'))
 define stream FooStream (symbol string, price float, volume long);
 
 ```

@@ -276,9 +276,6 @@
                                     <resources>
                                         <resource>
                                             <directory>src/test/resources/carbon-home/conf/security</directory>
-                                            <includes>
-                                                <include>carbon-jaas.config</include>
-                                            </includes>
                                         </resource>
                                     </resources>
                                 </configuration>
@@ -318,7 +315,7 @@
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
                             <execution>
-                                <phase>post-integration-test</phase>
+                                <phase>install</phase>
                                 <configuration>
                                     <target xmlns:jacoco="antlib:org.jacoco.ant">
                                         <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
@@ -329,7 +326,6 @@
                                                 destfile="${project.build.directory}/coverage-reports/jacoco.exec">
                                             <fileset dir="${project.build.directory}" includes="*.exec"/>
                                         </jacoco:merge>
-                                        <!-- OSGi Test coverage only enabled for org.wso2.carbon.stream.core module-->
                                         <jacoco:report>
                                             <executiondata>
                                                 <file file="${project.build.directory}/coverage-reports/jacoco.exec" />
