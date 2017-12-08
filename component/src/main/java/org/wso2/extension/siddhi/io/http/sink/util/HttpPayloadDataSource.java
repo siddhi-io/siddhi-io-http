@@ -95,6 +95,7 @@ public class HttpPayloadDataSource implements MessageDataSource , Cloneable {
     public void serializeData() {
         try {
             this.outputStream.write(this.value.getBytes(Charset.defaultCharset()));
+            this.outputStream.close();
         } catch (IOException e) {
             throw new HttpSinkAdaptorRuntimeException("Error occurred during writing the string message to the " +
                     "output stream", e);

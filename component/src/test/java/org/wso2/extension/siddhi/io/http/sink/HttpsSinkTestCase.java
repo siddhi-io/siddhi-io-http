@@ -97,10 +97,10 @@ public class HttpsSinkTestCase {
         HttpsServerListenerHandler lst = new HttpsServerListenerHandler(8009);
         lst.run();
         fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
-        while (!lst.getServerListner().isMessageArrive()) {
+        while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
-        String eventData = lst.getServerListner().getData();
+        String eventData = lst.getServerListener().getData();
         Assert.assertEquals(eventData, expected);
         siddhiAppRuntime.shutdown();
         lst.shutdown();
@@ -135,10 +135,10 @@ public class HttpsSinkTestCase {
         HttpsServerListenerHandler lst = new HttpsServerListenerHandler(8009);
         lst.run();
         fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
-        while (!lst.getServerListner().isMessageArrive()) {
+        while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
-        String eventData = lst.getServerListner().getData();
+        String eventData = lst.getServerListener().getData();
         Assert.assertEquals(eventData, expected);
         siddhiAppRuntime.shutdown();
         lst.shutdown();

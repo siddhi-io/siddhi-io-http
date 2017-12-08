@@ -18,34 +18,33 @@
  */
 package org.wso2.extension.siddhi.io.http.source;
 
-import com.google.common.io.ByteStreams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.messaging.CarbonCallback;
-import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
+import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
+import org.wso2.transport.http.netty.message.HttpMessageDataStreamer;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.util.stream.Collectors;
 
 /**
  * Handles the send data to source listener.
  */
 public class HttpWorkerThread implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(HttpWorkerThread.class);
-    private CarbonMessage carbonMessage;
-    private CarbonCallback carbonCallback;
+    private HTTPCarbonMessage carbonMessage;
     private SourceEventListener sourceEventListener;
     private String sourceID;
     private String[] trpProperties;
 
-    HttpWorkerThread(CarbonMessage cMessage, CarbonCallback cCallback, SourceEventListener sourceEventListener,
+    HttpWorkerThread(HTTPCarbonMessage cMessage, SourceEventListener sourceEventListener,
                      String sourceID, String[] trpProperties) {
         this.carbonMessage = cMessage;
-        this.carbonCallback = cCallback;
         this.sourceEventListener = sourceEventListener;
         this.sourceID = sourceID;
         this.trpProperties = trpProperties;
@@ -53,27 +52,30 @@ public class HttpWorkerThread implements Runnable {
 
     @Override
     public void run() {
+        BufferedReader buf = new BufferedReader(
+                new InputStreamReader(new HttpMessageDataStreamer(carbonMessage).getInputStream(),
+                        Charset.defaultCharset()));
         try {
-            InputStream inputStream = carbonMessage.getInputStream();
-            String payload = new String(ByteStreams.toByteArray(inputStream), StandardCharsets.UTF_8);
+            String payload = buf.lines().collect(Collectors.joining("\n"));
+
             if (!payload.equals(HttpConstants.EMPTY_STRING)) {
                 sourceEventListener.onEvent(payload, trpProperties);
-                HttpSourceUtil.handleCallback("OK", carbonCallback, 200);
+                HttpSourceUtil.handleCallback(carbonMessage, 200);
                 if (logger.isDebugEnabled()) {
                     logger.debug("Submitted Event " + payload + " Stream");
                 }
             } else {
-                HttpSourceUtil.handleCallback("Empty payload event", carbonCallback, 405);
+                HttpSourceUtil.handleCallback(carbonMessage, 405);
                 if (logger.isDebugEnabled()) {
                     logger.debug("Empty payload event, hence dropping the event chunk in " + sourceID);
                 }
             }
-        } catch (IOException e) {
-            logger.error("Event format is not equal to the expected in " + sourceID);
-            HttpSourceUtil.handleCallback("Event format " +
-                    "is not equal to the expected", carbonCallback, 405);
         } finally {
-            carbonMessage.release();
+            try {
+                buf.close();
+            } catch (IOException e) {
+                logger.error("Error closing byte buf");
+            }
         }
     }
 }

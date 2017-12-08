@@ -62,7 +62,7 @@ public class HttpBasicTests {
     @Test
     public void testHTTPInputTransportWithoutURL() throws Exception {
         logger.info(" Creating test for publishing events without URL.");
-        URI baseURI = URI.create(String.format("http://%s:%d", "0.0.0.0", 9763));
+        URI baseURI = URI.create(String.format("http://%s:%d", "0.0.0.0", 8280));
         List<String> receivedEventNameList = new ArrayList<>(2);
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();

@@ -20,11 +20,9 @@ package org.wso2.extension.siddhi.io.http.source;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.messaging.CarbonCallback;
-import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
-import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
+import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,7 +31,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * {@code HttpSourceListener } This class maintain the states of each and every source listener which are created
- * such as is currently paused or not,  need isAuthenticated or not.
+ * such as is currently paused or not,  need isAuthEnabled or not.
  */
 class HttpSourceListener {
     private static final Logger logger = LoggerFactory.getLogger(HttpSourceListener.class);
@@ -42,7 +40,7 @@ class HttpSourceListener {
     private ReentrantLock lock;
     private Condition condition;
     private String url;
-    private Boolean isAuthenticated;
+    private Boolean isAuthEnabled;
     private SourceEventListener sourceEventListener;
     private String[] requestedTransportPropertyNames;
 
@@ -53,7 +51,7 @@ class HttpSourceListener {
         this.lock = new ReentrantLock();
         this.condition = lock.newCondition();
         this.url = url;
-        this.isAuthenticated = auth;
+        this.isAuthEnabled = auth;
         this.sourceEventListener = sourceEventListener;
         this.requestedTransportPropertyNames = requestedTransportPropertyNames;
         logger.info("Source Listener has created for url " + this.url);
@@ -62,43 +60,44 @@ class HttpSourceListener {
     /**
      * This method is handle the submit carbon message to executor service.
      *
-     * @param carbonMessage  the carbon message received from carbon transport.
-     * @param carbonCallback the carbon callback received from carbon transport.
+     * @param carbonMessage the carbon message received from carbon transport.
      */
-    void send(CarbonMessage carbonMessage, CarbonCallback carbonCallback) {
-        if (paused) {
-            lock.lock();
-            try {
-                while (paused) {
-                    condition.await();
-                }
-            } catch (InterruptedException ie) {
-                carbonMessage.release();
-                Thread.currentThread().interrupt();
-                logger.error("Thread interrupted while pausing ", ie);
-                HttpSourceUtil.handleCallback("Internal Error", carbonCallback , 500);
-            } finally {
-                lock.unlock();
-            }
-        }
-        try {
-            // TODO: 9/19/17 Basic auth support from globe interceptor
-//            if (isAuthenticated) {
-//                HttpAuthenticator.authenticate(carbonMessage, carbonCallback);
+    void send(HTTPCarbonMessage carbonMessage) {
+
+//        if (paused) {
+//            lock.lock();
+//            try {
+//                while (paused) {
+//                    condition.await();
+//                }
+//            } catch (InterruptedException ie) {
+//                Thread.currentThread().interrupt();
+//                logger.error("Thread interrupted while pausing ", ie);
+//                HttpSourceUtil.handleCallback(carbonMessage, 500);
+//            } finally {
+//                lock.unlock();
+//                carbonMessage.release();
 //            }
+//        }
+        try {
+            if (isAuthEnabled) {
+                if (!HttpAuthenticator.authenticate(carbonMessage)) {
+                    throw new HttpSourceAdaptorRuntimeException(carbonMessage, "Authorisation fails", 401);
+                }
+            }
             String[] trpProperties = new String[requestedTransportPropertyNames.length];
             populateTransportHeaders(carbonMessage, trpProperties);
             populateTransportProperties(carbonMessage, trpProperties);
-            executorService.execute(new HttpWorkerThread(carbonMessage, carbonCallback,
-                        sourceEventListener, sourceEventListener.getStreamDefinition().toString(), trpProperties));
+            executorService.execute(new HttpWorkerThread(carbonMessage,
+                    sourceEventListener, sourceEventListener.getStreamDefinition().toString(), trpProperties));
         } catch (RuntimeException e) {
             carbonMessage.release();
             throw new HttpSourceAdaptorRuntimeException("Internal Error. Failed to process HTTP message.",
-                    e , carbonCallback, 500 , carbonMessage);
+                    e, 500, carbonMessage);
         }
     }
 
-    private void populateTransportHeaders(CarbonMessage carbonMessage, String[] properties) {
+    private void populateTransportHeaders(HTTPCarbonMessage carbonMessage, String[] properties) {
         if (requestedTransportPropertyNames.length > 0) {      //cannot be null according to siddhi impl
             int i = 0;
             for (String property : requestedTransportPropertyNames) {
@@ -108,7 +107,7 @@ class HttpSourceListener {
         }
     }
 
-    private void populateTransportProperties(CarbonMessage carbonMessage, String[] properties) {
+    private void populateTransportProperties(HTTPCarbonMessage carbonMessage, String[] properties) {
         if (requestedTransportPropertyNames.length > 0) {      //cannot be null according to siddhi impl
             int i = 0;
             for (String property : requestedTransportPropertyNames) {
@@ -117,6 +116,7 @@ class HttpSourceListener {
             }
         }
     }
+
     /**
      * State that current Source Listener is paused or not.
      *
