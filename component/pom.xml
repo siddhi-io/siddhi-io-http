@@ -75,10 +75,6 @@
             <groupId>org.wso2.extension.siddhi.map.text</groupId>
             <artifactId>siddhi-map-text</artifactId>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.wso2.carbon</groupId>-->
-            <!--<artifactId>org.wso2.carbon.logging</artifactId>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.ops4j.pax.tipi</groupId>
             <artifactId>org.ops4j.pax.tipi.hamcrest.core</artifactId>

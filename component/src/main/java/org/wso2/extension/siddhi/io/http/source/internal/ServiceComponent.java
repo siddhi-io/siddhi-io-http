@@ -27,17 +27,18 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.analytics.idp.client.core.api.IdPClient;
+import org.wso2.msf4j.Microservice;
 
 /**
  * Service component which handle the IDP client .
  */
 @Component(
-        name = "org.wso2.extension.siddhi.io.http.source.internal.AuthenticationService",
-        service = AuthenticationService.class,
+        name = "org.wso2.extension.siddhi.io.http.source.internal.ServiceComponent",
+        service = ServiceComponent.class,
         immediate = true
 )
-public class AuthenticationService {
-    private static final Logger log = Logger.getLogger(AuthenticationService.class);
+public class ServiceComponent {
+    private static final Logger log = Logger.getLogger(ServiceComponent.class);
     /**
      * This is the activation method of Http io declarative service. This will be called when its references are
      * satisfied.
@@ -74,4 +75,21 @@ public class AuthenticationService {
     protected void unregisterIdP(IdPClient client) {
         HttpIODataHolder.getInstance().setClient(null);
     }
+
+    @Reference(
+            name = "MSF4JMicroservice",
+            service = Microservice.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unregisterMSF4JService"
+    )
+    protected void registerMSF4JService(Microservice client) {
+        //do nothing
+    }
+
+    protected void unregisterMSF4JService(Microservice client) {
+        //do nothing
+    }
+
+
 }

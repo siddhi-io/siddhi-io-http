@@ -153,13 +153,13 @@ import java.util.Map;
                         optional = true,
                         dynamic = true, defaultValue = "null"),
                 @Parameter(
-                        name = "sslEnabledProtocols",
-                        description = "TODO",
+                        name = "ssl.enabled.protocols",
+                        description = "ssl.enabled.protocols -> sslEnabledProtocols",
                         type = {DataType.STRING},
                         optional = true,
                         dynamic = true, defaultValue = "null"),
                 @Parameter(
-                        name = "Client.enable.session.creation",
+                        name = "client.enable.session.creation",
                         description = "TODO",
                         type = {DataType.STRING},
                         optional = true,
