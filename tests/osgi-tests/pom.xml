@@ -19,7 +19,7 @@
     <parent>
         <artifactId>siddhi-io-http-tests</artifactId>
         <groupId>org.wso2.extension.siddhi.io.http</groupId>
-        <version>1.0.5-SNAPSHOT</version>
+        <version>1.0.9-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -237,6 +237,7 @@
                                 </org.wso2.carbon.test.default.distribution>
                                 <org.ops4j.pax.logging.DefaultServiceLog.level>DEBUG
                                 </org.ops4j.pax.logging.DefaultServiceLog.level>
+                                <carbon.home>src/test/resources/carbon-home.conf</carbon.home>
                             </systemPropertyVariables>
                             <suiteXmlFiles>
                                 <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
@@ -245,18 +246,6 @@
                                 <JAVA_OPTS>${jcoverage.command}</JAVA_OPTS>
                             </environmentVariables>
                         </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
                     </plugin>
                     <plugin>
                         <artifactId>maven-resources-plugin</artifactId>
@@ -275,6 +264,9 @@
                                     <resources>
                                         <resource>
                                             <directory>src/test/resources/carbon-home/conf/security</directory>
+                                            <includes>
+                                                <include>carbon-jaas.config</include>
+                                            </includes>
                                         </resource>
                                     </resources>
                                 </configuration>
@@ -314,7 +306,7 @@
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
                             <execution>
-                                <phase>install</phase>
+                                <phase>post-integration-test</phase>
                                 <configuration>
                                     <target xmlns:jacoco="antlib:org.jacoco.ant">
                                         <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
@@ -325,6 +317,7 @@
                                                 destfile="${project.build.directory}/coverage-reports/jacoco.exec">
                                             <fileset dir="${project.build.directory}" includes="*.exec"/>
                                         </jacoco:merge>
+                                        <!-- OSGi Test coverage only enabled for org.wso2.carbon.stream.core module-->
                                         <jacoco:report>
                                             <executiondata>
                                                 <file file="${project.build.directory}/coverage-reports/jacoco.exec" />

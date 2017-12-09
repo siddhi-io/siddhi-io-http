@@ -21,6 +21,7 @@ package org.wso2.extension.siddhi.io.http.source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
+import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
@@ -63,22 +64,21 @@ class HttpSourceListener {
      * @param carbonMessage the carbon message received from carbon transport.
      */
     void send(HTTPCarbonMessage carbonMessage) {
-
-//        if (paused) {
-//            lock.lock();
-//            try {
-//                while (paused) {
-//                    condition.await();
-//                }
-//            } catch (InterruptedException ie) {
-//                Thread.currentThread().interrupt();
-//                logger.error("Thread interrupted while pausing ", ie);
-//                HttpSourceUtil.handleCallback(carbonMessage, 500);
-//            } finally {
-//                lock.unlock();
-//                carbonMessage.release();
-//            }
-//        }
+        if (paused) {
+            lock.lock();
+            try {
+                while (paused) {
+                    condition.await();
+                }
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                logger.error("Thread interrupted while pausing ", ie);
+                HttpSourceUtil.handleCallback(carbonMessage, 500);
+            } finally {
+                lock.unlock();
+                carbonMessage.release();
+            }
+        }
         try {
             if (isAuthEnabled) {
                 if (!HttpAuthenticator.authenticate(carbonMessage)) {
