@@ -27,6 +27,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.analytics.idp.client.core.api.IdPClient;
+import org.wso2.msf4j.Interceptor;
 import org.wso2.msf4j.MicroservicesServer;
 
 /**
@@ -76,9 +77,7 @@ public class ServiceComponent {
         HttpIODataHolder.getInstance().setClient(null);
     }
 
-    @Reference(
-            name = "org.wso2.msf4j.internal.MicroServicesServerSC",
-            service = MicroservicesServer.class,
+    @Reference(service = MicroservicesServer.class,
             cardinality = ReferenceCardinality.MANDATORY,
             policy = ReferencePolicy.DYNAMIC,
             unbind = "unsetMicroservicesServer")
@@ -87,6 +86,20 @@ public class ServiceComponent {
     }
 
     protected void unsetMicroservicesServer(MicroservicesServer microservicesServer) {
+        //do nothing
+    }
+
+    @Reference(
+            name = "org.wso2.msf4j.analytics.httpmonitoring.HTTPMonitoringInterceptor",
+            service = Interceptor.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetMicroservices")
+    protected void setMicroservices(Interceptor microservicesServer) {
+        //do nothing
+    }
+
+    protected void unsetMicroservices(Interceptor microservicesServer) {
         //do nothing
     }
 }
