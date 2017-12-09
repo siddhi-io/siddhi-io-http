@@ -119,6 +119,12 @@
             <artifactId>org.wso2.orbit.org.owasp.encoder.feature</artifactId>
             <type>zip</type>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.transport</groupId>
+            <artifactId>org.wso2.carbon.connector.framework.feature</artifactId>
+
+            <type>zip</type>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -195,6 +201,10 @@
                         <configuration>
                             <targetRepository>file:${basedir}/target/p2-repo</targetRepository>
                             <features>
+                                <feature>
+                                    <id>org.wso2.carbon.connector.framework.feature</id>
+                                    <version>${org.wso2.carbon.transport.http.netty.version}</version>
+                                </feature>
                                 <feature>
                                     <id>org.wso2.carbon.server.feature</id>
                                     <version>${carbon.kernel.version}</version>

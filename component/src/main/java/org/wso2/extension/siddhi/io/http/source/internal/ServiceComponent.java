@@ -27,7 +27,7 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.analytics.idp.client.core.api.IdPClient;
-import org.wso2.msf4j.Microservice;
+import org.wso2.msf4j.MicroservicesServer;
 
 /**
  * Service component which handle the IDP client .
@@ -62,7 +62,7 @@ public class ServiceComponent {
     }
 
     @Reference(
-            name = "IdPClient",
+            name = "org.wso2.carbon.analytics.idp.client.core.api.IdPClient",
             service = IdPClient.class,
             cardinality = ReferenceCardinality.MANDATORY,
             policy = ReferencePolicy.DYNAMIC,
@@ -77,19 +77,16 @@ public class ServiceComponent {
     }
 
     @Reference(
-            name = "MSF4JMicroservice",
-            service = Microservice.class,
+            name = "org.wso2.msf4j.internal.MicroServicesServerSC",
+            service = MicroservicesServer.class,
             cardinality = ReferenceCardinality.MANDATORY,
             policy = ReferencePolicy.DYNAMIC,
-            unbind = "unregisterMSF4JService"
-    )
-    protected void registerMSF4JService(Microservice client) {
-        //do nothing
+            unbind = "unsetMicroservicesServer")
+    protected void setMicroservicesServer(MicroservicesServer microservicesServer) {
+      //do nothing
     }
 
-    protected void unregisterMSF4JService(Microservice client) {
+    protected void unsetMicroservicesServer(MicroservicesServer microservicesServer) {
         //do nothing
     }
-
-
 }

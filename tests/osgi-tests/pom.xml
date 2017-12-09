@@ -237,14 +237,13 @@
                                 </org.wso2.carbon.test.default.distribution>
                                 <org.ops4j.pax.logging.DefaultServiceLog.level>DEBUG
                                 </org.ops4j.pax.logging.DefaultServiceLog.level>
-                                <carbon.home>src/test/resources/carbon-home.conf</carbon.home>
                             </systemPropertyVariables>
                             <suiteXmlFiles>
                                 <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                             </suiteXmlFiles>
-                            <!--<environmentVariables>-->
-                                <!--<JAVA_OPTS>${jcoverage.command}</JAVA_OPTS>-->
-                            <!--</environmentVariables>-->
+                            <environmentVariables>
+                                <JAVA_OPTS>${jcoverage.command}</JAVA_OPTS>
+                            </environmentVariables>
                         </configuration>
                     </plugin>
                     <plugin>
