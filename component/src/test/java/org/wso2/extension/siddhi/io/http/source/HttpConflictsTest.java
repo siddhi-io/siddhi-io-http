@@ -20,6 +20,7 @@ package org.wso2.extension.siddhi.io.http.source;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.source.util.HttpTestUtil;
 import org.wso2.extension.siddhi.map.xml.sourcemapper.XmlSourceMapper;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
@@ -59,8 +60,8 @@ public class HttpConflictsTest {
      *
      * @throws Exception Interrupted exception
      */
-    @Test
-    public void testHTTPInputTransportDifferentFormat() throws Exception {
+    @Test(expectedExceptions = HttpSourceAdaptorRuntimeException.class)
+    public void testHTTPDifferentFormat() throws Exception {
         logger.info("Creating test for publishing events with https protocol.");
         HttpTestUtil.setCarbonHome();
         Map<String, String> masterConfigs = new HashMap<>();
@@ -73,25 +74,16 @@ public class HttpConflictsTest {
         inMemoryConfigManager.generateConfigReader("source", "http");
         siddhiManager.setConfigManager(inMemoryConfigManager);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
-        String inStreamDefinitionA = "@source(type='http', @map(type='xml'), receiver.url='http://localhost:8005"
-                + "/endpoints/RecPro')"
+        String inStreamDefinitionA = "@source(type='http', @map(type='xml'), receiver.url='https://localhost:8005"
+                + "/endpoints/RecPro2')"
                 + "define stream inputStream (name string, age int, country string);";
         String queryA = ("@info(name = 'query') "
                 + "from inputStream "
                 + "select *  "
                 + "insert into outputStream;"
         );
-        String inStreamDefinitionB = "@source(type='http', @map(type='xml'), receiver.url='https://localhost:8005"
-                + "/endpoints/RecPro2')"
-                + "define stream inputStream2 (name string, age int, country string);";
-        String queryB = ("@info(name = 'query2') "
-                + "from inputStream2 "
-                + "select *  "
-                + "insert into outputStream2;"
-        );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
-                .createSiddhiAppRuntime(inStreamDefinitionA + inStreamDefinitionB + queryA + queryB);
-
+                .createSiddhiAppRuntime(inStreamDefinitionA + queryA);
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -103,10 +95,21 @@ public class HttpConflictsTest {
             }
         });
         siddhiAppRuntime.start();
+        masterConfigs.put("source.http.keyStorePassword", "wso2carbon2");
+        masterConfigs.put("source.http.certPassword", "wso2carbon2");
+        String inStreamDefinitionB = "@source(type='http', @map(type='xml'), receiver.url='https://localhost:8005"
+                + "/endpoints/RecPro')"
+                + "define stream inputStream2 (name string, age int, country string);";
+        String queryB = ("@info(name = 'query2') "
+                + "from inputStream2 "
+                + "select *  "
+                + "insert into outputStream2;"
+        );
+        SiddhiAppRuntime siddhiAppRuntime2 = siddhiManager
+                .createSiddhiAppRuntime(inStreamDefinitionB + queryB);
+        siddhiAppRuntime2.start();
         // publishing events
         List<String> expected = new ArrayList<>(2);
-        expected.add("John");
-        expected.add("Mike");
         String event1 = "<events>"
                 + "<event>"
                 + "<name>John</name>"

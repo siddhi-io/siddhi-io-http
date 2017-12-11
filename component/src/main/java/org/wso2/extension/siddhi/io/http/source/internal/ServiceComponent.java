@@ -27,8 +27,6 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.analytics.idp.client.core.api.IdPClient;
-import org.wso2.msf4j.Interceptor;
-import org.wso2.msf4j.MicroservicesServer;
 
 /**
  * Service component which handle the IDP client .
@@ -75,31 +73,5 @@ public class ServiceComponent {
 
     protected void unregisterIdP(IdPClient client) {
         HttpIODataHolder.getInstance().setClient(null);
-    }
-
-    @Reference(service = MicroservicesServer.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetMicroservicesServer")
-    protected void setMicroservicesServer(MicroservicesServer microservicesServer) {
-      //do nothing
-    }
-
-    protected void unsetMicroservicesServer(MicroservicesServer microservicesServer) {
-        //do nothing
-    }
-
-    @Reference(
-            name = "org.wso2.msf4j.analytics.httpmonitoring.HTTPMonitoringInterceptor",
-            service = Interceptor.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetMicroservices")
-    protected void setMicroservices(Interceptor microservicesServer) {
-        //do nothing
-    }
-
-    protected void unsetMicroservices(Interceptor microservicesServer) {
-        //do nothing
     }
 }

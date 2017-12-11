@@ -327,6 +327,7 @@ public class HttpSinkUtil {
         trpPropertyTypes.put("client.bootstrap.connect.timeout", TrpPropertyTypes.INTEGER);
         trpPropertyTypes.put("client.bootstrap.socket.reuse", TrpPropertyTypes.BOOLEAN);
         trpPropertyTypes.put("client.bootstrap.socket.timeout", TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put("latency.metrics.enabled", TrpPropertyTypes.BOOLEAN);
 
         return trpPropertyTypes;
     }

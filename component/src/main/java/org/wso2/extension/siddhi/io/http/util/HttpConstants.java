@@ -102,6 +102,7 @@ public class HttpConstants {
     public static final String DEFAULT_SOURCE_SCHEME = "defaultScheme";
     public static final String DEFAULT_SOURCE_SCHEME_VALUE = "http";
     public static final String DEFAULT_TRACE_LOG_ENABLED = "httpTraceLogEnabled";
+    public static final String TRACE_LOG_ENABLED = "trace.log.enabled";
     public static final String DEFAULT_TRACE_LOG_ENABLED_VALUE = "false";
 
     public static final String SERVER_BOOTSTRAP_BOSS_GROUP_SIZE = "serverBootstrapBossGroupSize";
@@ -116,7 +117,7 @@ public class HttpConstants {
 
     //Http Source & sink variables
     public static final String SOCKET_IDEAL_TIMEOUT = "socket.idle.timeout";
-    public static final String SSL_VERIFY_CLIENT = "verify.client";
+    public static final String SSL_VERIFY_CLIENT = "ssl.verify.client";
     public static final String SSL_PROTOCOL = "ssl.protocol";
     public static final String TLS_STORE_TYPE = "tls.store.type";
     public static final String SOURCE_PARAMETERS = "parameters";
@@ -127,7 +128,7 @@ public class HttpConstants {
     public static final String CLIENT_FOLLOW_REDIRECT = "follow.redirect";
     public static final String CLIENT_MAX_REDIRECT_COUNT = "max.redirect.count";
     public static final String CLIENT_BOOTSTRAP_CONFIGURATION = "client.bootstrap.configurations";
-    public static final String CLIENT_POOL_CONFIGURATION = "client.pool.configurations";
+    public static final String CLIENT_POOL_CONFIGURATION = "client.threadpool.configurations";
     public static final String PROXY_HOST = "proxy.host";
     public static final String PROXY_PORT = "proxy.port";
     public static final String PROXY_USERNAME = "proxy.username";

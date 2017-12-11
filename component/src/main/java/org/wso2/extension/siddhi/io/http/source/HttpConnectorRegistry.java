@@ -58,7 +58,6 @@ class HttpConnectorRegistry {
     private Map<String, HttpSourceListener> sourceListenersMap = new ConcurrentHashMap<>();
     private TransportsConfiguration trpConfig;
     private HttpWsConnectorFactory httpConnectorFactory;
-    private boolean isLogTraceEnabled = false;
 
     private HttpConnectorRegistry() {
     }
@@ -116,10 +115,6 @@ class HttpConnectorRegistry {
         return instance;
     }
 
-    public void setLogTraceEnabled(ConfigReader configReader) {
-        isLogTraceEnabled = Boolean.parseBoolean(configReader.readConfig(HttpConstants.DEFAULT_TRACE_LOG_ENABLED,
-                HttpConstants.DEFAULT_TRACE_LOG_ENABLED_VALUE));
-    }
 
     /**
      * Get the source listener map.
@@ -196,9 +191,6 @@ class HttpConnectorRegistry {
         }
     }
 
-    private boolean isHTTPTraceLoggerEnabled() {
-        return isLogTraceEnabled;
-    }
 
     void createHttpServerConnector(ListenerConfiguration listenerConfig) {
         synchronized (this) {
@@ -212,9 +204,6 @@ class HttpConnectorRegistry {
                 }
                 httpServerConnectorContext.incrementReferenceCount();
                 return;
-            }
-            if (isHTTPTraceLoggerEnabled()) {
-                listenerConfig.setHttpTraceLogEnabled(true);
             }
             ServerBootstrapConfiguration serverBootstrapConfiguration = HTTPConnectorUtil
                     .getServerBootstrapConfiguration(trpConfig.getTransportProperties());
@@ -319,13 +308,15 @@ class HttpConnectorRegistry {
         }
         if (listenerConfiguration.getScheme().equalsIgnoreCase("https")) {
             ListenerConfiguration config = context.getListenerConfiguration();
-            if (!listenerConfiguration.getKeyStoreFile().equals(config.getKeyStoreFile())
-                    || !listenerConfiguration.getKeyStorePass().equals(config.getKeyStorePass())
-                    || !listenerConfiguration.getCertPass().equals(config.getCertPass())) {
-                if (listenerConfiguration.getScheme().equalsIgnoreCase("http")) {
-                    log.info("There is already registered server connector for 'http' protocol since it have 'jks' " +
-                            "setup continue as 'https'");
+            if (config.getScheme().equalsIgnoreCase("https")) {
+                if (!listenerConfiguration.getKeyStoreFile().equals(config.getKeyStoreFile())
+                        || !listenerConfiguration.getKeyStorePass().equals(config.getKeyStorePass())
+                        || !listenerConfiguration.getCertPass().equals(config.getCertPass())) {
+                    log.info("There is already registered https server connector for same host:port which has " +
+                            " conflicting configurations.");
+                    return true;
                 }
+            } else {
                 return true;
             }
         }

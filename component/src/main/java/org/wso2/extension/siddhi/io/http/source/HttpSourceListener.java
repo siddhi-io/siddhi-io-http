@@ -79,22 +79,17 @@ class HttpSourceListener {
                 carbonMessage.release();
             }
         }
-        try {
-            if (isAuthEnabled) {
-                if (!HttpAuthenticator.authenticate(carbonMessage)) {
-                    throw new HttpSourceAdaptorRuntimeException(carbonMessage, "Authorisation fails", 401);
-                }
+        if (isAuthEnabled) {
+            if (!HttpAuthenticator.authenticate(carbonMessage)) {
+                throw new HttpSourceAdaptorRuntimeException(carbonMessage, "Authorisation fails", 401);
             }
-            String[] trpProperties = new String[requestedTransportPropertyNames.length];
-            populateTransportHeaders(carbonMessage, trpProperties);
-            populateTransportProperties(carbonMessage, trpProperties);
-            executorService.execute(new HttpWorkerThread(carbonMessage,
-                    sourceEventListener, sourceEventListener.getStreamDefinition().toString(), trpProperties));
-        } catch (RuntimeException e) {
-            carbonMessage.release();
-            throw new HttpSourceAdaptorRuntimeException("Internal Error. Failed to process HTTP message.",
-                    e, 500, carbonMessage);
         }
+        String[] trpProperties = new String[requestedTransportPropertyNames.length];
+        populateTransportHeaders(carbonMessage, trpProperties);
+        populateTransportProperties(carbonMessage, trpProperties);
+        executorService.execute(new HttpWorkerThread(carbonMessage,
+                sourceEventListener, sourceEventListener.getStreamDefinition().toString(), trpProperties));
+
     }
 
     private void populateTransportHeaders(HTTPCarbonMessage carbonMessage, String[] properties) {

@@ -262,6 +262,7 @@ public class HttpSourceUtil {
         trpPropertyTypes.put("server.bootstrap.socket.reuse", TrpPropertyTypes.BOOLEAN);
         trpPropertyTypes.put("server.bootstrap.socket.timeout", TrpPropertyTypes.INTEGER);
         trpPropertyTypes.put("server.bootstrap.socket.backlog", TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put("latency.metrics.enabled", TrpPropertyTypes.BOOLEAN);
         return trpPropertyTypes;
     }
 

@@ -18,6 +18,7 @@
  */
 package org.wso2.extension.siddhi.io.http.source;
 
+import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.siddhi.annotation.Example;
@@ -76,180 +77,227 @@ import java.util.Map;
                         defaultValue = "1"),
                 @Parameter(
                         name = "socket.idle.timeout",
-                        description = "TODO",
+                        description = "Idle timeout for HTTP connection.",
                         type = {DataType.INT},
                         optional = true,
-                         defaultValue = "120000"),
+                        defaultValue = "120000"),
                 @Parameter(
-                        name = "verify.client",
-                        description = "TODO",
+                        name = "ssl.verify.client",
+                        description = "The type of client certificate verification.",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "null"),
+                        defaultValue = "null"),
                 @Parameter(
                         name = "ssl.protocol",
-                        description = "TODO",
+                        description = "ssl/tls related options",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "TLS"),
+                        defaultValue = "TLS"),
                 @Parameter(
                         name = "tls.store.type",
-                        description = "TODO",
+                        description = "TLS store type.",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "JKS"),
+                        defaultValue = "JKS"),
+                @Parameter(
+                        name = "parameters",
+                        description = "Parameters other than basics such as ciphers,sslEnabledProtocols,client.enable" +
+                                ".session.creation. Expected format of these parameters is as follows: " +
+                                "\"'ciphers:xxx','sslEnabledProtocols,client.enable:xxx'\"",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "null"),
                 @Parameter(
                         name = "ciphers",
-                        description = "TODO",
+                        description = "List of ciphers to be used. This parameter should include under parameters Ex:" +
+                                " 'ciphers:TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256'",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "null"),
+                        defaultValue = "null"),
                 @Parameter(
                         name = "ssl.enabled.protocols",
-                        description = "sslEnabledProtocols->ssl.enabled.protocols",
+                        description = "SSL/TLS protocols to be enabled. This parameter should be in camel case format" +
+                                "(sslEnabledProtocols) under parameters. Ex 'sslEnabledProtocols:true'",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "null"),
+                        defaultValue = "null"),
                 @Parameter(
                         name = "server.enable.session.creation",
-                        description = "TODO",
+                        description = "Enable HTTP session creation.This parameter should include under parameters " +
+                                "Ex:" +
+                                " 'client.enable.session.creation:true'",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "null"),
+                        defaultValue = "null"),
                 @Parameter(
                         name = "server.supported.snimatchers",
-                        description = "TODO",
+                        description = "Http SNIMatcher to be added. This parameter should include under parameters" +
+                                " Ex:" +
+                                " 'server.supported.snimatchers:SNIMatcher'",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "null"),
+                        defaultValue = "null"),
                 @Parameter(
                         name = "server.suported.server.names",
-                        description = "TODO",
+                        description = "Http supported servers. This parameter should include under parameters Ex:" +
+                                " 'server.suported.server.names:server'",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "null"),
+                        defaultValue = "null"),
+
                 //header validation parameters
                 @Parameter(
-                        name = "request.size.validation",
-                        description = "TODO",
+                        name = "request.size.validation.configuration",
+                        description = "Parameters that responsible for validating the http request and request " +
+                                "headers. Expected format of these parameters is as follows:" +
+                                " \"'request.size.validation:xxx','request.size.validation.maximum.value:xxx'\"",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "TODO"),
+                        defaultValue = "null"),
+                @Parameter(
+                        name = "request.size.validation",
+                        description = "To enable the request size validation.",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "false"),
                 @Parameter(
                         name = "request.size.validation.maximum.value",
-                        description = "TODO",
+                        description = "If request size is validated then maximum size.",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "TODO"),
+                        defaultValue = "Integer.MAX_VALUE"),
                 @Parameter(
                         name = "request.size.validation.reject.status.code",
-                        description = "TODO",
+                        description = "If request is exceed maximum size and request.size.validation is enabled then " +
+                                "status code to be send as response.",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "TODO"),
+                        defaultValue = "401"),
                 @Parameter(
                         name = "request.size.validation.reject.message",
-                        description = "TODO",
+                        description = "If request is exceed maximum size and request.size.validation is enabled then " +
+                                "status message to be send as response.",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "TODO"),
+                        defaultValue = "Message is bigger than the valid size"),
                 @Parameter(
                         name = "request.size.validation.reject.message.content.type",
-                        description = "TODO",
+                        description = "If request is exceed maximum size and request.size.validation is enabled then " +
+                                "content type to be send as response.",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "TODO"),
+                        defaultValue = "plain/text"),
                 @Parameter(
                         name = "header.size.validation",
-                        description = "TODO",
+                        description = "To enable the header size validation.",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "TODO"),
+                        defaultValue = "false"),
                 @Parameter(
                         name = "header.validation.maximum.request.line",
-                        description = "TODO",
+                        description = "If header header validation is enabled then the maximum request line.",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "TODO"),
+                        defaultValue = "4096"),
                 @Parameter(
                         name = "header.validation.maximum.size",
-                        description = "TODO",
+                        description = "If header header validation is enabled then the maximum expected header size.",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "TODO"),
+                        defaultValue = "8192"),
                 @Parameter(
                         name = "header.validation.maximum.chunk.size",
-                        description = "TODO",
+                        description = "If header header validation is enabled then the maximum expected chunk size.",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "TODO"),
+                        defaultValue = "8192"),
                 @Parameter(
                         name = "header.validation.reject.status.code",
-                        description = "TODO",
+                        description = "401",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "TODO"),
+                        defaultValue = "If header is exceed maximum size and header.size.validation is enabled then " +
+                                "status code to be send as response."),
                 @Parameter(
                         name = "header.validation.reject.message",
-                        description = "TODO",
+                        description = "If header is exceed maximum size and header.size.validation is enabled then " +
+                                "message to be send as response.",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "TODO"),
+                        defaultValue = "Message header is bigger than the valid size"),
                 @Parameter(
                         name = "header.validation.reject.message.content.type",
-                        description = "TODO",
+                        description = "If header is exceed maximum size and header.size.validation is enabled then " +
+                                "content type to be send as response.",
                         type = {DataType.STRING},
                         optional = true,
-                         defaultValue = "TODO"),
+                        defaultValue = "plain/text"),
+
                 //bootstrap configuration
                 @Parameter(
+                        name = "server.bootstrap.configuration",
+                        description = "Parameters that for bootstrap configurations of the server. Expected format of" +
+                                " these parameters is as follows:" +
+                                " \"'ciphers:xxx','sslEnabledProtocols,client.enable:xxx'\"",
+                        type = {DataType.OBJECT},
+                        optional = true,
+                        defaultValue = "null"),
+                @Parameter(
                         name = "server.bootstrap.nodelay",
-                        description = "TODO",
+                        description = "Http server no delay.",
                         type = {DataType.BOOL},
                         optional = true,
-                         defaultValue = "true"),
+                        defaultValue = "true"),
                 @Parameter(
                         name = "server.bootstrap.keepalive",
-                        description = "TODO",
+                        description = "Http server keep alive.",
                         type = {DataType.BOOL},
                         optional = true,
-                         defaultValue = "true"),
+                        defaultValue = "true"),
                 @Parameter(
                         name = "server.bootstrap.sendbuffersize",
-                        description = "TODO",
+                        description = "Http server send buffer size.",
                         type = {DataType.INT},
                         optional = true,
-                         defaultValue = "1048576"),
+                        defaultValue = "1048576"),
                 @Parameter(
                         name = "server.bootstrap.recievebuffersize",
-                        description = "TODO",
+                        description = "Http server receive buffer size.",
                         type = {DataType.INT},
                         optional = true,
-                         defaultValue = "1048576"),
+                        defaultValue = "1048576"),
                 @Parameter(
                         name = "server.bootstrap.connect.timeout",
-                        description = "TODO",
+                        description = "Http server connection timeout.",
                         type = {DataType.INT},
                         optional = true,
-                         defaultValue = "15000"),
+                        defaultValue = "15000"),
                 @Parameter(
                         name = "server.bootstrap.socket.reuse",
-                        description = "TODO",
+                        description = "To enable http socket reuse.",
                         type = {DataType.BOOL},
                         optional = true,
-                         defaultValue = "false"),
+                        defaultValue = "false"),
                 @Parameter(
                         name = "server.bootstrap.socket.timeout",
-                        description = "TODO",
+                        description = "Http server socket timeout.",
                         type = {DataType.BOOL},
                         optional = true,
-                         defaultValue = "15"),
+                        defaultValue = "15"),
                 @Parameter(
                         name = "server.bootstrap.socket.backlog",
-                        description = "TODO",
+                        description = "THttp server socket backlog.",
                         type = {DataType.BOOL},
                         optional = true,
-                         defaultValue = "100")
+                        defaultValue = "100"),
+                @Parameter(
+                        name = "trace.log.enabled",
+                        description = "Http traffic monitoring.",
+                        defaultValue = "false",
+                        optional = true,
+                        type = {DataType.BOOL}
+
+                )
         },
         examples = {
                 @Example(syntax = "@source(type='http', receiver.url='http://localhost:9055/endpoints/RecPro', " +
@@ -329,17 +377,11 @@ import java.util.Map;
                         description = "The default cert password.",
                         defaultValue = "wso2carbon",
                         possibleParameters = "String of cert password"
-                ),
-                @SystemParameter(
-                        name = "httpTraceLogEnabled",
-                        description = "Http traffic monitoring.",
-                        defaultValue = "wso2carbon",
-                        possibleParameters = "String of cert password"
                 )
         }
 )
 public class HttpSource extends Source {
-    //private String sourceId;
+    private static final Logger log = Logger.getLogger(HttpSource.class);
     private String listenerUrl;
     private HttpConnectorRegistry httpConnectorRegistry;
     private Boolean isAuth;
@@ -404,6 +446,8 @@ public class HttpSource extends Source {
                 .SERVER_BOOTSTRAP_CONFIGURATION, HttpConstants.EMPTY_STRING);
         String parameterList = optionHolder.validateAndGetStaticValue(HttpConstants.SOURCE_PARAMETERS, HttpConstants
                 .EMPTY_STRING);
+        String traceLog = optionHolder.validateAndGetStaticValue(HttpConstants.TRACE_LOG_ENABLED, configReader
+                .readConfig(HttpConstants.DEFAULT_TRACE_LOG_ENABLED, HttpConstants.EMPTY_STRING));
         this.listenerConfiguration = HttpSourceUtil.getListenerConfiguration(this.listenerUrl, configReader);
         if (socketIdleTimeout != -1) {
             this.listenerConfiguration.setSocketIdleTimeout(socketIdleTimeout);
@@ -417,9 +461,11 @@ public class HttpSource extends Source {
         if (!HttpConstants.EMPTY_STRING.equals(tlsStoreType)) {
             this.listenerConfiguration.setTlsStoreType(tlsStoreType);
         }
+        if (!HttpConstants.EMPTY_STRING.equals(traceLog)) {
+            this.listenerConfiguration.setHttpTraceLogEnabled(Boolean.parseBoolean(traceLog));
+        }
         this.httpConnectorRegistry = HttpConnectorRegistry.getInstance();
         this.httpConnectorRegistry.initBootstrapConfigIfFirst(configReader);
-        this.httpConnectorRegistry.setLogTraceEnabled(configReader);
         this.httpConnectorRegistry.setTrpConfig(serverBootstrapPropertiesList, requestSizeValidationConfigList);
         if (!HttpConstants.EMPTY_STRING.equals(requestSizeValidationConfigList)) {
             this.listenerConfiguration.setRequestSizeValidationConfig(HttpConnectorRegistry.getInstance()

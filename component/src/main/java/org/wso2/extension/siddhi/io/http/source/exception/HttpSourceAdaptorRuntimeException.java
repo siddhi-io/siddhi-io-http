@@ -41,10 +41,4 @@ public class HttpSourceAdaptorRuntimeException extends RuntimeException {
         super(message);
         HttpIoUtil.handleFailure(carbonMessage, this, code, message);
     }
-
-    public HttpSourceAdaptorRuntimeException(String message, Throwable cause, int code, HTTPCarbonMessage
-            carbonMessage) {
-        super(message, cause);
-        HttpIoUtil.handleFailure(carbonMessage, this, code, message);
-    }
 }
