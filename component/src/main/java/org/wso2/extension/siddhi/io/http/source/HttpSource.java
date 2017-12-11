@@ -304,7 +304,7 @@ import java.util.Map;
                         "socketIdleTimeout='150000', parameters=\"'ciphers : TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256'," +
                         " 'sslEnabledProtocols:TLSv1.1,TLSv1.2'\",request.size.validation.configuration=\"request" +
                         ".size.validation:true\",server.bootstrap.configuration=\"server.bootstrap.socket" +
-                        ".timeout:25\"”  " +
+                        ".timeout:25\" " +
                         "@map(type='xml'))\n"
                         + "define stream FooStream (symbol string, price float, volume long);\n",
                         description = "Above source listenerConfiguration performs a default XML input mapping. " +
