@@ -1,4 +1,4 @@
-# API Docs - v1.0.9-SNAPSHOT
+# API Docs - v1.0.10
 
 ## Sink
 
@@ -747,7 +747,7 @@
 <span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
 ```
-@source(type='http', receiver.url='http://localhost:9055/endpoints/RecPro', socketIdleTimeout='150000', parameters="'ciphers : TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256', 'sslEnabledProtocols:TLSv1.1,TLSv1.2'",request.size.validation.configuration="request.size.validation:true",server.bootstrap.configuration="server.bootstrap.socket.timeout:25"”  @map(type='xml'))
+@source(type='http', receiver.url='http://localhost:9055/endpoints/RecPro', socketIdleTimeout='150000', parameters="'ciphers : TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256', 'sslEnabledProtocols:TLSv1.1,TLSv1.2'",request.size.validation.configuration="request.size.validation:true",server.bootstrap.configuration="server.bootstrap.socket.timeout:25" @map(type='xml'))
 define stream FooStream (symbol string, price float, volume long);
 
 ```
