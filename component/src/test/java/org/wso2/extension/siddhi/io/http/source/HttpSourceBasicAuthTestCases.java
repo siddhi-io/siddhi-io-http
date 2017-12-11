@@ -116,6 +116,68 @@ public class HttpSourceBasicAuthTestCases {
     }
 
     /**
+     * Creating test for publishing events with basic auth false.
+     * @throws Exception Interrupted exception
+     */
+    @Test
+    public void testBasicAuthTrue() throws Exception {
+        logger.info(" Creating test for publishing events with basic auth false.");
+        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
+        List<String> receivedEventNameList = new ArrayList<>(2);
+        PersistenceStore persistenceStore = new InMemoryPersistenceStore();
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setPersistenceStore(persistenceStore);
+        siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
+        String inStreamDefinition = "@source(type='http', @map(type='xml'), receiver.url='http://localhost:8005"
+                + "/endpoints/RecPro', basic.auth.enabled='true' )"
+                + "define stream inputStream (name string, age int, country string);";
+        String query = (
+                "@info(name = 'query') "
+                        + "from inputStream "
+                        + "select * "
+                        + "insert into outputStream;"
+        );
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager
+                .createSiddhiAppRuntime(inStreamDefinition + query);
+
+        siddhiAppRuntime.addCallback("query", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event event : inEvents) {
+                    eventCount.incrementAndGet();
+                    receivedEventNameList.add(event.getData(0).toString());
+                }
+            }
+        });
+        siddhiAppRuntime.start();
+        // publishing events
+        List<String> expected = new ArrayList<>(2);
+        expected.add("John");
+        expected.add("Mike");
+        String event1 = "<events>"
+                + "<event>"
+                + "<name>John</name>"
+                + "<age>100</age>"
+                + "<country>AUS</country>"
+                + "</event>"
+                + "</events>";
+        String event2 = "<events>"
+                + "<event>"
+                + "<name>Mike</name>"
+                + "<age>20</age>"
+                + "<country>USA</country>"
+                + "</event>"
+                + "</events>";
+        HttpTestUtil.httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
+                "POST");
+        HttpTestUtil.httpPublishEvent(event2, baseURI, "/endpoints/RecPro",
+                "POST");
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
+        siddhiAppRuntime.shutdown();
+    }
+    /**
      * Creating test for publishing events with basic auth is not provided.
      * @throws Exception Interrupted exception
      */

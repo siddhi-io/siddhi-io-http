@@ -142,8 +142,7 @@ public class HttpAuthTest {
      *
      * @throws Exception Interrupted exception
      */
-    @Test(expectedExceptions = {HttpSinkAdaptorRuntimeException.class, ExceptionInInitializerError.class,
-            SiddhiAppCreationException.class})
+    @Test(expectedExceptions = {HttpSinkAdaptorRuntimeException.class, SiddhiAppCreationException.class})
     public void testHTTPTextMappingBasicAuthTrueIncorrectCredential() throws Exception {
         log.info("Creating test for publishing events with basic authentication true.");
         SiddhiManager siddhiManager = new SiddhiManager();

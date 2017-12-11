@@ -51,7 +51,7 @@ public class HttpsServerListenerHandler implements Runnable {
         keyStore = KeyStore.getInstance("JKS");
     }
 
-    public HttpServerListener getServerListner() {
+    public HttpServerListener getServerListener() {
         return serverListener;
     }
 

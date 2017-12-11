@@ -33,13 +33,13 @@ import org.wso2.extension.siddhi.map.xml.sinkmapper.XMLSinkMapper;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.inject.Inject;
+
 import static org.ops4j.pax.exam.CoreOptions.maven;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.wso2.carbon.container.options.CarbonDistributionOption.copyFile;
-import static org.wso2.carbon.container.options.CarbonDistributionOption.copyOSGiLibBundle;
 
 
 /**
@@ -111,18 +111,7 @@ public class HttpSink {
                         .groupId("org.wso2.extension.siddhi.io.http")
                         .artifactId("org.wso2.extension.io.http.test.distribution")
                         .type("zip")
-                        .versionAsInProject()),
-                copyOSGiLibBundle(maven()
-                        .artifactId("siddhi-io-http")
-                        .groupId("org.wso2.extension.siddhi.io.http")
-                        .versionAsInProject()),
-                copyOSGiLibBundle(maven()
-                        .artifactId("siddhi-map-xml")
-                        .groupId("org.wso2.extension.siddhi.map.xml")
-                        .versionAsInProject()),
-                systemProperty("java.security.auth.login.config")
-                        .value(Paths.get("conf", "security", "carbon-jaas.config").toString())
-                //CarbonDistributionOption.debug(5005)
+                        .versionAsInProject())
         };
     }
 
@@ -145,24 +134,24 @@ public class HttpSink {
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
         String payload = "<events>"
-                            + "<event>"
-                                + "<symbol>WSO2</symbol>"
-                                + "<price>55.645</price>"
-                                + "<volume>100</volume>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<symbol>WSO2</symbol>"
+                + "<price>55.645</price>"
+                + "<volume>100</volume>"
+                + "</event>"
+                + "</events>";
         fooStream.send(new Object[]{payload, "GET", "'Name:John','Age:23'"});
         while (!lst.getServerListener().iaMessageArrive()) {
             Thread.sleep(10);
         }
         String eventData = lst.getServerListener().getData();
         String expected = "<events>"
-                            + "<event>"
-                                + "<symbol>WSO2</symbol>"
-                                + "<price>55.645</price>"
-                                + "<volume>100</volume>"
-                            + "</event>"
-                        + "</events>\n";
+                + "<event>"
+                + "<symbol>WSO2</symbol>"
+                + "<price>55.645</price>"
+                + "<volume>100</volume>"
+                + "</event>"
+                + "</events>\n";
         Assert.assertEquals(eventData, expected);
         siddhiAppRuntime.shutdown();
         lst.shutdown();

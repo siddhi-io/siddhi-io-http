@@ -40,7 +40,6 @@ import org.wso2.siddhi.core.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 
-
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -50,9 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.inject.Inject;
 
 import static org.ops4j.pax.exam.CoreOptions.maven;
-import static org.ops4j.pax.exam.CoreOptions.systemProperty;
 import static org.wso2.carbon.container.options.CarbonDistributionOption.copyFile;
-import static org.wso2.carbon.container.options.CarbonDistributionOption.copyOSGiLibBundle;
 
 
 /**
@@ -134,22 +131,8 @@ public class HttpSourceBasicAuth {
                         .groupId("org.wso2.extension.siddhi.io.http")
                         .artifactId("org.wso2.extension.io.http.test.distribution")
                         .type("zip")
-                        .versionAsInProject()),
-                copyOSGiLibBundle(maven()
-                        .artifactId("siddhi-io-http")
-                        .groupId("org.wso2.extension.siddhi.io.http")
-                        .versionAsInProject()),
-                copyOSGiLibBundle(maven()
-                        .artifactId("siddhi-map-xml")
-                        .groupId("org.wso2.extension.siddhi.map.xml")
-                        .versionAsInProject()),
-                copyOSGiLibBundle(maven()
-                        .artifactId("siddhi-map-text")
-                        .groupId("org.wso2.extension.siddhi.map.text")
-                        .versionAsInProject()),
-                systemProperty("java.security.auth.login.config")
-                        .value(Paths.get("conf", "security", "carbon-jaas.config").toString())
-                //CarbonDistributionOption.debug(5005)
+                        .versionAsInProject())
+//                CarbonDistributionOption.debug(5005)
         };
     }
 
@@ -183,11 +166,11 @@ public class HttpSourceBasicAuth {
         expected.add("John");
         expected.add("Mike");
         String event1 = "name:\"John\",\n" +
-                        "age:100,\n" +
-                        "country:\"USA\"";
+                "age:100,\n" +
+                "country:\"USA\"";
         String event2 = "name:\"Mike\",\n" +
-                        "age:100,\n" +
-                        "country:\"USA\"";
+                "age:100,\n" +
+                "country:\"USA\"";
         new TestUtil().httpPublishEvent(event1, baseURI, "/endpoints/RecPro", false, "plain/text",
                 "POST");
         new TestUtil().httpPublishEvent(event2, baseURI, "/endpoints/RecPro", false, "plain/text",

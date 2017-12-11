@@ -33,8 +33,8 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 /**
  * Test case for mapping type.
  */
-public class HttpMappingTest {
-    private static final Logger log = Logger.getLogger(HttpMappingTest.class);
+public class HttpSinkMappingTest {
+    private static final Logger log = Logger.getLogger(HttpSinkMappingTest.class);
 
     /**
      * Creating test for publishing events with XML mapping.

@@ -25,6 +25,35 @@ wso2.carbon:
       # port offset
     offset: 0
 
+wso2.transport.http:
+  transportProperties:
+    -
+      name: "server.bootstrap.socket.timeout"
+      value: 60
+    -
+      name: "client.bootstrap.socket.timeout"
+      value: 60
+    -
+      name: "latency.metrics.enabled"
+      value: true
+
+  listenerConfigurations:
+    -
+      id: "http-default"
+      host: "0.0.0.0"
+      port: 9090
+    -
+      id: "https-default"
+      host: "0.0.0.0"
+      port: 9443
+      scheme: https
+      keyStoreFile: "${carbon.home}/resources/security/wso2carbon.jks"
+      keyStorePassword: wso2carbon
+      certPass: wso2carbon
+
+  senderConfigurations:
+    -
+      id: "http-sender"
   # Siddhi Configuration Parameters
 siddhi:
   extensions:
@@ -47,17 +76,16 @@ siddhi:
         namespace: 'source'
           # Extension properties
         properties:
-          latency.metrics.enabled: true
-          server.bootstrap.socket.timeout: 15
-          server.bootstrap.boss.group.size: 4
-          server.bootstrap.worker.group.size: 8
-          default.host: 0.0.0.0
-          http.port: 9763
-          https.port: 9443
-          default.scheme: http
-          https.keystore.file: ${carbon.home}/resources/security/wso2carbon.jks
-          https.keyStore.pass: wso2carbon
-          https.certPass: wso2carbon
+          serverBootstrapBossGroupSize: 4
+          serverBootstrapWorkerGroupSize: 8
+          defaultHost: 0.0.0.0
+          defaultHttpPort: 9763
+          defaultHttpsPort: 9443
+          defaultScheme: http
+          keyStoreLocation: ${carbon.home}/resources/security/wso2carbon.jks
+          keyStorePassword: wso2carbon
+          certPassword: wso2carbon
+          httpTraceLogEnabled: false
     -
         # Extension configuration for window length
       extension:
@@ -67,13 +95,10 @@ siddhi:
         namespace: 'sink'
           # Extension properties
         properties:
-          latency.metrics.enabled: true
-          client.bootstrap.socket.timeout: 15
-          default.scheme: http
-          https.host: 0.0.0.0
-          https.port: 9763
-          client.truststore.file: ${carbon.home}/resources/security/client-truststore.jks
-          client.truststore.pass: wso2carbon
+          clientBootstrapBossGroupSize: 4
+          clientBootstrapWorkerGroupSize: 8
+          trustStoreLocation: ${carbon.home}/resources/security/client-truststore.jks
+          trustStorePassword: wso2carbon
 
 wso2.securevault:
   secretRepository:

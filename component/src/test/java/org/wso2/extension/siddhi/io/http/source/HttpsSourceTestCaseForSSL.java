@@ -66,9 +66,9 @@ public class HttpsSourceTestCaseForSSL {
         logger.info("Creating test for publishing events with https protocol.");
         HttpTestUtil.setCarbonHome();
         Map<String, String> masterConfigs = new HashMap<>();
-        masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/resources/security/wso2carbon.jks");
-        masterConfigs.put("source.http.https.keystore.password", "wso2carbon");
-        masterConfigs.put("source.http.https.cert.password", "wso2carbon");
+        masterConfigs.put("source.http.keyStoreLocation", "${carbon.home}/resources/security/wso2carbon.jks");
+        masterConfigs.put("source.http.keyStorePassword", "wso2carbon");
+        masterConfigs.put("source.http.certPassword", "wso2carbon");
         List<String> receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
         InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs , null);
@@ -134,9 +134,9 @@ public class HttpsSourceTestCaseForSSL {
         logger.info("Creating test for publishing events with https protocol with invalid keystore.");
         HttpTestUtil.setCarbonHome();
         Map<String, String> masterConfigs = new HashMap<>();
-        masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/resources/security/store.jks");
-        masterConfigs.put("source.http.https.keystore.password", "wso2carbon");
-        masterConfigs.put("source.http.https.cert.password", "wso2carbon");
+        masterConfigs.put("source.http.keyStoreLocation", "${carbon.home}/resources/security/store.jks");
+        masterConfigs.put("source.http.keyStorePassword", "wso2carbon");
+        masterConfigs.put("source.http.certPassword", "wso2carbon");
 
         List<String> receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -209,9 +209,9 @@ public class HttpsSourceTestCaseForSSL {
         logger.info("Creating test for publishing events with https protocol with invalid keystore pass.");
         HttpTestUtil.setCarbonHome();
         Map<String, String> masterConfigs = new HashMap<>();
-        masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/resources/security/wso2carbon.jks");
-        masterConfigs.put("source.http.https.keystore.password", "wso2carbon123");
-        masterConfigs.put("source.http.https.cert.password", "wso2carbon");
+        masterConfigs.put("source.http.keyStoreLocation", "${carbon.home}/resources/security/wso2carbon.jks");
+        masterConfigs.put("source.http.keyStorePassword", "wso2carbon123");
+        masterConfigs.put("source.http.certPassword", "wso2carbon");
         List<String> receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
         InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs , null);
@@ -284,9 +284,9 @@ public class HttpsSourceTestCaseForSSL {
         logger.info(" Creating test for publishing events with https protocol with invalid cert pass.");
         HttpTestUtil.setCarbonHome();
         Map<String, String> masterConfigs = new HashMap<>();
-        masterConfigs.put("source.http.https.keystore.file", "${carbon.home}/resources/security/wso2carbon.jks");
+        masterConfigs.put("source.http.keyStoreLocation", "${carbon.home}/resources/security/wso2carbon.jks");
         masterConfigs.put("source.http.https.keystore,password", "wso2carbon");
-        masterConfigs.put("source.http.https.cert.password", "wso2carbon123");
+        masterConfigs.put("source.http.certPassword", "wso2carbon123");
         List<String> receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
         InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs , null);

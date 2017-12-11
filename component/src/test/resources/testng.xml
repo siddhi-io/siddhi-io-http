@@ -18,11 +18,12 @@ limitations under the License.
     <test name="Siddhi-io-http-tests" preserve-order="true" parallel="false">
         <classes>
             <class name="org.wso2.extension.siddhi.io.http.sink.HttpAuthTest"/>
-            <class name="org.wso2.extension.siddhi.io.http.sink.HttpMappingTest"/>
-            <class name="org.wso2.extension.siddhi.io.http.sink.HttpMethodType"/>
+            <class name="org.wso2.extension.siddhi.io.http.sink.HttpSinkMappingTest"/>
+            <class name="org.wso2.extension.siddhi.io.http.sink.HttpSinkMethodType"/>
             <class name="org.wso2.extension.siddhi.io.http.sink.HttpMultipleEventSink"/>
             <class name="org.wso2.extension.siddhi.io.http.sink.HttpSinkTestCase"/>
             <class name="org.wso2.extension.siddhi.io.http.sink.HttpsSinkTestCase"/>
+            <class name="org.wso2.extension.siddhi.io.http.sink.HttpSinkCustomConfigurationTest"/>
 
             <class name="org.wso2.extension.siddhi.io.http.source.HttpBasicTests"/>
             <class name="org.wso2.extension.siddhi.io.http.source.HttpCustomThreadPoolConfigTest"/>
@@ -31,6 +32,8 @@ limitations under the License.
             <class name="org.wso2.extension.siddhi.io.http.source.HttpSourceBasicAuthTestCases"/>
             <class name="org.wso2.extension.siddhi.io.http.source.HttpSourceMappingTestCases"/>
             <class name="org.wso2.extension.siddhi.io.http.source.HttpsSourceTestCaseForSSL"/>
+            <class name="org.wso2.extension.siddhi.io.http.source.HttpCustomConfigTestCase"/>
+            <class name="org.wso2.extension.siddhi.io.http.source.HttpConflictsTest"/>
         </classes>
     </test>
 </suite>
