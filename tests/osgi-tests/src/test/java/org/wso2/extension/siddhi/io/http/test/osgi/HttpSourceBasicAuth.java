@@ -132,7 +132,6 @@ public class HttpSourceBasicAuth {
                         .artifactId("org.wso2.extension.io.http.test.distribution")
                         .type("zip")
                         .versionAsInProject())
-//                CarbonDistributionOption.debug(5005)
         };
     }
 
