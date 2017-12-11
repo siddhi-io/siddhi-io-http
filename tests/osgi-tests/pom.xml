@@ -19,7 +19,7 @@
     <parent>
         <artifactId>siddhi-io-http-tests</artifactId>
         <groupId>org.wso2.extension.siddhi.io.http</groupId>
-        <version>1.0.10-SNAPSHOT</version>
+        <version>1.0.10</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -313,9 +313,8 @@
                                             <classpath path="${project.build.directory}" />
                                         </taskdef>
                                         <!--Report merge is done so as to fix build when tests are skipped -->
-                                        <jacoco:merge
-                                                destfile="${project.build.directory}/coverage-reports/jacoco.exec">
-                                            <fileset dir="${project.build.directory}" includes="*.exec"/>
+                                        <jacoco:merge destfile="${project.build.directory}/coverage-reports/jacoco.exec">
+                                            <fileset dir="${project.build.directory}" includes="*.exec" />
                                         </jacoco:merge>
                                         <!-- OSGi Test coverage only enabled for org.wso2.carbon.stream.core module-->
                                         <jacoco:report>

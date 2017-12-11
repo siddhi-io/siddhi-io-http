@@ -18,7 +18,7 @@
     <parent>
         <artifactId>siddhi-io-http-tests</artifactId>
         <groupId>org.wso2.extension.siddhi.io.http</groupId>
-        <version>1.0.10-SNAPSHOT</version>
+        <version>1.0.10</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -381,8 +381,7 @@
                         <phase>package</phase>
                         <configuration>
                             <tasks>
-                                <replace dir="target/wso2siddhi-io-http-${project.version}/wso2" token="false"
-                                         value="true">
+                                <replace dir="target/wso2siddhi-io-http-${project.version}/wso2" token="false" value="true">
                                     <include name="**/bundles.info" />
                                 </replace>
                             </tasks>
