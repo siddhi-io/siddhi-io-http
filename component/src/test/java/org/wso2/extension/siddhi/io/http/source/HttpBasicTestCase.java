@@ -43,9 +43,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Basic test cases for http source functions.
  */
-public class HttpBasicTests {
+public class HttpBasicTestCase {
     private static final org.apache.log4j.Logger logger = org.apache.log4j
-            .Logger.getLogger(HttpBasicTests.class);
+            .Logger.getLogger(HttpBasicTestCase.class);
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;

@@ -40,9 +40,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Multiple event synchronously run.
  */
 
-public class HttpMultipleEventDifferentFormatTest {
+public class HttpMultipleFormatSourcesTestCase {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger
-            .getLogger(HttpMultipleEventDifferentFormatTest.class);
+            .getLogger(HttpMultipleFormatSourcesTestCase.class);
     private AtomicInteger eventCountA = new AtomicInteger(0);
     private AtomicInteger eventCountB = new AtomicInteger(0);
     private AtomicInteger eventCountC = new AtomicInteger(0);

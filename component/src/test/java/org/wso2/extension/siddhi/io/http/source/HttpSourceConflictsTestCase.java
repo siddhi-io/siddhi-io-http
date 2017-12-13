@@ -41,9 +41,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Multiple event synchronously run.
  */
 
-public class HttpConflictsTest {
+public class HttpSourceConflictsTestCase {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger
-            .getLogger(HttpConflictsTest.class);
+            .getLogger(HttpSourceConflictsTestCase.class);
     private AtomicInteger eventCountA = new AtomicInteger(0);
     private AtomicInteger eventCountB = new AtomicInteger(0);
     private int waitTime = 50;

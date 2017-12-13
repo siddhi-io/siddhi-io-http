@@ -59,8 +59,8 @@ import static org.wso2.carbon.container.options.CarbonDistributionOption.copyFil
 @Listeners(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 @ExamFactory(CarbonContainerFactory.class)
-public class HttpSourceBasicAuth {
-    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(HttpSourceBasicAuth.class);
+public class HttpSourceTestCase {
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(HttpSourceTestCase.class);
     private List<String> receivedEventNameList;
     private static final String DEPLOYMENT_FILENAME = "deployment.yaml";
     private static final String CLIENTTRUSTSTORE_FILENAME = "client-truststore.jks";

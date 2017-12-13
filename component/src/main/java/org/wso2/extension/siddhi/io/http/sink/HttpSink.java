@@ -635,7 +635,6 @@ public class HttpSink extends Sink {
 
                 break;
             }
-
         }
         return httpCarbonMessage;
     }

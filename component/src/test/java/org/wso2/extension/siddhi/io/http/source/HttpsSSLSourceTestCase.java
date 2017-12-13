@@ -45,9 +45,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Test case for HTTPS protocol.
  */
-public class HttpsSourceTestCaseForSSL {
+public class HttpsSSLSourceTestCase {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger
-            .getLogger(HttpsSourceTestCaseForSSL.class);
+            .getLogger(HttpsSSLSourceTestCase.class);
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;

@@ -212,12 +212,12 @@ class HttpConnectorRegistry {
             httpServerConnectorContext = new HttpServerConnectorContext(serverConnector, listenerConfig);
             serverConnectorPool.put(serverConnector.getConnectorID(), httpServerConnectorContext);
             httpServerConnectorContext.incrementReferenceCount();
-            this.registerServerConnector(serverConnector);
+            this.registerServerConnector(serverConnector, listenerConfig);
         }
     }
 
     void registerServerConnector(org.wso2.transport.http.netty.contract.ServerConnector
-                                         serverConnector) {
+                                         serverConnector, ListenerConfiguration listenerConfig) {
         ServerConnectorFuture connectorFuture = serverConnector.start();
         ConnectorStartupSynchronizer startupSyncer =
                 new ConnectorStartupSynchronizer(new CountDownLatch(1));
@@ -226,7 +226,8 @@ class HttpConnectorRegistry {
             // Wait for all the connectors to start
             startupSyncer.getCountDownLatch().await();
         } catch (InterruptedException e) {
-            throw new HttpSourceAdaptorRuntimeException("Error in starting HTTP server connector");
+            throw new HttpSourceAdaptorRuntimeException("Error in starting HTTP server connector for server: " +
+                    listenerConfig.getHost() + ":" + listenerConfig.getPort(), e);
         }
         validateConnectorStartup(startupSyncer);
     }
