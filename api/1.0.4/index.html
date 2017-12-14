@@ -1,0 +1,745 @@
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+      
+      
+      
+        <link rel="shortcut icon" href="../../images/favicon.ico">
+      
+      <meta name="generator" content="mkdocs-0.16.3, mkdocs-material-1.10.3">
+    
+    
+      
+        <title>1.0.4 - Siddhi-IO-HTTP</title>
+      
+    
+    
+      <script src="../../assets/javascripts/modernizr-e826f8942a.js"></script>
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/application-9011e2d3f8.css">
+      
+        <link rel="stylesheet" href="../../assets/stylesheets/application-23f75ab9c7.palette.css">
+      
+    
+    
+      
+        
+        
+        
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    
+  </head>
+  
+  
+  
+  
+    <body data-md-color-primary="teal" data-md-color-accent="teal">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="drawer">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="search">
+    <label class="md-overlay" data-md-component="overlay" for="drawer"></label>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="../.." title="Siddhi-IO-HTTP" class="md-header-nav__button md-logo">
+          
+            
+              <img src="../../images/siddhi-logo-w.svg" width="24" height="24">
+            
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <span class="md-flex__ellipsis md-header-nav__title">
+          
+            
+              
+                <span class="md-header-nav__parent">
+                  API Docs
+                </span>
+              
+            
+            1.0.4
+          
+        </span>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          <label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
+          
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="search"></label>
+  <div class="md-search__inner">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" required placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query">
+      <label class="md-icon md-search__icon" for="search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset">&#xE5CD;</button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result" data-md-lang-search="" data-md-lang-tokenizer="[\s\-]+">
+          <div class="md-search-result__meta" data-md-lang-result-none="No matching documents" data-md-lang-result-one="1 matching document" data-md-lang-result-other="# matching documents">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        
+      </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+      
+      
+      <main class="md-main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="drawer">
+    <div class="md-nav__button md-logo">
+      
+        
+          <img src="../../images/siddhi-logo-w.svg">
+        
+      
+    </div>
+    Siddhi-IO-HTTP
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../.." title="Welcome to WSO2 Siddhi IO HTTP" class="md-nav__link">
+      Welcome to WSO2 Siddhi IO HTTP
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
+    
+    <label class="md-nav__link" for="nav-2">
+      API Docs
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        API Docs
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../1.0.12/" title="1.0.12" class="md-nav__link">
+      1.0.12
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../1.0.11/" title="1.0.11" class="md-nav__link">
+      1.0.11
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../1.0.10/" title="1.0.10" class="md-nav__link">
+      1.0.10
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        1.0.4
+      </label>
+    
+    <a href="./" title="1.0.4" class="md-nav__link md-nav__link--active">
+      1.0.4
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#source" title="Source" class="md-nav__link">
+    Source
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#http-source" title="http (Source)" class="md-nav__link">
+    http (Source)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sink" title="Sink" class="md-nav__link">
+    Sink
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#http-sink" title="http (Sink)" class="md-nav__link">
+    http (Sink)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../latest/" title="latest" class="md-nav__link">
+      latest
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../license/" title="License" class="md-nav__link">
+      License
+    </a>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#source" title="Source" class="md-nav__link">
+    Source
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#http-source" title="http (Source)" class="md-nav__link">
+    http (Source)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sink" title="Sink" class="md-nav__link">
+    Sink
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#http-sink" title="http (Sink)" class="md-nav__link">
+    http (Sink)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                
+                <h1 id="api-docs-v104">API Docs - v1.0.4</h1>
+<h2 id="source">Source</h2>
+<h3 id="http-source">http <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a></em></h3>
+<p style="word-wrap: break-word">The HTTP source receives POST requests via HTTP or HTTPS in format such as <code>text</code>, <code>XML</code> and <code>JSON</code>. If required, you can enable basic authentication to ensure that events are received only from users who are authorized to access the service.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>@source(type=&quot;http&quot;, receiver.url=&quot;&lt;STRING&gt;&quot;, basic.auth.enabled=&quot;&lt;STRING&gt;&quot;, worker.count=&quot;&lt;STRING&gt;&quot;, @map(...)))
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">receiver.url</td>
+        <td style="vertical-align: top; word-wrap: break-word">The URL to which the events should be received. User can provide any valid url and if the url is not provided the system will use the following format <code>http://0.0.0.0:9763/&lt;appNAme&gt;/&lt;streamName&gt;</code>If the user want to use SSL the url should be given in following format <code>https://localhost:8080/&lt;streamName&gt;</code></td>
+        <td style="vertical-align: top">http://0.0.0.0:9763/<appNAme>/<streamName></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">basic.auth.enabled</td>
+        <td style="vertical-align: top; word-wrap: break-word">If this is set to <code>true</code>, basic authentication is enabled for incoming events, and the credentials with which each event is sent are verified to ensure that the user is authorized to access the service. If basic authentication fails, the event is not authenticated and an authentication error is logged in the CLI. By default this values 'false' </td>
+        <td style="vertical-align: top">false</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">worker.count</td>
+        <td style="vertical-align: top; word-wrap: break-word">The number of active worker threads to serve the incoming events. The value is 1 by default. This will ensure that the events are directed to the event stream in the same order in which they arrive. By increasing this value the performance might increase at the cost of loosing event ordering.</td>
+        <td style="vertical-align: top">1</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="system-parameters" class="md-typeset" style="display: block; font-weight: bold;">System Parameters</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Parameters</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">latency.metrics.enabled</td>
+        <td style="vertical-align: top; word-wrap: break-word">Property to enable metrics logs to monitor transport latency for config.</td>
+        <td style="vertical-align: top">true</td>
+        <td style="vertical-align: top">true<br>false</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.socket.timeout</td>
+        <td style="vertical-align: top; word-wrap: break-word">property to configure specified timeout in milliseconds which server socket will block for this amount of time for http message content to be received.</td>
+        <td style="vertical-align: top">15</td>
+        <td style="vertical-align: top">Any integer</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.boss.group.size</td>
+        <td style="vertical-align: top; word-wrap: break-word">property to configure number of boss threads, which accepts incoming connections until the ports are unbound. Once connection accepts successfully, boss thread passes the accepted channel to one of the worker threads.</td>
+        <td style="vertical-align: top">4</td>
+        <td style="vertical-align: top">Any integer</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.worker.group.size</td>
+        <td style="vertical-align: top; word-wrap: break-word">property to configure number of worker threads, which performs non blocking read and write for one or more channels in non-blocking mode.</td>
+        <td style="vertical-align: top">8</td>
+        <td style="vertical-align: top">Any integer</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">default.host</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default host of the transport.</td>
+        <td style="vertical-align: top">0.0.0.0</td>
+        <td style="vertical-align: top">Any valid host</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">http.port</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default port if the default scheme is 'http'.</td>
+        <td style="vertical-align: top">9763</td>
+        <td style="vertical-align: top">Any valid port</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">https.port</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default port if the default scheme is 'https'.</td>
+        <td style="vertical-align: top">9443</td>
+        <td style="vertical-align: top">Any valid port</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">default.protocol</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default protocol.</td>
+        <td style="vertical-align: top">http</td>
+        <td style="vertical-align: top">http<br>https</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">https.keystore.file</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default keystore file path.</td>
+        <td style="vertical-align: top">${carbon.home}/resources/security/wso2carbon.jks</td>
+        <td style="vertical-align: top">Path to wso2carbon.jks file</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">https.keystore.password</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default keystore password.</td>
+        <td style="vertical-align: top">wso2carbon</td>
+        <td style="vertical-align: top">String of keystore password</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">https.cert.password</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default cert password.</td>
+        <td style="vertical-align: top">wso2carbon</td>
+        <td style="vertical-align: top">String of cert password</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>@source(type='http', receiver.url='http://localhost:9055/endpoints/RecPro', @map(type='xml'))
+define stream FooStream (symbol string, price float, volume long);
+
+</code></pre>
+
+<p style="word-wrap: break-word">Above source configuration performs a default XML input mapping. The expected input is as follows:&lt;events&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;event&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;symbol&gt;WSO2&lt;/symbol&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;price&gt;55.6&lt;/price&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;volume&gt;100&lt;/volume&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/event&gt;<br>&lt;/events&gt;<br>If basic authentication is enabled via the <code>basic.auth.enabled='true</code> setting, each input event is also expected to contain the <code>Authorization:'Basic encodeBase64(username:Password)'</code> header.</p>
+
+<h2 id="sink">Sink</h2>
+<h3 id="http-sink">http <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink">(Sink)</a></em></h3>
+<p style="word-wrap: break-word">This extension publish the HTTP events in any HTTP method  POST, GET, PUT, DELETE  via HTTP or https protocols. As the additional features this component can provide basic authentication as well as user can publish events using custom client truststore files when publishing events via https protocol. And also user can add any number of headers including HTTP_METHOD header for each event dynamically.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>@sink(type=&quot;http&quot;, publisher.url=&quot;&lt;STRING&gt;&quot;, basic.auth.username=&quot;&lt;STRING&gt;&quot;, basic.auth.password=&quot;&lt;STRING&gt;&quot;, client.truststore.path=&quot;&lt;STRING&gt;&quot;, client.truststore.password=&quot;&lt;STRING&gt;&quot;, headers=&quot;&lt;STRING&gt;&quot;, method=&quot;&lt;STRING&gt;&quot;, @map(...)))
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">publisher.url</td>
+        <td style="vertical-align: top; word-wrap: break-word">The URL to which the outgoing events should be published via HTTP. This is a mandatory parameter and if this is not specified, an error is logged in the CLI. If user wants to enable SSL for the events, use <code>https</code> instead of <code>http</code> in the publisher.url.e.g., <code>http://localhost:8080/endpoint</code>, <code>https://localhost:8080/endpoint</code></td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">basic.auth.username</td>
+        <td style="vertical-align: top; word-wrap: break-word">The username to be included in the authentication header of the basic authentication enabled events. It is required to specify both username and password to enable basic authentication. If one of the parameter is not given by user then an error is logged in the CLI.</td>
+        <td style="vertical-align: top"> </td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">basic.auth.password</td>
+        <td style="vertical-align: top; word-wrap: break-word">The password to include in the authentication header of the basic authentication enabled events. It is required to specify both username and password to enable basic authentication. If one of the parameter is not given by user then an error is logged in the CLI.</td>
+        <td style="vertical-align: top"> </td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">client.truststore.path</td>
+        <td style="vertical-align: top; word-wrap: break-word">The file path to the location of the truststore of the client that sends the HTTP events through 'https' protocol. A custom client-truststore can be specified if required.</td>
+        <td style="vertical-align: top">${carbon.home}/resources/security/client-truststore.jks</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">client.truststore.password</td>
+        <td style="vertical-align: top; word-wrap: break-word">The password for the client-truststore. A custom password can be specified if required. If no custom password is specified and the protocol of URL is 'https' then, the system uses default password.</td>
+        <td style="vertical-align: top">wso2carbon</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">headers</td>
+        <td style="vertical-align: top; word-wrap: break-word">The headers that should be included as a HTTP request headers. There can be any number of headers concatenated on following format. header1:value1#header2:value2. User can include content-type header if he need to any specific type for payload if not system get the mapping type as the content-Type header (ie. @map(xml):application/xml,@map(json):application/json,@map(text):plain/text ) and if user does not include any mapping type then system gets the 'plain/text' as default Content-Type header. If user does not include Content-Length header then system calculate the bytes size of payload and include it as content-length header.</td>
+        <td style="vertical-align: top"> </td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">method</td>
+        <td style="vertical-align: top; word-wrap: break-word">For HTTP events, HTTP_METHOD header should be included as a request header. If the parameter is null then system uses 'POST' as a default header.</td>
+        <td style="vertical-align: top">POST</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+</table></p>
+<p><span id="system-parameters" class="md-typeset" style="display: block; font-weight: bold;">System Parameters</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Parameters</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">latency.metrics.enabled</td>
+        <td style="vertical-align: top; word-wrap: break-word">Property to enable metrics logs to monitor transport latency for config.</td>
+        <td style="vertical-align: top">true</td>
+        <td style="vertical-align: top">Any Integer</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.socket.timeout</td>
+        <td style="vertical-align: top; word-wrap: break-word">Property to configure specified timeout in milliseconds which server socket will block for this amount of time for http message content to be received.</td>
+        <td style="vertical-align: top">15</td>
+        <td style="vertical-align: top">Any Integer</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.boss.group.size</td>
+        <td style="vertical-align: top; word-wrap: break-word">Property to configure number of boss threads, which accepts incoming connections until the ports are unbound. Once connection accepts successfully, boss thread passes the accepted channel to one of the worker threads.</td>
+        <td style="vertical-align: top">4</td>
+        <td style="vertical-align: top">Any integer</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.worker.group.size</td>
+        <td style="vertical-align: top; word-wrap: break-word">Property to configure number of worker threads, which performs non blocking read and write for one or more channels in non-blocking mode.</td>
+        <td style="vertical-align: top">8</td>
+        <td style="vertical-align: top">Any integer</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">default.protocol</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default protocol.</td>
+        <td style="vertical-align: top">http</td>
+        <td style="vertical-align: top">http<br>https</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">https.truststore.file</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default truststore file path.</td>
+        <td style="vertical-align: top">${carbon.home}/resources/security/client-truststore.jks</td>
+        <td style="vertical-align: top">Path to client-truststore.jks</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">https.truststore.password</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default truststore password.</td>
+        <td style="vertical-align: top">wso2carbon</td>
+        <td style="vertical-align: top">Truststore password</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>@sink(type='http',publisher.url='http://localhost:8009/foo', method='{{method}}',headers='{{headers}}', @map(type='xml' , @payload('{{payloadBody}}')))define stream FooStream (payloadBody String, method string, headers string);
+
+</code></pre>
+
+<p style="word-wrap: break-word">If it is xml mapping expected input should be in following format for FooStream:{&lt;events&gt;    &lt;event&gt;        &lt;symbol&gt;WSO2&lt;/symbol&gt;        &lt;price&gt;55.6&lt;/price&gt;        &lt;volume&gt;100&lt;/volume&gt;    &lt;/event&gt;&lt;/events&gt;,POST,Content-Length:24#Content-Location:USA#Retry-After:120}Above event will generate output as below.~Output http event payload&lt;events&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;event&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;symbol&gt;WSO2&lt;/symbol&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;price&gt;55.6&lt;/price&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;volume&gt;100&lt;/volume&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/event&gt;<br>&lt;/events&gt;<br>~Output http event headersContent-Length:24,Content-Location:'USA',Retry-After:120,Content-Type:'application/xml',HTTP_METHOD:'POST',~Output http event propertiesHTTP_METHOD:'POST',HOST:'localhost',PORT:8009PROTOCOL:'http'TO:'/foo'</p>
+                
+                  
+                
+              
+              
+                
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../1.0.10/" title="1.0.10" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                1.0.10
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../latest/" title="latest" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                latest
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        powered by
+        <a href="http://www.mkdocs.org" title="MkDocs">MkDocs</a>
+        and
+        <a href="http://squidfunk.github.io/mkdocs-material/" title="Material for MkDocs">
+          Material for MkDocs</a>
+      </div>
+      
+        
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../../assets/javascripts/application-f3ab9e5ff8.js"></script>
+      
+      
+      <script>app.initialize({url:{base:"../.."}})</script>
+      
+        <script src="../../javascripts/extra.js"></script>
+      
+    
+    
+      
+      <script>!function(e,t,a,n,o,c,i){e.GoogleAnalyticsObject=o,e[o]=e[o]||function(){(e[o].q=e[o].q||[]).push(arguments)},e[o].l=1*new Date,c=t.createElement(a),i=t.getElementsByTagName(a)[0],c.async=1,c.src=n,i.parentNode.insertBefore(c,i)}(window,document,"script","https://www.google-analytics.com/analytics.js","ga"),ga("create","UA-103065-28","auto"),ga("set","anonymizeIp",!0),ga("send","pageview");var links=document.getElementsByTagName("a");Array.prototype.map.call(links,function(e){e.host!=document.location.host&&e.addEventListener("click",function(){var t=e.getAttribute("data-md-action")||"follow";ga("send","event","outbound",t,e.href)})});var query=document.forms.search.query;query.addEventListener("blur",function(){if(this.value){var e=document.location.pathname;ga("send","pageview",e+"?q="+this.value)}})</script>
+      
+    
+  </body>
+</html>
