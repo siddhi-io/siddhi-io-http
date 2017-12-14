@@ -31,8 +31,8 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 /**
  * Test case for mapping type.
  */
-public class HttpSinkCustomConfigurationTest {
-    private static final Logger log = Logger.getLogger(HttpSinkCustomConfigurationTest.class);
+public class HttpSinkCustomConfigurationTestCase {
+    private static final Logger log = Logger.getLogger(HttpSinkCustomConfigurationTestCase.class);
 
     /**
      * Creating test for publishing events with XML mapping.

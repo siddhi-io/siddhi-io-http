@@ -41,8 +41,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Test case for HTTPS protocol.
  */
-public class HttpCustomThreadPoolConfigTest {
-    private static final Logger logger = Logger.getLogger(HttpCustomThreadPoolConfigTest.class);
+public class HttpCustomThreadPoolConfigTestCase {
+    private static final Logger logger = Logger.getLogger(HttpCustomThreadPoolConfigTestCase.class);
     private AtomicInteger eventCount = new AtomicInteger(0);
 
     @BeforeMethod

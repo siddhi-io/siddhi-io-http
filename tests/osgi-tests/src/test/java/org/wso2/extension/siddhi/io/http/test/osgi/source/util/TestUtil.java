@@ -32,7 +32,7 @@ public class TestUtil {
             try {
                 urlConn = ServerUtil.request(baseURI, "/endpoints/RecPro", HttpMethod.POST.name(), true);
             } catch (IOException e) {
-                ServerUtil.handleException("IOException occurred while running the HttpsSourceTestCaseForSSL", e);
+                ServerUtil.handleException("IOException occurred while running the HttpsSSLSourceTestCase", e);
             }
             if (auth) {
                 ServerUtil.setHeader(urlConn, "Authorization",
@@ -47,7 +47,7 @@ public class TestUtil {
             logger.info("Event response message " + urlConn.getResponseMessage());
             urlConn.disconnect();
         } catch (IOException e) {
-            ServerUtil.handleException("IOException occurred while running the HttpsSourceTestCaseForSSL", e);
+            ServerUtil.handleException("IOException occurred while running the HttpsSSLSourceTestCase", e);
         }
     }
 
@@ -58,7 +58,7 @@ public class TestUtil {
             try {
                 urlConn = ServerUtil.request(baseURI, path, methodType, true);
             } catch (IOException e) {
-                ServerUtil.handleException("IOException occurred while running the HttpsSourceTestCaseForSSL", e);
+                ServerUtil.handleException("IOException occurred while running the HttpsSSLSourceTestCase", e);
             }
             if (auth) {
                 byte[] val = ("admin" + ":" + "admin").getBytes("UTF-8");
@@ -73,7 +73,7 @@ public class TestUtil {
             logger.info("Event response message " + urlConn.getResponseMessage());
             urlConn.disconnect();
         } catch (IOException e) {
-            ServerUtil.handleException("IOException occurred while running the HttpsSourceTestCaseForSSL", e);
+            ServerUtil.handleException("IOException occurred while running the HttpsSSLSourceTestCase", e);
         }
     }
 }

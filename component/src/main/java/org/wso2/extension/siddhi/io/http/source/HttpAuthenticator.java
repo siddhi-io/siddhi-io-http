@@ -47,7 +47,7 @@ public class HttpAuthenticator {
         } else {
             String authHeader = httpCarbonMessage.getHeaders().get(HttpConstants.AUTHORIZATION_HEADER);
             if (authHeader != null) {
-                String usernamePasswordEncoded = authHeader.replace(HttpConstants.AUTHORIZATION_METHOD , "");
+                String usernamePasswordEncoded = authHeader.replace(HttpConstants.AUTHORIZATION_METHOD, "");
                 ByteBuf usernamePasswordBuf = Base64.decode(Unpooled.copiedBuffer(usernamePasswordEncoded.getBytes
                         (Charset
                                 .defaultCharset())));
@@ -70,11 +70,12 @@ public class HttpAuthenticator {
                             return false;
                         }
                     } catch (IdPClientException e) {
-                        logger.error("Authorization fails.");
+                        logger.error("Authorization process fails for " + usernamePassword[0] + ":" +
+                                        usernamePassword[1], e);
                         return false;
                     }
                 } else {
-                    logger.error("Authorization header in incorrect format.");
+                    logger.error("Authorization header in incorrect format. header: " + usernamePasswordEncoded);
                     return false;
                 }
             } else {

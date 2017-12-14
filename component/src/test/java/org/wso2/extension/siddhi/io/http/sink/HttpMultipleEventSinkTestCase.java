@@ -36,8 +36,8 @@ import java.util.List;
 /**
  * Test cases for multiple event sink synchronously.
  */
-public class HttpMultipleEventSink {
-    private static final Logger logger = Logger.getLogger(HttpMultipleEventSink.class);
+public class HttpMultipleEventSinkTestCase {
+    private static final Logger logger = Logger.getLogger(HttpMultipleEventSinkTestCase.class);
 
     /**
      * Test cases for multiple event sink synchronously.

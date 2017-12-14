@@ -49,8 +49,8 @@ import static org.wso2.carbon.container.options.CarbonDistributionOption.copyFil
 @Listeners(PaxExam.class)
 @ExamReactorStrategy(PerClass.class)
 @ExamFactory(CarbonContainerFactory.class)
-public class HttpSink {
-    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(HttpSink.class);
+public class HttpSinkTestCase {
+    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(HttpSinkTestCase.class);
     private static final String DEPLOYMENT_FILENAME = "deployment.yaml";
     private static final String CLIENTTRUSTSTORE_FILENAME = "client-truststore.jks";
     private static final String KEYSTORESTORE_FILENAME = "wso2carbon.jks";

@@ -32,8 +32,8 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 /**
  * Test cases for different method types.
  */
-public class HttpSinkMethodType {
-    private static final Logger log = Logger.getLogger(HttpSinkMethodType.class);
+public class HttpSinkMethodTypeTestCase {
+    private static final Logger log = Logger.getLogger(HttpSinkMethodTypeTestCase.class);
     private String payload;
     private String expected;
 

@@ -62,7 +62,7 @@ class HttpServerUtil {
     }
 
     static void handleException(IOException ex) {
-        log.error("IOException occurred while running the HttpsSourceTestCaseForSSL", ex);
+        log.error("IOException occurred while running the HttpsSSLSourceTestCase", ex);
     }
 }
 

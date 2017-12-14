@@ -140,11 +140,8 @@ public class HttpSinkUtil {
             httpSender.setTrustStorePass(clientStorePass);
             httpSender.setId(httpStaticProperties.get(HttpConstants.TO));
             httpSender.setScheme(httpStaticProperties.get(HttpConstants.SCHEME));
-            //populateSenderStaticConfiguration(httpSender, configReader);
         } else {
             httpSender.setScheme(httpStaticProperties.get(HttpConstants.SCHEME));
-            // populateSenderStaticConfiguration(httpSender, configReader);
-
         }
         if (isHTTPTraceLoggerEnabled(configReader)) {
             httpSender.setHttpTraceLogEnabled(true);
@@ -175,7 +172,6 @@ public class HttpSinkUtil {
                             parameters.add(parameter);
                         }
                 );
-
             } catch (ArrayIndexOutOfBoundsException ex) {
                 log.error("Bootstrap configuration is not in expected format please insert them as 'key1:val1'," +
                         "'key2:val2' format");
@@ -205,7 +201,7 @@ public class HttpSinkUtil {
                 properties.putAll(populateClientConnectionConfiguration(bootstrapValueMap));
             } catch (ArrayIndexOutOfBoundsException ex) {
                 log.error("Client Bootstrap configuration is not in expected format please insert them as " +
-                        "'key1:val1'," + "'key2:val2' format");
+                        "'key1:val1'," + "'key2:val2' format", ex);
             }
         }
 
@@ -222,8 +218,7 @@ public class HttpSinkUtil {
                 properties.putAll(populateClientConnectionConfiguration(clientConnectionConfigurationValueMap));
             } catch (ArrayIndexOutOfBoundsException ex) {
                 log.error("client Connection Configuration is not in expected format please insert them as " +
-                        "'key1:val1'," +
-                        "'key2:val2' format");
+                        "'key1:val1','key2:val2' format", ex);
             }
         }
         return properties;

@@ -33,8 +33,8 @@ import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 /**
  * test cases for basic authentication.
  */
-public class HttpAuthTest {
-    private static final Logger log = Logger.getLogger(HttpAuthTest.class);
+public class HttpAuthTestCase {
+    private static final Logger log = Logger.getLogger(HttpAuthTestCase.class);
 
     /**
      * Creating test for publishing events wth basic authentication false.

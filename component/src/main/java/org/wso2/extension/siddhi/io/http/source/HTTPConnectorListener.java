@@ -55,7 +55,7 @@ public class HTTPConnectorListener implements HttpConnectorListener {
                 try {
                     carbonMessage.respond(carbonMessage);
                 } catch (ServerConnectorException e) {
-                    log.error("Error occurred during message notification: " + e.getMessage());
+                    log.error("Error occurred during message notification: " + e.getMessage(), e);
                 }
             } else {
                 if (HttpConstants.HTTP_METHOD_POST.equalsIgnoreCase((String)
