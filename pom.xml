@@ -579,7 +579,7 @@
                         <reportFormat>brief</reportFormat>
                         <useFile>false</useFile>
                         <forkMode>once</forkMode>
-                        <argLine>-ea -Xmx512m</argLine>
+                        <argLine>-ea -Xmx1024m</argLine>
                     </configuration>
                 </plugin>
             </plugins>
