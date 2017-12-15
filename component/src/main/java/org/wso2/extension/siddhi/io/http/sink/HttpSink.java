@@ -712,12 +712,6 @@ public class HttpSink extends Sink {
      */
     private HTTPCarbonMessage generateCarbonMessage(List<Header> headers, String contentType,
                                                     String httpMethod, HTTPCarbonMessage cMessage) {
-        //if Authentication enabled
-        if (!(userName.equals(HttpConstants.EMPTY_STRING) || userPassword.equals
-                (HttpConstants.EMPTY_STRING))) {
-            cMessage.setHeader(HttpConstants.AUTHORIZATION_HEADER, authorizationHeader);
-        }
-
         /*
          * set carbon message properties which is to be used in carbon transport.
          */
@@ -731,25 +725,32 @@ public class HttpSink extends Sink {
         cMessage.setProperty(Constants.PORT, Integer.valueOf(httpURLProperties.get(HttpConstants.PORT)));
         // Set method
         cMessage.setProperty(HttpConstants.HTTP_METHOD, httpMethod);
+        HttpHeaders httpHeaders = cMessage.getHeaders();
+        //if Authentication enabled
+        if (!(userName.equals(HttpConstants.EMPTY_STRING)) && !(userPassword.equals
+                (HttpConstants.EMPTY_STRING))) {
+            httpHeaders.set(HttpConstants.AUTHORIZATION_HEADER, authorizationHeader);
+        } else if (!(userName.equals(HttpConstants.EMPTY_STRING)) || !(userPassword.equals
+                (HttpConstants.EMPTY_STRING))) {
+            log.error("One of the basic authentication username or password missing. Hence basic authentication not " +
+                    "supported.");
+        }
 
         /*
          *set request headers.
          */
         // Set user given Headers
         if (headers != null) {
-            HttpHeaders httpHeaders = cMessage.getHeaders();
             for (Header header : headers) {
                 httpHeaders.set(header.getName(), header.getValue());
             }
         }
         // Set content type if content type s not included in headers
         if (contentType.contains(mapType)) {
-            cMessage.setHeader(HttpConstants.HTTP_CONTENT_TYPE, contentType);
+            httpHeaders.set(HttpConstants.HTTP_CONTENT_TYPE, contentType);
         }
-
         //set method-type header
-        cMessage.setHeader(HttpConstants.HTTP_METHOD, httpMethod);
-        //cMessage.setEndOfMsgAdded(true);
+        httpHeaders.set(HttpConstants.HTTP_METHOD, httpMethod);
         return cMessage;
     }
 }
