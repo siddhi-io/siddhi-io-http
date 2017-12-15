@@ -96,8 +96,8 @@ public class HttpMultipleEventSinkTestCase {
                                 + "<volume>100</volume>"
                             + "</event>"
                         + "</events>";
-        fooStream.send(new Object[]{event1, "GET", "'Name:John','Age:23'"});
-        fooStream2.send(new Object[]{event2, "GET", "'Name:John','Age:23'"});
+        fooStream.send(new Object[]{event1, "POST", "'Name:John','Age:23'"});
+        fooStream2.send(new Object[]{event2, "POST", "'Name:John','Age:23'"});
         Thread.sleep(1000);
         final List<LoggingEvent> log = appender.getLog();
         List<String> logMessages = new ArrayList<>();

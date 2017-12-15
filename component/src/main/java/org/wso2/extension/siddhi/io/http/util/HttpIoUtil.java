@@ -103,7 +103,6 @@ public class HttpIoUtil {
         StringDataSource stringDataSource = new StringDataSource(payload
                 , new HttpMessageDataStreamer(response).getOutputStream());
         response.setMessageDataSource(stringDataSource);
-        response.setAlreadyRead(true);
         byte[] errorMessageBytes = payload.getBytes(Charset.defaultCharset());
 
         HttpHeaders httpHeaders = response.getHeaders();

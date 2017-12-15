@@ -109,7 +109,7 @@ public class HttpsSinkTestCase {
     /**
      * Test case for HTTPS output publisher.
      */
-    @Test
+    @Test (dependsOnMethods = "testHTTPSPublisher")
     public void testHTTPSPublisherCustomClientTrustStorePath() throws Exception {
         setCarbonHome();
         logger.info("Test case for HTTPS output publisher with custom trustore.");

@@ -51,6 +51,7 @@ public class HttpServerListenerHandler implements Runnable {
 
     public void shutdown() {
         if (server != null) {
+            logger.info("Shutting down");
             server.stop(1);
         }
     }

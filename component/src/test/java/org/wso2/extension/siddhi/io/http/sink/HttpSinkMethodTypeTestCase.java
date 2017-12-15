@@ -86,7 +86,7 @@ public class HttpSinkMethodTypeTestCase {
             Thread.sleep(10);
         }
         String eventData = lst.getServerListener().getData();
-        Assert.assertEquals(eventData, expected);
+        Assert.assertEquals("", eventData);
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
@@ -95,7 +95,7 @@ public class HttpSinkMethodTypeTestCase {
      * Creating test for publishing events from PUT method.
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test (dependsOnMethods = "testHTTPTestGetMethod")
     public void testHTTPTestPutMethod() throws Exception {
         log.info("Creating test for publishing events from PUT method.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -122,7 +122,7 @@ public class HttpSinkMethodTypeTestCase {
             Thread.sleep(10);
         }
         String eventData = lst.getServerListener().getData();
-        Assert.assertEquals(eventData, eventData);
+        Assert.assertEquals(expected, eventData);
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
@@ -131,7 +131,7 @@ public class HttpSinkMethodTypeTestCase {
      * Creating test for publishing events from DELETE method.
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test (dependsOnMethods = "testHTTPTestPutMethod")
     public void testHTTPTestDeleteMethod() throws Exception {
         log.info("Creating test for publishing events from DELETE method.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -159,7 +159,7 @@ public class HttpSinkMethodTypeTestCase {
         Thread.sleep(10);
         }
         String eventData = lst.getServerListener().getData();
-        Assert.assertEquals(eventData, expected);
+        Assert.assertEquals("", eventData);
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
