@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.transport.http.netty.contract.PortBindingEventListener;
 
-import java.io.PrintStream;
 import java.net.BindException;
 
 /**
@@ -33,7 +32,6 @@ import java.net.BindException;
 public class HttpConnectorPortBindingListener implements PortBindingEventListener {
 
     private static final Logger log = LoggerFactory.getLogger(HttpConnectorPortBindingListener.class);
-    private static final PrintStream console = System.out;
 
     private ConnectorStartupSynchronizer connectorStartupSynchronizer;
     private String serverConnectorId;
@@ -47,9 +45,9 @@ public class HttpConnectorPortBindingListener implements PortBindingEventListene
     @Override
     public void onOpen(String serverConnectorId, boolean isHttps) {
         if (isHttps) {
-            console.println("siddhi: started HTTPS server connector " + serverConnectorId);
+            log.info("siddhi: started HTTPS server connector " + serverConnectorId);
         } else {
-            console.println("siddhi: started HTTP server connector " + serverConnectorId);
+            log.info("siddhi: started HTTP server connector " + serverConnectorId);
         }
         connectorStartupSynchronizer.getCountDownLatch().countDown();
     }
@@ -57,9 +55,9 @@ public class HttpConnectorPortBindingListener implements PortBindingEventListene
     @Override
     public void onClose(String serverConnectorId, boolean isHttps) {
         if (isHttps) {
-            console.println("siddhi: stopped HTTPS server connector " + serverConnectorId);
+            log.info("siddhi: stopped HTTPS server connector " + serverConnectorId);
         } else {
-            console.println("siddhi: stopped HTTP server connector " + serverConnectorId);
+            log.info("siddhi: stopped HTTP server connector " + serverConnectorId);
         }
     }
 

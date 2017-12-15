@@ -16,15 +16,14 @@
  */
 package org.wso2.extension.siddhi.io.http.util;
 
-import java.io.PrintStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class contains utility methods for ballerina server error handling.
  */
 public class ErrorHandlerUtils {
-
-    private static final PrintStream outStream = System.err;
-
+    private static final Logger log = LoggerFactory.getLogger(ErrorHandlerUtils.class);
     /**
      * Print the error.
      *
@@ -33,7 +32,7 @@ public class ErrorHandlerUtils {
     public static void printError(Throwable throwable) {
         String errorMessage = throwable.getMessage();
         if (errorMessage != null) {
-            outStream.println(errorMessage);
+            log.error(errorMessage);
         }
     }
 }
