@@ -65,7 +65,7 @@ public class HttpSinkMappingTestCase {
                                 + "<volume>100</volume>"
                             + "</event>"
                         + "</events>";
-        fooStream.send(new Object[]{payload, "GET", "'Name:John','Age:23'"});
+        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -86,7 +86,7 @@ public class HttpSinkMappingTestCase {
      * Creating test for publishing events with JSON mapping.
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test (dependsOnMethods = "testHTTPTextMappingXML")
     public void testHTTPTextMappingJson() throws Exception {
 
         log.info("Creating test for publishing events with JSON mapping.");
@@ -112,7 +112,7 @@ public class HttpSinkMappingTestCase {
                         + "\"price\":55.6,"
                         + "\"volume\":100"
                         + "}}"
-                , "GET", "Name:John,Age:23"});
+                , "POST", "Name:John,Age:23"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -132,7 +132,7 @@ public class HttpSinkMappingTestCase {
      *
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test (dependsOnMethods = "testHTTPTextMappingJson")
     public void testHTTPTextMappingText() throws Exception {
 
         log.info("Creating test for publishing events with TEXT mapping.");
@@ -167,7 +167,7 @@ public class HttpSinkMappingTestCase {
      *
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test (dependsOnMethods = "testHTTPTextMappingText")
     public void testHTTPTextMappingText2() throws Exception {
         log.info("Creating test for publishing events with TEXT mapping.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -205,7 +205,7 @@ public class HttpSinkMappingTestCase {
      *
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test (dependsOnMethods = "testHTTPTextMappingText2")
     public void testHTTPTextMappingText3() throws Exception {
 
         log.info("Creating test for publishing events with TEXT mapping.");
@@ -237,7 +237,7 @@ public class HttpSinkMappingTestCase {
      *
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test (dependsOnMethods = "testHTTPTextMappingText3")
     public void testHTTPTextMappingText4() throws Exception {
 
         log.info("Creating test for publishing events with TEXT mapping.");

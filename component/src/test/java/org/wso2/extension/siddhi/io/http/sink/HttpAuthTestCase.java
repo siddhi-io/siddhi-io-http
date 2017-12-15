@@ -69,7 +69,7 @@ public class HttpAuthTestCase {
                                 + "<volume>100</volume>"
                             + "</event>"
                         + "</events>";
-        fooStream.send(new Object[]{payload, "GET", "'Name:John','Age:23','Country:USA'"});
+        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23','Country:USA'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -91,7 +91,7 @@ public class HttpAuthTestCase {
      *
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test (dependsOnMethods = "testHTTPTextAuthFalse")
     public void testHTTPTextMappingBasicAuthTrue() throws Exception {
         log.info("Creating test for publishing events with basic authentication true.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -120,7 +120,7 @@ public class HttpAuthTestCase {
                                 + "<volume>100</volume>"
                             + "</event>"
                         + "</events>";
-        fooStream.send(new Object[]{payload, "GET", "'Name:John','Age:23'"});
+        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -142,7 +142,8 @@ public class HttpAuthTestCase {
      *
      * @throws Exception Interrupted exception
      */
-    @Test(expectedExceptions = {HttpSinkAdaptorRuntimeException.class, SiddhiAppCreationException.class})
+    @Test (dependsOnMethods = "testHTTPTextMappingBasicAuthTrue",
+           expectedExceptions = {HttpSinkAdaptorRuntimeException.class, SiddhiAppCreationException.class})
     public void testHTTPTextMappingBasicAuthTrueIncorrectCredential() throws Exception {
         log.info("Creating test for publishing events with basic authentication true.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -168,7 +169,7 @@ public class HttpAuthTestCase {
                                 + "<volume>100</volume>"
                             + "</event>"
                         + "</events>";
-        fooStream.send(new Object[]{payload, "GET", "Name:John,Age:23"});
+        fooStream.send(new Object[]{payload, "POST", "Name:John,Age:23"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -190,7 +191,8 @@ public class HttpAuthTestCase {
      *
      * @throws Exception Interrupted exception
      */
-    @Test(expectedExceptions = {SiddhiAppValidationException.class})
+    @Test (dependsOnMethods = "testHTTPTextMappingBasicAuthTrueIncorrectCredential",
+                 expectedExceptions =  {SiddhiAppValidationException.class})
     public void testHTTPWithoutURL() throws Exception {
         log.info("Creating test for publishing events without URL.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -215,7 +217,7 @@ public class HttpAuthTestCase {
                                 + "<volume>100</volume>"
                             + "</event>"
                         + "</events>";
-        fooStream.send(new Object[]{payload, "GET", "'Name:John','Age:23'"});
+        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }

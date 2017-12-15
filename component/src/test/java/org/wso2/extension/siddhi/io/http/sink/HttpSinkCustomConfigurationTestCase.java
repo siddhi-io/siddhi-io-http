@@ -75,7 +75,7 @@ public class HttpSinkCustomConfigurationTestCase {
                 + "<volume>100</volume>"
                 + "</event>"
                 + "</events>";
-        fooStream.send(new Object[]{payload, "GET", "'Name:John','Age:23'"});
+        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }

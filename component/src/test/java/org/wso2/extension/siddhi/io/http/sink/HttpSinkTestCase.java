@@ -84,7 +84,7 @@ public class HttpSinkTestCase {
         siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[]{payload, "GET", "'Name:John','Age:23'"});
+        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -108,7 +108,7 @@ public class HttpSinkTestCase {
      * Creating test for publishing events including Content-Type header at header list.
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test (dependsOnMethods = "testHTTPContentTypeNotIncluded")
     public void testHTTPContentTypeAtHeaders() throws Exception {
         log.info("Creating test for publishing events including Content-Type header at header list.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -129,7 +129,7 @@ public class HttpSinkTestCase {
         siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[]{payload, "GET", "'Name:John','Age:23','Content-Type:text'"});
+        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23','Content-Type:text'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
