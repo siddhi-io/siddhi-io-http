@@ -37,7 +37,6 @@ import org.wso2.transport.http.netty.listener.ServerBootstrapConfiguration;
 import org.wso2.transport.http.netty.message.HTTPConnectorUtil;
 import org.wso2.transport.http.netty.sender.channel.pool.ConnectionManager;
 
-import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
@@ -336,10 +335,9 @@ class HttpConnectorRegistry {
         if (noOfExceptions <= 0) {
             return;
         }
-        PrintStream console = System.err;
 
         startupSyncer.getExceptions().forEach((connectorId, e) -> {
-            console.println("siddhi: " + e.getMessage() + ": [" + connectorId + "]");
+            log.error("siddhi: " + e.getMessage() + ": [" + connectorId + "]");
         });
 
         if (noOfExceptions == 1) {
