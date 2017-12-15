@@ -337,7 +337,7 @@ class HttpConnectorRegistry {
         }
 
         startupSyncer.getExceptions().forEach((connectorId, e) -> {
-            log.error("siddhi: " + e.getMessage() + ": [" + connectorId + "]");
+            log.error("siddhi: " + e.getMessage() + ": [" + connectorId + "]", e);
         });
 
         if (noOfExceptions == 1) {

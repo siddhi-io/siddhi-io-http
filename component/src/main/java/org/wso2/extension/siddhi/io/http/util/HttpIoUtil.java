@@ -83,8 +83,7 @@ public class HttpIoUtil {
         if (statusCode == 404) {
             if (ex != null) {
                 responsePayload = ex.getMessage();
-                log.error(responsePayload);
-                ErrorHandlerUtils.printError(ex);
+                log.error(responsePayload, ex);
             }
         }
         handleResponse(requestMessage, createErrorMessage(responsePayload, statusCode));
