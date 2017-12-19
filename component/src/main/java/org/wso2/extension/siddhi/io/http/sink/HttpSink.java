@@ -329,7 +329,8 @@ import java.util.Map;
         examples = {
                 @Example(syntax =
                         "@sink(type='http',publisher.url='http://localhost:8009/foo', method='{{method}}',"
-                                + "headers=\"'Content-Type:xml',''\",client.bootstrap.configuration=\"'client" +
+                                + "headers=\"'content-type:xml','content-length:94'\",client.bootstrap" +
+                                ".configuration=\"'client" +
                                 ".bootstrap" +
                                 ".socket" +
                                 ".timeout:20','client.bootstrap.worker.group.size:10'\",client.pool" +
