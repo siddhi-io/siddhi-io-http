@@ -111,11 +111,11 @@ import java.util.Map;
                         name = "headers",
                         description = "The headers that should be included as a HTTP request headers. There can be " +
                                 "any number of headers concatenated on following format. " +
-                                "header1:value1#header2:value2. User can include content-type header if he need to " +
-                                "any specific type for payload if not system get the mapping type as the content-Type" +
-                                " header (ie. @map(xml):application/xml,@map(json):application/json,@map(text)" +
-                                ":plain/text ) and if user does not include any mapping type then system gets the " +
-                                "'plain/text' as default Content-Type header. If user does not include " +
+                                "\"'header1:value1','header2:value2'\". User can include content-type header if he " +
+                                "need to any specific type for payload if not system get the mapping type as the " +
+                                "content-Type header (ie. @map(xml):application/xml,@map(json):application/json," +
+                                "@map(text):plain/text ) and if user does not include any mapping type then system " +
+                                "gets the 'plain/text' as default Content-Type header. If user does not include " +
                                 "Content-Length header then system calculate the bytes size of payload and include it" +
                                 " as content-length header.",
                         type = {DataType.STRING},
@@ -329,7 +329,10 @@ import java.util.Map;
         examples = {
                 @Example(syntax =
                         "@sink(type='http',publisher.url='http://localhost:8009/foo', method='{{method}}',"
-                                + "headers='{{headers}}',client.bootstrap.configuration=\"'client.bootstrap.socket" +
+                                + "headers=\"'content-type:xml','content-length:94'\",client.bootstrap" +
+                                ".configuration=\"'client" +
+                                ".bootstrap" +
+                                ".socket" +
                                 ".timeout:20','client.bootstrap.worker.group.size:10'\",client.pool" +
                                 ".configuration=\"'client.connection.pool.count:10','client.max.active.connections" +
                                 ".per.pool:1'\" "
