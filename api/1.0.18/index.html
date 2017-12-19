@@ -16,7 +16,7 @@
     
     
       
-        <title>1.0.17 - Siddhi-IO-HTTP</title>
+        <title>1.0.18 - Siddhi-IO-HTTP</title>
       
     
     
@@ -84,7 +84,7 @@
                 </span>
               
             
-            1.0.17
+            1.0.18
           
         </span>
       </div>
@@ -181,18 +181,6 @@
           
           
 
-
-  <li class="md-nav__item">
-    <a href="../1.0.18/" title="1.0.18" class="md-nav__link">
-      1.0.18
-    </a>
-  </li>
-
-        
-          
-          
-          
-
   
 
 
@@ -204,11 +192,11 @@
     
     
       <label class="md-nav__link md-nav__link--active" for="toc">
-        1.0.17
+        1.0.18
       </label>
     
-    <a href="./" title="1.0.17" class="md-nav__link md-nav__link--active">
-      1.0.17
+    <a href="./" title="1.0.18" class="md-nav__link md-nav__link--active">
+      1.0.18
     </a>
     
       
@@ -267,6 +255,18 @@
   
 </nav>
     
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../1.0.17/" title="1.0.17" class="md-nav__link">
+      1.0.17
+    </a>
   </li>
 
         
@@ -470,7 +470,7 @@
               
                 
                 
-                <h1 id="api-docs-v1017">API Docs - v1.0.17</h1>
+                <h1 id="api-docs-v1018">API Docs - v1.0.18</h1>
 <h2 id="sink">Sink</h2>
 <h3 id="http-sink">http <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink">(Sink)</a></em></h3>
 <p style="word-wrap: break-word">This extension publish the HTTP events in any HTTP method  POST, GET, PUT, DELETE  via HTTP or https protocols. As the additional features this component can provide basic authentication as well as user can publish events using custom client truststore files when publishing events via https protocol. And also user can add any number of headers including HTTP_METHOD header for each event dynamically.</p>
@@ -531,7 +531,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">headers</td>
-        <td style="vertical-align: top; word-wrap: break-word">The headers that should be included as a HTTP request headers. There can be any number of headers concatenated on following format. header1:value1#header2:value2. User can include content-type header if he need to any specific type for payload if not system get the mapping type as the content-Type header (ie. @map(xml):application/xml,@map(json):application/json,@map(text):plain/text ) and if user does not include any mapping type then system gets the 'plain/text' as default Content-Type header. If user does not include Content-Length header then system calculate the bytes size of payload and include it as content-length header.</td>
+        <td style="vertical-align: top; word-wrap: break-word">The headers that should be included as a HTTP request headers. There can be any number of headers concatenated on following format. "'header1:value1','header2:value2'". User can include content-type header if he need to any specific type for payload if not system get the mapping type as the content-Type header (ie. @map(xml):application/xml,@map(json):application/json,@map(text):plain/text ) and if user does not include any mapping type then system gets the 'plain/text' as default Content-Type header. If user does not include Content-Length header then system calculate the bytes size of payload and include it as content-length header.</td>
         <td style="vertical-align: top"> </td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -829,7 +829,7 @@
 </table></p>
 <p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
-<pre><code>@sink(type='http',publisher.url='http://localhost:8009/foo', method='{{method}}',headers='{{headers}}',client.bootstrap.configuration=&quot;'client.bootstrap.socket.timeout:20','client.bootstrap.worker.group.size:10'&quot;,client.pool.configuration=&quot;'client.connection.pool.count:10','client.max.active.connections.per.pool:1'&quot; @map(type='xml' , @payload('{{payloadBody}}')))define stream FooStream (payloadBody String, method string, headers string);
+<pre><code>@sink(type='http',publisher.url='http://localhost:8009/foo', method='{{method}}',headers=&quot;'content-type:xml','content-length:94'&quot;,client.bootstrap.configuration=&quot;'client.bootstrap.socket.timeout:20','client.bootstrap.worker.group.size:10'&quot;,client.pool.configuration=&quot;'client.connection.pool.count:10','client.max.active.connections.per.pool:1'&quot; @map(type='xml' , @payload('{{payloadBody}}')))define stream FooStream (payloadBody String, method string, headers string);
 
 </code></pre>
 
@@ -1231,7 +1231,7 @@ define stream FooStream (symbol string, price float, volume long);
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../1.0.18/" title="1.0.18" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../.." title="Welcome to WSO2 Siddhi IO HTTP" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -1240,19 +1240,19 @@ define stream FooStream (symbol string, price float, volume long);
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                1.0.18
+                Welcome to WSO2 Siddhi IO HTTP
               </span>
             </div>
           </a>
         
         
-          <a href="../1.0.16/" title="1.0.16" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../1.0.17/" title="1.0.17" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                1.0.16
+                1.0.17
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
