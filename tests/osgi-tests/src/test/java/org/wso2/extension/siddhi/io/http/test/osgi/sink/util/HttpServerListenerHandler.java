@@ -25,19 +25,16 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 /**
- *Http test sever listener.
+ * Http test sever listener.
  */
 public class HttpServerListenerHandler implements Runnable {
-    public HttpServerListener getServerListener() {
-        return sl;
-    }
     private static final Logger logger = Logger.getLogger(HttpServerListenerHandler.class);
-    private HttpServerListener sl;
+    private HttpServerListener serverListener;
     private HttpServer server;
     private int port;
 
     public HttpServerListenerHandler(int port) {
-        this.sl = new HttpServerListener();
+        this.serverListener = new HttpServerListener();
         this.port = port;
     }
 
@@ -45,17 +42,21 @@ public class HttpServerListenerHandler implements Runnable {
     public void run() {
         try {
             server = HttpServer.create(new InetSocketAddress(port), 5);
-            server.createContext("/abc", sl);
+            server.createContext("/abc", serverListener);
             server.start();
         } catch (IOException e) {
-          logger.error("Error in creating test server.");
+            logger.error("Error in creating test server.", e);
         }
     }
 
     public void shutdown() {
         if (server != null) {
+            logger.info("Test server is Shutting down");
             server.stop(1);
         }
     }
 
+    public HttpServerListener getServerListener() {
+        return serverListener;
+    }
 }

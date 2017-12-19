@@ -33,8 +33,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Test Server Listener Manger.
  */
 public class HttpServerListener implements HttpHandler {
-    private AtomicBoolean isEventArraved = new AtomicBoolean(false);
-    private StringBuilder strBld;
+    private AtomicBoolean isEventArrived = new AtomicBoolean(false);
+    private StringBuilder stringBuilder;
     private Headers headers;
     private static final Logger logger = Logger.getLogger(HttpServerListener.class);
 
@@ -42,25 +42,47 @@ public class HttpServerListener implements HttpHandler {
     }
 
     @Override
-    public void handle(HttpExchange t) throws IOException {
+    public void handle(HttpExchange event) {
         // Get the paramString form the request
         String line;
-        headers = t.getRequestHeaders();
-        InputStream is = t.getRequestBody();
-        // initiating
-        BufferedReader in = new BufferedReader(new InputStreamReader(is));
-        strBld = new StringBuilder();
-        while ((line = in.readLine()) != null) {
-            strBld = strBld.append(line).append("\n");
-            System.out.print(line + "\n");
+        BufferedReader in = null;
+        InputStream is = null;
+        headers = event.getRequestHeaders();
+        try {
+            is = event.getRequestBody();
+            // initiating
+            in = new BufferedReader(new InputStreamReader(is));
+            stringBuilder = new StringBuilder();
+            while ((line = in.readLine()) != null) {
+                stringBuilder = stringBuilder.append(line).append("\n");
+            }
+            logger.info("Event Arrived: " + stringBuilder.toString());
+            isEventArrived.set(true);
+        } catch (IOException e) {
+           logger.error("Error reading payload from http io test server." , e);
+        } finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (IOException e) {
+                //ignore
+            }
+            try {
+                if (is != null) {
+                    is.close();
+                }
+            } catch (IOException e) {
+                //ignore
+            }
         }
-        logger.info("Event Arrived: " + strBld.toString());
-        isEventArraved.set(true);
+
+
     }
 
     public String getData() {
-        String data = strBld.toString();
-        isEventArraved = new AtomicBoolean(false);
+        String data = stringBuilder.toString();
+        isEventArrived = new AtomicBoolean(false);
         return data;
     }
 
@@ -68,8 +90,8 @@ public class HttpServerListener implements HttpHandler {
         return headers;
     }
 
-    public boolean iaMessageArrive() {
-        return isEventArraved.get();
+    public boolean isMessageArrive() {
+        return isEventArrived.get();
     }
 
 }

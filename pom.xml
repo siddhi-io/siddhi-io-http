@@ -440,7 +440,7 @@
  	    <carbon.metrics.version>2.3.2</carbon.metrics.version>
         <carbon.metrics.version.range>[2.0,3)</carbon.metrics.version.range>
         <carbon.secvault.version.range>[5.0.0, 6.0.0)</carbon.secvault.version.range>
-        <carbon.deployment.version>5.1.5</carbon.deployment.version>
+        <carbon.deployment.version>5.1.9</carbon.deployment.version>
         <carbon.deployment.version.range>[5.0.0,6.0.0)</carbon.deployment.version.range>
         <org.wso2.carbon.messaging.version>3.0.2</org.wso2.carbon.messaging.version>
         <org.wso2.carbon.messaging.version.range>[3,4)</org.wso2.carbon.messaging.version.range>

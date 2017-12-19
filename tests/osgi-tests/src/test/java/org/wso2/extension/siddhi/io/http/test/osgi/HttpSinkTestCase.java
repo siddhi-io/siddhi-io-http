@@ -74,39 +74,9 @@ public class HttpSinkTestCase {
         return copyFile(carbonYmlFilePath, Paths.get("conf", "default", DEPLOYMENT_FILENAME));
     }
 
-    /**
-     * Place default client  trusts-sore.jks file in conf security folder.
-     */
-    private Option copyCarbonClientTrustStoreOption() {
-        Path carbonYmlFilePath;
-        String basedir = System.getProperty("basedir");
-        if (basedir == null) {
-            basedir = Paths.get(".").toString();
-        }
-        carbonYmlFilePath = Paths.get(basedir, "src", "test", "resources", "security",
-                CLIENTTRUSTSTORE_FILENAME);
-        return copyFile(carbonYmlFilePath, Paths.get("resources", "security", CLIENTTRUSTSTORE_FILENAME));
-    }
-
-    /**
-     * Place default client  key-store.jks file in conf security folder.
-     */
-    private Option copyCarbonKeyStoreOption() {
-        Path carbonYmlFilePath;
-        String basedir = System.getProperty("basedir");
-        if (basedir == null) {
-            basedir = Paths.get(".").toString();
-        }
-        carbonYmlFilePath = Paths.get(basedir, "src", "test", "resources", "security",
-                KEYSTORESTORE_FILENAME);
-        return copyFile(carbonYmlFilePath, Paths.get("resources", "security", KEYSTORESTORE_FILENAME));
-    }
-
     @Configuration
     public Option[] createConfiguration() {
         return new Option[]{copyCarbonYAMLOption(),
-                copyCarbonClientTrustStoreOption(),
-                copyCarbonKeyStoreOption(),
                 CarbonDistributionOption.carbonDistribution(maven()
                         .groupId("org.wso2.extension.siddhi.io.http")
                         .artifactId("org.wso2.extension.io.http.test.distribution")
@@ -117,9 +87,8 @@ public class HttpSinkTestCase {
 
     @Test
     public void testHTTPTextMappingXML() throws Exception {
-        logger.info("Creating test for publishing events with XML mapping.");
         SiddhiManager siddhiManager = new SiddhiManager();
-        siddhiManager.setExtension("xml", XMLSinkMapper.class);
+        siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
                 + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
                 + "headers='{{headers}}',"
@@ -140,8 +109,8 @@ public class HttpSinkTestCase {
                 + "<volume>100</volume>"
                 + "</event>"
                 + "</events>";
-        fooStream.send(new Object[]{payload, "GET", "'Name:John','Age:23'"});
-        while (!lst.getServerListener().iaMessageArrive()) {
+        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
+        while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
         String eventData = lst.getServerListener().getData();
