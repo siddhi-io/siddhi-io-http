@@ -1,4 +1,4 @@
-# API Docs - v1.0.18-SNAPSHOT
+# API Docs - v1.0.18
 
 ## Sink
 
@@ -364,7 +364,7 @@
 <span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
 ```
-@sink(type='http',publisher.url='http://localhost:8009/foo', method='{{method}}',headers="'Content-Type:xml',''",client.bootstrap.configuration="'client.bootstrap.socket.timeout:20','client.bootstrap.worker.group.size:10'",client.pool.configuration="'client.connection.pool.count:10','client.max.active.connections.per.pool:1'" @map(type='xml' , @payload('{{payloadBody}}')))define stream FooStream (payloadBody String, method string, headers string);
+@sink(type='http',publisher.url='http://localhost:8009/foo', method='{{method}}',headers="'content-type:xml','content-length:94'",client.bootstrap.configuration="'client.bootstrap.socket.timeout:20','client.bootstrap.worker.group.size:10'",client.pool.configuration="'client.connection.pool.count:10','client.max.active.connections.per.pool:1'" @map(type='xml' , @payload('{{payloadBody}}')))define stream FooStream (payloadBody String, method string, headers string);
 
 ```
 <p style="word-wrap: break-word">If it is xml mapping expected input should be in following format for FooStream:{&lt;events&gt;    &lt;event&gt;        &lt;symbol&gt;WSO2&lt;/symbol&gt;        &lt;price&gt;55.6&lt;/price&gt;        &lt;volume&gt;100&lt;/volume&gt;    &lt;/event&gt;&lt;/events&gt;,POST,Content-Length:24#Content-Location:USA#Retry-After:120}Above event will generate output as below.~Output http event payload&lt;events&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;event&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;symbol&gt;WSO2&lt;/symbol&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;price&gt;55.6&lt;/price&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;volume&gt;100&lt;/volume&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/event&gt;<br>&lt;/events&gt;<br>~Output http event headersContent-Length:24,Content-Location:'USA',Retry-After:120,Content-Type:'application/xml',HTTP_METHOD:'POST',~Output http event propertiesHTTP_METHOD:'POST',HOST:'localhost',PORT:8009PROTOCOL:'http'TO:'/foo'</p>
