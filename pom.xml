@@ -36,7 +36,7 @@
     </modules>
     <groupId>org.wso2.extension.siddhi.io.http</groupId>
     <artifactId>siddhi-io-http-parent</artifactId>
-    <version>1.0.17-SNAPSHOT</version>
+    <version>1.0.18-SNAPSHOT</version>
     <name>WSO2 Siddhi IO Extension - HTTP IO Aggregator Pom</name>
     <url>http://wso2.org</url>
     <profiles>
@@ -396,10 +396,10 @@
         <org.wso2.carbon.transport.http.netty.version>5.0.1</org.wso2.carbon.transport.http.netty.version>
         <msf4j.version>2.5.1</msf4j.version>
         <javax.servlet.version>3.1.0</javax.servlet.version>
-        <siddhi.mapper.json.version>4.0.11</siddhi.mapper.json.version>
+        <siddhi.mapper.json.version>4.0.15</siddhi.mapper.json.version>
         <siddhi.mapper.text.version>1.0.9</siddhi.mapper.text.version>
-        <siddhi.mapper.xml.version>4.0.8</siddhi.mapper.xml.version>
-        <siddhi.version>4.0.0-alpha22</siddhi.version>
+        <siddhi.mapper.xml.version>4.0.11</siddhi.mapper.xml.version>
+        <siddhi.version>4.0.4</siddhi.version>
         <pax.exam.spi.version>4.10.0</pax.exam.spi.version>
         <carbon.analytics.common.version>6.0.32</carbon.analytics.common.version>
         <commons.collections.version>3.1</commons.collections.version>
