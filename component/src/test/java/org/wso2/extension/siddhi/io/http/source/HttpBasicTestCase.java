@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -44,8 +44,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Basic test cases for http source functions.
  */
 public class HttpBasicTestCase {
-    private static final org.apache.log4j.Logger logger = org.apache.log4j
-            .Logger.getLogger(HttpBasicTestCase.class);
+    private static final Logger logger = Logger.getLogger(HttpBasicTestCase.class);
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;

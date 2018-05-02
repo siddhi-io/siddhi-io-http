@@ -1,3 +1,21 @@
+/*
+ *  Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ */
 package org.wso2.extension.siddhi.io.http.util;
 
 
@@ -24,44 +42,10 @@ public class HttpIoUtil {
     private static final Logger log = Logger.getLogger(HttpIoUtil.class);
     
     /**
-     * Adding header to Http Carbon message
-     *
-     * @param httpCarbonMessage
-     */
-    public static void addHeader(HTTPCarbonMessage httpCarbonMessage) {
-        String headerName = "";
-        String headerValue = "";
-        
-        HttpHeaders httpHeaders = httpCarbonMessage.getHeaders();
-        httpHeaders.add(headerName, headerValue);
-        
-        if (log.isDebugEnabled()) {
-            log.debug("Add " + headerName + " to header with value: " + headerValue);
-        }
-    }
-    
-    /**
-     * Geeting header from HTTP carbon message
-     *
-     * @param httpCarbonMessage
-     * @return
-     */
-    public static String getHeader(HTTPCarbonMessage httpCarbonMessage) {
-        String headerName = "";
-        String headerValue = httpCarbonMessage.getHeader(headerName);
-        boolean headerExists = headerValue != null;
-        
-        // Reset the header value to siddhi string default value if the header doesn't exist
-        headerValue = !headerExists ? "" : headerValue;
-        
-        return headerValue;
-    }
-    
-    /**
      * Handle response from http message.
      *
-     * @param requestMsg
-     * @param responseMsg
+     * @param requestMsg request carbon message.
+     * @param responseMsg response carbon message.
      */
     private static void handleResponse(HTTPCarbonMessage requestMsg, HTTPCarbonMessage responseMsg) {
         try {
@@ -74,10 +58,10 @@ public class HttpIoUtil {
     /**
      * Handle failure.
      *
-     * @param requestMessage
-     * @param ex
-     * @param code
-     * @param payload
+     * @param requestMessage request message.
+     * @param ex throwable exception.
+     * @param code error code.
+     * @param payload response payload.
      */
     public static void handleFailure(HTTPCarbonMessage requestMessage, HttpSourceAdaptorRuntimeException ex, Integer
             code, String payload) {
@@ -95,12 +79,12 @@ public class HttpIoUtil {
     /**
      * Create new HTTP carbon message.
      *
-     * @param statusCode
+     * @param statusCode error code
      * @return
      */
     private static HTTPCarbonMessage createErrorMessage(String responseValue, int statusCode) {
         
-        HTTPCarbonMessage response = createHttpCarbonMessage(false);
+        HTTPCarbonMessage response = createHttpCarbonMessage();
         if (responseValue != null) {
             byte[] array;
             try {
@@ -123,18 +107,12 @@ public class HttpIoUtil {
     /**
      * Create new HTTP carbon messge.
      *
-     * @param isRequest
-     * @return
+     * @return carbon message.
      */
-    private static HTTPCarbonMessage createHttpCarbonMessage(boolean isRequest) {
+    private static HTTPCarbonMessage createHttpCarbonMessage() {
         HTTPCarbonMessage httpCarbonMessage;
-        if (isRequest) {
-            httpCarbonMessage = new HTTPCarbonMessage(
-                    new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, HttpConstants.EMPTY_STRING));
-        } else {
-            httpCarbonMessage = new HTTPCarbonMessage(
-                    new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
-        }
+        httpCarbonMessage = new HTTPCarbonMessage(
+                new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
         return httpCarbonMessage;
     }
 }

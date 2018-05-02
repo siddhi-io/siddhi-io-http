@@ -39,6 +39,7 @@ import org.wso2.transport.http.netty.message.HTTPConnectorUtil;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -64,7 +65,7 @@ class HttpConnectorRegistry {
         return new RequestSizeValidationConfig();
     }
     
-    void setTrpConfig(String serverBootstrapConfigurationList, String serverHeaderValidation) {
+    void setTransportConfig(String serverBootstrapConfigurationList, String serverHeaderValidation) {
         trpConfig = new TransportsConfiguration();
         Set<TransportProperty> transportProperties = new HashSet<>();
         if (!HttpConstants.EMPTY_STRING.equals(serverBootstrapConfigurationList.trim())) {
@@ -72,16 +73,24 @@ class HttpConnectorRegistry {
                 String[] valueList = serverBootstrapConfigurationList.trim().substring(1,
                         serverBootstrapConfigurationList.length
                                 () - 1).split("','");
-                Map<String, String> bootstrapValueMap = Arrays.stream(valueList).collect(Collectors.toMap(
-                        (valueEntry) -> valueEntry.split(":")[0],
-                        (valueEntry) -> valueEntry.split(":")[1]
-                        )
+                Map<String, String> bootstrapValueMap = new HashMap<>();
+                Arrays.stream(valueList).forEach(valueEntry ->
+                        {
+                            String[] entry = valueEntry.split(":");
+                            if (entry.length == 2) {
+                                bootstrapValueMap.put(entry[0], entry[1]);
+                            } else {
+                                log.error("Client Bootstrap configuration is not in expected format please insert them as " +
+                                        "'key1:val1'," + "'key2:val2' format");
+                            }
+                
+                        }
                 );
-                trpConfig.setTransportProperties(HttpSourceUtil.getInstance().populateServerBootstrapConfigurations
+                trpConfig.setTransportProperties(HttpSourceUtil.getInstance().populateBootstrapConfigurations
                         (bootstrapValueMap, transportProperties));
             } catch (ArrayIndexOutOfBoundsException ex) {
                 log.error("Bootstrap configuration is not in expected format please insert them as 'key1:val1'," +
-                        "'key2:val2' format");
+                        "'key2:val2' format", ex);
             }
         }
         
@@ -98,8 +107,7 @@ class HttpConnectorRegistry {
                         (headerValidationValueMap, transportProperties));
             } catch (ArrayIndexOutOfBoundsException ex) {
                 log.error("Header validation configuration is not in expected format please insert them as " +
-                        "'key1:val1'," +
-                        "'key2:val2' format");
+                        "'key1:val1','key2:val2' format.", ex);
             }
         }
     }
@@ -344,8 +352,7 @@ class HttpConnectorRegistry {
         });
         
         if (noOfExceptions == 1) {
-            // If the no. of exceptions is equal to the no. of connectors to be started, then none of the
-            // connectors have started properly and we can terminate the runtime
+            // If the no. of exceptions is equal to one there is an error has occured.
             throw new HttpSourceAdaptorRuntimeException("failed to start the server connectors");
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -35,14 +35,13 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
+import org.apache.log4j.Logger;
 /**
  * Multiple event synchronously run.
  */
 
 public class HttpMultipleFormatSourcesTestCase {
-    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger
-            .getLogger(HttpMultipleFormatSourcesTestCase.class);
+    private static final Logger logger = Logger.getLogger(HttpMultipleFormatSourcesTestCase.class);
     private AtomicInteger eventCountA = new AtomicInteger(0);
     private AtomicInteger eventCountB = new AtomicInteger(0);
     private AtomicInteger eventCountC = new AtomicInteger(0);

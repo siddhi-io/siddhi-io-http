@@ -82,27 +82,27 @@ public class HttpSourceUtil {
     }
 
     /**
-     * @param parameterList
-     * @return
+     * @param parameterList transport parameter list string in key and value format
+     * @return transport parameter list
      */
     public List<Parameter> populateParameters(String parameterList) {
         List<org.wso2.transport.http.netty.config.Parameter> parameters = new ArrayList<>();
         if (!HttpConstants.EMPTY_STRING.equals(parameterList.trim())) {
-            try {
                 String[] valueList = parameterList.trim().substring(1, parameterList.length() - 1).split("','");
                 Arrays.stream(valueList).forEach(valueEntry ->
                         {
                             org.wso2.transport.http.netty.config.Parameter parameter = new Parameter();
-                            parameter.setName(valueEntry.split(":")[0]);
-                            parameter.setValue(valueEntry.split(":")[1]);
-                            parameters.add(parameter);
+                            String[] entry = valueEntry.split(":");
+                            if (entry.length == 2) {
+                                parameter.setName(entry[0]);
+                                parameter.setValue(entry[1]);
+                                parameters.add(parameter);
+                            } else {
+                                log.error("Bootstrap configuration is not in expected format please insert them as " +
+                                        "'key1:val1','key2:val2' format at http sink.");
+                            }
                         }
                 );
-
-            } catch (ArrayIndexOutOfBoundsException ex) {
-                log.error("Bootstrap configuration is not in expected format please insert them as 'key1:val1'," +
-                        "'key2:val2' format");
-            }
         }
         return parameters;
     }
@@ -112,7 +112,7 @@ public class HttpSourceUtil {
      *
      * @return return the set of config transportation configuration.
      */
-    public Set<TransportProperty> populateServerBootstrapConfigurations(
+    public Set<TransportProperty> populateBootstrapConfigurations(
             Map<String, String> serverBootstrapConfigurationList, Set<TransportProperty> transportProperties) {
         Map<String, TrpPropertyTypes> tryMap =
                 trpPropertyTypeMap();
@@ -217,7 +217,7 @@ public class HttpSourceUtil {
                     throw new HttpSourceAdaptorRuntimeException("Invalid protocol " + protocol);
             }
         } catch (MalformedURLException e) {
-            log.error("Receiver url malformed." + listenerUrl);
+            log.error("Receiver url malformed." + listenerUrl, e);
         }
         return listenerConfig;
     }

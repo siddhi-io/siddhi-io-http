@@ -36,13 +36,12 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
+import org.apache.log4j.Logger;
 /**
  * Test cases for basic authentication.
  */
 public class HttpSourceBasicAuthTestCase {
-    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger
-            (HttpSourceBasicAuthTestCase.class);
+    private static final Logger logger = Logger.getLogger(HttpSourceBasicAuthTestCase.class);
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;

@@ -15,7 +15,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.wso2.extension.siddhi.io.http.source;
 
 import org.slf4j.Logger;
@@ -45,9 +44,9 @@ public class HttpConnectorPortBindingListener implements PortBindingEventListene
     @Override
     public void onOpen(String serverConnectorId, boolean isHttps) {
         if (isHttps) {
-            log.info("siddhi: started HTTPS server connector " + serverConnectorId);
+            log.info("HTTPS source " + serverConnectorId + " has been started");
         } else {
-            log.info("siddhi: started HTTP server connector " + serverConnectorId);
+            log.info("HTTP source " + serverConnectorId + " has been started");
         }
         connectorStartupSynchronizer.getCountDownLatch().countDown();
     }
@@ -55,15 +54,15 @@ public class HttpConnectorPortBindingListener implements PortBindingEventListene
     @Override
     public void onClose(String serverConnectorId, boolean isHttps) {
         if (isHttps) {
-            log.info("siddhi: stopped HTTPS server connector " + serverConnectorId);
+            log.info("HTTPS source " + serverConnectorId + " has been started");
         } else {
-            log.info("siddhi: stopped HTTP server connector " + serverConnectorId);
+            log.info("HTTP source " + serverConnectorId + " has been started");
         }
     }
 
     @Override
     public void onError(Throwable throwable) {
-        log.error("Error in http server connector", throwable);
+        log.error("Error in http source ", throwable);
 
         if (throwable instanceof BindException) {
             connectorStartupSynchronizer.addException(serverConnectorId, (BindException) throwable);

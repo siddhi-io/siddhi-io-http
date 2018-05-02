@@ -38,7 +38,7 @@ public class HttpServerListener implements HttpHandler {
     private Headers headers;
     private static final Logger logger = Logger.getLogger(HttpServerListener.class);
 
-    HttpServerListener() {
+    public HttpServerListener() {
     }
 
     @Override
@@ -46,11 +46,11 @@ public class HttpServerListener implements HttpHandler {
         // Get the paramString form the request
         String line;
         headers = event.getRequestHeaders();
-        InputStream is = event.getRequestBody();
+        InputStream inputStream = event.getRequestBody();
         // initiating
-        BufferedReader in = new BufferedReader(new InputStreamReader(is));
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         stringBuilder = new StringBuilder();
-        while ((line = in.readLine()) != null) {
+        while ((line = bufferedReader.readLine()) != null) {
             stringBuilder = stringBuilder.append(line).append("\n");
         }
         logger.info("Event Arrived: " + stringBuilder.toString());

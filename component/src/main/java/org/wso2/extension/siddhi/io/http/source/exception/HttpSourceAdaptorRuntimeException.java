@@ -18,8 +18,6 @@
  */
 package org.wso2.extension.siddhi.io.http.source.exception;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.io.http.util.HttpIoUtil;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
@@ -27,7 +25,6 @@ import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
  * HTTP source adaptor specific exception.
  */
 public class HttpSourceAdaptorRuntimeException extends RuntimeException {
-    private static final Logger log = LoggerFactory.getLogger(HttpSourceAdaptorRuntimeException.class);
 
     public HttpSourceAdaptorRuntimeException(String message, Throwable e) {
         super(message, e);

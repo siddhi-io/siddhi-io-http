@@ -473,7 +473,7 @@ public class HttpSource extends Source {
         }
         this.httpConnectorRegistry = HttpConnectorRegistry.getInstance();
         this.httpConnectorRegistry.initBootstrapConfigIfFirst(configReader);
-        this.httpConnectorRegistry.setTrpConfig(serverBootstrapPropertiesList, requestSizeValidationConfigList);
+        this.httpConnectorRegistry.setTransportConfig(serverBootstrapPropertiesList, requestSizeValidationConfigList);
         if (!HttpConstants.EMPTY_STRING.equals(requestSizeValidationConfigList)) {
             this.listenerConfiguration.setRequestSizeValidationConfig(HttpConnectorRegistry.getInstance()
                     .populateRequestSizeValidationConfiguration());

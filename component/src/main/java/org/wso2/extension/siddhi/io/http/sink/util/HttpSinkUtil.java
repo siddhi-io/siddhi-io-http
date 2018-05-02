@@ -152,28 +152,28 @@ public class HttpSinkUtil {
     }
     
     /**
-     * @param parameterList
-     * @return
+     * @param parameterList transport property list in format of 'key1:val1','key2:val2',....
+     * @return transport property list
      */
     public static List<org.wso2.transport.http.netty.config.Parameter> populateParameters(String parameterList) {
         List<org.wso2.transport.http.netty.config.Parameter> parameters = new ArrayList<>();
         if (!HttpConstants.EMPTY_STRING.equals(parameterList.trim())) {
-            try {
-                String[] valueList = parameterList.trim().substring(1,
-                        parameterList.length
-                                () - 1).split("','");
-                Arrays.stream(valueList).forEach(valueEntry ->
-                        {
-                            org.wso2.transport.http.netty.config.Parameter parameter = new Parameter();
-                            parameter.setName(valueEntry.split(":")[0]);
-                            parameter.setValue(valueEntry.split(":")[1]);
+            String[] valueList = parameterList.trim().substring(1, parameterList.length() - 1).split("','");
+            Arrays.stream(valueList).forEach(valueEntry ->
+                    {
+                        org.wso2.transport.http.netty.config.Parameter parameter = new Parameter();
+                        String[] entry = valueEntry.split(":");
+                        if (entry.length == 2) {
+                            parameter.setName(entry[0]);
+                            parameter.setValue(entry[1]);
                             parameters.add(parameter);
+                        } else {
+                            log.error("Bootstrap configuration is not in expected format please insert them as " +
+                                    "'key1:val1','key2:val2' format in http source.");
                         }
-                );
-            } catch (ArrayIndexOutOfBoundsException ex) {
-                log.error("Bootstrap configuration is not in expected format please insert them as 'key1:val1'," +
-                        "'key2:val2' format");
-            }
+                    }
+            );
+            
         }
         return parameters;
     }
@@ -187,27 +187,29 @@ public class HttpSinkUtil {
             clientConnectionConfiguration) {
         Map<String, Object> properties = new HashMap<>();
         if (!HttpConstants.EMPTY_STRING.equals(clientBootstrapConfigurationList.trim())) {
-            try {
-                String[] valueList = clientBootstrapConfigurationList.trim().substring(1,
-                        clientBootstrapConfigurationList.length
-                                () - 1).split("','");
-                Map<String, Object> bootstrapValueMap = Arrays.stream(valueList).collect(Collectors.toMap(
-                        (valueEntry) -> valueEntry.split(":")[0],
-                        (valueEntry) -> valueEntry.split(":")[1]
-                        )
-                );
-                properties.putAll(populateClientConnectionConfiguration(bootstrapValueMap));
-            } catch (ArrayIndexOutOfBoundsException ex) {
-                log.error("Client Bootstrap configuration is not in expected format please insert them as " +
-                        "'key1:val1'," + "'key2:val2' format", ex);
-            }
+            String[] valueList = clientBootstrapConfigurationList.trim().substring(1,
+                    clientBootstrapConfigurationList.length
+                            () - 1).split("','");
+            Map<String, String> bootstrapValueMap = new HashMap<>();
+            Arrays.stream(valueList).forEach(valueEntry ->
+                    {
+                        String[] entry = valueEntry.split(":");
+                        if (entry.length == 2) {
+                            bootstrapValueMap.put(entry[0], entry[1]);
+                        } else {
+                            log.error("Client Bootstrap configuration is not in expected format please insert them as " +
+                                    "'key1:val1','key2:val2' format");
+                        }
+                    }
+            );
+            properties.putAll(populateClientConnectionConfiguration(bootstrapValueMap));
         }
         
         if (!HttpConstants.EMPTY_STRING.equals(clientConnectionConfiguration.trim())) {
             try {
                 String[] valueList = clientConnectionConfiguration.trim().substring(1,
                         clientConnectionConfiguration.length() - 1).split("','");
-                Map<String, Object> clientConnectionConfigurationValueMap = Arrays.stream(valueList)
+                Map<String, String> clientConnectionConfigurationValueMap = Arrays.stream(valueList)
                         .collect(Collectors.toMap(
                                 (valueEntry) -> valueEntry.split(":")[0],
                                 (valueEntry) -> valueEntry.split(":")[1]
@@ -272,25 +274,25 @@ public class HttpSinkUtil {
     }
     
     public static Map<String, Object> populateClientConnectionConfiguration(
-            Map<String, Object> clientConnectionConfigurationList) {
+            Map<String, String> clientConnectionConfigurationList) {
         Map<String, Object> properties = new HashMap<>();
         Map<String, TrpPropertyTypes> tryMap = trpPropertyTypeMap();
         clientConnectionConfigurationList.forEach((key, value) -> {
             switch (tryMap.get(key).name()) {
                 case "BOOLEAN":
-                    properties.put(key, Boolean.valueOf((String) value));
+                    properties.put(key, Boolean.valueOf(value));
                     break;
                 case "STRING":
                     properties.put(key, value);
                     break;
                 case "INTEGER":
-                    properties.put(key, Integer.valueOf((String) value));
+                    properties.put(key, Integer.valueOf(value));
                     break;
                 case "DOUBLE":
-                    properties.put(key, Double.valueOf((String) value));
+                    properties.put(key, Double.valueOf(value));
                     break;
                 default:
-                    log.error("Transport property is no defined.");
+                    log.error("Transport property:'" + tryMap.get(key).name() + "' is no defined.");
                     break;
             }
         });

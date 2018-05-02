@@ -74,7 +74,7 @@ public class HttpWorkerThread implements Runnable {
             try {
                 buf.close();
             } catch (IOException e) {
-                logger.error("Error closing byte buf", e);
+                logger.error("Error closing byte buf.", e);
             }
         }
     }

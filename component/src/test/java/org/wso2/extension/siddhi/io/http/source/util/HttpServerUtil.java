@@ -35,9 +35,6 @@ class HttpServerUtil {
 
     private static final Logger log = LoggerFactory.getLogger(HttpServerUtil.class);
 
-    HttpServerUtil() {
-    }
-
     static void writeContent(HttpURLConnection urlConn, String content) throws IOException {
         OutputStreamWriter out = new OutputStreamWriter(
                 urlConn.getOutputStream());
