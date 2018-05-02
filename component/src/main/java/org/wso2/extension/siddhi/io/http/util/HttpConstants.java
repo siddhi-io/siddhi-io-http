@@ -106,14 +106,12 @@ public class HttpConstants {
     public static final String DEFAULT_TRACE_LOG_ENABLED_VALUE = "false";
 
     public static final String SERVER_BOOTSTRAP_BOSS_GROUP_SIZE = "serverBootstrapBossGroupSize";
-    public static final String SERVER_BOOTSTRAP_BOSS_GROUP_SIZE_VALUE = "";
     public static final String SERVER_BOOTSTRAP_WORKER_GROUP_SIZE = "serverBootstrapWorkerGroupSize";
-    public static final String SERVER_BOOTSTRAP_WORKER_GROUP_SIZE_VALUE = "";
+    public static final String SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE = "serverBootstrapClientGroupSize";
     public static final String CLIENT_BOOTSTRAP_BOSS_GROUP_SIZE = "clientBootstrapBossGroupSize";
-    public static final String CLIENT_BOOTSTRAP_BOSS_GROUP_SIZE_VALUE = "";
     public static final String CLIENT_BOOTSTRAP_WORKER_GROUP_SIZE = "clientBootstrapWorkerGroupSize";
-    public static final String CLIENT_BOOTSTRAP_WORKER_GROUP_SIZE_VALUE = "";
-    public static final String DEFAULT_INTERFACE = "0.0.0.0:9090";
+    public static final String CLIENT_BOOTSTRAP_CLIENT_GROUP_SIZE = "clientBootstrapClientGroupSize";
+    public static final String DEFAULT_INTERFACE = "0.0.0.0:8280";
 
     //Http Source & sink variables
     public static final String SOCKET_IDEAL_TIMEOUT = "socket.idle.timeout";

@@ -254,6 +254,7 @@ public class HttpSourceUtil {
         trpPropertyTypes.put("header.validation.reject.message.content.type", TrpPropertyTypes.STRING);
         trpPropertyTypes.put("server.bootstrap.boss.group.size", TrpPropertyTypes.INTEGER);
         trpPropertyTypes.put("server.bootstrap.worker.group.size", TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put("server.bootstrap.client.group.size", TrpPropertyTypes.INTEGER);
         trpPropertyTypes.put("server.bootstrap.nodelay", TrpPropertyTypes.BOOLEAN);
         trpPropertyTypes.put("server.bootstrap.keepalive", TrpPropertyTypes.BOOLEAN);
         trpPropertyTypes.put("server.bootstrap.sendbuffersize", TrpPropertyTypes.INTEGER);

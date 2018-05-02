@@ -1,8 +1,11 @@
 package org.wso2.extension.siddhi.io.http.util;
 
 
+import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.DefaultHttpResponse;
+import io.netty.handler.codec.http.DefaultLastHttpContent;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -10,16 +13,16 @@ import io.netty.handler.codec.http.HttpVersion;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
-import org.wso2.transport.http.netty.message.HttpMessageDataStreamer;
 
-import java.nio.charset.Charset;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 
 /**
  * Util class which is use for handle HTTP util function.
  */
 public class HttpIoUtil {
     private static final Logger log = Logger.getLogger(HttpIoUtil.class);
-
+    
     /**
      * Adding header to Http Carbon message
      *
@@ -28,15 +31,15 @@ public class HttpIoUtil {
     public static void addHeader(HTTPCarbonMessage httpCarbonMessage) {
         String headerName = "";
         String headerValue = "";
-
+        
         HttpHeaders httpHeaders = httpCarbonMessage.getHeaders();
         httpHeaders.add(headerName, headerValue);
-
+        
         if (log.isDebugEnabled()) {
             log.debug("Add " + headerName + " to header with value: " + headerValue);
         }
     }
-
+    
     /**
      * Geeting header from HTTP carbon message
      *
@@ -47,13 +50,13 @@ public class HttpIoUtil {
         String headerName = "";
         String headerValue = httpCarbonMessage.getHeader(headerName);
         boolean headerExists = headerValue != null;
-
+        
         // Reset the header value to siddhi string default value if the header doesn't exist
         headerValue = !headerExists ? "" : headerValue;
-
+        
         return headerValue;
     }
-
+    
     /**
      * Handle response from http message.
      *
@@ -67,7 +70,7 @@ public class HttpIoUtil {
             throw new HttpSourceAdaptorRuntimeException("Error occurred during response", e);
         }
     }
-
+    
     /**
      * Handle failure.
      *
@@ -88,36 +91,35 @@ public class HttpIoUtil {
         }
         handleResponse(requestMessage, createErrorMessage(responsePayload, statusCode));
     }
-
+    
     /**
      * Create new HTTP carbon message.
      *
-     * @param payload
      * @param statusCode
      * @return
      */
-    private static HTTPCarbonMessage createErrorMessage(String payload, int statusCode) {
-
+    private static HTTPCarbonMessage createErrorMessage(String responseValue, int statusCode) {
+        
         HTTPCarbonMessage response = createHttpCarbonMessage(false);
-        StringDataSource stringDataSource = new StringDataSource(payload
-                , new HttpMessageDataStreamer(response).getOutputStream());
-        response.setMessageDataSource(stringDataSource);
-        byte[] errorMessageBytes = payload.getBytes(Charset.defaultCharset());
-
-        HttpHeaders httpHeaders = response.getHeaders();
-        httpHeaders.set(org.wso2.transport.http.netty.common.Constants.HTTP_CONNECTION,
-                org.wso2.transport.http.netty.common.Constants.CONNECTION_KEEP_ALIVE);
-        httpHeaders.set(org.wso2.transport.http.netty.common.Constants.HTTP_CONTENT_TYPE,
-                org.wso2.transport.http.netty.common.Constants.TEXT_PLAIN);
-        httpHeaders.set(org.wso2.transport.http.netty.common.Constants.HTTP_CONTENT_LENGTH,
-                (String.valueOf(errorMessageBytes.length)));
-
+        if (responseValue != null) {
+            byte[] array;
+            try {
+                array = responseValue.getBytes("UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new HttpSourceAdaptorRuntimeException("Error sending response.", e);
+            }
+            ByteBuffer byteBuffer = ByteBuffer.allocate(array.length);
+            byteBuffer.put(array);
+            response.setHeader(HttpHeaderNames.CONTENT_LENGTH.toString(), String.valueOf(array.length));
+            byteBuffer.flip();
+            response.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(byteBuffer)));
+        }
         response.setProperty(org.wso2.transport.http.netty.common.Constants.HTTP_STATUS_CODE, statusCode);
         response.setProperty(org.wso2.carbon.messaging.Constants.DIRECTION,
                 org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE);
         return response;
     }
-
+    
     /**
      * Create new HTTP carbon messge.
      *
@@ -128,12 +130,10 @@ public class HttpIoUtil {
         HTTPCarbonMessage httpCarbonMessage;
         if (isRequest) {
             httpCarbonMessage = new HTTPCarbonMessage(
-                    new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, ""));
-            httpCarbonMessage.setEndOfMsgAdded(true);
+                    new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, HttpConstants.EMPTY_STRING));
         } else {
             httpCarbonMessage = new HTTPCarbonMessage(
                     new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
-            httpCarbonMessage.setEndOfMsgAdded(true);
         }
         return httpCarbonMessage;
     }

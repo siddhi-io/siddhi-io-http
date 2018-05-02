@@ -76,7 +76,6 @@ class HttpSourceListener {
                 HttpSourceUtil.handleCallback(carbonMessage, 500);
             } finally {
                 lock.unlock();
-                carbonMessage.release();
             }
         }
         if (isAuthEnabled) {

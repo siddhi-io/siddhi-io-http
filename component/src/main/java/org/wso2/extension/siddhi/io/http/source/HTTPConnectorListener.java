@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
+import org.wso2.transport.http.netty.common.Constants;
 import org.wso2.transport.http.netty.config.TransportsConfiguration;
 import org.wso2.transport.http.netty.contract.HttpClientConnector;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
@@ -88,7 +89,7 @@ public class HTTPConnectorListener implements HttpConnectorListener {
     }
 
     protected String getInterface(HTTPCarbonMessage cMsg) {
-        String interfaceId = (String) cMsg.getProperty(org.wso2.carbon.messaging.Constants.LISTENER_INTERFACE_ID);
+        String interfaceId = (String) cMsg.getProperty(Constants.LISTENER_INTERFACE_ID);
         if (interfaceId == null) {
             if (log.isDebugEnabled()) {
                 log.debug("Interface id not found on the message, hence using the default interface");

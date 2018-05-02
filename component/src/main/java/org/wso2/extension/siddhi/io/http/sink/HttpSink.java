@@ -45,10 +45,11 @@ import org.wso2.siddhi.core.util.transport.OptionHolder;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.transport.http.netty.common.Constants;
 import org.wso2.transport.http.netty.common.ProxyServerConfiguration;
+import org.wso2.transport.http.netty.config.ChunkConfig;
 import org.wso2.transport.http.netty.config.SenderConfiguration;
 import org.wso2.transport.http.netty.contract.HttpClientConnector;
 import org.wso2.transport.http.netty.contract.HttpWsConnectorFactory;
-import org.wso2.transport.http.netty.contractimpl.HttpWsConnectorFactoryImpl;
+import org.wso2.transport.http.netty.contractimpl.DefaultHttpWsConnectorFactory;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import java.net.UnknownHostException;
@@ -269,7 +270,7 @@ import java.util.Map;
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "15"),
-
+                
                 @Parameter(
                         name = "client.threadpool.configurations",
                         description = "Thread pool configuration. Expected format of these parameters is as follows:" +
@@ -351,7 +352,7 @@ import java.util.Map;
                                         + "POST,"
                                         + "Content-Length:24#Content-Location:USA#Retry-After:120"
                                         + "}"
-
+                                        
                                         + "Above event will generate output as below."
                                         + "~Output http event payload"
                                         + "<events>\n"
@@ -380,14 +381,21 @@ import java.util.Map;
                         description = "property to configure number of boss threads, which accepts incoming " +
                                 "connections until the ports are unbound. Once connection accepts successfully, " +
                                 "boss thread passes the accepted channel to one of the worker threads.",
-                        defaultValue = "4",
+                        defaultValue = "Number of available processors",
                         possibleParameters = "Any integer"
                 ),
                 @SystemParameter(
                         name = "clientBootstrapWorkerGroupSize",
                         description = "property to configure number of worker threads, which performs non " +
                                 "blocking read and write for one or more channels in non-blocking mode.",
-                        defaultValue = "8",
+                        defaultValue = "(Number of available processors)*2",
+                        possibleParameters = "Any integer"
+                ),
+                @SystemParameter(
+                        name = "clientBootstrapClientGroupSize",
+                        description = "property to configure number of client threads, which performs non " +
+                                "blocking read and write for one or more channels in non-blocking mode.",
+                        defaultValue = "(Number of available processors)*2",
                         possibleParameters = "Any integer"
                 ),
                 @SystemParameter(
@@ -416,7 +424,7 @@ public class HttpSink extends Sink {
     private String userName;
     private String userPassword;
     private String publisherURL;
-
+    
     /**
      * Returns the list of classes which this sink can consume.
      * Based on the type of the sink, it may be limited to being able to publish specific type of classes.
@@ -427,9 +435,9 @@ public class HttpSink extends Sink {
      */
     @Override
     public Class[] getSupportedInputEventClasses() {
-        return new Class[]{String.class};
+        return new Class[] {String.class};
     }
-
+    
     /**
      * Returns a list of supported dynamic options (that means for each event value of the option can change) by
      * the transport
@@ -438,9 +446,9 @@ public class HttpSink extends Sink {
      */
     @Override
     public String[] getSupportedDynamicOptions() {
-        return new String[]{HttpConstants.HEADERS, HttpConstants.METHOD};
+        return new String[] {HttpConstants.HEADERS, HttpConstants.METHOD};
     }
-
+    
     /**
      * The initialization method for {@link Sink}, which will be called before other methods and validate
      * the all configuration and getting the intial values.
@@ -498,9 +506,11 @@ public class HttpSink extends Sink {
                 .CLIENT_POOL_CONFIGURATION, HttpConstants.EMPTY_STRING);
         //read trp globe configuration
         String bootstrapWorker = configReader.readConfig(HttpConstants
-                .CLIENT_BOOTSTRAP_WORKER_GROUP_SIZE, HttpConstants.CLIENT_BOOTSTRAP_WORKER_GROUP_SIZE_VALUE);
+                .CLIENT_BOOTSTRAP_WORKER_GROUP_SIZE, HttpConstants.EMPTY_STRING);
         String bootstrapBoss = configReader.readConfig(HttpConstants
-                .CLIENT_BOOTSTRAP_BOSS_GROUP_SIZE, HttpConstants.CLIENT_BOOTSTRAP_BOSS_GROUP_SIZE_VALUE);
+                .CLIENT_BOOTSTRAP_BOSS_GROUP_SIZE, HttpConstants.EMPTY_STRING);
+        String bootstrapClient = configReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_CLIENT_GROUP_SIZE,
+                HttpConstants.EMPTY_STRING);
         //Generate basic sender configurations
         SenderConfiguration senderConfig = HttpSinkUtil.getSenderConfigurations(httpURLProperties,
                 clientStoreFile, clientStorePass, configReader);
@@ -529,12 +539,17 @@ public class HttpSink extends Sink {
         //if bootstrap configurations are given then pass it if not let take default value of transport
         HttpWsConnectorFactory httpConnectorFactory;
         if (!HttpConstants.EMPTY_STRING.equals(bootstrapBoss) && !HttpConstants.EMPTY_STRING.equals(bootstrapWorker)) {
-            httpConnectorFactory = new HttpWsConnectorFactoryImpl(Integer.parseInt(bootstrapBoss), Integer.parseInt
-                    (bootstrapWorker));
+            if (!HttpConstants.EMPTY_STRING.equals(bootstrapClient)) {
+                httpConnectorFactory = new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss),
+                        Integer.parseInt(bootstrapWorker), Integer.parseInt(bootstrapClient));
+            } else {
+                httpConnectorFactory = new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss),
+                        Integer.parseInt(bootstrapWorker), Integer.parseInt(bootstrapWorker));
+            }
         } else {
-            httpConnectorFactory = new HttpWsConnectorFactoryImpl();
+            httpConnectorFactory = new DefaultHttpWsConnectorFactory();
         }
-
+        
         //if proxy username and password not equal to null then create proxy configurations
         if (!HttpConstants.EMPTY_STRING.equals(proxyHost) && !HttpConstants.EMPTY_STRING.equals(proxyPort)) {
             try {
@@ -555,13 +570,19 @@ public class HttpSink extends Sink {
             senderConfig.setSocketIdleTimeout(socketIdleTimeout);
         }
         if (!HttpConstants.EMPTY_STRING.equals(sslProtocol)) {
-            senderConfig.setSslProtocol(sslProtocol);
+            senderConfig.setSSLProtocol(sslProtocol);
         }
         if (!HttpConstants.EMPTY_STRING.equals(tlsStoreType)) {
-            senderConfig.setTlsStoreType(tlsStoreType);
+            senderConfig.setTLSStoreType(tlsStoreType);
         }
         if (!HttpConstants.EMPTY_STRING.equals(chunkDisabled)) {
-            senderConfig.setChunkDisabled(Boolean.parseBoolean(chunkDisabled));
+            if (chunkDisabled != null) {
+                if (Boolean.parseBoolean(chunkDisabled)) {
+                    senderConfig.setChunkingConfig(ChunkConfig.NEVER);
+                } else {
+                    senderConfig.setChunkingConfig(ChunkConfig.ALWAYS);
+                }
+            } // else AUTO
         }
         if (!HttpConstants.EMPTY_STRING.equals(followRedirect)) {
             senderConfig.setFollowRedirect(Boolean.parseBoolean(followRedirect));
@@ -572,15 +593,15 @@ public class HttpSink extends Sink {
         if (!HttpConstants.EMPTY_STRING.equals(parametersList)) {
             senderConfig.setParameters(HttpSinkUtil.populateParameters(parametersList));
         }
-
+        
         //overwrite default transport configuration
         Map<String, Object> properties = HttpSinkUtil.populateTransportConfiguration(clientBootstrapConfiguration,
                 clientPoolConfiguration);
-
+        
         clientConnector = httpConnectorFactory.createHttpClientConnector(properties, senderConfig);
     }
-
-
+    
+    
     /**
      * This method will be called when events need to be published via this sink
      *
@@ -590,58 +611,25 @@ public class HttpSink extends Sink {
      *                                        such that the  system will take care retrying for connection
      */
     @Override
-    public void publish(Object payload, DynamicOptions dynamicOptions) throws ConnectionUnavailableException {
+    public void publish(Object payload, DynamicOptions dynamicOptions) {
         String headers = httpHeaderOption.getValue(dynamicOptions);
         String httpMethod = HttpConstants.EMPTY_STRING.equals(httpMethodOption.getValue(dynamicOptions)) ?
                 HttpConstants.METHOD_DEFAULT : httpMethodOption.getValue(dynamicOptions);
         List<Header> headersList = HttpSinkUtil.getHeaders(headers);
         String contentType = HttpSinkUtil.getContentType(mapType, headersList);
         String messageBody = (String) payload;
-        HTTPCarbonMessage cMessage = createHttpCarbonMessage(httpMethod);
+        HttpMethod httpReqMethod = new HttpMethod(httpMethod);
+        HTTPCarbonMessage cMessage = new HTTPCarbonMessage(
+                new DefaultHttpRequest(HttpVersion.HTTP_1_1, httpReqMethod, ""));
         cMessage = generateCarbonMessage(headersList, contentType, httpMethod, cMessage);
-        cMessage.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(messageBody
-                .getBytes(Charset.defaultCharset()))));
-        clientConnector.send(cMessage);
-
-    }
-
-    public HTTPCarbonMessage createHttpCarbonMessage(String method) {
-        HTTPCarbonMessage httpCarbonMessage = null;
-        switch (method) {
-            case "GET": {
-                httpCarbonMessage = new HTTPCarbonMessage(
-                        new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, ""));
-                break;
-            }
-            case "PUT": {
-                httpCarbonMessage = new HTTPCarbonMessage(
-                        new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.PUT, ""));
-                break;
-            }
-            case "PATCH": {
-                httpCarbonMessage = new HTTPCarbonMessage(
-                        new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.PATCH, ""));
-                break;
-            }
-            case "DELETE": {
-                httpCarbonMessage = new HTTPCarbonMessage(
-                        new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.DELETE, ""));
-                break;
-            }
-            case "POST": {
-                httpCarbonMessage = new HTTPCarbonMessage(
-                        new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, ""));
-                break;
-            }
-            default: {
-                log.error("Invalid request type.");
-
-                break;
-            }
+        if (!Constants.HTTP_GET_METHOD.equals(httpMethod)) {
+            cMessage.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(messageBody
+                    .getBytes(Charset.defaultCharset()))));
         }
-        return httpCarbonMessage;
+        cMessage.completeMessage();
+        clientConnector.send(cMessage);
     }
-
+    
     /**
      * This method will be called before the processing method.
      * Intention to establish connection to publish event.
@@ -652,9 +640,9 @@ public class HttpSink extends Sink {
     @Override
     public void connect() throws ConnectionUnavailableException {
         log.info(streamID + " has successfully connected to " + publisherURL);
-
+        
     }
-
+    
     /**
      * Called after all publishing is done, or when {@link ConnectionUnavailableException} is thrown
      * Implementation of this method should contain the steps needed to disconnect from the sink.
@@ -666,7 +654,7 @@ public class HttpSink extends Sink {
             log.info("Server connector for url " + publisherURL + " disconnected.");
         }
     }
-
+    
     /**
      * The method can be called when removing an event receiver.
      * The cleanups that has to be done when removing the receiver has to be done here.
@@ -678,7 +666,7 @@ public class HttpSink extends Sink {
             log.info("Server connector for url " + publisherURL + " disconnected.");
         }
     }
-
+    
     /**
      * Used to collect the serializable state of the processing element, that need to be
      * persisted for reconstructing the element to the same state on a different point of time
@@ -691,7 +679,7 @@ public class HttpSink extends Sink {
         //no current state.
         return null;
     }
-
+    
     /**
      * Used to restore serialized state of the processing element, for reconstructing
      * the element to the same state as if was on a previous point of time.
@@ -703,7 +691,7 @@ public class HttpSink extends Sink {
     public void restoreState(Map<String, Object> state) {
         //no need to maintain.
     }
-
+    
     /**
      * The method is responsible of generating carbon message to send.
      *
@@ -719,15 +707,17 @@ public class HttpSink extends Sink {
          * set carbon message properties which is to be used in carbon transport.
          */
         // Set protocol type http or https
-        cMessage.setProperty(Constants.PROTOCOL, httpURLProperties.get(HttpConstants.SCHEME));
+        cMessage.setProperty(Constants.PROTOCOL, httpURLProperties.get(Constants.PROTOCOL));
         // Set uri
-        cMessage.setProperty(Constants.TO, httpURLProperties.get(HttpConstants.TO));
+        cMessage.setProperty(Constants.TO, httpURLProperties.get(Constants.TO));
         // set Host
-        cMessage.setProperty(Constants.HOST, httpURLProperties.get(HttpConstants.HOST));
+        cMessage.setProperty(Constants.HTTP_HOST, httpURLProperties.get(Constants.HTTP_HOST));
         //set port
-        cMessage.setProperty(Constants.PORT, Integer.valueOf(httpURLProperties.get(HttpConstants.PORT)));
+        cMessage.setProperty(Constants.HTTP_PORT, Integer.valueOf(httpURLProperties.get(Constants.HTTP_PORT)));
         // Set method
-        cMessage.setProperty(HttpConstants.HTTP_METHOD, httpMethod);
+        cMessage.setProperty(Constants.HTTP_METHOD, httpMethod);
+        //cMessage.setProperty(Constants.HTTP_METHOD, Constants.HTTP_GET_METHOD);
+        //cMessage.setProperty(Constants.REQUEST_URL, httpURLProperties.get(Constants.REQUEST_URL));
         HttpHeaders httpHeaders = cMessage.getHeaders();
         //if Authentication enabled
         if (!(userName.equals(HttpConstants.EMPTY_STRING)) && !(userPassword.equals
@@ -738,7 +728,7 @@ public class HttpSink extends Sink {
             log.error("One of the basic authentication username or password missing. Hence basic authentication not " +
                     "supported.");
         }
-
+        
         /*
          *set request headers.
          */

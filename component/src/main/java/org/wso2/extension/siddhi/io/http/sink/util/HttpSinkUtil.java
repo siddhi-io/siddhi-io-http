@@ -25,6 +25,7 @@ import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.extension.siddhi.io.http.util.TrpPropertyTypes;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.util.config.ConfigReader;
+import org.wso2.transport.http.netty.common.Constants;
 import org.wso2.transport.http.netty.config.Parameter;
 import org.wso2.transport.http.netty.config.SenderConfiguration;
 
@@ -42,10 +43,10 @@ import java.util.stream.Collectors;
  */
 public class HttpSinkUtil {
     private static final Logger log = Logger.getLogger(HttpSinkUtil.class);
-
+    
     private HttpSinkUtil() {
     }
-
+    
     /**
      * Method is responsible for separate publisher url to host,port and context.
      *
@@ -55,22 +56,19 @@ public class HttpSinkUtil {
     public static Map<String, String> getURLProperties(String publisherURL) {
         Map<String, String> httpStaticProperties;
         try {
-            URL aURL = new URL(publisherURL);
-            String scheme = aURL.getProtocol();
-            String host = aURL.getHost();
-            String port = Integer.toString(aURL.getPort());
-            String path = aURL.getPath();
+            URL url = new URL(publisherURL);
             httpStaticProperties = new HashMap<>();
-            httpStaticProperties.put(HttpConstants.TO, path);
-            httpStaticProperties.put(HttpConstants.HOST, host);
-            httpStaticProperties.put(HttpConstants.PORT, port);
-            httpStaticProperties.put(HttpConstants.SCHEME, scheme);
+            httpStaticProperties.put(Constants.TO, url.toString());
+            httpStaticProperties.put(Constants.HTTP_HOST, url.getHost());
+            httpStaticProperties.put(Constants.HTTP_PORT, Integer.toString(url.getPort()));
+            httpStaticProperties.put(Constants.PROTOCOL, url.getProtocol());
+            httpStaticProperties.put(Constants.REQUEST_URL, url.toString());
         } catch (MalformedURLException e) {
             throw new HttpSinkAdaptorRuntimeException(" Receiver url mandatory. Please insert valid url .", e);
         }
         return httpStaticProperties;
     }
-
+    
     /**
      * Method is responsible of to convert string of headers to list of headers.
      * Example header format : 'name1:value1','name2:value2'
@@ -100,7 +98,7 @@ public class HttpSinkUtil {
             return null;
         }
     }
-
+    
     /**
      * user can give custom truststore file if user did not give then custom then system read
      * the default values which is in the deployment yaml.
@@ -111,7 +109,7 @@ public class HttpSinkUtil {
         return sinkConfigReader.readConfig(HttpConstants.CLIENT_TRUSTSTORE_PATH,
                 HttpConstants.CLIENT_TRUSTSTORE_PATH_VALUE);
     }
-
+    
     /**
      * user can give custom truststore password if user did not give then custom then system read
      * the default values which is in the deployment yaml.
@@ -122,7 +120,7 @@ public class HttpSinkUtil {
         return sinkConfigReader.readConfig(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD,
                 HttpConstants.CLIENT_TRUSTSTORE_PASSWORD_VALUE);
     }
-
+    
     /**
      * Method is responsible for set sender configuration values .
      *
@@ -134,25 +132,25 @@ public class HttpSinkUtil {
     public static SenderConfiguration getSenderConfigurations(Map<String, String> httpStaticProperties, String
             clientStoreFile, String clientStorePass, ConfigReader configReader) {
         SenderConfiguration httpSender = new SenderConfiguration(httpStaticProperties
-                .get(HttpConstants.PORT));
-        if (httpStaticProperties.get(HttpConstants.SCHEME).equals(HttpConstants.SCHEME_HTTPS)) {
+                .get(Constants.HTTP_PORT));
+        if (httpStaticProperties.get(Constants.PROTOCOL).equals(HttpConstants.SCHEME_HTTPS)) {
             httpSender.setTrustStoreFile(clientStoreFile);
             httpSender.setTrustStorePass(clientStorePass);
-            httpSender.setId(httpStaticProperties.get(HttpConstants.TO));
-            httpSender.setScheme(httpStaticProperties.get(HttpConstants.SCHEME));
+            httpSender.setId(httpStaticProperties.get(Constants.TO));
+            httpSender.setScheme(httpStaticProperties.get(Constants.PROTOCOL));
         } else {
-            httpSender.setScheme(httpStaticProperties.get(HttpConstants.SCHEME));
+            httpSender.setScheme(httpStaticProperties.get(Constants.PROTOCOL));
         }
         if (isHTTPTraceLoggerEnabled(configReader)) {
             httpSender.setHttpTraceLogEnabled(true);
         }
         return httpSender;
     }
-
+    
     private static boolean isHTTPTraceLoggerEnabled(ConfigReader configReader) {
         return Boolean.parseBoolean(configReader.readConfig("httpTraceLogEnabled", "false"));
     }
-
+    
     /**
      * @param parameterList
      * @return
@@ -179,7 +177,7 @@ public class HttpSinkUtil {
         }
         return parameters;
     }
-
+    
     /**
      * Method is responsible for set transportation configuration values.
      *
@@ -204,7 +202,7 @@ public class HttpSinkUtil {
                         "'key1:val1'," + "'key2:val2' format", ex);
             }
         }
-
+        
         if (!HttpConstants.EMPTY_STRING.equals(clientConnectionConfiguration.trim())) {
             try {
                 String[] valueList = clientConnectionConfiguration.trim().substring(1,
@@ -223,7 +221,7 @@ public class HttpSinkUtil {
         }
         return properties;
     }
-
+    
     /**
      * Responsible of get the content type of payload.
      *
@@ -242,13 +240,13 @@ public class HttpSinkUtil {
         switch (mapType) {
             case HttpConstants.MAP_TEXT:
                 return HttpConstants.TEXT_PLAIN;
-
+            
             case HttpConstants.MAP_XML:
                 return HttpConstants.APPLICATION_XML;
-
+            
             case HttpConstants.MAP_JSON:
                 return HttpConstants.APPLICATION_JSON;
-
+            
             default: {
                 log.info("Invalid payload map type. System support only text," +
                         "Json and XML type hence proceed with default text mapping");
@@ -256,7 +254,7 @@ public class HttpSinkUtil {
             }
         }
     }
-
+    
     /**
      * Get port from listenerUrl.
      *
@@ -272,7 +270,7 @@ public class HttpSinkUtil {
         }
         return aURL.getProtocol();
     }
-
+    
     public static Map<String, Object> populateClientConnectionConfiguration(
             Map<String, Object> clientConnectionConfigurationList) {
         Map<String, Object> properties = new HashMap<>();
@@ -298,7 +296,7 @@ public class HttpSinkUtil {
         });
         return properties;
     }
-
+    
     /**
      * This map contains the properties other than String
      *
@@ -314,7 +312,7 @@ public class HttpSinkUtil {
         trpPropertyTypes.put("sender.thread.count", TrpPropertyTypes.INTEGER);
         trpPropertyTypes.put("event.group.executor.thread.size", TrpPropertyTypes.INTEGER);
         trpPropertyTypes.put("max.wait.for.trp.client.connection.pool", TrpPropertyTypes.INTEGER);
-
+        
         trpPropertyTypes.put("client.bootstrap.nodelay", TrpPropertyTypes.BOOLEAN);
         trpPropertyTypes.put("client.bootstrap.keepalive", TrpPropertyTypes.BOOLEAN);
         trpPropertyTypes.put("client.bootstrap.sendbuffersize", TrpPropertyTypes.INTEGER);
@@ -323,7 +321,7 @@ public class HttpSinkUtil {
         trpPropertyTypes.put("client.bootstrap.socket.reuse", TrpPropertyTypes.BOOLEAN);
         trpPropertyTypes.put("client.bootstrap.socket.timeout", TrpPropertyTypes.INTEGER);
         trpPropertyTypes.put("latency.metrics.enabled", TrpPropertyTypes.BOOLEAN);
-
+        
         return trpPropertyTypes;
     }
 }

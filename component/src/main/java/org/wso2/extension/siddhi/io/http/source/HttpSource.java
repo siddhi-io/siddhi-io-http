@@ -326,14 +326,21 @@ import java.util.Map;
                         description = "property to configure number of boss threads, which accepts incoming " +
                                 "connections until the ports are unbound. Once connection accepts successfully, " +
                                 "boss thread passes the accepted channel to one of the worker threads.",
-                        defaultValue = "4",
+                        defaultValue = "Number of available processors",
                         possibleParameters = "Any integer"
                 ),
                 @SystemParameter(
                         name = "serverBootstrapWorkerGroupSize",
                         description = "property to configure number of worker threads, which performs non " +
                                 "blocking read and write for one or more channels in non-blocking mode.",
-                        defaultValue = "8",
+                        defaultValue = "(Number of available processors)*2",
+                        possibleParameters = "Any integer"
+                ),
+                @SystemParameter(
+                        name = "serverBootstrapClientGroupSize",
+                        description = "property to configure number of client threads, which performs non " +
+                                "blocking read and write for one or more channels in non-blocking mode.",
+                        defaultValue = "(Number of available processors)*2",
                         possibleParameters = "Any integer"
                 ),
                 @SystemParameter(
@@ -456,10 +463,10 @@ public class HttpSource extends Source {
             this.listenerConfiguration.setVerifyClient(verifyClient);
         }
         if (!HttpConstants.EMPTY_STRING.equals(sslProtocol)) {
-            this.listenerConfiguration.setSslProtocol(sslProtocol);
+            this.listenerConfiguration.setSSLProtocol(sslProtocol);
         }
         if (!HttpConstants.EMPTY_STRING.equals(tlsStoreType)) {
-            this.listenerConfiguration.setTlsStoreType(tlsStoreType);
+            this.listenerConfiguration.setTLSStoreType(tlsStoreType);
         }
         if (!HttpConstants.EMPTY_STRING.equals(traceLog)) {
             this.listenerConfiguration.setHttpTraceLogEnabled(Boolean.parseBoolean(traceLog));
