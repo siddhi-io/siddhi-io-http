@@ -19,7 +19,7 @@
     <parent>
         <artifactId>siddhi-io-http-tests</artifactId>
         <groupId>org.wso2.extension.siddhi.io.http</groupId>
-        <version>1.0.19</version>
+        <version>1.0.20-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
