@@ -27,7 +27,7 @@
         <url>https://github.com/wso2-extensions/siddhi-io-http.git</url>
         <developerConnection>scm:git:https://github.com/wso2-extensions/siddhi-io-http.git
         </developerConnection>
-        <tag>HEAD</tag>
+        <tag>v1.0.19</tag>
     </scm>
     <modules>
         <module>component</module>
@@ -36,7 +36,7 @@
     </modules>
     <groupId>org.wso2.extension.siddhi.io.http</groupId>
     <artifactId>siddhi-io-http-parent</artifactId>
-    <version>1.0.19-SNAPSHOT</version>
+    <version>1.0.19</version>
     <name>WSO2 Siddhi IO Extension - HTTP IO Aggregator Pom</name>
     <url>http://wso2.org</url>
     <profiles>
