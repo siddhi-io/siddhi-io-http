@@ -11,7 +11,7 @@ Find some useful links below:
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/api/1.0.18">1.0.18</a>.
+Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/api/1.0.19">1.0.19</a>.
 
 ## How to use 
 
@@ -45,8 +45,8 @@ Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/si
 
 ## Features
 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/api/1.0.18/#http-sink">http</a> *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink">(Sink)</a>)*<br><div style="padding-left: 1em;"><p>This extension publishes HTTP events in any HTTP method (i.e., POST, GET, PUT, DELETE)  via HTTP or HTTPS protocols. In addition, this component also provides basic authentication, and allows you to publish events using custom client truststore files when publishing events via the HTTPS protocol. You can also dynamically add any number of headers for each event including the HTTP_METHOD header.</p></div>
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/api/1.0.18/#http-source">http</a> *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a>)*<br><div style="padding-left: 1em;"><p>The HTTP source receives POST requests via HTTP or HTTPS in format such as <code>text</code>, <code>XML</code> or <code>JSON</code>. If required, you can enable basic authentication to ensure that events are received only from users who are authorized to access the service.</p></div>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/api/1.0.19/#http-sink">http</a> *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink">(Sink)</a>)*<br><div style="padding-left: 1em;"><p>This extension publish the HTTP events in any HTTP method  POST, GET, PUT, DELETE  via HTTP or https protocols. As the additional features this component can provide basic authentication as well as user can publish events using custom client truststore files when publishing events via https protocol. And also user can add any number of headers including HTTP_METHOD header for each event dynamically.</p></div>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-io-http/api/1.0.19/#http-source">http</a> *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a>)*<br><div style="padding-left: 1em;"><p>The HTTP source receives POST requests via HTTP or HTTPS in format such as <code>text</code>, <code>XML</code> and <code>JSON</code>. If required, you can enable basic authentication to ensure that events are received only from users who are authorized to access the service.</p></div>
 
 ## How to Contribute
  
