@@ -29,18 +29,18 @@ import java.net.BindException;
  * @since 0.94
  */
 public class HttpConnectorPortBindingListener implements PortBindingEventListener {
-
+    
     private static final Logger log = LoggerFactory.getLogger(HttpConnectorPortBindingListener.class);
-
+    
     private ConnectorStartupSynchronizer connectorStartupSynchronizer;
     private String serverConnectorId;
-
+    
     public HttpConnectorPortBindingListener(ConnectorStartupSynchronizer connectorStartupSynchronizer,
                                             String serverConnectorId) {
         this.connectorStartupSynchronizer = connectorStartupSynchronizer;
         this.serverConnectorId = serverConnectorId;
     }
-
+    
     @Override
     public void onOpen(String serverConnectorId, boolean isHttps) {
         if (isHttps) {
@@ -50,7 +50,7 @@ public class HttpConnectorPortBindingListener implements PortBindingEventListene
         }
         connectorStartupSynchronizer.getCountDownLatch().countDown();
     }
-
+    
     @Override
     public void onClose(String serverConnectorId, boolean isHttps) {
         if (isHttps) {
@@ -59,11 +59,11 @@ public class HttpConnectorPortBindingListener implements PortBindingEventListene
             log.info("HTTP source " + serverConnectorId + " has been started");
         }
     }
-
+    
     @Override
     public void onError(Throwable throwable) {
         log.error("Error in http source ", throwable);
-
+        
         if (throwable instanceof BindException) {
             connectorStartupSynchronizer.addException(serverConnectorId, (BindException) throwable);
             connectorStartupSynchronizer.getCountDownLatch().countDown();

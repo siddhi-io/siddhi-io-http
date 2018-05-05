@@ -17,6 +17,7 @@
  */
 package org.wso2.extension.siddhi.io.http.source;
 
+import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -35,7 +36,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.log4j.Logger;
+
 /**
  * Multiple event synchronously run.
  */
@@ -48,7 +49,7 @@ public class HttpMultipleFormatSourcesTestCase {
     private AtomicInteger eventCountD = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;
-
+    
     @BeforeMethod
     public void init() {
         eventCountA.set(0);
@@ -56,7 +57,7 @@ public class HttpMultipleFormatSourcesTestCase {
         eventCountC.set(0);
         eventCountD.set(0);
     }
-
+    
     /**
      * Creating test for publishing events with multiple formats synchronously.
      *
@@ -85,8 +86,8 @@ public class HttpMultipleFormatSourcesTestCase {
                         + "from inputStreamA "
                         + "select *  "
                         + "insert into outputStreamA;"
-                        );
-
+        );
+        
         String inStreamDefinitionB = "@source(type='http', @map(type='xml'), "
                 + "receiver.url='http://localhost:8005/endpoints/RecPro1', basic.auth.enabled='false')"
                 + "define stream inputStreamB (name string, age int, country string);";
@@ -95,8 +96,8 @@ public class HttpMultipleFormatSourcesTestCase {
                         + "from inputStreamB "
                         + "select *  "
                         + "insert into outputStreamB;"
-                        );
-
+        );
+        
         String inStreamDefinitionC = "@source(type='http', @map(type='xml'), "
                 + "receiver.url='http://localhost:8009/endpoints/RecPro', basic.auth.enabled='false')"
                 + "define stream inputStreamC (name string, age int, country string);";
@@ -105,8 +106,8 @@ public class HttpMultipleFormatSourcesTestCase {
                         + "from inputStreamC "
                         + "select *  "
                         + "insert into outputStreamC;"
-                        );
-
+        );
+        
         String inStreamDefinitionD = "@source(type='http', @map(type='xml'), "
                 + "receiver.url='http://localhost:8005/endpoints/RecPro2', basic.auth.enabled='false')"
                 + "define stream inputStreamD (name string, age int, country string);";
@@ -115,12 +116,12 @@ public class HttpMultipleFormatSourcesTestCase {
                         + "from inputStreamD "
                         + "select *  "
                         + "insert into outputStreamD;"
-                         );
-
+        );
+        
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinitionA + inStreamDefinitionB +
                         inStreamDefinitionC + inStreamDefinitionD + queryA + queryB + queryC + queryD);
-
+        
         siddhiAppRuntime.addCallback("queryA", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -167,19 +168,19 @@ public class HttpMultipleFormatSourcesTestCase {
         expectedA.add("JohnA");
         expectedA.add("MikeA");
         String event1 = "<events>"
-                            + "<event>"
-                                + "<name>JohnA</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>JohnA</name>"
+                + "<age>100</age>"
+                + "<country>AUS</country>"
+                + "</event>"
+                + "</events>";
         String event2 = "<events>"
-                            + "<event>"
-                                + "<name>MikeA</name>"
-                                + "<age>20</age>"
-                                + "<country>USA</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>MikeA</name>"
+                + "<age>20</age>"
+                + "<country>USA</country>"
+                + "</event>"
+                + "</events>";
         HttpTestUtil.httpPublishEvent(event1, baseURIA, "/endpoints/RecPro",
                 "POST");
         HttpTestUtil.httpPublishEvent(event2, baseURIA, "/endpoints/RecPro",
@@ -191,19 +192,19 @@ public class HttpMultipleFormatSourcesTestCase {
         expectedB.add("JohnB");
         expectedB.add("MikeB");
         String event3 = "<events>"
-                            + "<event>"
-                                + "<name>JohnB</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>JohnB</name>"
+                + "<age>100</age>"
+                + "<country>AUS</country>"
+                + "</event>"
+                + "</events>";
         String event4 = "<events>"
-                            + "<event>"
-                                + "<name>MikeB</name>"
-                                + "<age>20</age>"
-                                + "<country>USA</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>MikeB</name>"
+                + "<age>20</age>"
+                + "<country>USA</country>"
+                + "</event>"
+                + "</events>";
         HttpTestUtil.httpPublishEvent(event3, baseURIA, "/endpoints/RecPro1",
                 "POST");
         HttpTestUtil.httpPublishEvent(event4, baseURIA, "/endpoints/RecPro1",
@@ -215,19 +216,19 @@ public class HttpMultipleFormatSourcesTestCase {
         expectedC.add("JohnC");
         expectedC.add("MikeC");
         String event5 = "<events>"
-                            + "<event>"
-                                + "<name>JohnC</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>JohnC</name>"
+                + "<age>100</age>"
+                + "<country>AUS</country>"
+                + "</event>"
+                + "</events>";
         String event6 = "<events>"
-                            + "<event>"
-                                + "<name>MikeC</name>"
-                                + "<age>20</age>"
-                                + "<country>USA</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>MikeC</name>"
+                + "<age>20</age>"
+                + "<country>USA</country>"
+                + "</event>"
+                + "</events>";
         HttpTestUtil.httpPublishEvent(event5, baseURIC, "/endpoints/RecPro",
                 "POST");
         HttpTestUtil.httpPublishEvent(event6, baseURIC, "/endpoints/RecPro",
@@ -239,19 +240,19 @@ public class HttpMultipleFormatSourcesTestCase {
         expectedD.add("JohnD");
         expectedD.add("MikeD");
         String event7 = "<events>"
-                            + "<event>"
-                                + "<name>JohnD</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>JohnD</name>"
+                + "<age>100</age>"
+                + "<country>AUS</country>"
+                + "</event>"
+                + "</events>";
         String event8 = "<events>"
-                            + "<event>"
-                                + "<name>MikeD</name>"
-                                + "<age>20</age>"
-                                + "<country>USA</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>MikeD</name>"
+                + "<age>20</age>"
+                + "<country>USA</country>"
+                + "</event>"
+                + "</events>";
         HttpTestUtil.httpPublishEvent(event7, baseURIA, "/endpoints/RecPro2",
                 "POST");
         HttpTestUtil.httpPublishEvent(event8, baseURIA, "/endpoints/RecPro2",

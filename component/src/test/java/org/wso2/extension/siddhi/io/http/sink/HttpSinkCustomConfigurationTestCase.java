@@ -33,7 +33,7 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
  */
 public class HttpSinkCustomConfigurationTestCase {
     private static final Logger log = Logger.getLogger(HttpSinkCustomConfigurationTestCase.class);
-
+    
     /**
      * Creating test for publishing events with XML mapping.
      *
@@ -75,7 +75,7 @@ public class HttpSinkCustomConfigurationTestCase {
                 + "<volume>100</volume>"
                 + "</event>"
                 + "</events>";
-        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
+        fooStream.send(new Object[] {payload, "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }

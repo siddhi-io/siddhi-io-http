@@ -44,12 +44,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class HttpOrderlyProcessTestCase {
     private static final Logger logger = Logger.getLogger(HttpOrderlyProcessTestCase.class);
     private AtomicInteger eventCount = new AtomicInteger(0);
-
+    
     @BeforeMethod
     public void init() {
         eventCount.set(0);
     }
-
+    
     /**
      * Creating test for publishing events with XML mapping.
      *
@@ -73,10 +73,10 @@ public class HttpOrderlyProcessTestCase {
                         + "from inputStream "
                         + "select *  "
                         + "insert into outputStream;"
-                        );
+        );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-
+        
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -96,33 +96,33 @@ public class HttpOrderlyProcessTestCase {
         expected.add("D");
         expected.add("A");
         String event1 = "<events>" +
-                            "<event>" +
-                                    "<name>A</name>" +
-                                    "<age>100</age>" +
-                                    "<country>USA</country>" +
-                            "</event>" +
-                        "</events>";
+                "<event>" +
+                "<name>A</name>" +
+                "<age>100</age>" +
+                "<country>USA</country>" +
+                "</event>" +
+                "</events>";
         String event2 = "<events>" +
-                            "<event>" +
-                                "<name>B</name>" +
-                                "<age>100</age>" +
-                                "<country>USA</country>" +
-                            "</event>" +
-                        "</events>";
+                "<event>" +
+                "<name>B</name>" +
+                "<age>100</age>" +
+                "<country>USA</country>" +
+                "</event>" +
+                "</events>";
         String event3 = "<events>" +
-                            "<event>" +
-                                "<name>C</name>" +
-                                "<age>100</age>" +
-                                "<country>USA</country>" +
-                            "</event>" +
-                        "</events>";
+                "<event>" +
+                "<name>C</name>" +
+                "<age>100</age>" +
+                "<country>USA</country>" +
+                "</event>" +
+                "</events>";
         String event4 = "<events>" +
-                            "<event>" +
-                                "<name>D</name>" +
-                                "<age>100</age>" +
-                                "<country>USA</country>" +
-                            "</event>" +
-                        "</events>";
+                "<event>" +
+                "<name>D</name>" +
+                "<age>100</age>" +
+                "<country>USA</country>" +
+                "</event>" +
+                "</events>";
         String[] events = {event1, event2, event3, event4};
         int k = 0;
         for (int i = 0; i < 5; i++) {

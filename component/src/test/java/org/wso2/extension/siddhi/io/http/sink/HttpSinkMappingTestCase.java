@@ -35,9 +35,10 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
  */
 public class HttpSinkMappingTestCase {
     private static final Logger log = Logger.getLogger(HttpSinkMappingTestCase.class);
-
+    
     /**
      * Creating test for publishing events with XML mapping.
+     *
      * @throws Exception Interrupted exception
      */
     @Test
@@ -81,18 +82,19 @@ public class HttpSinkMappingTestCase {
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
-
+    
     /**
      * Creating test for publishing events with JSON mapping.
+     *
      * @throws Exception Interrupted exception
      */
-    @Test (dependsOnMethods = "testHTTPTextMappingXML")
+    @Test(dependsOnMethods = "testHTTPTextMappingXML")
     public void testHTTPTextMappingJson() throws Exception {
-
+        
         log.info("Creating test for publishing events with JSON mapping.");
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-output-mapper", JsonSinkMapper.class);
-
+        
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
                 + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
                 + "headers='{{headers}}',"
@@ -106,7 +108,7 @@ public class HttpSinkMappingTestCase {
         siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[]{
+        fooStream.send(new Object[] {
                 "{\"event\""
                         + ":{\"symbol\":\"WSO2\","
                         + "\"price\":55.6,"
@@ -119,22 +121,22 @@ public class HttpSinkMappingTestCase {
         String eventData = lst.getServerListener().getData();
         Assert.assertEquals(eventData,
                 "{\"event\""
-                + ":{\"symbol\":\"WSO2\","
-                + "\"price\":55.6,"
-                + "\"volume\":100"
-                + "}}\n");
+                        + ":{\"symbol\":\"WSO2\","
+                        + "\"price\":55.6,"
+                        + "\"volume\":100"
+                        + "}}\n");
         lst.shutdown();
         siddhiAppRuntime.shutdown();
     }
-
+    
     /**
      * Creating test for publishing events with TEXT mapping.
      *
      * @throws Exception Interrupted exception
      */
-    @Test (dependsOnMethods = "testHTTPTextMappingJson")
+    @Test(dependsOnMethods = "testHTTPTextMappingJson")
     public void testHTTPTextMappingText() throws Exception {
-
+        
         log.info("Creating test for publishing events with TEXT mapping.");
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("text-output-mapper", TextSinkMapper.class);
@@ -151,7 +153,7 @@ public class HttpSinkMappingTestCase {
         siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[]{"WSO2,55.6,100", "POST", "'Name:John','Age:23'"});
+        fooStream.send(new Object[] {"WSO2,55.6,100", "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -161,13 +163,13 @@ public class HttpSinkMappingTestCase {
         lst.shutdown();
         siddhiAppRuntime.shutdown();
     }
-
+    
     /**
      * Creating test for publishing events with TEXT mapping.
      *
      * @throws Exception Interrupted exception
      */
-    @Test (dependsOnMethods = "testHTTPTextMappingText")
+    @Test(dependsOnMethods = "testHTTPTextMappingText")
     public void testHTTPTextMappingText2() throws Exception {
         log.info("Creating test for publishing events with TEXT mapping.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -186,7 +188,7 @@ public class HttpSinkMappingTestCase {
         siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[]{"WSO2", 55.6, "USA", "POST", "'Name:John','Age:23'"});
+        fooStream.send(new Object[] {"WSO2", 55.6, "USA", "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -199,15 +201,15 @@ public class HttpSinkMappingTestCase {
         lst.shutdown();
         siddhiAppRuntime.shutdown();
     }
-
+    
     /**
      * Creating test for publishing events with TEXT mapping.
      *
      * @throws Exception Interrupted exception
      */
-    @Test (dependsOnMethods = "testHTTPTextMappingText2")
+    @Test(dependsOnMethods = "testHTTPTextMappingText2")
     public void testHTTPTextMappingText3() throws Exception {
-
+        
         log.info("Creating test for publishing events with TEXT mapping.");
         SiddhiManager siddhiManager = new SiddhiManager();
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
@@ -222,7 +224,7 @@ public class HttpSinkMappingTestCase {
         siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[]{"WSO2,55.6,100", "POST", "'Name:John','Age:23'"});
+        fooStream.send(new Object[] {"WSO2,55.6,100", "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -232,14 +234,15 @@ public class HttpSinkMappingTestCase {
         lst.shutdown();
         siddhiAppRuntime.shutdown();
     }
+    
     /**
      * Creating test for publishing events with TEXT mapping.
      *
      * @throws Exception Interrupted exception
      */
-    @Test (dependsOnMethods = "testHTTPTextMappingText3")
+    @Test(dependsOnMethods = "testHTTPTextMappingText3")
     public void testHTTPTextMappingText4() throws Exception {
-
+        
         log.info("Creating test for publishing events with TEXT mapping.");
         SiddhiManager siddhiManager = new SiddhiManager();
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
@@ -255,7 +258,7 @@ public class HttpSinkMappingTestCase {
         siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[]{"WSO2,55.6,100", "POST", "'Name:John','Age:23'"});
+        fooStream.send(new Object[] {"WSO2,55.6,100", "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }

@@ -20,20 +20,26 @@ package org.wso2.extension.siddhi.io.http.util;
 
 
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.DefaultLastHttpContent;
 import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
+import org.wso2.transport.http.netty.config.Parameter;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.PARAMETER_SEPARATOR;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.VALUE_SEPARATOR;
 
 /**
  * Util class which is use for handle HTTP util function.
@@ -44,7 +50,7 @@ public class HttpIoUtil {
     /**
      * Handle response from http message.
      *
-     * @param requestMsg request carbon message.
+     * @param requestMsg  request carbon message.
      * @param responseMsg response carbon message.
      */
     private static void handleResponse(HTTPCarbonMessage requestMsg, HTTPCarbonMessage responseMsg) {
@@ -59,14 +65,14 @@ public class HttpIoUtil {
      * Handle failure.
      *
      * @param requestMessage request message.
-     * @param ex throwable exception.
-     * @param code error code.
-     * @param payload response payload.
+     * @param ex             throwable exception.
+     * @param code           error code.
+     * @param payload        response payload.
      */
     public static void handleFailure(HTTPCarbonMessage requestMessage, HttpSourceAdaptorRuntimeException ex, Integer
             code, String payload) {
         int statusCode = (code == null) ? 500 : code;
-        String responsePayload = (payload != null) ? payload : "";
+        String responsePayload = (payload != null) ? payload : HttpConstants.EMPTY_STRING;
         if (statusCode == 404) {
             if (ex != null) {
                 responsePayload = ex.getMessage();
@@ -114,5 +120,53 @@ public class HttpIoUtil {
         httpCarbonMessage = new HTTPCarbonMessage(
                 new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
         return httpCarbonMessage;
+    }
+    
+    /**
+     * @param parameterList transport property list in format of 'key1:val1','key2:val2',....
+     * @return transport property list
+     */
+    public static List<Parameter> populateParameters(String parameterList) {
+        List<org.wso2.transport.http.netty.config.Parameter> parameters = new ArrayList<>();
+        if (!HttpConstants.EMPTY_STRING.equals(parameterList.trim())) {
+            String[] valueList = parameterList.trim().substring(1, parameterList.length() - 1)
+                    .split(PARAMETER_SEPARATOR);
+            Arrays.stream(valueList).forEach(valueEntry ->
+                    {
+                        org.wso2.transport.http.netty.config.Parameter parameter = new Parameter();
+                        String[] entry = valueEntry.split(VALUE_SEPARATOR);
+                        if (entry.length == 2) {
+                            parameter.setName(entry[0]);
+                            parameter.setValue(entry[1]);
+                            parameters.add(parameter);
+                        } else {
+                            log.error("Bootstrap configuration is not in expected format please insert them as " +
+                                    "'key1:val1','key2:val2' format in http source.");
+                        }
+                    }
+            );
+            
+        }
+        return parameters;
+    }
+    
+    /**
+     * @param valueList transport property list in format of 'key1:val1','key2:val2',....
+     * @return transport property list
+     */
+    public static Map<String, String> populateParameterMap(String[] valueList) {
+        Map<String, String> parameterMap = new HashMap<>();
+        Arrays.stream(valueList).forEach(valueEntry ->
+                {
+                    String[] entry = valueEntry.split(VALUE_SEPARATOR);
+                    if (entry.length == 2) {
+                        parameterMap.put(entry[0], entry[1]);
+                    } else {
+                        log.error("Configuration parameter '" + valueEntry + "' is not in expected format. Please " +
+                                "insert them as 'key:val' format");
+                    }
+                }
+        );
+        return parameterMap;
     }
 }

@@ -38,9 +38,10 @@ import java.util.List;
  */
 public class HttpMultipleEventSinkTestCase {
     private static final Logger logger = Logger.getLogger(HttpMultipleEventSinkTestCase.class);
-
+    
     /**
      * Test cases for multiple event sink synchronously.
+     *
      * @throws Exception Interrupted exception
      */
     @Test
@@ -51,7 +52,7 @@ public class HttpMultipleEventSinkTestCase {
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
-
+        
         String inStreamDefinition1 = "Define stream FooStreamA (message String,method String,headers String);"
                 + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}'," +
                 "headers='{{headers}}',"
@@ -62,8 +63,8 @@ public class HttpMultipleEventSinkTestCase {
                 "from FooStreamA "
                 + "select message,method,headers "
                 + "insert into BarStreamA;"
-                );
-
+        );
+        
         String inStreamDefinition2 = "Define stream FooStreamB (message String,method String,headers String);"
                 + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}'," +
                 "headers='{{headers}}',"
@@ -83,21 +84,21 @@ public class HttpMultipleEventSinkTestCase {
         lst.run();
         siddhiAppRuntime.start();
         String event1 = "<events>"
-                            + "<event>"
-                                + "<symbol>WSO2</symbol>"
-                                + "<price>55.645</price>"
-                                + "<volume>100</volume>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<symbol>WSO2</symbol>"
+                + "<price>55.645</price>"
+                + "<volume>100</volume>"
+                + "</event>"
+                + "</events>";
         String event2 = "<events>"
-                            + "<event>"
-                                + "<symbol>IFS</symbol>"
-                                + "<price>55.645</price>"
-                                + "<volume>100</volume>"
-                            + "</event>"
-                        + "</events>";
-        fooStream.send(new Object[]{event1, "POST", "'Name:John','Age:23'"});
-        fooStream2.send(new Object[]{event2, "POST", "'Name:John','Age:23'"});
+                + "<event>"
+                + "<symbol>IFS</symbol>"
+                + "<price>55.645</price>"
+                + "<volume>100</volume>"
+                + "</event>"
+                + "</events>";
+        fooStream.send(new Object[] {event1, "POST", "'Name:John','Age:23'"});
+        fooStream2.send(new Object[] {event2, "POST", "'Name:John','Age:23'"});
         Thread.sleep(1000);
         final List<LoggingEvent> log = appender.getLog();
         List<String> logMessages = new ArrayList<>();
@@ -110,25 +111,25 @@ public class HttpMultipleEventSinkTestCase {
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
-
+    
     private static class TestAppender extends AppenderSkeleton {
-
+        
         private final List<LoggingEvent> log = new ArrayList<>();
-
+        
         @Override
         public boolean requiresLayout() {
             return false;
         }
-
+        
         @Override
         protected void append(final LoggingEvent loggingEvent) {
             log.add(loggingEvent);
         }
-
+        
         @Override
         public void close() {
         }
-
+        
         List<LoggingEvent> getLog() {
             return new ArrayList<>(log);
         }

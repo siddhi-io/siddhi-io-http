@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public class HttpAuthenticator {
     private static final Logger logger = LoggerFactory.getLogger(HttpAuthenticator.class);
-
+    
     public static boolean authenticate(HTTPCarbonMessage httpCarbonMessage) {
         if (HttpIODataHolder.getInstance().getBundleContext() == null) {
             //this will handle the events at non osgi mode.
@@ -83,5 +83,5 @@ public class HttpAuthenticator {
             }
         }
     }
-
+    
 }

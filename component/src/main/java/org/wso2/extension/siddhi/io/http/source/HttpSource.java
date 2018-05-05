@@ -21,6 +21,7 @@ package org.wso2.extension.siddhi.io.http.source;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
+import org.wso2.extension.siddhi.io.http.util.HttpIoUtil;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
@@ -144,7 +145,7 @@ import java.util.Map;
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "null"),
-
+                
                 //header validation parameters
                 @Parameter(
                         name = "request.size.validation.configuration",
@@ -232,7 +233,7 @@ import java.util.Map;
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "plain/text"),
-
+                
                 //bootstrap configuration
                 @Parameter(
                         name = "server.bootstrap.configuration",
@@ -296,7 +297,7 @@ import java.util.Map;
                         defaultValue = "false",
                         optional = true,
                         type = {DataType.BOOL}
-
+                
                 )
         },
         examples = {
@@ -322,7 +323,7 @@ import java.util.Map;
                                 "`Authorization:'Basic encodeBase64(username:Password)'` header.")},
         systemParameter = {
                 @SystemParameter(
-                        name = "serverBootstrapBossGroupSize",
+                        name = "SERVER_BOOTSTRAP_BOSS_GROUP_SIZE1",
                         description = "property to configure number of boss threads, which accepts incoming " +
                                 "connections until the ports are unbound. Once connection accepts successfully, " +
                                 "boss thread passes the accepted channel to one of the worker threads.",
@@ -330,14 +331,14 @@ import java.util.Map;
                         possibleParameters = "Any integer"
                 ),
                 @SystemParameter(
-                        name = "serverBootstrapWorkerGroupSize",
+                        name = "SERVER_BOOTSTRAP_WORKER_GROUP_SIZE1",
                         description = "property to configure number of worker threads, which performs non " +
                                 "blocking read and write for one or more channels in non-blocking mode.",
                         defaultValue = "(Number of available processors)*2",
                         possibleParameters = "Any integer"
                 ),
                 @SystemParameter(
-                        name = "serverBootstrapClientGroupSize",
+                        name = "SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE1",
                         description = "property to configure number of client threads, which performs non " +
                                 "blocking read and write for one or more channels in non-blocking mode.",
                         defaultValue = "(Number of available processors)*2",
@@ -396,7 +397,7 @@ public class HttpSource extends Source {
     private SourceEventListener sourceEventListener;
     private String[] requestedTransportPropertyNames;
     private ListenerConfiguration listenerConfiguration;
-
+    
     /**
      * The initialization method for {@link Source}, which will be called before other methods and validate
      * the all listenerConfiguration and getting the intial values.
@@ -478,9 +479,9 @@ public class HttpSource extends Source {
             this.listenerConfiguration.setRequestSizeValidationConfig(HttpConnectorRegistry.getInstance()
                     .populateRequestSizeValidationConfiguration());
         }
-        listenerConfiguration.setParameters(HttpSourceUtil.getInstance().populateParameters(parameterList));
+        listenerConfiguration.setParameters(HttpIoUtil.populateParameters(parameterList));
     }
-
+    
     /**
      * Returns the list of classes which this source can output.
      *
@@ -489,9 +490,9 @@ public class HttpSource extends Source {
      */
     @Override
     public Class[] getOutputEventClasses() {
-        return new Class[]{String.class};
+        return new Class[] {String.class};
     }
-
+    
     /**
      * Intialy Called to connect to the end point for start  retriving the messages asynchronisly .
      *
@@ -506,7 +507,7 @@ public class HttpSource extends Source {
         this.httpConnectorRegistry.registerSourceListener(sourceEventListener, this.listenerUrl,
                 Integer.parseInt(workerThread), isAuth, requestedTransportPropertyNames);
     }
-
+    
     /**
      * This method can be called when it is needed to disconnect from the end point.
      */
@@ -515,7 +516,7 @@ public class HttpSource extends Source {
         this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl);
         this.httpConnectorRegistry.unregisterServerConnector(this.listenerUrl);
     }
-
+    
     /**
      * Called at the end to clean all the resources consumed by the {@link Source}
      */
@@ -523,7 +524,7 @@ public class HttpSource extends Source {
     public void destroy() {
         this.httpConnectorRegistry.clearBootstrapConfigIfLast();
     }
-
+    
     /**
      * Called to pause event consumption
      */
@@ -535,7 +536,7 @@ public class HttpSource extends Source {
             httpSourceListener.pause();
         }
     }
-
+    
     /**
      * Called to resume event consumption
      */
@@ -547,7 +548,7 @@ public class HttpSource extends Source {
             httpSourceListener.resume();
         }
     }
-
+    
     /**
      * Used to collect the serializable state of the processing element, that need to be
      * persisted for the reconstructing the element to the same state on a different point of time
@@ -559,7 +560,7 @@ public class HttpSource extends Source {
         //no current state
         return null;
     }
-
+    
     /**
      * Used to restore serialized state of the processing element, for reconstructing
      *

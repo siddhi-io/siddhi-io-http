@@ -38,14 +38,14 @@ import org.wso2.transport.http.netty.message.HTTPConnectorUtil;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Collectors;
+
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.PARAMETER_SEPARATOR;
+import static org.wso2.extension.siddhi.io.http.util.HttpIoUtil.populateParameterMap;
 
 /**
  * {@code HttpConnectorRegistry} The code is responsible for maintaining the all active server connectors.
@@ -65,50 +65,27 @@ class HttpConnectorRegistry {
         return new RequestSizeValidationConfig();
     }
     
+    /**
+     * Set transport properties.
+     *
+     * @param serverBootstrapConfigurationList bootstrap configurations.
+     * @param serverHeaderValidation           header validation configurations.
+     */
     void setTransportConfig(String serverBootstrapConfigurationList, String serverHeaderValidation) {
         trpConfig = new TransportsConfiguration();
         Set<TransportProperty> transportProperties = new HashSet<>();
         if (!HttpConstants.EMPTY_STRING.equals(serverBootstrapConfigurationList.trim())) {
-            try {
-                String[] valueList = serverBootstrapConfigurationList.trim().substring(1,
-                        serverBootstrapConfigurationList.length
-                                () - 1).split("','");
-                Map<String, String> bootstrapValueMap = new HashMap<>();
-                Arrays.stream(valueList).forEach(valueEntry ->
-                        {
-                            String[] entry = valueEntry.split(":");
-                            if (entry.length == 2) {
-                                bootstrapValueMap.put(entry[0], entry[1]);
-                            } else {
-                                log.error("Client Bootstrap configuration is not in expected format please insert them as " +
-                                        "'key1:val1'," + "'key2:val2' format");
-                            }
-                
-                        }
-                );
-                trpConfig.setTransportProperties(HttpSourceUtil.getInstance().populateBootstrapConfigurations
-                        (bootstrapValueMap, transportProperties));
-            } catch (ArrayIndexOutOfBoundsException ex) {
-                log.error("Bootstrap configuration is not in expected format please insert them as 'key1:val1'," +
-                        "'key2:val2' format", ex);
-            }
+            String[] valueList = serverBootstrapConfigurationList.trim().substring(1,
+                    serverBootstrapConfigurationList.length
+                            () - 1).split(PARAMETER_SEPARATOR);
+            trpConfig.setTransportProperties(HttpSourceUtil.populateBootstrapConfigurations
+                    (populateParameterMap(valueList), transportProperties));
         }
-        
         if (!HttpConstants.EMPTY_STRING.equals(serverHeaderValidation.trim())) {
-            try {
-                String[] valueList = serverHeaderValidation.trim().substring(1, serverHeaderValidation.length
-                        () - 1).split("','");
-                Map<String, String> headerValidationValueMap = Arrays.stream(valueList).collect(Collectors.toMap(
-                        (valueEntry) -> valueEntry.split(":")[0],
-                        (valueEntry) -> valueEntry.split(":")[1]
-                        )
-                );
-                trpConfig.setTransportProperties(HttpSourceUtil.getInstance().populateHeaderValidationConfigurations
-                        (headerValidationValueMap, transportProperties));
-            } catch (ArrayIndexOutOfBoundsException ex) {
-                log.error("Header validation configuration is not in expected format please insert them as " +
-                        "'key1:val1','key2:val2' format.", ex);
-            }
+            String[] valueList = serverHeaderValidation.trim().substring(1, serverHeaderValidation.length
+                    () - 1).split(PARAMETER_SEPARATOR);
+            trpConfig.setTransportProperties(HttpSourceUtil.populateTransportProperties
+                    (populateParameterMap(valueList), transportProperties));
         }
     }
     
@@ -204,7 +181,11 @@ class HttpConnectorRegistry {
         }
     }
     
-    
+    /**
+     * Create http server connector for given listener configurations.
+     *
+     * @param listenerConfig listener configurations.
+     */
     void createHttpServerConnector(ListenerConfiguration listenerConfig) {
         synchronized (this) {
             String listenerInterface = listenerConfig.getHost() + ":" + listenerConfig.getPort();
@@ -229,8 +210,13 @@ class HttpConnectorRegistry {
         }
     }
     
-    void registerServerConnector(org.wso2.transport.http.netty.contract.ServerConnector
-                                         serverConnector, ListenerConfiguration listenerConfig) {
+    /**
+     * Register new server connector.
+     *
+     * @param serverConnector server connector.
+     * @param listenerConfig  listener configuration.
+     */
+    void registerServerConnector(ServerConnector serverConnector, ListenerConfiguration listenerConfig) {
         ServerConnectorFuture connectorFuture = serverConnector.start();
         ConnectorStartupSynchronizer startupSyncer =
                 new ConnectorStartupSynchronizer(new CountDownLatch(1));
@@ -271,6 +257,9 @@ class HttpConnectorRegistry {
         }
     }
     
+    /**
+     * The server connector context.
+     */
     private static class HttpServerConnectorContext {
         private ServerConnector serverConnector;
         private ListenerConfiguration listenerConfiguration;

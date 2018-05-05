@@ -48,14 +48,15 @@ public class HttpBasicTestCase {
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;
-
+    
     @BeforeMethod
     public void init() {
         eventCount.set(0);
     }
-
+    
     /**
      * Creating test for publishing events without URL.
+     *
      * @throws Exception Interrupted exception
      */
     @Test
@@ -67,17 +68,17 @@ public class HttpBasicTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
-        String inStreamDefinition =  "@App:name('TestSiddhiApp')"  +
+        String inStreamDefinition = "@App:name('TestSiddhiApp')" +
                 "@source(type='http', @map(type='xml') )" +
-                        "define stream inputStream (name string, age int, country string);";
+                "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query') "
                 + "from inputStream "
                 + "select *  "
                 + "insert into outputStream;"
-                        );
+        );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-
+        
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -94,28 +95,29 @@ public class HttpBasicTestCase {
         expected.add("John");
         expected.add("Mike");
         String event1 = "<events>"
-                            + "<event>"
-                                + "<name>John</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>John</name>"
+                + "<age>100</age>"
+                + "<country>AUS</country>"
+                + "</event>"
+                + "</events>";
         String event2 = "<events>"
-                            + "<event>"
-                                + "<name>Mike</name>"
-                                + "<age>20</age>"
-                                + "<country>USA</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>Mike</name>"
+                + "<age>20</age>"
+                + "<country>USA</country>"
+                + "</event>"
+                + "</events>";
         HttpTestUtil.httpPublishEventDefault(event1, baseURI);
         HttpTestUtil.httpPublishEventDefault(event2, baseURI);
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-
+    
     /**
      * Creating test for publishing events from PUT method.
+     *
      * @throws Exception Interrupted exception
      */
     @Test
@@ -151,19 +153,19 @@ public class HttpBasicTestCase {
         // publishing events
         List<String> expected = new ArrayList<>(2);
         String event1 = "<events>"
-                            + "<event>"
-                                + "<name>John</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>John</name>"
+                + "<age>100</age>"
+                + "<country>AUS</country>"
+                + "</event>"
+                + "</events>";
         String event2 = "<events>"
-                            + "<event>"
-                                + "<name>Mike</name>"
-                                + "<age>20</age>"
-                                + "<country>USA</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>Mike</name>"
+                + "<age>20</age>"
+                + "<country>USA</country>"
+                + "</event>"
+                + "</events>";
         HttpTestUtil.httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
                 "PUT");
         HttpTestUtil.httpPublishEvent(event2, baseURI, "/endpoints/RecPro", "PUT");
@@ -178,9 +180,10 @@ public class HttpBasicTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-
+    
     /**
      * Creating test for publishing events with XML mapping.
+     *
      * @throws Exception Interrupted exception
      */
     @Test(expectedExceptions = RuntimeException.class)
@@ -218,7 +221,7 @@ public class HttpBasicTestCase {
         );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager1
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-
+        
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -232,7 +235,7 @@ public class HttpBasicTestCase {
         siddhiAppRuntime.start();
         SiddhiAppRuntime siddhiAppRuntime2 = siddhiManager2
                 .createSiddhiAppRuntime(inStreamDefinition2 + query2);
-
+        
         siddhiAppRuntime2.addCallback("query2", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -249,19 +252,19 @@ public class HttpBasicTestCase {
         expected.add("John");
         expected.add("Mike");
         String event1 = "<events>"
-                            + "<event>"
-                                + "<name>John</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>John</name>"
+                + "<age>100</age>"
+                + "<country>AUS</country>"
+                + "</event>"
+                + "</events>";
         String event2 = "<events>"
-                            + "<event>"
-                                + "<name>Mike</name>"
-                                + "<age>20</age>"
-                                + "<country>USA</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>Mike</name>"
+                + "<age>20</age>"
+                + "<country>USA</country>"
+                + "</event>"
+                + "</events>";
         HttpTestUtil.httpPublishEvent(event1, baseURI, "/endpoints/abc",
                 "POST");
         HttpTestUtil.httpPublishEvent(event2, baseURI, "/endpoints/abc",
@@ -280,7 +283,7 @@ public class HttpBasicTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-
+    
     /**
      * Creating test for publishing events without URL multiple events with same url.
      */
@@ -303,7 +306,7 @@ public class HttpBasicTestCase {
                         + "from inputStreamA "
                         + "select *  "
                         + "insert into outputStreamA;"
-                         );
+        );
         String inStreamDefinitionB = "@source(type='http', @map(type='xml'), receiver.url='http://localhost:8006" +
                 "/endpoints/RecPro', basic.auth.enabled='false')"
                 + "define stream inputStreamB (name string, age int, country string);";
@@ -312,29 +315,29 @@ public class HttpBasicTestCase {
                         + "from inputStreamB "
                         + "select *  "
                         + "insert into outputStreamB;"
-                        );
+        );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinitionA + inStreamDefinitionB + queryA + queryB);
         siddhiAppRuntime.addCallback("queryA", new QueryCallback() {
-                @Override
-                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                    EventPrinter.print(timeStamp, inEvents, removeEvents);
-                    for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        receivedEventNameListA.add(event.getData(0).toString());
-                    }
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event event : inEvents) {
+                    eventCount.incrementAndGet();
+                    receivedEventNameListA.add(event.getData(0).toString());
                 }
-            });
+            }
+        });
         siddhiAppRuntime.addCallback("queryB", new QueryCallback() {
-                @Override
-                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                    EventPrinter.print(timeStamp, inEvents, removeEvents);
-                    for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        receivedEventNameListB.add(event.getData(0).toString());
-                    }
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                EventPrinter.print(timeStamp, inEvents, removeEvents);
+                for (Event event : inEvents) {
+                    eventCount.incrementAndGet();
+                    receivedEventNameListB.add(event.getData(0).toString());
                 }
-            });
+            }
+        });
         siddhiAppRuntime.start();
         //To check weather only one is deployed
         final List<LoggingEvent> log = appender.getLog();
@@ -349,9 +352,10 @@ public class HttpBasicTestCase {
                 "'inputStreamA', Listener URL http://localhost:8006/endpoints/RecPro already connected."), 1);
         siddhiAppRuntime.shutdown();
     }
-
+    
     /**
      * Creating test for publishing events with different url with same context.
+     *
      * @throws Exception Interrupted exception
      */
     @Test
@@ -371,7 +375,7 @@ public class HttpBasicTestCase {
                         + "from inputStreamA "
                         + "select *  "
                         + "insert into outputStreamA;"
-                        );
+        );
         String inStreamDefinition2 = "@source(type='http', @map(type='xml'), receiver.url='http://localhost:8009/" +
                 "endpoints/RecPro', basic.auth.enabled='false' )"
                 + "define stream inputStreamB (name string, age int, country string);";
@@ -380,7 +384,7 @@ public class HttpBasicTestCase {
                         + "from inputStreamB "
                         + "select *  "
                         + "insert into outputStreamB;"
-                        );
+        );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition1 + inStreamDefinition2 + query1 + query2);
         siddhiAppRuntime.addCallback("queryA", new QueryCallback() {
@@ -412,33 +416,33 @@ public class HttpBasicTestCase {
         expectedB.add("Donna");
         expectedB.add("Miano");
         String event1 = "<events>"
-                            + "<event>"
-                                + "<name>John</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>John</name>"
+                + "<age>100</age>"
+                + "<country>AUS</country>"
+                + "</event>"
+                + "</events>";
         String event2 = "<events>"
-                            + "<event>"
-                                + "<name>Mike</name>"
-                                + "<age>20</age>"
-                                + "<country>USA</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>Mike</name>"
+                + "<age>20</age>"
+                + "<country>USA</country>"
+                + "</event>"
+                + "</events>";
         String event3 = "<events>"
-                            + "<event>"
-                                + "<name>Donna</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>Donna</name>"
+                + "<age>100</age>"
+                + "<country>AUS</country>"
+                + "</event>"
+                + "</events>";
         String event4 = "<events>"
-                            + "<event>"
-                                + "<name>Miano</name>"
-                                + "<age>20</age>"
-                                + "<country>USA</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>Miano</name>"
+                + "<age>20</age>"
+                + "<country>USA</country>"
+                + "</event>"
+                + "</events>";
         HttpTestUtil.httpPublishEvent(event1, baseURIA, "/endpoints/RecPro",
                 "POST");
         HttpTestUtil.httpPublishEvent(event2, baseURIA, "/endpoints/RecPro",
@@ -452,9 +456,10 @@ public class HttpBasicTestCase {
         Assert.assertEquals(receivedEventNameListB.toString(), expectedB.toString());
         siddhiAppRuntime.shutdown();
     }
-
+    
     /**
      * Creating test for publishing events with empty payload.
+     *
      * @throws Exception Interrupted exception
      */
     @Test
@@ -472,7 +477,7 @@ public class HttpBasicTestCase {
                         + "from inputStream "
                         + "select *  "
                         + "insert into outputStream;"
-                        );
+        );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
@@ -494,25 +499,25 @@ public class HttpBasicTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-
+    
     private static class TestAppender extends AppenderSkeleton {
-
+        
         private final List<LoggingEvent> log = new ArrayList<>();
-
+        
         @Override
         public boolean requiresLayout() {
             return false;
         }
-
+        
         @Override
         protected void append(final LoggingEvent loggingEvent) {
             log.add(loggingEvent);
         }
-
+        
         @Override
         public void close() {
         }
-
+        
         List<LoggingEvent> getLog() {
             return new ArrayList<>(log);
         }

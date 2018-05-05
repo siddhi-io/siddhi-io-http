@@ -50,14 +50,15 @@ public class HttpsSSLSourceTestCase {
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;
-
+    
     @BeforeMethod
     public void init() {
         eventCount.set(0);
     }
-
+    
     /**
      * Creating test for publishing events with https protocol.
+     *
      * @throws Exception Interrupted exception
      */
     @Test
@@ -70,7 +71,7 @@ public class HttpsSSLSourceTestCase {
         masterConfigs.put("source.http.certPassword", "wso2carbon");
         List<String> receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
-        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs , null);
+        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs, null);
         inMemoryConfigManager.generateConfigReader("source", "http");
         siddhiManager.setConfigManager(inMemoryConfigManager);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
@@ -81,10 +82,10 @@ public class HttpsSSLSourceTestCase {
                 + "from inputStream "
                 + "select *  "
                 + "insert into outputStream;"
-                );
+        );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-
+        
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -101,28 +102,29 @@ public class HttpsSSLSourceTestCase {
         expected.add("John");
         expected.add("Mike");
         String event1 = "<events>"
-                            + "<event>"
-                                + "<name>John</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>John</name>"
+                + "<age>100</age>"
+                + "<country>AUS</country>"
+                + "</event>"
+                + "</events>";
         String event2 = "<events>"
-                            + "<event>"
-                                + "<name>Mike</name>"
-                                + "<age>20</age>"
-                                + "<country>USA</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>Mike</name>"
+                + "<age>20</age>"
+                + "<country>USA</country>"
+                + "</event>"
+                + "</events>";
         HttpTestUtil.httpsPublishEvent(event1);
         HttpTestUtil.httpsPublishEvent(event2);
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-
+    
     /**
      * Creating test for publishing events with https protocol with invalid keystore.
+     *
      * @throws Exception Interrupted exception
      */
     @Test
@@ -136,10 +138,10 @@ public class HttpsSSLSourceTestCase {
         masterConfigs.put("source.http.keyStoreLocation", "${carbon.home}/resources/security/store.jks");
         masterConfigs.put("source.http.keyStorePassword", "wso2carbon");
         masterConfigs.put("source.http.certPassword", "wso2carbon");
-
+        
         List<String> receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
-        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs , null);
+        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs, null);
         inMemoryConfigManager.generateConfigReader("source", "http");
         siddhiManager.setConfigManager(inMemoryConfigManager);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
@@ -148,13 +150,13 @@ public class HttpsSSLSourceTestCase {
                 + "define stream inputStream (name string, age int, country string);";
         String query = (
                 "@info(name = 'query') " +
-                "from inputStream " +
-                "select *  " +
-                "insert into outputStream;"
-                );
+                        "from inputStream " +
+                        "select *  " +
+                        "insert into outputStream;"
+        );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-
+        
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -169,19 +171,19 @@ public class HttpsSSLSourceTestCase {
         // publishing events
         List<String> expected = new ArrayList<>(2);
         String event1 = "<events>"
-                            + "<event>"
-                                + "<name>John</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>John</name>"
+                + "<age>100</age>"
+                + "<country>AUS</country>"
+                + "</event>"
+                + "</events>";
         String event2 = "<events>"
-                            + "<event>"
-                                + "<name>Mike</name>"
-                                + "<age>20</age>"
-                                + "<country>USA</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>Mike</name>"
+                + "<age>20</age>"
+                + "<country>USA</country>"
+                + "</event>"
+                + "</events>";
         HttpTestUtil.httpsPublishEvent(event1);
         HttpTestUtil.httpsPublishEvent(event2);
         final List<LoggingEvent> log = appender.getLog();
@@ -195,9 +197,10 @@ public class HttpsSSLSourceTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-
+    
     /**
      * Creating test for publishing events with https protocol with invalid keystore pass.
+     *
      * @throws Exception Interrupted exception
      */
     @Test
@@ -213,7 +216,7 @@ public class HttpsSSLSourceTestCase {
         masterConfigs.put("source.http.certPassword", "wso2carbon");
         List<String> receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
-        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs , null);
+        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs, null);
         inMemoryConfigManager.generateConfigReader("source", "http");
         siddhiManager.setConfigManager(inMemoryConfigManager);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
@@ -222,13 +225,13 @@ public class HttpsSSLSourceTestCase {
                 + "define stream inputStream (name string, age int, country string);";
         String query = (
                 "@info(name = 'query') "
-                + "from inputStream "
-                + "select *  "
-                + "insert into outputStream;"
+                        + "from inputStream "
+                        + "select *  "
+                        + "insert into outputStream;"
         );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-
+        
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -243,19 +246,19 @@ public class HttpsSSLSourceTestCase {
         // publishing events
         List<String> expected = new ArrayList<>(2);
         String event1 = "<events>"
-                            + "<event>"
-                                + "<name>John</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>John</name>"
+                + "<age>100</age>"
+                + "<country>AUS</country>"
+                + "</event>"
+                + "</events>";
         String event2 = "<events>"
-                            + "<event>"
-                                + "<name>Mike</name>"
-                                + "<age>20</age>"
-                                + "<country>USA</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>Mike</name>"
+                + "<age>20</age>"
+                + "<country>USA</country>"
+                + "</event>"
+                + "</events>";
         HttpTestUtil.httpsPublishEvent(event1);
         HttpTestUtil.httpsPublishEvent(event2);
         final List<LoggingEvent> log = appender.getLog();
@@ -269,7 +272,7 @@ public class HttpsSSLSourceTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-
+    
     /**
      * Creating test for publishing events with https protocol with invalid cert pass.
      *
@@ -288,7 +291,7 @@ public class HttpsSSLSourceTestCase {
         masterConfigs.put("source.http.certPassword", "wso2carbon123");
         List<String> receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
-        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs , null);
+        InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs, null);
         inMemoryConfigManager.generateConfigReader("source", "http");
         siddhiManager.setConfigManager(inMemoryConfigManager);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
@@ -299,10 +302,10 @@ public class HttpsSSLSourceTestCase {
                 + "from inputStream "
                 + "select *  "
                 + "insert into outputStream;"
-                );
+        );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-
+        
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -317,19 +320,19 @@ public class HttpsSSLSourceTestCase {
         // publishing events
         List<String> expected = new ArrayList<>(2);
         String event1 = "<events>"
-                            + "<event>"
-                                + "<name>John</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>John</name>"
+                + "<age>100</age>"
+                + "<country>AUS</country>"
+                + "</event>"
+                + "</events>";
         String event2 = "<events>"
-                            + "<event>"
-                                + "<name>Mike</name>"
-                                + "<age>20</age>"
-                                + "<country>USA</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>Mike</name>"
+                + "<age>20</age>"
+                + "<country>USA</country>"
+                + "</event>"
+                + "</events>";
         HttpTestUtil.httpsPublishEvent(event1);
         HttpTestUtil.httpsPublishEvent(event2);
         final List<LoggingEvent> log = appender.getLog();
@@ -343,24 +346,24 @@ public class HttpsSSLSourceTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-
+    
     private class TestAppender extends AppenderSkeleton {
         private final List<LoggingEvent> log = new ArrayList<>();
-
+        
         @Override
         public boolean requiresLayout() {
             return false;
         }
-
+        
         @Override
         protected void append(final LoggingEvent loggingEvent) {
             log.add(loggingEvent);
         }
-
+        
         @Override
         public void close() {
         }
-
+        
         List<LoggingEvent> getLog() {
             return new ArrayList<LoggingEvent>(log);
         }

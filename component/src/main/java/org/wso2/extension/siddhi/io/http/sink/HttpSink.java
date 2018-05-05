@@ -29,6 +29,7 @@ import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpSinkUtil;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
+import org.wso2.extension.siddhi.io.http.util.HttpIoUtil;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
@@ -591,7 +592,7 @@ public class HttpSink extends Sink {
             senderConfig.setMaxRedirectCount(Integer.parseInt(maxRedirectCount));
         }
         if (!HttpConstants.EMPTY_STRING.equals(parametersList)) {
-            senderConfig.setParameters(HttpSinkUtil.populateParameters(parametersList));
+            senderConfig.setParameters(HttpIoUtil.populateParameters(parametersList));
         }
         
         //overwrite default transport configuration

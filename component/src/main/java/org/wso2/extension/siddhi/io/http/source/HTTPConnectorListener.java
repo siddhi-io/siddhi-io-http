@@ -33,18 +33,18 @@ import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
  * HTTP connector listener for Siddhi.
  */
 public class HTTPConnectorListener implements HttpConnectorListener {
-
+    
     private static final Logger log = LoggerFactory.getLogger(HTTPConnectorListener.class);
     private TransportsConfiguration configuration;
     private HttpClientConnector clientConnector;
-
+    
     public HTTPConnectorListener(TransportsConfiguration configuration) {
         this.configuration = configuration;
     }
-
+    
     public HTTPConnectorListener() {
     }
-
+    
     @Override
     public void onMessage(HTTPCarbonMessage carbonMessage) {
         if (HttpConstants.PROTOCOL_ID.equals(carbonMessage.getProperty(HttpConstants.PROTOCOL)) &&
@@ -87,7 +87,7 @@ public class HTTPConnectorListener implements HttpConnectorListener {
             HttpSourceUtil.handleCallback(carbonMessage, 404);
         }
     }
-
+    
     protected String getInterface(HTTPCarbonMessage cMsg) {
         String interfaceId = (String) cMsg.getProperty(Constants.LISTENER_INTERFACE_ID);
         if (interfaceId == null) {
@@ -96,10 +96,10 @@ public class HTTPConnectorListener implements HttpConnectorListener {
             }
             interfaceId = HttpConstants.DEFAULT_INTERFACE;
         }
-
+        
         return interfaceId;
     }
-
+    
     @Override
     public void onError(Throwable throwable) {
         log.error("Error in http server connector", throwable);

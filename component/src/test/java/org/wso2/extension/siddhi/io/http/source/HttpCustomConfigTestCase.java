@@ -19,6 +19,7 @@
  */
 package org.wso2.extension.siddhi.io.http.source;
 
+import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -38,7 +39,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.log4j.Logger;
+
 /**
  * Http test case with custom configurations.
  */
@@ -47,12 +48,12 @@ public class HttpCustomConfigTestCase {
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;
-
+    
     @BeforeMethod
     public void init() {
         eventCount.set(0);
     }
-
+    
     /**
      * Creating test for publishing events with XML mapping.
      *
@@ -89,7 +90,7 @@ public class HttpCustomConfigTestCase {
         );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-
+        
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -127,7 +128,7 @@ public class HttpCustomConfigTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-
+    
     /**
      * Creating test for publishing events with XML mapping.
      *
@@ -153,7 +154,7 @@ public class HttpCustomConfigTestCase {
         );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-
+        
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -165,7 +166,7 @@ public class HttpCustomConfigTestCase {
             }
         });
         siddhiAppRuntime.start();
-
+        
         // publishing events
         List<String> expected = new ArrayList<>(2);
         expected.add("John");
@@ -193,7 +194,7 @@ public class HttpCustomConfigTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-
+    
     /**
      * Creating test for publishing events with XML mapping.
      *
@@ -219,7 +220,7 @@ public class HttpCustomConfigTestCase {
         );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-
+        
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -268,7 +269,7 @@ public class HttpCustomConfigTestCase {
             }
         };
         thread3.start();
-
+        
         Thread thread2 = new Thread() {
             public void run() {
                 for (List<Source> sourceList : siddhiAppRuntime.getSources()) {

@@ -20,6 +20,7 @@
 package org.wso2.extension.siddhi.io.http.test.osgi.source.util;
 
 import io.netty.handler.codec.http.HttpMethod;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -34,17 +35,18 @@ import java.nio.file.Paths;
 public class TestUtil {
     private static final Logger logger = Logger.getLogger(TestUtil.class);
     private static final String CARBON_HOME = "carbon.home";
+    
     public TestUtil() {
     }
-
+    
     public void setCarbonHome() {
         Path carbonHome = Paths.get("");
         carbonHome = Paths.get(carbonHome.toString(), "src", "test", "resources");
         System.setProperty(CARBON_HOME, carbonHome.toString());
         logger.info("Carbon Home Absolute path set to: " + carbonHome.toAbsolutePath());
-
+        
     }
-
+    
     public void httpPublishEventAuthIncorrect(String event, URI baseURI, Boolean auth, String mapping) {
         try {
             HttpURLConnection urlConn = null;
@@ -69,7 +71,7 @@ public class TestUtil {
             ServerUtil.handleException("IOException occurred while running the HttpsSSLSourceTestCase", e);
         }
     }
-
+    
     public void httpPublishEvent(String event, URI baseURI, String path, Boolean auth, String mapping,
                                  String methodType) {
         try {

@@ -17,6 +17,7 @@
  */
 package org.wso2.extension.siddhi.io.http.source;
 
+import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -30,7 +31,7 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.util.EventPrinter;
 import org.wso2.siddhi.core.util.SiddhiTestHelper;
 import org.wso2.siddhi.core.util.config.InMemoryConfigManager;
-import org.apache.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,13 +48,13 @@ public class HttpSourceConflictsTestCase {
     private AtomicInteger eventCountB = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;
-
+    
     @BeforeMethod
     public void init() {
         eventCountA.set(0);
         eventCountB.set(0);
     }
-
+    
     /**
      * Creating test for publishing events with multiple formats synchronously.
      *

@@ -44,14 +44,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class HttpCustomThreadPoolConfigTestCase {
     private static final Logger logger = Logger.getLogger(HttpCustomThreadPoolConfigTestCase.class);
     private AtomicInteger eventCount = new AtomicInteger(0);
-
+    
     @BeforeMethod
     public void init() {
         eventCount.set(0);
     }
-
+    
     /**
      * Creating test for publishing events with XML mapping.
+     *
      * @throws Exception Interrupted exception
      */
     @Test
@@ -72,7 +73,7 @@ public class HttpCustomThreadPoolConfigTestCase {
                         + "from inputStream "
                         + "select *  "
                         + "insert into outputStream;"
-                        );
+        );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
@@ -91,19 +92,19 @@ public class HttpCustomThreadPoolConfigTestCase {
         expected.add("John");
         expected.add("Mike");
         String event1 = "<events>"
-                            + "<event>"
-                                + "<name>John</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>John</name>"
+                + "<age>100</age>"
+                + "<country>AUS</country>"
+                + "</event>"
+                + "</events>";
         String event2 = "<events>"
-                            + "<event>"
-                                + "<name>Mike</name>"
-                                + "<age>20</age>"
-                                + "<country>USA</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>Mike</name>"
+                + "<age>20</age>"
+                + "<country>USA</country>"
+                + "</event>"
+                + "</events>";
         HttpTestUtil.httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
                 "POST");
         HttpTestUtil.httpPublishEvent(event2, baseURI, "/endpoints/RecPro",
