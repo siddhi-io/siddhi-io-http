@@ -54,9 +54,9 @@ public class HttpConnectorPortBindingListener implements PortBindingEventListene
     @Override
     public void onClose(String serverConnectorId, boolean isHttps) {
         if (isHttps) {
-            log.info("HTTPS source " + serverConnectorId + " has been started");
+            log.info("HTTPS source " + serverConnectorId + " has been closed");
         } else {
-            log.info("HTTP source " + serverConnectorId + " has been started");
+            log.info("HTTP source " + serverConnectorId + " has been closed");
         }
     }
     

@@ -717,8 +717,8 @@ public class HttpSink extends Sink {
         cMessage.setProperty(Constants.HTTP_PORT, Integer.valueOf(httpURLProperties.get(Constants.HTTP_PORT)));
         // Set method
         cMessage.setProperty(Constants.HTTP_METHOD, httpMethod);
-        //cMessage.setProperty(Constants.HTTP_METHOD, Constants.HTTP_GET_METHOD);
-        //cMessage.setProperty(Constants.REQUEST_URL, httpURLProperties.get(Constants.REQUEST_URL));
+        //Set request URL
+        cMessage.setProperty(Constants.REQUEST_URL, httpURLProperties.get(Constants.REQUEST_URL));
         HttpHeaders httpHeaders = cMessage.getHeaders();
         //if Authentication enabled
         if (!(userName.equals(HttpConstants.EMPTY_STRING)) && !(userPassword.equals
