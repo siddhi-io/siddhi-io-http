@@ -22,6 +22,7 @@ import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
 import com.sun.net.httpserver.HttpsServer;
 import org.apache.log4j.Logger;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -44,17 +45,18 @@ public class HttpsServerListenerHandler implements Runnable {
     private HttpServerListener serverListener;
     private int port;
     private KeyStore keyStore;
-    private  HttpsServer server;
+    private HttpsServer server;
+    
     public HttpsServerListenerHandler(int port) throws KeyStoreException {
         this.serverListener = new HttpServerListener();
         this.port = port;
         keyStore = KeyStore.getInstance("JKS");
     }
-
+    
     public HttpServerListener getServerListener() {
         return serverListener;
     }
-
+    
     @Override
     public void run() {
         try {
@@ -79,12 +81,12 @@ public class HttpsServerListenerHandler implements Runnable {
             });
             server.createContext("/abc", serverListener);
             server.start();
-        }  catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             logger.error("No such algorithm in  while trying to up test https server.", e);
         } catch (CertificateException e) {
             logger.error("Certificate exception in basic authentication", e);
         } catch (KeyStoreException e) {
-            logger.error("Keystore exception in  while trying to up test https server." , e);
+            logger.error("Keystore exception in  while trying to up test https server.", e);
         } catch (IOException e) {
             logger.error("IOException  while trying to up test https server. ", e);
         } catch (UnrecoverableKeyException e) {
@@ -93,10 +95,11 @@ public class HttpsServerListenerHandler implements Runnable {
             logger.error("KeyManagementException while trying to up test https server.", e);
         }
     }
+    
     public void shutdown() {
         if (server != null) {
             server.stop(1);
         }
-
+        
     }
 }

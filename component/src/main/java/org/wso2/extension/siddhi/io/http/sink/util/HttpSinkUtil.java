@@ -25,27 +25,46 @@ import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.extension.siddhi.io.http.util.TrpPropertyTypes;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.transport.http.netty.config.Parameter;
+import org.wso2.transport.http.netty.common.Constants;
 import org.wso2.transport.http.netty.config.SenderConfiguration;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.CLIENT_BOOTSTRAP_CONNECT_TIMEOUT;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.CLIENT_BOOTSTRAP_KEEPALIVE;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.CLIENT_BOOTSTRAP_NODELAY;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.CLIENT_BOOTSTRAP_RECIEVEBUFFERSIZE;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.CLIENT_BOOTSTRAP_SENDBUFFERSIZE;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.CLIENT_BOOTSTRAP_SOCKET_REUSE;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.CLIENT_BOOTSTRAP_SOCKET_TIMEOUT;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.CLIENT_CONNECTION_POOL_COUNT;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.CLIENT_MAX_ACTIVE_CONNECTIONS_PER_POOL;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.CLIENT_MAX_IDLE_CONNECTIONS_PER_POOL;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.CLIENT_MIN_EVICTION_IDLE_TIME;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.CLIENT_MIN_IDLE_CONNECTIONS_PER_POOL;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EVENT_GROUP_EXECUTOR_THREAD_SIZE;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.HTTP_TRACE_LOG_ENABLED;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.LATENCY_METRICS_ENABLED;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.LOG_TRACE_ENABLE_DEFAULT_VALUE;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.MAX_WAIT_FOR_TRP_CLIENT_CONNECTION_POOL;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.PARAMETER_SEPARATOR;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SENDER_THREAD_COUNT;
+import static org.wso2.extension.siddhi.io.http.util.HttpIoUtil.populateParameterMap;
 
 /**
  * {@code HttpSinkUtil } responsible of the all configuration reading and input formatting of http transport.
  */
 public class HttpSinkUtil {
     private static final Logger log = Logger.getLogger(HttpSinkUtil.class);
-
+    
     private HttpSinkUtil() {
     }
-
+    
     /**
      * Method is responsible for separate publisher url to host,port and context.
      *
@@ -55,22 +74,19 @@ public class HttpSinkUtil {
     public static Map<String, String> getURLProperties(String publisherURL) {
         Map<String, String> httpStaticProperties;
         try {
-            URL aURL = new URL(publisherURL);
-            String scheme = aURL.getProtocol();
-            String host = aURL.getHost();
-            String port = Integer.toString(aURL.getPort());
-            String path = aURL.getPath();
+            URL url = new URL(publisherURL);
             httpStaticProperties = new HashMap<>();
-            httpStaticProperties.put(HttpConstants.TO, path);
-            httpStaticProperties.put(HttpConstants.HOST, host);
-            httpStaticProperties.put(HttpConstants.PORT, port);
-            httpStaticProperties.put(HttpConstants.SCHEME, scheme);
+            httpStaticProperties.put(Constants.TO, url.toString());
+            httpStaticProperties.put(Constants.HTTP_HOST, url.getHost());
+            httpStaticProperties.put(Constants.HTTP_PORT, Integer.toString(url.getPort()));
+            httpStaticProperties.put(Constants.PROTOCOL, url.getProtocol());
+            httpStaticProperties.put(Constants.REQUEST_URL, url.toString());
         } catch (MalformedURLException e) {
             throw new HttpSinkAdaptorRuntimeException(" Receiver url mandatory. Please insert valid url .", e);
         }
         return httpStaticProperties;
     }
-
+    
     /**
      * Method is responsible of to convert string of headers to list of headers.
      * Example header format : 'name1:value1','name2:value2'
@@ -83,10 +99,10 @@ public class HttpSinkUtil {
             headers = headers.trim();
             headers = headers.substring(1, headers.length() - 1);
             List<Header> headersList = new ArrayList<>();
-            if (!"".equals(headers)) {
+            if (!HttpConstants.EMPTY_STRING.equals(headers)) {
                 String[] spam = headers.split(HttpConstants.HEADER_SPLITTER_REGEX);
-                for (String aSpam : spam) {
-                    String[] header = aSpam.split(HttpConstants.HEADER_NAME_VALUE_SPLITTER, 2);
+                for (String headerValue : spam) {
+                    String[] header = headerValue.split(HttpConstants.HEADER_NAME_VALUE_SPLITTER, 2);
                     if (header.length > 1) {
                         headersList.add(new Header(header[0], header[1]));
                     } else {
@@ -100,7 +116,7 @@ public class HttpSinkUtil {
             return null;
         }
     }
-
+    
     /**
      * user can give custom truststore file if user did not give then custom then system read
      * the default values which is in the deployment yaml.
@@ -111,7 +127,7 @@ public class HttpSinkUtil {
         return sinkConfigReader.readConfig(HttpConstants.CLIENT_TRUSTSTORE_PATH,
                 HttpConstants.CLIENT_TRUSTSTORE_PATH_VALUE);
     }
-
+    
     /**
      * user can give custom truststore password if user did not give then custom then system read
      * the default values which is in the deployment yaml.
@@ -122,7 +138,7 @@ public class HttpSinkUtil {
         return sinkConfigReader.readConfig(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD,
                 HttpConstants.CLIENT_TRUSTSTORE_PASSWORD_VALUE);
     }
-
+    
     /**
      * Method is responsible for set sender configuration values .
      *
@@ -134,52 +150,25 @@ public class HttpSinkUtil {
     public static SenderConfiguration getSenderConfigurations(Map<String, String> httpStaticProperties, String
             clientStoreFile, String clientStorePass, ConfigReader configReader) {
         SenderConfiguration httpSender = new SenderConfiguration(httpStaticProperties
-                .get(HttpConstants.PORT));
-        if (httpStaticProperties.get(HttpConstants.SCHEME).equals(HttpConstants.SCHEME_HTTPS)) {
+                .get(Constants.HTTP_PORT));
+        if (httpStaticProperties.get(Constants.PROTOCOL).equals(HttpConstants.SCHEME_HTTPS)) {
             httpSender.setTrustStoreFile(clientStoreFile);
             httpSender.setTrustStorePass(clientStorePass);
-            httpSender.setId(httpStaticProperties.get(HttpConstants.TO));
-            httpSender.setScheme(httpStaticProperties.get(HttpConstants.SCHEME));
+            httpSender.setId(httpStaticProperties.get(Constants.TO));
+            httpSender.setScheme(httpStaticProperties.get(Constants.PROTOCOL));
         } else {
-            httpSender.setScheme(httpStaticProperties.get(HttpConstants.SCHEME));
+            httpSender.setScheme(httpStaticProperties.get(Constants.PROTOCOL));
         }
         if (isHTTPTraceLoggerEnabled(configReader)) {
             httpSender.setHttpTraceLogEnabled(true);
         }
         return httpSender;
     }
-
+    
     private static boolean isHTTPTraceLoggerEnabled(ConfigReader configReader) {
-        return Boolean.parseBoolean(configReader.readConfig("httpTraceLogEnabled", "false"));
+        return Boolean.parseBoolean(configReader.readConfig(HTTP_TRACE_LOG_ENABLED, LOG_TRACE_ENABLE_DEFAULT_VALUE));
     }
-
-    /**
-     * @param parameterList
-     * @return
-     */
-    public static List<org.wso2.transport.http.netty.config.Parameter> populateParameters(String parameterList) {
-        List<org.wso2.transport.http.netty.config.Parameter> parameters = new ArrayList<>();
-        if (!HttpConstants.EMPTY_STRING.equals(parameterList.trim())) {
-            try {
-                String[] valueList = parameterList.trim().substring(1,
-                        parameterList.length
-                                () - 1).split("','");
-                Arrays.stream(valueList).forEach(valueEntry ->
-                        {
-                            org.wso2.transport.http.netty.config.Parameter parameter = new Parameter();
-                            parameter.setName(valueEntry.split(":")[0]);
-                            parameter.setValue(valueEntry.split(":")[1]);
-                            parameters.add(parameter);
-                        }
-                );
-            } catch (ArrayIndexOutOfBoundsException ex) {
-                log.error("Bootstrap configuration is not in expected format please insert them as 'key1:val1'," +
-                        "'key2:val2' format");
-            }
-        }
-        return parameters;
-    }
-
+    
     /**
      * Method is responsible for set transportation configuration values.
      *
@@ -188,42 +177,22 @@ public class HttpSinkUtil {
     public static Map<String, Object> populateTransportConfiguration(String clientBootstrapConfigurationList, String
             clientConnectionConfiguration) {
         Map<String, Object> properties = new HashMap<>();
+        //populate bootstrap configurations
         if (!HttpConstants.EMPTY_STRING.equals(clientBootstrapConfigurationList.trim())) {
-            try {
-                String[] valueList = clientBootstrapConfigurationList.trim().substring(1,
-                        clientBootstrapConfigurationList.length
-                                () - 1).split("','");
-                Map<String, Object> bootstrapValueMap = Arrays.stream(valueList).collect(Collectors.toMap(
-                        (valueEntry) -> valueEntry.split(":")[0],
-                        (valueEntry) -> valueEntry.split(":")[1]
-                        )
-                );
-                properties.putAll(populateClientConnectionConfiguration(bootstrapValueMap));
-            } catch (ArrayIndexOutOfBoundsException ex) {
-                log.error("Client Bootstrap configuration is not in expected format please insert them as " +
-                        "'key1:val1'," + "'key2:val2' format", ex);
-            }
+            String[] valueList = clientBootstrapConfigurationList.trim().substring(1,
+                    clientBootstrapConfigurationList.length
+                            () - 1).split(PARAMETER_SEPARATOR);
+            properties.putAll(populateClientConnectionConfiguration(populateParameterMap(valueList)));
         }
-
+        //populate connection configurations
         if (!HttpConstants.EMPTY_STRING.equals(clientConnectionConfiguration.trim())) {
-            try {
-                String[] valueList = clientConnectionConfiguration.trim().substring(1,
-                        clientConnectionConfiguration.length() - 1).split("','");
-                Map<String, Object> clientConnectionConfigurationValueMap = Arrays.stream(valueList)
-                        .collect(Collectors.toMap(
-                                (valueEntry) -> valueEntry.split(":")[0],
-                                (valueEntry) -> valueEntry.split(":")[1]
-                                )
-                        );
-                properties.putAll(populateClientConnectionConfiguration(clientConnectionConfigurationValueMap));
-            } catch (ArrayIndexOutOfBoundsException ex) {
-                log.error("client Connection Configuration is not in expected format please insert them as " +
-                        "'key1:val1','key2:val2' format", ex);
-            }
+            String[] valueList = clientConnectionConfiguration.trim().substring(1,
+                    clientConnectionConfiguration.length() - 1).split(PARAMETER_SEPARATOR);
+            properties.putAll(populateClientConnectionConfiguration(populateParameterMap(valueList)));
         }
         return properties;
     }
-
+    
     /**
      * Responsible of get the content type of payload.
      *
@@ -242,13 +211,13 @@ public class HttpSinkUtil {
         switch (mapType) {
             case HttpConstants.MAP_TEXT:
                 return HttpConstants.TEXT_PLAIN;
-
+            
             case HttpConstants.MAP_XML:
                 return HttpConstants.APPLICATION_XML;
-
+            
             case HttpConstants.MAP_JSON:
                 return HttpConstants.APPLICATION_JSON;
-
+            
             default: {
                 log.info("Invalid payload map type. System support only text," +
                         "Json and XML type hence proceed with default text mapping");
@@ -256,7 +225,7 @@ public class HttpSinkUtil {
             }
         }
     }
-
+    
     /**
      * Get port from listenerUrl.
      *
@@ -272,58 +241,56 @@ public class HttpSinkUtil {
         }
         return aURL.getProtocol();
     }
-
-    public static Map<String, Object> populateClientConnectionConfiguration(
-            Map<String, Object> clientConnectionConfigurationList) {
+    
+    private static Map<String, Object> populateClientConnectionConfiguration(
+            Map<String, String> clientConnectionConfigurationList) {
         Map<String, Object> properties = new HashMap<>();
         Map<String, TrpPropertyTypes> tryMap = trpPropertyTypeMap();
         clientConnectionConfigurationList.forEach((key, value) -> {
             switch (tryMap.get(key).name()) {
                 case "BOOLEAN":
-                    properties.put(key, Boolean.valueOf((String) value));
+                    properties.put(key, Boolean.valueOf(value));
                     break;
                 case "STRING":
                     properties.put(key, value);
                     break;
                 case "INTEGER":
-                    properties.put(key, Integer.valueOf((String) value));
+                    properties.put(key, Integer.valueOf(value));
                     break;
                 case "DOUBLE":
-                    properties.put(key, Double.valueOf((String) value));
+                    properties.put(key, Double.valueOf(value));
                     break;
                 default:
-                    log.error("Transport property is no defined.");
+                    log.error("Transport property:'" + tryMap.get(key).name() + "' is no defined.");
                     break;
             }
         });
         return properties;
     }
-
+    
     /**
      * This map contains the properties other than String
      *
      * @return
      */
-    public static Map<String, TrpPropertyTypes> trpPropertyTypeMap() {
+    private static Map<String, TrpPropertyTypes> trpPropertyTypeMap() {
         Map<String, TrpPropertyTypes> trpPropertyTypes = new HashMap<>();
-        trpPropertyTypes.put("client.connection.pool.count", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("client.max.active.connections.per.pool", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("client.min.idle.connections.per.pool", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("client.max.idle.connections.per.pool", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("client.min.eviction.idle.time", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("sender.thread.count", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("event.group.executor.thread.size", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("max.wait.for.trp.client.connection.pool", TrpPropertyTypes.INTEGER);
-
-        trpPropertyTypes.put("client.bootstrap.nodelay", TrpPropertyTypes.BOOLEAN);
-        trpPropertyTypes.put("client.bootstrap.keepalive", TrpPropertyTypes.BOOLEAN);
-        trpPropertyTypes.put("client.bootstrap.sendbuffersize", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("client.bootstrap.recievebuffersize", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("client.bootstrap.connect.timeout", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("client.bootstrap.socket.reuse", TrpPropertyTypes.BOOLEAN);
-        trpPropertyTypes.put("client.bootstrap.socket.timeout", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("latency.metrics.enabled", TrpPropertyTypes.BOOLEAN);
-
+        trpPropertyTypes.put(CLIENT_CONNECTION_POOL_COUNT, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(CLIENT_MAX_ACTIVE_CONNECTIONS_PER_POOL, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(CLIENT_MIN_IDLE_CONNECTIONS_PER_POOL, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(CLIENT_MAX_IDLE_CONNECTIONS_PER_POOL, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(CLIENT_MIN_EVICTION_IDLE_TIME, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(SENDER_THREAD_COUNT, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(EVENT_GROUP_EXECUTOR_THREAD_SIZE, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(MAX_WAIT_FOR_TRP_CLIENT_CONNECTION_POOL, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(CLIENT_BOOTSTRAP_NODELAY, TrpPropertyTypes.BOOLEAN);
+        trpPropertyTypes.put(CLIENT_BOOTSTRAP_KEEPALIVE, TrpPropertyTypes.BOOLEAN);
+        trpPropertyTypes.put(CLIENT_BOOTSTRAP_SENDBUFFERSIZE, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(CLIENT_BOOTSTRAP_RECIEVEBUFFERSIZE, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(CLIENT_BOOTSTRAP_CONNECT_TIMEOUT, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(CLIENT_BOOTSTRAP_SOCKET_REUSE, TrpPropertyTypes.BOOLEAN);
+        trpPropertyTypes.put(CLIENT_BOOTSTRAP_SOCKET_TIMEOUT, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(LATENCY_METRICS_ENABLED, TrpPropertyTypes.BOOLEAN);
         return trpPropertyTypes;
     }
 }

@@ -41,7 +41,7 @@ public class HttpWorkerThread implements Runnable {
     private SourceEventListener sourceEventListener;
     private String sourceID;
     private String[] trpProperties;
-
+    
     HttpWorkerThread(HTTPCarbonMessage cMessage, SourceEventListener sourceEventListener,
                      String sourceID, String[] trpProperties) {
         this.carbonMessage = cMessage;
@@ -49,7 +49,7 @@ public class HttpWorkerThread implements Runnable {
         this.sourceID = sourceID;
         this.trpProperties = trpProperties;
     }
-
+    
     @Override
     public void run() {
         BufferedReader buf = new BufferedReader(
@@ -57,7 +57,7 @@ public class HttpWorkerThread implements Runnable {
                         Charset.defaultCharset()));
         try {
             String payload = buf.lines().collect(Collectors.joining("\n"));
-
+            
             if (!payload.equals(HttpConstants.EMPTY_STRING)) {
                 sourceEventListener.onEvent(payload, trpProperties);
                 HttpSourceUtil.handleCallback(carbonMessage, 200);
@@ -74,7 +74,7 @@ public class HttpWorkerThread implements Runnable {
             try {
                 buf.close();
             } catch (IOException e) {
-                logger.error("Error closing byte buf", e);
+                logger.error("Error closing byte buf.", e);
             }
         }
     }

@@ -39,7 +39,7 @@ import java.util.Map;
  */
 public class HttpAuthenticator {
     private static final Logger logger = LoggerFactory.getLogger(HttpAuthenticator.class);
-
+    
     public static boolean authenticate(HTTPCarbonMessage httpCarbonMessage) {
         if (HttpIODataHolder.getInstance().getBundleContext() == null) {
             //this will handle the events at non osgi mode.
@@ -51,27 +51,26 @@ public class HttpAuthenticator {
                 ByteBuf usernamePasswordBuf = Base64.decode(Unpooled.copiedBuffer(usernamePasswordEncoded.getBytes
                         (Charset
                                 .defaultCharset())));
-                String[] usernamePassword = usernamePasswordBuf.toString(Charset.defaultCharset()).split(":");
+                String[] credentials = usernamePasswordBuf.toString(Charset.defaultCharset()).split(":");
                 IdPClient idPClient = HttpIODataHolder.getInstance().getClient();
-                if ((idPClient != null) && (usernamePassword.length == 2)) {
+                if ((idPClient != null) && (credentials.length == 2)) {
                     try {
                         Map<String, String> loginProperties = new HashMap<>();
-                        loginProperties.put(IdPClientConstants.USERNAME, usernamePassword[0]);
-                        loginProperties.put(IdPClientConstants.PASSWORD, usernamePassword[1]);
+                        loginProperties.put(IdPClientConstants.USERNAME, credentials[0]);
+                        loginProperties.put(IdPClientConstants.PASSWORD, credentials[1]);
                         loginProperties.put(IdPClientConstants.GRANT_TYPE, IdPClientConstants.PASSWORD_GRANT_TYPE);
                         Map<String, String> login = idPClient.login(loginProperties);
                         String loginStatus = login.get(IdPClientConstants.LOGIN_STATUS);
                         if (loginStatus.equals(IdPClientConstants.LoginStatus.LOGIN_SUCCESS)) {
                             return true;
                         } else {
-                            logger.error("Authentication failed for username '" + usernamePassword[0] + "'. Error : '"
+                            logger.error("Authentication failed for username '" + credentials[0] + "'. Error : '"
                                     + login.get(IdPClientConstants.ERROR) + "'. Error Description : '"
                                     + login.get(IdPClientConstants.ERROR_DESCRIPTION) + "'");
                             return false;
                         }
                     } catch (IdPClientException e) {
-                        logger.error("Authorization process fails for " + usernamePassword[0] + ":" +
-                                        usernamePassword[1], e);
+                        logger.error("Authorization process fails for user '" + credentials[0] + "'", e);
                         return false;
                     }
                 } else {
@@ -84,5 +83,5 @@ public class HttpAuthenticator {
             }
         }
     }
-
+    
 }

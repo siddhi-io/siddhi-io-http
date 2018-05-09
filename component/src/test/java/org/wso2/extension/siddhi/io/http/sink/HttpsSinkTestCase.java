@@ -39,7 +39,7 @@ public class HttpsSinkTestCase {
     public static final String CARBON_HOME = "carbon.home";
     private String payload;
     private String expected;
-
+    
     @BeforeTest
     public void init() {
         payload = "<events>"
@@ -57,7 +57,7 @@ public class HttpsSinkTestCase {
                     + "</event>"
                 + "</events>\n";
     }
-
+    
     /**
      * Test case for HTTP output publisher.
      */
@@ -66,9 +66,9 @@ public class HttpsSinkTestCase {
         carbonHome = Paths.get(carbonHome.toString(), "src", "test");
         System.setProperty(CARBON_HOME, carbonHome.toString());
         logger.info("Carbon Home Absolute path set to: " + carbonHome.toAbsolutePath());
-
+        
     }
-
+    
     /**
      * Test case for HTTPS output publisher.
      */
@@ -96,7 +96,7 @@ public class HttpsSinkTestCase {
         siddhiAppRuntime.start();
         HttpsServerListenerHandler lst = new HttpsServerListenerHandler(8009);
         lst.run();
-        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
+        fooStream.send(new Object[] {payload, "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -105,11 +105,11 @@ public class HttpsSinkTestCase {
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
-
+    
     /**
      * Test case for HTTPS output publisher.
      */
-    @Test (dependsOnMethods = "testHTTPSPublisher")
+    @Test(dependsOnMethods = "testHTTPSPublisher")
     public void testHTTPSPublisherCustomClientTrustStorePath() throws Exception {
         setCarbonHome();
         logger.info("Test case for HTTPS output publisher with custom trustore.");
@@ -127,14 +127,14 @@ public class HttpsSinkTestCase {
                         + "from FooStream "
                         + "select message,method,headers "
                         + "insert into BarStream;"
-                    );
+        );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
         HttpsServerListenerHandler lst = new HttpsServerListenerHandler(8009);
         lst.run();
-        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
+        fooStream.send(new Object[] {payload, "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -143,6 +143,6 @@ public class HttpsSinkTestCase {
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
-
+    
 }
 

@@ -22,15 +22,15 @@ package org.wso2.extension.siddhi.io.http.util;
  * {@code HttpConstant }Http Sink SinkConstants.
  */
 public class HttpConstants {
-
+    
     private HttpConstants() {
     }
-
+    
     //source configuration
     //--source transport configuration
     public static final String WORKER_COUNT = "worker.count";
     public static final String DEFAULT_WORKER_COUNT = "1";
-
+    
     //--source general configuration
     public static final String RECEIVER_URL = "receiver.url";
     public static final String IS_AUTH = "basic.auth.enabled";
@@ -38,7 +38,7 @@ public class HttpConstants {
     public static final String MESSAGE_PROCESSOR_ID = "messageProcessorId";
     public static final String MESSAGE_PROCESSOR_ID_VALUE = "Siddhi HTTP-message-processor";
     public static final String LISTENER_PORT = "LISTENER_PORT";
-
+    
     //Http siddhi sink properties
     public static final String AUTH_USERNAME_PASSWORD_SEPARATOR = ":";
     public static final String METHOD = "method";
@@ -54,7 +54,7 @@ public class HttpConstants {
     public static final String APPLICATION_XML = "application/xml";
     public static final String APPLICATION_JSON = "application/json";
     public static final String DEFAULT_ENCODING = "UTF-8";
-
+    
     //Common util values
     public static final String HTTP_METHOD_POST = "POST"; //method name
     public static final String HTTP_METHOD = "HTTP_METHOD";
@@ -80,7 +80,7 @@ public class HttpConstants {
     public static final String PORT_HOST_SEPARATOR = ":";
     public static final String PORT_CONTEXT_SEPARATOR = "/";
     public static final String PORT_CONTEXT_KEY_SEPARATOR = "-";
-
+    
     //GlobaleConfigurations
     public static final String HTTP_PORT = "defaultHttpPort";
     public static final String HTTP_PORT_VALUE = "8280";
@@ -104,17 +104,15 @@ public class HttpConstants {
     public static final String DEFAULT_TRACE_LOG_ENABLED = "httpTraceLogEnabled";
     public static final String TRACE_LOG_ENABLED = "trace.log.enabled";
     public static final String DEFAULT_TRACE_LOG_ENABLED_VALUE = "false";
-
+    
     public static final String SERVER_BOOTSTRAP_BOSS_GROUP_SIZE = "serverBootstrapBossGroupSize";
-    public static final String SERVER_BOOTSTRAP_BOSS_GROUP_SIZE_VALUE = "";
     public static final String SERVER_BOOTSTRAP_WORKER_GROUP_SIZE = "serverBootstrapWorkerGroupSize";
-    public static final String SERVER_BOOTSTRAP_WORKER_GROUP_SIZE_VALUE = "";
+    public static final String SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE = "serverBootstrapClientGroupSize";
     public static final String CLIENT_BOOTSTRAP_BOSS_GROUP_SIZE = "clientBootstrapBossGroupSize";
-    public static final String CLIENT_BOOTSTRAP_BOSS_GROUP_SIZE_VALUE = "";
     public static final String CLIENT_BOOTSTRAP_WORKER_GROUP_SIZE = "clientBootstrapWorkerGroupSize";
-    public static final String CLIENT_BOOTSTRAP_WORKER_GROUP_SIZE_VALUE = "";
-    public static final String DEFAULT_INTERFACE = "0.0.0.0:9090";
-
+    public static final String CLIENT_BOOTSTRAP_CLIENT_GROUP_SIZE = "clientBootstrapClientGroupSize";
+    public static final String DEFAULT_INTERFACE = "0.0.0.0:8280";
+    
     //Http Source & sink variables
     public static final String SOCKET_IDEAL_TIMEOUT = "socket.idle.timeout";
     public static final String SSL_VERIFY_CLIENT = "ssl.verify.client";
@@ -123,7 +121,7 @@ public class HttpConstants {
     public static final String SOURCE_PARAMETERS = "parameters";
     public static final String REQUEST_SIZE_VALIDATION_CONFIG = "request.size.validation.configurations";
     public static final String SERVER_BOOTSTRAP_CONFIGURATION = "server.bootstrap.configurations";
-
+    
     public static final String CLIENT_CHUNK_ENABLED = "chunk.disabled";
     public static final String CLIENT_FOLLOW_REDIRECT = "follow.redirect";
     public static final String CLIENT_MAX_REDIRECT_COUNT = "max.redirect.count";
@@ -134,4 +132,57 @@ public class HttpConstants {
     public static final String PROXY_USERNAME = "proxy.username";
     public static final String PROXY_PASSWORD = "proxy.password";
     public static final String SINK_PARAMETERS = "parameters";
+    
+    //http sink transport properties
+    public static final String LATENCY_METRICS_ENABLED = "latency.metrics.enabled";
+    public static final String REQUEST_SIZE_VALIDATION = "request.size.validation";
+    public static final String REQUEST_SIZE_VALIDATION_MAXIMUM_VALUE = "request.size.validation.maximum.value";
+    public static final String REQUEST_SIZE_VALIDATION_REJECT_STATUS_CODE = "request.size.validation.reject.status" +
+            ".code";
+    public static final String REQUEST_SIZE_VALIDATION_REJECT_MESSAGE = "request.size.validation.reject.message";
+    public static final String REQUEST_SIZE_VALIDATION_REJECT_MESSAGE_CONTENT_TYPE = "request.size.validation.reject" +
+            ".message.content.type";
+    public static final String HEADER_SIZE_VALIDATION = "header.size.validation";
+    public static final String HEADER_VALIDATION_MAXIMUM_REQUEST_LINE = "header.validation.maximum.request.line";
+    public static final String HEADER_VALIDATION_MAXIMUM_SIZE = "header.validation.maximum.size";
+    public static final String HEADER_VALIDATION_MAXIMUM_CHUNK_SIZE = "header.validation.maximum.chunk.size";
+    public static final String HEADER_VALIDATION_REJECT_STATUS_CODE = "header.validation.reject.status.code";
+    public static final String HEADER_VALIDATION_REJECT_MESSAGE = "header.validation.reject.message";
+    public static final String HEADER_VALIDATION_REJECT_MESSAGE_CONTENT_TYPE = "header.validation.reject.message" +
+            ".content.type";
+    public static final String SERVER_BOOTSTRAP_BOSS_GROUP_SIZE_PARAM = "server.bootstrap.boss.group.size";
+    public static final String SERVER_BOOTSTRAP_WORKER_GROUP_SIZE_PARAM = "server.bootstrap.worker.group.size";
+    public static final String SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE_PARAM = "server.bootstrap.client.group.size";
+    public static final String SERVER_BOOTSTRAP_NODELAY_PARAM = "server.bootstrap.nodelay";
+    public static final String SERVER_BOOTSTRAP_KEEPALIVE_PARAM = "server.bootstrap.keepalive";
+    public static final String SERVER_BOOTSTRAP_SENDBUFFERSIZE_PARAM = "server.bootstrap.sendbuffersize";
+    public static final String SERVER_BOOTSTRAP_RECIEVEBUFFERSIZE_PARAM = "server.bootstrap.recievebuffersize";
+    public static final String SERVER_BOOTSTRAP_CONNECT_TIMEOUT_PARAM = "server.bootstrap.connect.timeout";
+    public static final String SERVER_BOOTSTRAP_SOCKET_REUSE_PARAM = "server.bootstrap.socket.reuse";
+    public static final String SERVER_BOOTSTRAP_SOCKET_TIMEOUT_PARAM = "server.bootstrap.socket.timeout";
+    public static final String SERVER_BOOTSTRAP_SOCKET_BACKLOG_PARAM = "server.bootstrap.socket.backlog";
+    
+    //http source transport properties
+    public static final String CLIENT_CONNECTION_POOL_COUNT = "client.connection.pool.count";
+    public static final String CLIENT_MAX_ACTIVE_CONNECTIONS_PER_POOL = "client.max.active.connections.per.pool";
+    public static final String CLIENT_MIN_IDLE_CONNECTIONS_PER_POOL = "client.min.idle.connections.per.pool";
+    public static final String CLIENT_MAX_IDLE_CONNECTIONS_PER_POOL = "client.max.idle.connections.per.pool";
+    public static final String CLIENT_MIN_EVICTION_IDLE_TIME = "client.min.eviction.idle.time";
+    public static final String SENDER_THREAD_COUNT = "sender.thread.count";
+    public static final String EVENT_GROUP_EXECUTOR_THREAD_SIZE = "event.group.executor.thread.size";
+    public static final String MAX_WAIT_FOR_TRP_CLIENT_CONNECTION_POOL = "max.wait.for.trp.client.connection.pool";
+    public static final String CLIENT_BOOTSTRAP_NODELAY = "client.bootstrap.nodelay";
+    public static final String CLIENT_BOOTSTRAP_KEEPALIVE = "client.bootstrap.keepalive";
+    public static final String CLIENT_BOOTSTRAP_SENDBUFFERSIZE = "client.bootstrap.sendbuffersize";
+    public static final String CLIENT_BOOTSTRAP_RECIEVEBUFFERSIZE = "client.bootstrap.recievebuffersize";
+    public static final String CLIENT_BOOTSTRAP_CONNECT_TIMEOUT = "client.bootstrap.connect.timeout";
+    public static final String CLIENT_BOOTSTRAP_SOCKET_REUSE = "client.bootstrap.socket.reuse";
+    public static final String CLIENT_BOOTSTRAP_SOCKET_TIMEOUT = "client.bootstrap.socket.timeout";
+    
+    public static final String HTTP_TRACE_LOG_ENABLED = "httpTraceLogEnabled";
+    public static final String LOG_TRACE_ENABLE_DEFAULT_VALUE = "false";
+    
+    public static final String PARAMETER_SEPARATOR = "','";
+    public static final String VALUE_SEPARATOR = ":";
+    
 }

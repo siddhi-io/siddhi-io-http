@@ -32,12 +32,12 @@ public class HttpServerListenerHandler implements Runnable {
     private HttpServerListener serverListener;
     private HttpServer server;
     private int port;
-
+    
     public HttpServerListenerHandler(int port) {
         this.serverListener = new HttpServerListener();
         this.port = port;
     }
-
+    
     @Override
     public void run() {
         try {
@@ -48,14 +48,14 @@ public class HttpServerListenerHandler implements Runnable {
             logger.error("Error in creating test server.", e);
         }
     }
-
+    
     public void shutdown() {
         if (server != null) {
             logger.info("Shutting down");
             server.stop(1);
         }
     }
-
+    
     public HttpServerListener getServerListener() {
         return serverListener;
     }

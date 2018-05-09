@@ -48,14 +48,15 @@ public class HttpSourceMappingTestCase {
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;
-
+    
     @BeforeMethod
     public void init() {
         eventCount.set(0);
     }
-
+    
     /**
      * Creating test for publishing events with XML mapping.
+     *
      * @throws Exception Interrupted exception
      */
     @Test
@@ -75,10 +76,10 @@ public class HttpSourceMappingTestCase {
                         + "from inputStream "
                         + "select *  "
                         + "insert into outputStream;"
-                        );
+        );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-
+        
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -95,19 +96,19 @@ public class HttpSourceMappingTestCase {
         expected.add("John");
         expected.add("Mike");
         String event1 = "<events>"
-                            + "<event>"
-                                + "<name>John</name>"
-                                + "<age>100</age>"
-                                + "<country>AUS</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>John</name>"
+                + "<age>100</age>"
+                + "<country>AUS</country>"
+                + "</event>"
+                + "</events>";
         String event2 = "<events>"
-                            + "<event>"
-                                + "<name>Mike</name>"
-                                + "<age>20</age>"
-                                + "<country>USA</country>"
-                            + "</event>"
-                        + "</events>";
+                + "<event>"
+                + "<name>Mike</name>"
+                + "<age>20</age>"
+                + "<country>USA</country>"
+                + "</event>"
+                + "</events>";
         HttpTestUtil.httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
                 "POST");
         HttpTestUtil.httpPublishEvent(event2, baseURI, "/endpoints/RecPro",
@@ -116,6 +117,7 @@ public class HttpSourceMappingTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
+    
     /**
      * Creating test for publishing events with Text mapping.
      *
@@ -143,7 +145,7 @@ public class HttpSourceMappingTestCase {
         );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-
+        
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -155,7 +157,7 @@ public class HttpSourceMappingTestCase {
             }
         });
         siddhiAppRuntime.start();
-
+        
         // publishing events
         List<String> expected = new ArrayList<>(2);
         expected.add("John");
@@ -174,8 +176,10 @@ public class HttpSourceMappingTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
+    
     /**
      * Creating test for publishing events with Text mapping.
+     *
      * @throws Exception Interrupted exception
      */
     @Test
@@ -195,10 +199,10 @@ public class HttpSourceMappingTestCase {
                         + "from inputStream "
                         + "select *  "
                         + "insert into outputStream;"
-                    );
+        );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-
+        
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -210,7 +214,7 @@ public class HttpSourceMappingTestCase {
             }
         });
         siddhiAppRuntime.start();
-
+        
         // publishing events
         List<String> expected = new ArrayList<>(2);
         expected.add("John");
@@ -229,9 +233,10 @@ public class HttpSourceMappingTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-
+    
     /**
      * Creating test for publishing events with Json mapping.
+     *
      * @throws Exception Interrupted exception
      */
     @Test
@@ -250,10 +255,10 @@ public class HttpSourceMappingTestCase {
                 + "from inputStream "
                 + "select *  "
                 + "insert into outputStream;"
-                );
+        );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-
+        
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {

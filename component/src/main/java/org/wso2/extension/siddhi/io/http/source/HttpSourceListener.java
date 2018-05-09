@@ -44,7 +44,7 @@ class HttpSourceListener {
     private Boolean isAuthEnabled;
     private SourceEventListener sourceEventListener;
     private String[] requestedTransportPropertyNames;
-
+    
     HttpSourceListener(int workerThread, String url, Boolean auth, SourceEventListener sourceEventListener,
                        String[] requestedTransportPropertyNames) {
         this.executorService = Executors.newFixedThreadPool(workerThread);
@@ -57,7 +57,7 @@ class HttpSourceListener {
         this.requestedTransportPropertyNames = requestedTransportPropertyNames;
         logger.info("Source Listener has created for url " + this.url);
     }
-
+    
     /**
      * This method is handle the submit carbon message to executor service.
      *
@@ -76,7 +76,6 @@ class HttpSourceListener {
                 HttpSourceUtil.handleCallback(carbonMessage, 500);
             } finally {
                 lock.unlock();
-                carbonMessage.release();
             }
         }
         if (isAuthEnabled) {
@@ -89,9 +88,9 @@ class HttpSourceListener {
         populateTransportProperties(carbonMessage, trpProperties);
         executorService.execute(new HttpWorkerThread(carbonMessage,
                 sourceEventListener, sourceEventListener.getStreamDefinition().toString(), trpProperties));
-
+        
     }
-
+    
     private void populateTransportHeaders(HTTPCarbonMessage carbonMessage, String[] properties) {
         if (requestedTransportPropertyNames.length > 0) {      //cannot be null according to siddhi impl
             int i = 0;
@@ -101,7 +100,7 @@ class HttpSourceListener {
             }
         }
     }
-
+    
     private void populateTransportProperties(HTTPCarbonMessage carbonMessage, String[] properties) {
         if (requestedTransportPropertyNames.length > 0) {      //cannot be null according to siddhi impl
             int i = 0;
@@ -111,7 +110,7 @@ class HttpSourceListener {
             }
         }
     }
-
+    
     /**
      * State that current Source Listener is paused or not.
      *
@@ -120,7 +119,7 @@ class HttpSourceListener {
     boolean isRunning() {
         return !paused;
     }
-
+    
     /**
      * State that current Source Listener is running or not.
      *
@@ -129,7 +128,7 @@ class HttpSourceListener {
     boolean isPaused() {
         return paused;
     }
-
+    
     /**
      * Pause the execution.
      */
@@ -142,7 +141,7 @@ class HttpSourceListener {
             lock.unlock();
         }
     }
-
+    
     /**
      * Resume pool execution.
      */
@@ -156,7 +155,7 @@ class HttpSourceListener {
             lock.unlock();
         }
     }
-
+    
     /**
      * Disconnect pool execution.
      */

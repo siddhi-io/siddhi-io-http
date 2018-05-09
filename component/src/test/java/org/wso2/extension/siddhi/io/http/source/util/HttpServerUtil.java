@@ -32,19 +32,16 @@ import java.net.URL;
  * A util class to be used for tests.
  */
 class HttpServerUtil {
-
+    
     private static final Logger log = LoggerFactory.getLogger(HttpServerUtil.class);
-
-    HttpServerUtil() {
-    }
-
+    
     static void writeContent(HttpURLConnection urlConn, String content) throws IOException {
         OutputStreamWriter out = new OutputStreamWriter(
                 urlConn.getOutputStream());
         out.write(content);
         out.close();
     }
-
+    
     static HttpURLConnection request(URI baseURI, String path, String method)
             throws IOException {
         URL url = baseURI.resolve(path).toURL();
@@ -56,11 +53,11 @@ class HttpServerUtil {
         urlConn.setRequestProperty("Connection", "Keep-Alive");
         return urlConn;
     }
-
+    
     static void setHeader(HttpURLConnection urlConnection, String key, String value) {
         urlConnection.setRequestProperty(key, value);
     }
-
+    
     static void handleException(IOException ex) {
         log.error("IOException occurred while running the HttpsSSLSourceTestCase", ex);
     }

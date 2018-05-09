@@ -39,27 +39,28 @@ public class HttpSinkTestCase {
     private static final Logger log = Logger.getLogger(HttpSinkTestCase.class);
     private String payload;
     private String expected;
-
+    
     @BeforeTest
     public void init() {
         payload = "<events>"
-                    + "<event>"
-                        + "<symbol>WSO2</symbol>"
-                        + "<price>55.645</price>"
-                        + "<volume>100</volume>"
-                    + "</event>"
+                + "<event>"
+                + "<symbol>WSO2</symbol>"
+                + "<price>55.645</price>"
+                + "<volume>100</volume>"
+                + "</event>"
                 + "</events>";
         expected = "<events>"
-                        + "<event>"
-                            + "<symbol>WSO2</symbol>"
-                            + "<price>55.645</price>"
-                            + "<volume>100</volume>"
-                        + "</event>"
-                    + "</events>\n";
+                + "<event>"
+                + "<symbol>WSO2</symbol>"
+                + "<price>55.645</price>"
+                + "<volume>100</volume>"
+                + "</event>"
+                + "</events>\n";
     }
-
+    
     /**
      * Creating test for publishing events without Content-Type header include.
+     *
      * @throws Exception Interrupted exception
      */
     @Test
@@ -74,17 +75,17 @@ public class HttpSinkTestCase {
                 + "Define stream BarStream (message String,method String,headers String);";
         String query = (
                 "@info(name = 'query') "
-                + "from FooStream "
-                + "select message,method,headers "
-                + "insert into BarStream;"
-                );
+                        + "from FooStream "
+                        + "select message,method,headers "
+                        + "insert into BarStream;"
+        );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
                 query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
+        fooStream.send(new Object[] {payload, "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -103,12 +104,13 @@ public class HttpSinkTestCase {
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
-
+    
     /**
      * Creating test for publishing events including Content-Type header at header list.
+     *
      * @throws Exception Interrupted exception
      */
-    @Test (dependsOnMethods = "testHTTPContentTypeNotIncluded")
+    @Test(dependsOnMethods = "testHTTPContentTypeNotIncluded")
     public void testHTTPContentTypeAtHeaders() throws Exception {
         log.info("Creating test for publishing events including Content-Type header at header list.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -122,14 +124,14 @@ public class HttpSinkTestCase {
                 + "from FooStream "
                 + "select message,method,headers "
                 + "insert into BarStream;"
-                );
+        );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
                 query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23','Content-Type:text'"});
+        fooStream.send(new Object[] {payload, "POST", "'Name:John','Age:23','Content-Type:text'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -148,6 +150,6 @@ public class HttpSinkTestCase {
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
-
+    
 }
 

@@ -26,122 +26,107 @@ import org.wso2.extension.siddhi.io.http.util.TrpPropertyTypes;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.transport.http.netty.config.ListenerConfiguration;
-import org.wso2.transport.http.netty.config.Parameter;
 import org.wso2.transport.http.netty.config.TransportProperty;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.HEADER_SIZE_VALIDATION;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.HEADER_VALIDATION_MAXIMUM_CHUNK_SIZE;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.HEADER_VALIDATION_MAXIMUM_REQUEST_LINE;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.HEADER_VALIDATION_MAXIMUM_SIZE;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.HEADER_VALIDATION_REJECT_MESSAGE;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.HEADER_VALIDATION_REJECT_MESSAGE_CONTENT_TYPE;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.HEADER_VALIDATION_REJECT_STATUS_CODE;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.LATENCY_METRICS_ENABLED;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.REQUEST_SIZE_VALIDATION;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.REQUEST_SIZE_VALIDATION_MAXIMUM_VALUE;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.REQUEST_SIZE_VALIDATION_REJECT_MESSAGE;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.REQUEST_SIZE_VALIDATION_REJECT_MESSAGE_CONTENT_TYPE;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.REQUEST_SIZE_VALIDATION_REJECT_STATUS_CODE;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_BOSS_GROUP_SIZE_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_CONNECT_TIMEOUT_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_KEEPALIVE_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_NODELAY_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_RECIEVEBUFFERSIZE_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_SENDBUFFERSIZE_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_SOCKET_BACKLOG_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_SOCKET_REUSE_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_WORKER_GROUP_SIZE_PARAM;
 
 /**
  * Handles the http source util functions.
  */
 public class HttpSourceUtil {
     private static final Logger log = Logger.getLogger(HttpSourceUtil.class);
-    private static HttpSourceUtil instance = new HttpSourceUtil();
-
-    public HttpSourceUtil() {
+    
+    private HttpSourceUtil() {
     }
-
-    public static HttpSourceUtil getInstance() {
-        return instance;
-    }
-
-    public Set<TransportProperty> populateHeaderValidationConfigurations(
+    
+    /**
+     * Populate transport properties.
+     *
+     * @param serverHeaderValidationList header validation properties
+     * @param transportProperties        bootstrap transport properties.
+     * @return transport property map
+     */
+    public static Set<TransportProperty> populateTransportProperties(
             Map<String, String> serverHeaderValidationList, Set<TransportProperty> transportProperties) {
-        Map<String, TrpPropertyTypes> tryMap = trpPropertyTypeMap();
-        serverHeaderValidationList.forEach((key, value) -> {
-            TransportProperty trpProperty = new TransportProperty();
-            trpProperty.setName(key);
-            switch (tryMap.get(key).name()) {
-                case "BOOLEAN":
-                    trpProperty.setValue(Boolean.valueOf(value));
-                    break;
-                case "STRING":
-                    trpProperty.setValue(value);
-                    break;
-                case "INTEGER":
-                    trpProperty.setValue(Integer.valueOf(value));
-                    break;
-                case "DOUBLE":
-                    trpProperty.setValue(Double.valueOf(value));
-                    break;
-                default:
-                    trpProperty.setValue(value);
-                    break;
-            }
-            transportProperties.add(trpProperty);
-        });
+        serverHeaderValidationList.forEach((key, value) ->
+                transportProperties.add(getTransportProperty(key, value)));
         return transportProperties;
     }
-
+    
     /**
-     * @param parameterList
-     * @return
+     * Create single transport property based on it's type.
+     *
+     * @param name  name of the property.
+     * @param value value of the property.
+     * @return created transport property.
      */
-    public List<Parameter> populateParameters(String parameterList) {
-        List<org.wso2.transport.http.netty.config.Parameter> parameters = new ArrayList<>();
-        if (!HttpConstants.EMPTY_STRING.equals(parameterList.trim())) {
-            try {
-                String[] valueList = parameterList.trim().substring(1, parameterList.length() - 1).split("','");
-                Arrays.stream(valueList).forEach(valueEntry ->
-                        {
-                            org.wso2.transport.http.netty.config.Parameter parameter = new Parameter();
-                            parameter.setName(valueEntry.split(":")[0]);
-                            parameter.setValue(valueEntry.split(":")[1]);
-                            parameters.add(parameter);
-                        }
-                );
-
-            } catch (ArrayIndexOutOfBoundsException ex) {
-                log.error("Bootstrap configuration is not in expected format please insert them as 'key1:val1'," +
-                        "'key2:val2' format");
-            }
+    private static TransportProperty getTransportProperty(String name, String value) {
+        TransportProperty trpProperty = new TransportProperty();
+        Map<String, TrpPropertyTypes> tryMap = trpPropertyTypeMap();
+        trpProperty.setName(name);
+        switch (tryMap.get(name).name()) {
+            case "BOOLEAN":
+                trpProperty.setValue(Boolean.valueOf(value));
+                break;
+            case "STRING":
+                trpProperty.setValue(value);
+                break;
+            case "INTEGER":
+                trpProperty.setValue(Integer.valueOf(value));
+                break;
+            case "DOUBLE":
+                trpProperty.setValue(Double.valueOf(value));
+                break;
+            default:
+                trpProperty.setValue(value);
+                break;
         }
-        return parameters;
+        return trpProperty;
     }
-
+    
     /**
      * Method is responsible for set transportation configuration values.
      *
      * @return return the set of config transportation configuration.
      */
-    public Set<TransportProperty> populateServerBootstrapConfigurations(
+    public static Set<TransportProperty> populateBootstrapConfigurations(
             Map<String, String> serverBootstrapConfigurationList, Set<TransportProperty> transportProperties) {
-        Map<String, TrpPropertyTypes> tryMap =
-                trpPropertyTypeMap();
-        serverBootstrapConfigurationList.forEach((key, value) -> {
-            TransportProperty trpProperty = new TransportProperty();
-            trpProperty.setName(key);
-            switch (tryMap.get(key).name()) {
-                case "BOOLEAN":
-                    trpProperty.setValue(Boolean.valueOf(value));
-                    break;
-                case "STRING":
-                    trpProperty.setValue(value);
-                    break;
-                case "INTEGER":
-                    trpProperty.setValue(Integer.valueOf(value));
-                    break;
-                case "DOUBLE":
-                    trpProperty.setValue(Double.valueOf(value));
-                    break;
-                default:
-                    trpProperty.setValue(value);
-                    break;
-            }
-            transportProperties.add(trpProperty);
-        });
+        serverBootstrapConfigurationList.forEach((key, value) ->
+                transportProperties.add(getTransportProperty(key, value)));
         return transportProperties;
     }
-
-
+    
+    
     /**
      * Key value generated for Source Listener using host and port.
      *
@@ -157,7 +142,7 @@ public class HttpSourceUtil {
         }
         return String.valueOf(aURL.getPort()) + HttpConstants.PORT_CONTEXT_KEY_SEPARATOR + aURL.getPath();
     }
-
+    
     /**
      * Get port from listenerUrl.
      *
@@ -173,7 +158,7 @@ public class HttpSourceUtil {
         }
         return String.valueOf(aURL.getPort());
     }
-
+    
     /**
      * Set Listener Configuration from given url.
      *
@@ -217,11 +202,11 @@ public class HttpSourceUtil {
                     throw new HttpSourceAdaptorRuntimeException("Invalid protocol " + protocol);
             }
         } catch (MalformedURLException e) {
-            log.error("Receiver url malformed." + listenerUrl);
+            log.error("Receiver url malformed." + listenerUrl, e);
         }
         return listenerConfig;
     }
-
+    
     /**
      * This method handle the response including the status of request.
      *
@@ -231,41 +216,39 @@ public class HttpSourceUtil {
     public static void handleCallback(HTTPCarbonMessage carbonMessage, int code) {
         HttpIoUtil.handleFailure(carbonMessage, null, code, null);
     }
-
+    
     /**
      * This map contains the properties other than String
      *
      * @return
      */
-    public static Map<String, TrpPropertyTypes> trpPropertyTypeMap() {
+    private static Map<String, TrpPropertyTypes> trpPropertyTypeMap() {
         Map<String, TrpPropertyTypes> trpPropertyTypes = new HashMap<>();
-        trpPropertyTypes.put("latency.metrics.enabled", TrpPropertyTypes.BOOLEAN);
-        trpPropertyTypes.put("request.size.validation", TrpPropertyTypes.BOOLEAN);
-        trpPropertyTypes.put("request.size.validation.maximum.value", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("request.size.validation.reject.status.code", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("request.size.validation.reject.message", TrpPropertyTypes.STRING);
-        trpPropertyTypes.put("request.size.validation.reject.message.content.type", TrpPropertyTypes.STRING);
-        trpPropertyTypes.put("header.size.validation", TrpPropertyTypes.BOOLEAN);
-        trpPropertyTypes.put("header.validation.maximum.request.line", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("header.validation.maximum.size", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("header.validation.maximum.chunk.size", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("header.validation.reject.status.code", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("header.validation.reject.message", TrpPropertyTypes.STRING);
-        trpPropertyTypes.put("header.validation.reject.message.content.type", TrpPropertyTypes.STRING);
-        trpPropertyTypes.put("server.bootstrap.boss.group.size", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("server.bootstrap.worker.group.size", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("server.bootstrap.nodelay", TrpPropertyTypes.BOOLEAN);
-        trpPropertyTypes.put("server.bootstrap.keepalive", TrpPropertyTypes.BOOLEAN);
-        trpPropertyTypes.put("server.bootstrap.sendbuffersize", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("server.bootstrap.recievebuffersize", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("server.bootstrap.connect.timeout", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("server.bootstrap.socket.reuse", TrpPropertyTypes.BOOLEAN);
-        trpPropertyTypes.put("server.bootstrap.socket.timeout", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("server.bootstrap.socket.backlog", TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put("latency.metrics.enabled", TrpPropertyTypes.BOOLEAN);
+        trpPropertyTypes.put(LATENCY_METRICS_ENABLED, TrpPropertyTypes.BOOLEAN);
+        trpPropertyTypes.put(REQUEST_SIZE_VALIDATION, TrpPropertyTypes.BOOLEAN);
+        trpPropertyTypes.put(REQUEST_SIZE_VALIDATION_MAXIMUM_VALUE, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(REQUEST_SIZE_VALIDATION_REJECT_STATUS_CODE, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(REQUEST_SIZE_VALIDATION_REJECT_MESSAGE, TrpPropertyTypes.STRING);
+        trpPropertyTypes.put(REQUEST_SIZE_VALIDATION_REJECT_MESSAGE_CONTENT_TYPE, TrpPropertyTypes.STRING);
+        trpPropertyTypes.put(HEADER_SIZE_VALIDATION, TrpPropertyTypes.BOOLEAN);
+        trpPropertyTypes.put(HEADER_VALIDATION_MAXIMUM_REQUEST_LINE, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(HEADER_VALIDATION_MAXIMUM_SIZE, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(HEADER_VALIDATION_MAXIMUM_CHUNK_SIZE, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(HEADER_VALIDATION_REJECT_STATUS_CODE, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(HEADER_VALIDATION_REJECT_MESSAGE, TrpPropertyTypes.STRING);
+        trpPropertyTypes.put(HEADER_VALIDATION_REJECT_MESSAGE_CONTENT_TYPE, TrpPropertyTypes.STRING);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_BOSS_GROUP_SIZE_PARAM, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_WORKER_GROUP_SIZE_PARAM, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE_PARAM, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_NODELAY_PARAM, TrpPropertyTypes.BOOLEAN);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_KEEPALIVE_PARAM, TrpPropertyTypes.BOOLEAN);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_SENDBUFFERSIZE_PARAM, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_RECIEVEBUFFERSIZE_PARAM, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_CONNECT_TIMEOUT_PARAM, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_SOCKET_REUSE_PARAM, TrpPropertyTypes.BOOLEAN);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_SOCKET_TIMEOUT_PARAM, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_SOCKET_BACKLOG_PARAM, TrpPropertyTypes.INTEGER);
         return trpPropertyTypes;
     }
-
-
 }
 

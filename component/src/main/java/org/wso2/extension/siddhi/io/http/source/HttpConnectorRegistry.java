@@ -26,26 +26,26 @@ import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.transport.http.netty.config.ListenerConfiguration;
-import org.wso2.transport.http.netty.config.RequestSizeValidationConfiguration;
+import org.wso2.transport.http.netty.config.RequestSizeValidationConfig;
 import org.wso2.transport.http.netty.config.TransportProperty;
 import org.wso2.transport.http.netty.config.TransportsConfiguration;
 import org.wso2.transport.http.netty.contract.HttpWsConnectorFactory;
 import org.wso2.transport.http.netty.contract.ServerConnector;
 import org.wso2.transport.http.netty.contract.ServerConnectorFuture;
-import org.wso2.transport.http.netty.contractimpl.HttpWsConnectorFactoryImpl;
+import org.wso2.transport.http.netty.contractimpl.DefaultHttpWsConnectorFactory;
 import org.wso2.transport.http.netty.listener.ServerBootstrapConfiguration;
 import org.wso2.transport.http.netty.message.HTTPConnectorUtil;
-import org.wso2.transport.http.netty.sender.channel.pool.ConnectionManager;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Collectors;
+
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.PARAMETER_SEPARATOR;
+import static org.wso2.extension.siddhi.io.http.util.HttpIoUtil.populateParameterMap;
 
 /**
  * {@code HttpConnectorRegistry} The code is responsible for maintaining the all active server connectors.
@@ -57,54 +57,38 @@ class HttpConnectorRegistry {
     private Map<String, HttpSourceListener> sourceListenersMap = new ConcurrentHashMap<>();
     private TransportsConfiguration trpConfig;
     private HttpWsConnectorFactory httpConnectorFactory;
-
+    
     private HttpConnectorRegistry() {
     }
-
-    RequestSizeValidationConfiguration populateRequestSizeValidationConfiguration() {
-        return new RequestSizeValidationConfiguration(trpConfig.getTransportProperties());
+    
+    RequestSizeValidationConfig populateRequestSizeValidationConfiguration() {
+        return new RequestSizeValidationConfig();
     }
-
-    void setTrpConfig(String serverBootstrapConfigurationList, String serverHeaderValidation) {
+    
+    /**
+     * Set transport properties.
+     *
+     * @param serverBootstrapConfigurationList bootstrap configurations.
+     * @param serverHeaderValidation           header validation configurations.
+     */
+    void setTransportConfig(String serverBootstrapConfigurationList, String serverHeaderValidation) {
         trpConfig = new TransportsConfiguration();
         Set<TransportProperty> transportProperties = new HashSet<>();
         if (!HttpConstants.EMPTY_STRING.equals(serverBootstrapConfigurationList.trim())) {
-            try {
-                String[] valueList = serverBootstrapConfigurationList.trim().substring(1,
-                        serverBootstrapConfigurationList.length
-                                () - 1).split("','");
-                Map<String, String> bootstrapValueMap = Arrays.stream(valueList).collect(Collectors.toMap(
-                        (valueEntry) -> valueEntry.split(":")[0],
-                        (valueEntry) -> valueEntry.split(":")[1]
-                        )
-                );
-                trpConfig.setTransportProperties(HttpSourceUtil.getInstance().populateServerBootstrapConfigurations
-                        (bootstrapValueMap, transportProperties));
-            } catch (ArrayIndexOutOfBoundsException ex) {
-                log.error("Bootstrap configuration is not in expected format please insert them as 'key1:val1'," +
-                        "'key2:val2' format");
-            }
+            String[] valueList = serverBootstrapConfigurationList.trim().substring(1,
+                    serverBootstrapConfigurationList.length
+                            () - 1).split(PARAMETER_SEPARATOR);
+            trpConfig.setTransportProperties(HttpSourceUtil.populateBootstrapConfigurations
+                    (populateParameterMap(valueList), transportProperties));
         }
-
         if (!HttpConstants.EMPTY_STRING.equals(serverHeaderValidation.trim())) {
-            try {
-                String[] valueList = serverHeaderValidation.trim().substring(1, serverHeaderValidation.length
-                        () - 1).split("','");
-                Map<String, String> headerValidationValueMap = Arrays.stream(valueList).collect(Collectors.toMap(
-                        (valueEntry) -> valueEntry.split(":")[0],
-                        (valueEntry) -> valueEntry.split(":")[1]
-                        )
-                );
-                trpConfig.setTransportProperties(HttpSourceUtil.getInstance().populateHeaderValidationConfigurations
-                        (headerValidationValueMap, transportProperties));
-            } catch (ArrayIndexOutOfBoundsException ex) {
-                log.error("Header validation configuration is not in expected format please insert them as " +
-                        "'key1:val1'," +
-                        "'key2:val2' format");
-            }
+            String[] valueList = serverHeaderValidation.trim().substring(1, serverHeaderValidation.length
+                    () - 1).split(PARAMETER_SEPARATOR);
+            trpConfig.setTransportProperties(HttpSourceUtil.populateTransportProperties
+                    (populateParameterMap(valueList), transportProperties));
         }
     }
-
+    
     /**
      * Get HttpConnectorRegistry instance.
      *
@@ -113,8 +97,8 @@ class HttpConnectorRegistry {
     static HttpConnectorRegistry getInstance() {
         return instance;
     }
-
-
+    
+    
     /**
      * Get the source listener map.
      *
@@ -123,8 +107,8 @@ class HttpConnectorRegistry {
     Map<String, HttpSourceListener> getSourceListenersMap() {
         return this.sourceListenersMap;
     }
-
-
+    
+    
     /**
      * Register new source listener.
      *
@@ -143,7 +127,7 @@ class HttpConnectorRegistry {
             throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected");
         }
     }
-
+    
     /**
      * Unregister the source listener.
      *
@@ -156,7 +140,7 @@ class HttpConnectorRegistry {
             httpSourceListener.disconnect();
         }
     }
-
+    
     /**
      * Initialize and start the server connector factory. This should be created at once for siddhi.
      *
@@ -166,19 +150,26 @@ class HttpConnectorRegistry {
         // to make sure it will create only once
         if ((this.sourceListenersMap.isEmpty()) && (httpConnectorFactory == null)) {
             String bootstrapWorker = sourceConfigReader.readConfig(HttpConstants
-                    .SERVER_BOOTSTRAP_WORKER_GROUP_SIZE, HttpConstants.SERVER_BOOTSTRAP_WORKER_GROUP_SIZE_VALUE);
+                    .SERVER_BOOTSTRAP_WORKER_GROUP_SIZE, HttpConstants.EMPTY_STRING);
             String bootstrapBoss = sourceConfigReader.readConfig(HttpConstants
-                    .SERVER_BOOTSTRAP_BOSS_GROUP_SIZE, HttpConstants.SERVER_BOOTSTRAP_BOSS_GROUP_SIZE_VALUE);
+                    .SERVER_BOOTSTRAP_BOSS_GROUP_SIZE, HttpConstants.EMPTY_STRING);
+            String bootstrapClient = sourceConfigReader.readConfig(HttpConstants
+                    .SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE, HttpConstants.EMPTY_STRING);
             if (!HttpConstants.EMPTY_STRING.equals(bootstrapBoss) && !HttpConstants.EMPTY_STRING.equals
                     (bootstrapWorker)) {
-                httpConnectorFactory = new HttpWsConnectorFactoryImpl(Integer.parseInt(bootstrapBoss), Integer
-                        .parseInt(bootstrapWorker));
+                if (!HttpConstants.EMPTY_STRING.equals(bootstrapClient)) {
+                    httpConnectorFactory = new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss), Integer
+                            .parseInt(bootstrapWorker), Integer.parseInt(bootstrapClient));
+                } else {
+                    httpConnectorFactory = new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss), Integer
+                            .parseInt(bootstrapWorker), Integer.parseInt(bootstrapWorker));
+                }
             } else {
-                httpConnectorFactory = new HttpWsConnectorFactoryImpl();
+                httpConnectorFactory = new DefaultHttpWsConnectorFactory();
             }
         }
     }
-
+    
     /**
      * Stop server connector controller.
      */
@@ -189,8 +180,12 @@ class HttpConnectorRegistry {
             }
         }
     }
-
-
+    
+    /**
+     * Create http server connector for given listener configurations.
+     *
+     * @param listenerConfig listener configurations.
+     */
     void createHttpServerConnector(ListenerConfiguration listenerConfig) {
         synchronized (this) {
             String listenerInterface = listenerConfig.getHost() + ":" + listenerConfig.getPort();
@@ -214,9 +209,14 @@ class HttpConnectorRegistry {
             this.registerServerConnector(serverConnector, listenerConfig);
         }
     }
-
-    void registerServerConnector(org.wso2.transport.http.netty.contract.ServerConnector
-                                         serverConnector, ListenerConfiguration listenerConfig) {
+    
+    /**
+     * Register new server connector.
+     *
+     * @param serverConnector server connector.
+     * @param listenerConfig  listener configuration.
+     */
+    void registerServerConnector(ServerConnector serverConnector, ListenerConfiguration listenerConfig) {
         ServerConnectorFuture connectorFuture = serverConnector.start();
         ConnectorStartupSynchronizer startupSyncer =
                 new ConnectorStartupSynchronizer(new CountDownLatch(1));
@@ -230,11 +230,11 @@ class HttpConnectorRegistry {
         }
         validateConnectorStartup(startupSyncer);
     }
-
+    
     Map<String, HttpServerConnectorContext> getServerConnectorPool() {
         return serverConnectorPool;
     }
-
+    
     /**
      * Register the new server connector.
      *
@@ -247,9 +247,6 @@ class HttpConnectorRegistry {
             if (context != null) {
                 if (context.getReferenceCount() == 1) {
                     serverConnectorPool.remove(getSeverConnectorKey(listenerUrl));
-                    if (ConnectionManager.getInstance() != null) {
-                        ConnectionManager.getInstance().getTargetChannelPool().clear();
-                    }
                     log.info("Server connector for port '" + port + "' has successfully shutdown.");
                     context.decrementReferenceCount();
                     return context.getServerConnector().stop();
@@ -259,39 +256,42 @@ class HttpConnectorRegistry {
             return false;
         }
     }
-
+    
+    /**
+     * The server connector context.
+     */
     private static class HttpServerConnectorContext {
         private ServerConnector serverConnector;
         private ListenerConfiguration listenerConfiguration;
         private int referenceCount = 0;
-
+        
         public HttpServerConnectorContext(ServerConnector
                                                   serverConnector, ListenerConfiguration listenerConfiguration) {
             this.serverConnector = serverConnector;
             this.listenerConfiguration = listenerConfiguration;
         }
-
+        
         public void incrementReferenceCount() {
             this.referenceCount++;
         }
-
+        
         public void decrementReferenceCount() {
             this.referenceCount--;
         }
-
+        
         public ServerConnector getServerConnector() {
             return this.serverConnector;
         }
-
+        
         public ListenerConfiguration getListenerConfiguration() {
             return this.listenerConfiguration;
         }
-
+        
         public int getReferenceCount() {
             return this.referenceCount;
         }
     }
-
+    
     /**
      * This method wil check that if there is already registered server connectors which may be http but if it have
      * jks security setup then it can be use as https transport as well
@@ -322,31 +322,30 @@ class HttpConnectorRegistry {
         }
         return false;
     }
-
+    
     private void setConnectorListeners(ServerConnectorFuture connectorFuture, String serverConnectorId,
                                        ConnectorStartupSynchronizer startupSyncer) {
         connectorFuture.setHttpConnectorListener(new HTTPConnectorListener());
         connectorFuture.setPortBindingEventListener(
                 new HttpConnectorPortBindingListener(startupSyncer, serverConnectorId));
     }
-
+    
     private void validateConnectorStartup(ConnectorStartupSynchronizer startupSyncer) {
         int noOfExceptions = startupSyncer.getExceptions().size();
         if (noOfExceptions <= 0) {
             return;
         }
-
+        
         startupSyncer.getExceptions().forEach((connectorId, e) -> {
             log.error("siddhi: " + e.getMessage() + ": [" + connectorId + "]", e);
         });
-
+        
         if (noOfExceptions == 1) {
-            // If the no. of exceptions is equal to the no. of connectors to be started, then none of the
-            // connectors have started properly and we can terminate the runtime
+            // If the no. of exceptions is equal to one there is an error has occured.
             throw new HttpSourceAdaptorRuntimeException("failed to start the server connectors");
         }
     }
-
+    
     private static String getSeverConnectorKey(String listenerUrl) {
         URL aURL;
         try {

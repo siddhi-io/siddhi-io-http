@@ -36,27 +36,28 @@ public class HttpSinkMethodTypeTestCase {
     private static final Logger log = Logger.getLogger(HttpSinkMethodTypeTestCase.class);
     private String payload;
     private String expected;
-
+    
     @BeforeTest
     public void init() {
         payload = "<events>"
-                    + "<event>"
-                        + "<symbol>WSO2</symbol>"
-                        + "<price>55.645</price>"
-                        + "<volume>100</volume>"
-                    + "</event>"
+                + "<event>"
+                + "<symbol>WSO2</symbol>"
+                + "<price>55.645</price>"
+                + "<volume>100</volume>"
+                + "</event>"
                 + "</events>";
         expected = "<events>"
-                    + "<event>"
-                        + "<symbol>WSO2</symbol>"
-                        + "<price>55.645</price>"
-                        + "<volume>100</volume>"
-                    + "</event>"
+                + "<event>"
+                + "<symbol>WSO2</symbol>"
+                + "<price>55.645</price>"
+                + "<volume>100</volume>"
+                + "</event>"
                 + "</events>\n";
     }
-
+    
     /**
      * Creating test for publishing events from GET method.
+     *
      * @throws Exception Interrupted exception
      */
     @Test
@@ -74,14 +75,14 @@ public class HttpSinkMethodTypeTestCase {
                 "from FooStream "
                 + "select message,method,headers "
                 + "insert into BarStream;"
-                );
+        );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
                 query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[]{payload, "GET", "Name:John,Age:23"});
+        fooStream.send(new Object[] {payload, "GET", "Name:John,Age:23"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -90,12 +91,50 @@ public class HttpSinkMethodTypeTestCase {
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
-
+    
     /**
-     * Creating test for publishing events from PUT method.
+     * Creating test for publishing events from POST method.
+     *
      * @throws Exception Interrupted exception
      */
-    @Test (dependsOnMethods = "testHTTPTestGetMethod")
+    @Test(dependsOnMethods = "testHTTPTestDeleteMethod")
+    public void testHTTPTestPOSTMethod() throws Exception {
+        log.info("Creating test for publishing events from PUT method.");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
+        String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
+                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
+                + "headers='{{headers}}',"
+                + "@map(type='xml', "
+                + "@payload('{{message}}'))) "
+                + "Define stream BarStream (message String,method String,headers String);";
+        String query = ("@info(name = 'query') " +
+                "from FooStream "
+                + "select message,method,headers "
+                + "insert into BarStream;"
+        );
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
+                query);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        lst.run();
+        fooStream.send(new Object[] {payload, "POST", "Name:John,Age:23"});
+        while (!lst.getServerListener().isMessageArrive()) {
+            Thread.sleep(10);
+        }
+        String eventData = lst.getServerListener().getData();
+        Assert.assertEquals(expected, eventData);
+        siddhiAppRuntime.shutdown();
+        lst.shutdown();
+    }
+    
+    /**
+     * Creating test for publishing events from PUT method.
+     *
+     * @throws Exception Interrupted exception
+     */
+    @Test(dependsOnMethods = "testHTTPTestGetMethod")
     public void testHTTPTestPutMethod() throws Exception {
         log.info("Creating test for publishing events from PUT method.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -110,14 +149,14 @@ public class HttpSinkMethodTypeTestCase {
                 "from FooStream "
                 + "select message,method,headers "
                 + "insert into BarStream;"
-                );
+        );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
                 query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[]{payload, "PUT", "Name:John,Age:23"});
+        fooStream.send(new Object[] {payload, "PUT", "Name:John,Age:23"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -126,17 +165,18 @@ public class HttpSinkMethodTypeTestCase {
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
-
+    
     /**
      * Creating test for publishing events from DELETE method.
+     *
      * @throws Exception Interrupted exception
      */
-    @Test (dependsOnMethods = "testHTTPTestPutMethod")
+    @Test(dependsOnMethods = "testHTTPTestPutMethod")
     public void testHTTPTestDeleteMethod() throws Exception {
         log.info("Creating test for publishing events from DELETE method.");
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
-
+        
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
                 + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
                 + "headers='{{headers}}',"
@@ -147,21 +187,21 @@ public class HttpSinkMethodTypeTestCase {
                 "from FooStream "
                 + "select message,method,headers "
                 + "insert into BarStream;"
-                );
+        );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
                 query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[]{payload, "DELETE", "'Name:John','Age:23'"});
+        fooStream.send(new Object[] {payload, "DELETE", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
-        Thread.sleep(10);
+            Thread.sleep(10);
         }
         String eventData = lst.getServerListener().getData();
-        Assert.assertEquals("", eventData);
+        Assert.assertEquals(expected, eventData);
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
-
+    
 }

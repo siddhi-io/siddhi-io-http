@@ -15,11 +15,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 package org.wso2.extension.siddhi.io.http.util;
 
 /**
- * .
+ * Transport Property types.
  */
 public enum TrpPropertyTypes {
     STRING,

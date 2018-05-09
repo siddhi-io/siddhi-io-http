@@ -32,9 +32,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.Security;
 import java.security.cert.CertificateException;
-
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -47,15 +45,16 @@ import javax.net.ssl.TrustManagerFactory;
 public class HttpTestUtil {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(HttpTestUtil.class);
     private static final String CARBON_HOME = "carbon.home";
+    
     public static void setCarbonHome() {
         Path carbonHome = Paths.get("");
         carbonHome = Paths.get(carbonHome.toString(), "src", "test");
         System.setProperty(CARBON_HOME, carbonHome.toString());
         logger.info("Carbon Home Absolute path set to: " + carbonHome.toAbsolutePath());
     }
-
+    
     public static void httpPublishEvent(String event, URI baseURI, String path,
-                                 String methodType) {
+                                        String methodType) {
         try {
             HttpURLConnection urlConn = null;
             try {
@@ -72,7 +71,7 @@ public class HttpTestUtil {
             HttpServerUtil.handleException(e);
         }
     }
-
+    
     public static void httpPublishEmptyPayload(URI baseURI) {
         try {
             HttpURLConnection urlConn = null;
@@ -91,7 +90,7 @@ public class HttpTestUtil {
             HttpServerUtil.handleException(e);
         }
     }
-
+    
     public static void httpPublishEventDefault(String event, URI baseURI) {
         try {
             HttpURLConnection urlConn = null;
@@ -112,14 +111,14 @@ public class HttpTestUtil {
             HttpServerUtil.handleException(e);
         }
     }
-
+    
     public static void httpsPublishEvent(String event)
             throws KeyManagementException {
         try {
             System.setProperty("javax.net.ssl.trustStore", System.getProperty("carbon.home") + "/resources/security/" +
                     "client-truststore.jks");
             System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
-            Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
+            // Security.addProvider(new com.sun.net.ssl.internal.ssl.Provider());
             char[] passphrase = "wso2carbon".toCharArray(); //password
             KeyStore keystore = KeyStore.getInstance("JKS");
             keystore.load(new FileInputStream(System.getProperty("carbon.home") + "/resources/security/" +
@@ -148,7 +147,7 @@ public class HttpTestUtil {
         } catch (CertificateException e) {
             logger.error("Certificate exception in basic authentication", e);
         } catch (KeyStoreException e) {
-            logger.error("Keystore exception in while trying to sent test request " , e);
+            logger.error("Keystore exception in while trying to sent test request ", e);
         } catch (IOException e) {
             logger.error("IOException when trying to send test request ", e);
         }

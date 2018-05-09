@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -17,6 +17,7 @@
  */
 package org.wso2.extension.siddhi.io.http.source;
 
+import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -42,19 +43,18 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 
 public class HttpSourceConflictsTestCase {
-    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger
-            .getLogger(HttpSourceConflictsTestCase.class);
+    private static final Logger logger = Logger.getLogger(HttpSourceConflictsTestCase.class);
     private AtomicInteger eventCountA = new AtomicInteger(0);
     private AtomicInteger eventCountB = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;
-
+    
     @BeforeMethod
     public void init() {
         eventCountA.set(0);
         eventCountB.set(0);
     }
-
+    
     /**
      * Creating test for publishing events with multiple formats synchronously.
      *

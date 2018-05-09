@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.wso2.extension.siddhi.io.http.test.osgi;
 
+import org.apache.log4j.Logger;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.ExamFactory;
 import org.ops4j.pax.exam.Option;
@@ -60,7 +61,7 @@ import static org.wso2.carbon.container.options.CarbonDistributionOption.copyFil
 @ExamReactorStrategy(PerClass.class)
 @ExamFactory(CarbonContainerFactory.class)
 public class HttpSourceTestCase {
-    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(HttpSourceTestCase.class);
+    private static final Logger logger = Logger.getLogger(HttpSourceTestCase.class);
     private List<String> receivedEventNameList;
     private static final String DEPLOYMENT_FILENAME = "deployment.yaml";
     private static final String CLIENTTRUSTSTORE_FILENAME = "client-truststore.jks";
@@ -68,19 +69,19 @@ public class HttpSourceTestCase {
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;
-
+    
     // TODO: 9/19/17 Fix after set globe interceptor
     @BeforeMethod
     public void init() {
         eventCount.set(0);
     }
-
+    
     @Inject
     private CarbonServerInfo carbonServerInfo;
-
+    
     @Inject
     protected BundleContext bundleContext;
-
+    
     /**
      * Replace the existing deployment.yaml file with populated deployment.yaml file.
      */
@@ -93,7 +94,7 @@ public class HttpSourceTestCase {
         carbonYmlFilePath = Paths.get(basedir, "src", "test", "resources", "config", DEPLOYMENT_FILENAME);
         return copyFile(carbonYmlFilePath, Paths.get("conf", "default", DEPLOYMENT_FILENAME));
     }
-
+    
     /**
      * Place default client  trusts-sore.jks file in conf security folder.
      */
@@ -107,7 +108,7 @@ public class HttpSourceTestCase {
                 CLIENTTRUSTSTORE_FILENAME);
         return copyFile(carbonYmlFilePath, Paths.get("resources", "security", CLIENTTRUSTSTORE_FILENAME));
     }
-
+    
     /**
      * Place default client  key-store.jks file in conf security folder.
      */
@@ -121,10 +122,10 @@ public class HttpSourceTestCase {
                 KEYSTORESTORE_FILENAME);
         return copyFile(carbonYmlFilePath, Paths.get("resources", "security", KEYSTORESTORE_FILENAME));
     }
-
+    
     @Configuration
     public Option[] createConfiguration() {
-        return new Option[]{copyCarbonYAMLOption(),
+        return new Option[] {copyCarbonYAMLOption(),
                 copyCarbonClientTrustStoreOption(),
                 copyCarbonKeyStoreOption(),
                 CarbonDistributionOption.carbonDistribution(maven()
@@ -134,7 +135,7 @@ public class HttpSourceTestCase {
                         .versionAsInProject())
         };
     }
-
+    
     @Test
     public void testHTTPInputTransportBasicAuthFalse() throws Exception {
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8009));
@@ -179,7 +180,7 @@ public class HttpSourceTestCase {
         Assert.assertEquals(receivedEventNameList, expected);
         siddhiAppRuntime.shutdown();
     }
-
+    
     @Test
     public void testHTTPInputTransportBasicAuthTrue() throws Exception {
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8009));
@@ -224,7 +225,7 @@ public class HttpSourceTestCase {
         Assert.assertEquals(receivedEventNameList, expected);
         siddhiAppRuntime.shutdown();
     }
-
+    
     @Test
     public void testBasicAuthTrueWrongConf() throws Exception {
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8009));

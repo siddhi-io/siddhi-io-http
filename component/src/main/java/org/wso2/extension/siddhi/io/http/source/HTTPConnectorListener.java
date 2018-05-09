@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
+import org.wso2.transport.http.netty.common.Constants;
 import org.wso2.transport.http.netty.config.TransportsConfiguration;
 import org.wso2.transport.http.netty.contract.HttpClientConnector;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
@@ -32,18 +33,18 @@ import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
  * HTTP connector listener for Siddhi.
  */
 public class HTTPConnectorListener implements HttpConnectorListener {
-
+    
     private static final Logger log = LoggerFactory.getLogger(HTTPConnectorListener.class);
     private TransportsConfiguration configuration;
     private HttpClientConnector clientConnector;
-
+    
     public HTTPConnectorListener(TransportsConfiguration configuration) {
         this.configuration = configuration;
     }
-
+    
     public HTTPConnectorListener() {
     }
-
+    
     @Override
     public void onMessage(HTTPCarbonMessage carbonMessage) {
         if (HttpConstants.PROTOCOL_ID.equals(carbonMessage.getProperty(HttpConstants.PROTOCOL)) &&
@@ -86,19 +87,19 @@ public class HTTPConnectorListener implements HttpConnectorListener {
             HttpSourceUtil.handleCallback(carbonMessage, 404);
         }
     }
-
+    
     protected String getInterface(HTTPCarbonMessage cMsg) {
-        String interfaceId = (String) cMsg.getProperty(org.wso2.carbon.messaging.Constants.LISTENER_INTERFACE_ID);
+        String interfaceId = (String) cMsg.getProperty(Constants.LISTENER_INTERFACE_ID);
         if (interfaceId == null) {
             if (log.isDebugEnabled()) {
                 log.debug("Interface id not found on the message, hence using the default interface");
             }
             interfaceId = HttpConstants.DEFAULT_INTERFACE;
         }
-
+        
         return interfaceId;
     }
-
+    
     @Override
     public void onError(Throwable throwable) {
         log.error("Error in http server connector", throwable);
