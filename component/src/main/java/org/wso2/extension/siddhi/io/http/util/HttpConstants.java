@@ -78,6 +78,7 @@ public class HttpConstants {
     public static final String DEFAULT_HOST_VALUE = "0.0.0.0";
     public static final String PROTOCOL_HOST_SEPARATOR = "://";
     public static final String PORT_HOST_SEPARATOR = ":";
+    public static final String CREDENTIAL_SEPARATOR = ":";
     public static final String PORT_CONTEXT_SEPARATOR = "/";
     public static final String PORT_CONTEXT_KEY_SEPARATOR = "-";
     
@@ -115,6 +116,7 @@ public class HttpConstants {
     
     //Http Source & sink variables
     public static final String SOCKET_IDEAL_TIMEOUT = "socket.idle.timeout";
+    public static final String SOCKET_IDEAL_TIMEOUT_VALUE = "-1";
     public static final String SSL_VERIFY_CLIENT = "ssl.verify.client";
     public static final String SSL_PROTOCOL = "ssl.protocol";
     public static final String TLS_STORE_TYPE = "tls.store.type";

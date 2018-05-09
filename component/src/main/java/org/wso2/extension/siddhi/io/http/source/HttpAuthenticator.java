@@ -34,6 +34,9 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.CREDENTIAL_SEPARATOR;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
+
 /**
  * Basic authentication handler of http io implementation.
  */
@@ -47,11 +50,11 @@ public class HttpAuthenticator {
         } else {
             String authHeader = httpCarbonMessage.getHeaders().get(HttpConstants.AUTHORIZATION_HEADER);
             if (authHeader != null) {
-                String usernamePasswordEncoded = authHeader.replace(HttpConstants.AUTHORIZATION_METHOD, "");
+                String usernamePasswordEncoded = authHeader.replace(HttpConstants.AUTHORIZATION_METHOD, EMPTY_STRING);
                 ByteBuf usernamePasswordBuf = Base64.decode(Unpooled.copiedBuffer(usernamePasswordEncoded.getBytes
-                        (Charset
-                                .defaultCharset())));
-                String[] credentials = usernamePasswordBuf.toString(Charset.defaultCharset()).split(":");
+                        (Charset.defaultCharset())));
+                String[] credentials = usernamePasswordBuf.toString(Charset.defaultCharset())
+                        .split(CREDENTIAL_SEPARATOR);
                 IdPClient idPClient = HttpIODataHolder.getInstance().getClient();
                 if ((idPClient != null) && (credentials.length == 2)) {
                     try {

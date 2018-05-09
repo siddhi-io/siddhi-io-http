@@ -43,6 +43,7 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.HEADER_VALIDA
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.HEADER_VALIDATION_REJECT_MESSAGE_CONTENT_TYPE;
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.HEADER_VALIDATION_REJECT_STATUS_CODE;
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.LATENCY_METRICS_ENABLED;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.PORT_HOST_SEPARATOR;
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.REQUEST_SIZE_VALIDATION;
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.REQUEST_SIZE_VALIDATION_MAXIMUM_VALUE;
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.REQUEST_SIZE_VALIDATION_REJECT_MESSAGE;
@@ -180,23 +181,23 @@ public class HttpSourceUtil {
             switch (protocol) {
                 case HttpConstants.SCHEME_HTTP:
                     listenerConfig = new ListenerConfiguration(HttpConstants.SCHEME_HTTP, host, port);
-                    listenerConfig.setId(host + ":" + port);
+                    listenerConfig.setId(host + PORT_HOST_SEPARATOR + port);
                     listenerConfig.setScheme(protocol);
-                    listenerConfig.setMessageProcessorId(sourceConfigReader.readConfig(HttpConstants
-                            .MESSAGE_PROCESSOR_ID, HttpConstants.MESSAGE_PROCESSOR_ID_VALUE));
+                    listenerConfig.setMessageProcessorId(sourceConfigReader
+                            .readConfig(HttpConstants.MESSAGE_PROCESSOR_ID, HttpConstants.MESSAGE_PROCESSOR_ID_VALUE));
                     break;
                 case HttpConstants.SCHEME_HTTPS:
                     listenerConfig = new ListenerConfiguration(HttpConstants.SCHEME_HTTPS, host, port);
-                    listenerConfig.setId(host + ":" + port);
+                    listenerConfig.setId(host + PORT_HOST_SEPARATOR + port);
                     listenerConfig.setScheme(protocol);
-                    listenerConfig.setKeyStoreFile(sourceConfigReader.readConfig(HttpConstants.KEYSTORE_FILE,
-                            HttpConstants.KEYSTORE_FILE_VALUE));
-                    listenerConfig.setKeyStorePass(sourceConfigReader.readConfig(HttpConstants.KEYSTORE_PASSWORD,
-                            HttpConstants.KEYSTORE_PASSWORD_VALUE));
-                    listenerConfig.setCertPass(sourceConfigReader.readConfig(HttpConstants.CERT_PASSWORD,
-                            HttpConstants.CERT_PASSWORD_VALUE));
-                    listenerConfig.setMessageProcessorId(sourceConfigReader.readConfig(HttpConstants
-                            .MESSAGE_PROCESSOR_ID, HttpConstants.MESSAGE_PROCESSOR_ID_VALUE));
+                    listenerConfig.setKeyStoreFile(sourceConfigReader
+                            .readConfig(HttpConstants.KEYSTORE_FILE, HttpConstants.KEYSTORE_FILE_VALUE));
+                    listenerConfig.setKeyStorePass(sourceConfigReader
+                            .readConfig(HttpConstants.KEYSTORE_PASSWORD, HttpConstants.KEYSTORE_PASSWORD_VALUE));
+                    listenerConfig.setCertPass(sourceConfigReader
+                            .readConfig(HttpConstants.CERT_PASSWORD, HttpConstants.CERT_PASSWORD_VALUE));
+                    listenerConfig.setMessageProcessorId(sourceConfigReader
+                            .readConfig(HttpConstants.MESSAGE_PROCESSOR_ID, HttpConstants.MESSAGE_PROCESSOR_ID_VALUE));
                     break;
                 default:
                     throw new HttpSourceAdaptorRuntimeException("Invalid protocol " + protocol);

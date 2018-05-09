@@ -75,15 +75,16 @@ class HttpConnectorRegistry {
         trpConfig = new TransportsConfiguration();
         Set<TransportProperty> transportProperties = new HashSet<>();
         if (!HttpConstants.EMPTY_STRING.equals(serverBootstrapConfigurationList.trim())) {
-            String[] valueList = serverBootstrapConfigurationList.trim().substring(1,
-                    serverBootstrapConfigurationList.length
-                            () - 1).split(PARAMETER_SEPARATOR);
+            String[] valueList = serverBootstrapConfigurationList.trim()
+                    .substring(1, serverBootstrapConfigurationList.length() - 1)
+                    .split(PARAMETER_SEPARATOR);
             trpConfig.setTransportProperties(HttpSourceUtil.populateBootstrapConfigurations
                     (populateParameterMap(valueList), transportProperties));
         }
         if (!HttpConstants.EMPTY_STRING.equals(serverHeaderValidation.trim())) {
-            String[] valueList = serverHeaderValidation.trim().substring(1, serverHeaderValidation.length
-                    () - 1).split(PARAMETER_SEPARATOR);
+            String[] valueList = serverHeaderValidation.trim()
+                    .substring(1, serverHeaderValidation.length() - 1)
+                    .split(PARAMETER_SEPARATOR);
             trpConfig.setTransportProperties(HttpSourceUtil.populateTransportProperties
                     (populateParameterMap(valueList), transportProperties));
         }

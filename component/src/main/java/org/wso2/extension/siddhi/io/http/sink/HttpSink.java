@@ -58,6 +58,10 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.PORT_HOST_SEPARATOR;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_TIMEOUT_VALUE;
+
 /**
  * {@code HttpSink } Handle the HTTP publishing tasks.
  */
@@ -465,16 +469,14 @@ public class HttpSink extends Sink {
     protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
                         ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
         //read configurations
-        this.streamID = siddhiAppContext.getName() + ":" + outputStreamDefinition.toString();
+        this.streamID = siddhiAppContext.getName() + PORT_HOST_SEPARATOR + outputStreamDefinition.toString();
         this.mapType = outputStreamDefinition.getAnnotations().get(0).getAnnotations().get(0).getElements().get(0)
                 .getValue();
         this.publisherURL = optionHolder.validateAndGetStaticValue(HttpConstants.PUBLISHER_URL);
         this.httpHeaderOption = optionHolder.getOrCreateOption(HttpConstants.HEADERS, HttpConstants.DEFAULT_HEADER);
         this.httpMethodOption = optionHolder.getOrCreateOption(HttpConstants.METHOD, HttpConstants.DEFAULT_METHOD);
-        this.userName = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_USERNAME,
-                HttpConstants.EMPTY_STRING);
-        this.userPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_PASSWORD,
-                HttpConstants.EMPTY_STRING);
+        this.userName = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_USERNAME, EMPTY_STRING);
+        this.userPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_PASSWORD, EMPTY_STRING);
         String clientStoreFile = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PATH_PARAM,
                 HttpSinkUtil.trustStorePath(configReader));
         String clientStorePass = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD_PARAM,
@@ -482,40 +484,35 @@ public class HttpSink extends Sink {
         String scheme = HttpSinkUtil.getScheme(publisherURL);
         this.httpURLProperties = HttpSinkUtil.getURLProperties(publisherURL);
         int socketIdleTimeout = Integer.parseInt(optionHolder.validateAndGetStaticValue
-                (HttpConstants.SOCKET_IDEAL_TIMEOUT, "-1"));
-        String sslProtocol = optionHolder.validateAndGetStaticValue(HttpConstants.SSL_PROTOCOL, HttpConstants
-                .EMPTY_STRING);
-        String tlsStoreType = optionHolder.validateAndGetStaticValue(HttpConstants.TLS_STORE_TYPE, HttpConstants
-                .EMPTY_STRING);
-        String chunkDisabled = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_CHUNK_ENABLED,
-                HttpConstants.EMPTY_STRING);
+                (HttpConstants.SOCKET_IDEAL_TIMEOUT, SOCKET_IDEAL_TIMEOUT_VALUE));
+        String sslProtocol = optionHolder.validateAndGetStaticValue(HttpConstants.SSL_PROTOCOL, EMPTY_STRING);
+        String tlsStoreType = optionHolder.validateAndGetStaticValue(HttpConstants.TLS_STORE_TYPE, EMPTY_STRING);
+        String chunkDisabled = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_CHUNK_ENABLED, EMPTY_STRING);
         String followRedirect = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_FOLLOW_REDIRECT,
-                HttpConstants.EMPTY_STRING);
+                EMPTY_STRING);
         String maxRedirectCount = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_MAX_REDIRECT_COUNT,
-                HttpConstants.EMPTY_STRING);
-        String parametersList = optionHolder.validateAndGetStaticValue(HttpConstants.SINK_PARAMETERS,
-                HttpConstants.EMPTY_STRING);
-        String proxyHost = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_HOST, HttpConstants.EMPTY_STRING);
-        String proxyPort = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_PORT, HttpConstants.EMPTY_STRING);
-        String proxyUsername = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_USERNAME, HttpConstants
-                .EMPTY_STRING);
-        String proxyPassword = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_PASSWORD, HttpConstants
-                .EMPTY_STRING);
-        String clientBootstrapConfiguration = optionHolder.validateAndGetStaticValue(HttpConstants
-                .CLIENT_BOOTSTRAP_CONFIGURATION, HttpConstants.EMPTY_STRING);
-        String clientPoolConfiguration = optionHolder.validateAndGetStaticValue(HttpConstants
-                .CLIENT_POOL_CONFIGURATION, HttpConstants.EMPTY_STRING);
+                EMPTY_STRING);
+        String parametersList = optionHolder.validateAndGetStaticValue(HttpConstants.SINK_PARAMETERS, EMPTY_STRING);
+        String proxyHost = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_HOST, EMPTY_STRING);
+        String proxyPort = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_PORT, EMPTY_STRING);
+        String proxyUsername = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_USERNAME,
+                EMPTY_STRING);
+        String proxyPassword = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_PASSWORD,
+                EMPTY_STRING);
+        String clientBootstrapConfiguration = optionHolder
+                .validateAndGetStaticValue(HttpConstants.CLIENT_BOOTSTRAP_CONFIGURATION, EMPTY_STRING);
+        String clientPoolConfiguration = optionHolder
+                .validateAndGetStaticValue(HttpConstants.CLIENT_POOL_CONFIGURATION, EMPTY_STRING);
         //read trp globe configuration
-        String bootstrapWorker = configReader.readConfig(HttpConstants
-                .CLIENT_BOOTSTRAP_WORKER_GROUP_SIZE, HttpConstants.EMPTY_STRING);
-        String bootstrapBoss = configReader.readConfig(HttpConstants
-                .CLIENT_BOOTSTRAP_BOSS_GROUP_SIZE, HttpConstants.EMPTY_STRING);
+        String bootstrapWorker = configReader
+                .readConfig(HttpConstants.CLIENT_BOOTSTRAP_WORKER_GROUP_SIZE, EMPTY_STRING);
+        String bootstrapBoss = configReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_BOSS_GROUP_SIZE, EMPTY_STRING);
         String bootstrapClient = configReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_CLIENT_GROUP_SIZE,
-                HttpConstants.EMPTY_STRING);
+                EMPTY_STRING);
         //Generate basic sender configurations
-        SenderConfiguration senderConfig = HttpSinkUtil.getSenderConfigurations(httpURLProperties,
-                clientStoreFile, clientStorePass, configReader);
-        if (HttpConstants.EMPTY_STRING.equals(publisherURL)) {
+        SenderConfiguration senderConfig = HttpSinkUtil
+                .getSenderConfigurations(httpURLProperties, clientStoreFile, clientStorePass, configReader);
+        if (EMPTY_STRING.equals(publisherURL)) {
             throw new SiddhiAppCreationException("Receiver URL found empty but it is Mandatory field in " +
                     "" + HttpConstants.HTTP_SINK_ID + "in" + streamID);
         }
@@ -526,11 +523,11 @@ public class HttpSink extends Sink {
         }
         //if username and password both not equal to null consider as basic auth enabled if only one is null take it
         // as exception
-        if ((HttpConstants.EMPTY_STRING.equals(userName) ^
-                HttpConstants.EMPTY_STRING.equals(userPassword))) {
+        if ((EMPTY_STRING.equals(userName) ^
+                EMPTY_STRING.equals(userPassword))) {
             throw new SiddhiAppCreationException("Please provide user name and password in " +
                     HttpConstants.HTTP_SINK_ID + "in" + streamID);
-        } else if (!(HttpConstants.EMPTY_STRING.equals(userName) || HttpConstants.EMPTY_STRING.equals
+        } else if (!(EMPTY_STRING.equals(userName) || EMPTY_STRING.equals
                 (userPassword))) {
             byte[] val = (userName + HttpConstants.AUTH_USERNAME_PASSWORD_SEPARATOR + userPassword).getBytes(Charset
                     .defaultCharset());
@@ -539,8 +536,8 @@ public class HttpSink extends Sink {
         }
         //if bootstrap configurations are given then pass it if not let take default value of transport
         HttpWsConnectorFactory httpConnectorFactory;
-        if (!HttpConstants.EMPTY_STRING.equals(bootstrapBoss) && !HttpConstants.EMPTY_STRING.equals(bootstrapWorker)) {
-            if (!HttpConstants.EMPTY_STRING.equals(bootstrapClient)) {
+        if (!EMPTY_STRING.equals(bootstrapBoss) && !EMPTY_STRING.equals(bootstrapWorker)) {
+            if (!EMPTY_STRING.equals(bootstrapClient)) {
                 httpConnectorFactory = new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss),
                         Integer.parseInt(bootstrapWorker), Integer.parseInt(bootstrapClient));
             } else {
@@ -552,11 +549,11 @@ public class HttpSink extends Sink {
         }
         
         //if proxy username and password not equal to null then create proxy configurations
-        if (!HttpConstants.EMPTY_STRING.equals(proxyHost) && !HttpConstants.EMPTY_STRING.equals(proxyPort)) {
+        if (!EMPTY_STRING.equals(proxyHost) && !EMPTY_STRING.equals(proxyPort)) {
             try {
                 ProxyServerConfiguration proxyServerConfiguration = new ProxyServerConfiguration(proxyHost, Integer
                         .parseInt(proxyPort));
-                if (!HttpConstants.EMPTY_STRING.equals(proxyPassword) && !HttpConstants.EMPTY_STRING.equals
+                if (!EMPTY_STRING.equals(proxyPassword) && !EMPTY_STRING.equals
                         (proxyUsername)) {
                     proxyServerConfiguration.setProxyPassword(proxyPassword);
                     proxyServerConfiguration.setProxyUsername(proxyUsername);
@@ -570,13 +567,13 @@ public class HttpSink extends Sink {
         if (socketIdleTimeout != -1) {
             senderConfig.setSocketIdleTimeout(socketIdleTimeout);
         }
-        if (!HttpConstants.EMPTY_STRING.equals(sslProtocol)) {
+        if (!EMPTY_STRING.equals(sslProtocol)) {
             senderConfig.setSSLProtocol(sslProtocol);
         }
-        if (!HttpConstants.EMPTY_STRING.equals(tlsStoreType)) {
+        if (!EMPTY_STRING.equals(tlsStoreType)) {
             senderConfig.setTLSStoreType(tlsStoreType);
         }
-        if (!HttpConstants.EMPTY_STRING.equals(chunkDisabled)) {
+        if (!EMPTY_STRING.equals(chunkDisabled)) {
             if (chunkDisabled != null) {
                 if (Boolean.parseBoolean(chunkDisabled)) {
                     senderConfig.setChunkingConfig(ChunkConfig.NEVER);
@@ -585,19 +582,19 @@ public class HttpSink extends Sink {
                 }
             } // else AUTO
         }
-        if (!HttpConstants.EMPTY_STRING.equals(followRedirect)) {
+        if (!EMPTY_STRING.equals(followRedirect)) {
             senderConfig.setFollowRedirect(Boolean.parseBoolean(followRedirect));
         }
-        if (!HttpConstants.EMPTY_STRING.equals(maxRedirectCount)) {
+        if (!EMPTY_STRING.equals(maxRedirectCount)) {
             senderConfig.setMaxRedirectCount(Integer.parseInt(maxRedirectCount));
         }
-        if (!HttpConstants.EMPTY_STRING.equals(parametersList)) {
+        if (!EMPTY_STRING.equals(parametersList)) {
             senderConfig.setParameters(HttpIoUtil.populateParameters(parametersList));
         }
         
         //overwrite default transport configuration
-        Map<String, Object> properties = HttpSinkUtil.populateTransportConfiguration(clientBootstrapConfiguration,
-                clientPoolConfiguration);
+        Map<String, Object> properties = HttpSinkUtil
+                .populateTransportConfiguration(clientBootstrapConfiguration, clientPoolConfiguration);
         
         clientConnector = httpConnectorFactory.createHttpClientConnector(properties, senderConfig);
     }
@@ -608,20 +605,18 @@ public class HttpSink extends Sink {
      *
      * @param payload        payload of the event based on the supported event class exported by the extensions
      * @param dynamicOptions holds the dynamic options of this sink and Use this object to obtain dynamic options.
-     * @throws ConnectionUnavailableException if end point is unavailable the ConnectionUnavailableException thrown
-     *                                        such that the  system will take care retrying for connection
      */
     @Override
     public void publish(Object payload, DynamicOptions dynamicOptions) {
         String headers = httpHeaderOption.getValue(dynamicOptions);
-        String httpMethod = HttpConstants.EMPTY_STRING.equals(httpMethodOption.getValue(dynamicOptions)) ?
+        String httpMethod = EMPTY_STRING.equals(httpMethodOption.getValue(dynamicOptions)) ?
                 HttpConstants.METHOD_DEFAULT : httpMethodOption.getValue(dynamicOptions);
         List<Header> headersList = HttpSinkUtil.getHeaders(headers);
         String contentType = HttpSinkUtil.getContentType(mapType, headersList);
         String messageBody = (String) payload;
         HttpMethod httpReqMethod = new HttpMethod(httpMethod);
         HTTPCarbonMessage cMessage = new HTTPCarbonMessage(
-                new DefaultHttpRequest(HttpVersion.HTTP_1_1, httpReqMethod, ""));
+                new DefaultHttpRequest(HttpVersion.HTTP_1_1, httpReqMethod, EMPTY_STRING));
         cMessage = generateCarbonMessage(headersList, contentType, httpMethod, cMessage);
         if (!Constants.HTTP_GET_METHOD.equals(httpMethod)) {
             cMessage.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(messageBody
@@ -721,11 +716,11 @@ public class HttpSink extends Sink {
         cMessage.setProperty(Constants.REQUEST_URL, httpURLProperties.get(Constants.REQUEST_URL));
         HttpHeaders httpHeaders = cMessage.getHeaders();
         //if Authentication enabled
-        if (!(userName.equals(HttpConstants.EMPTY_STRING)) && !(userPassword.equals
-                (HttpConstants.EMPTY_STRING))) {
+        if (!(userName.equals(EMPTY_STRING)) && !(userPassword.equals
+                (EMPTY_STRING))) {
             httpHeaders.set(HttpConstants.AUTHORIZATION_HEADER, authorizationHeader);
-        } else if (!(userName.equals(HttpConstants.EMPTY_STRING)) || !(userPassword.equals
-                (HttpConstants.EMPTY_STRING))) {
+        } else if (!(userName.equals(EMPTY_STRING)) || !(userPassword.equals
+                (EMPTY_STRING))) {
             log.error("One of the basic authentication username or password missing. Hence basic authentication not " +
                     "supported.");
         }
