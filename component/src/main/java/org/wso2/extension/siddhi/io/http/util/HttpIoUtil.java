@@ -86,7 +86,7 @@ public class HttpIoUtil {
      * Create new HTTP carbon message.
      *
      * @param statusCode error code
-     * @return
+     * @return HTTP Response
      */
     private static HTTPCarbonMessage createErrorMessage(String responseValue, int statusCode) {
         

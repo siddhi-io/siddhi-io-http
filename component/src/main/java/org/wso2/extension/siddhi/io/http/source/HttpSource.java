@@ -38,6 +38,9 @@ import org.wso2.transport.http.netty.config.ListenerConfiguration;
 import java.util.Locale;
 import java.util.Map;
 
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.DEFAULT_WORKER_COUNT;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_TIMEOUT_VALUE;
+
 /**
  * Http source for receive the http and https request.
  */
@@ -434,26 +437,27 @@ public class HttpSource extends Source {
         }
         //read configuration
         this.listenerUrl = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_URL, defaultURL);
-        this.isAuth = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants.IS_AUTH,
-                HttpConstants.EMPTY_IS_AUTH).toLowerCase(Locale.ENGLISH));
-        this.workerThread = optionHolder.validateAndGetStaticValue(HttpConstants.WORKER_COUNT, HttpConstants
-                .DEFAULT_WORKER_COUNT);
+        this.isAuth = Boolean.parseBoolean(optionHolder
+                .validateAndGetStaticValue(HttpConstants.IS_AUTH, HttpConstants.EMPTY_IS_AUTH)
+                .toLowerCase(Locale.ENGLISH));
+        this.workerThread = optionHolder
+                .validateAndGetStaticValue(HttpConstants.WORKER_COUNT, DEFAULT_WORKER_COUNT);
         this.sourceEventListener = sourceEventListener;
         this.requestedTransportPropertyNames = requestedTransportPropertyNames.clone();
-        int socketIdleTimeout = Integer.parseInt(optionHolder.validateAndGetStaticValue
-                (HttpConstants.SOCKET_IDEAL_TIMEOUT, "-1"));
-        String verifyClient = optionHolder.validateAndGetStaticValue(HttpConstants.SSL_VERIFY_CLIENT, HttpConstants
-                .EMPTY_STRING);
-        String sslProtocol = optionHolder.validateAndGetStaticValue(HttpConstants.SSL_PROTOCOL, HttpConstants
-                .EMPTY_STRING);
-        String tlsStoreType = optionHolder.validateAndGetStaticValue(HttpConstants.TLS_STORE_TYPE, HttpConstants
-                .EMPTY_STRING);
-        String requestSizeValidationConfigList = optionHolder.validateAndGetStaticValue(HttpConstants
-                .REQUEST_SIZE_VALIDATION_CONFIG, HttpConstants.EMPTY_STRING);
-        String serverBootstrapPropertiesList = optionHolder.validateAndGetStaticValue(HttpConstants
-                .SERVER_BOOTSTRAP_CONFIGURATION, HttpConstants.EMPTY_STRING);
-        String parameterList = optionHolder.validateAndGetStaticValue(HttpConstants.SOURCE_PARAMETERS, HttpConstants
-                .EMPTY_STRING);
+        int socketIdleTimeout = Integer.parseInt(optionHolder
+                .validateAndGetStaticValue(HttpConstants.SOCKET_IDEAL_TIMEOUT, SOCKET_IDEAL_TIMEOUT_VALUE));
+        String verifyClient = optionHolder
+                .validateAndGetStaticValue(HttpConstants.SSL_VERIFY_CLIENT, HttpConstants.EMPTY_STRING);
+        String sslProtocol = optionHolder
+                .validateAndGetStaticValue(HttpConstants.SSL_PROTOCOL, HttpConstants.EMPTY_STRING);
+        String tlsStoreType = optionHolder
+                .validateAndGetStaticValue(HttpConstants.TLS_STORE_TYPE, HttpConstants.EMPTY_STRING);
+        String requestSizeValidationConfigList = optionHolder
+                .validateAndGetStaticValue(HttpConstants.REQUEST_SIZE_VALIDATION_CONFIG, HttpConstants.EMPTY_STRING);
+        String serverBootstrapPropertiesList = optionHolder
+                .validateAndGetStaticValue(HttpConstants.SERVER_BOOTSTRAP_CONFIGURATION, HttpConstants.EMPTY_STRING);
+        String parameterList = optionHolder
+                .validateAndGetStaticValue(HttpConstants.SOURCE_PARAMETERS, HttpConstants.EMPTY_STRING);
         String traceLog = optionHolder.validateAndGetStaticValue(HttpConstants.TRACE_LOG_ENABLED, configReader
                 .readConfig(HttpConstants.DEFAULT_TRACE_LOG_ENABLED, HttpConstants.EMPTY_STRING));
         this.listenerConfiguration = HttpSourceUtil.getListenerConfiguration(this.listenerUrl, configReader);

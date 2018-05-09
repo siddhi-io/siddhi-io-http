@@ -38,7 +38,7 @@ public class HttpServerListener implements HttpHandler {
     private Headers headers;
     private static final Logger logger = Logger.getLogger(HttpServerListener.class);
 
-    HttpServerListener() {
+    public HttpServerListener() {
     }
 
     @Override

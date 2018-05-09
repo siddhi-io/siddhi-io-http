@@ -179,15 +179,16 @@ public class HttpSinkUtil {
         Map<String, Object> properties = new HashMap<>();
         //populate bootstrap configurations
         if (!HttpConstants.EMPTY_STRING.equals(clientBootstrapConfigurationList.trim())) {
-            String[] valueList = clientBootstrapConfigurationList.trim().substring(1,
-                    clientBootstrapConfigurationList.length
-                            () - 1).split(PARAMETER_SEPARATOR);
+            String[] valueList = clientBootstrapConfigurationList.trim()
+                    .substring(1, clientBootstrapConfigurationList.length() - 1)
+                    .split(PARAMETER_SEPARATOR);
             properties.putAll(populateClientConnectionConfiguration(populateParameterMap(valueList)));
         }
         //populate connection configurations
         if (!HttpConstants.EMPTY_STRING.equals(clientConnectionConfiguration.trim())) {
-            String[] valueList = clientConnectionConfiguration.trim().substring(1,
-                    clientConnectionConfiguration.length() - 1).split(PARAMETER_SEPARATOR);
+            String[] valueList = clientConnectionConfiguration.trim()
+                    .substring(1, clientConnectionConfiguration.length() - 1)
+                    .split(PARAMETER_SEPARATOR);
             properties.putAll(populateClientConnectionConfiguration(populateParameterMap(valueList)));
         }
         return properties;

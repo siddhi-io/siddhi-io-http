@@ -53,8 +53,8 @@ public class HttpWorkerThread implements Runnable {
     @Override
     public void run() {
         BufferedReader buf = new BufferedReader(
-                new InputStreamReader(new HttpMessageDataStreamer(carbonMessage).getInputStream(),
-                        Charset.defaultCharset()));
+                new InputStreamReader(
+                        new HttpMessageDataStreamer(carbonMessage).getInputStream(), Charset.defaultCharset()));
         try {
             String payload = buf.lines().collect(Collectors.joining("\n"));
             
