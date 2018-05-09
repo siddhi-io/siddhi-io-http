@@ -105,9 +105,9 @@ public class HttpConstants {
     public static final String TRACE_LOG_ENABLED = "trace.log.enabled";
     public static final String DEFAULT_TRACE_LOG_ENABLED_VALUE = "false";
     
-    public static final String SERVER_BOOTSTRAP_BOSS_GROUP_SIZE = "SERVER_BOOTSTRAP_BOSS_GROUP_SIZE1";
-    public static final String SERVER_BOOTSTRAP_WORKER_GROUP_SIZE = "SERVER_BOOTSTRAP_WORKER_GROUP_SIZE1";
-    public static final String SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE = "SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE1";
+    public static final String SERVER_BOOTSTRAP_BOSS_GROUP_SIZE = "serverBootstrapBossGroupSize";
+    public static final String SERVER_BOOTSTRAP_WORKER_GROUP_SIZE = "serverBootstrapWorkerGroupSize";
+    public static final String SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE = "serverBootstrapClientGroupSize";
     public static final String CLIENT_BOOTSTRAP_BOSS_GROUP_SIZE = "clientBootstrapBossGroupSize";
     public static final String CLIENT_BOOTSTRAP_WORKER_GROUP_SIZE = "clientBootstrapWorkerGroupSize";
     public static final String CLIENT_BOOTSTRAP_CLIENT_GROUP_SIZE = "clientBootstrapClientGroupSize";
@@ -150,17 +150,17 @@ public class HttpConstants {
     public static final String HEADER_VALIDATION_REJECT_MESSAGE = "header.validation.reject.message";
     public static final String HEADER_VALIDATION_REJECT_MESSAGE_CONTENT_TYPE = "header.validation.reject.message" +
             ".content.type";
-    public static final String SERVER_BOOTSTRAP_BOSS_GROUP_SIZE1 = "server.bootstrap.boss.group.size";
-    public static final String SERVER_BOOTSTRAP_WORKER_GROUP_SIZE1 = "server.bootstrap.worker.group.size";
-    public static final String SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE1 = "server.bootstrap.client.group.size";
-    public static final String SERVER_BOOTSTRAP_NODELAY = "server.bootstrap.nodelay";
-    public static final String SERVER_BOOTSTRAP_KEEPALIVE = "server.bootstrap.keepalive";
-    public static final String SERVER_BOOTSTRAP_SENDBUFFERSIZE = "server.bootstrap.sendbuffersize";
-    public static final String SERVER_BOOTSTRAP_RECIEVEBUFFERSIZE = "server.bootstrap.recievebuffersize";
-    public static final String SERVER_BOOTSTRAP_CONNECT_TIMEOUT = "server.bootstrap.connect.timeout";
-    public static final String SERVER_BOOTSTRAP_SOCKET_REUSE = "server.bootstrap.socket.reuse";
-    public static final String SERVER_BOOTSTRAP_SOCKET_TIMEOUT = "server.bootstrap.socket.timeout";
-    public static final String SERVER_BOOTSTRAP_SOCKET_BACKLOG = "server.bootstrap.socket.backlog";
+    public static final String SERVER_BOOTSTRAP_BOSS_GROUP_SIZE_PARAM = "server.bootstrap.boss.group.size";
+    public static final String SERVER_BOOTSTRAP_WORKER_GROUP_SIZE_PARAM = "server.bootstrap.worker.group.size";
+    public static final String SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE_PARAM = "server.bootstrap.client.group.size";
+    public static final String SERVER_BOOTSTRAP_NODELAY_PARAM = "server.bootstrap.nodelay";
+    public static final String SERVER_BOOTSTRAP_KEEPALIVE_PARAM = "server.bootstrap.keepalive";
+    public static final String SERVER_BOOTSTRAP_SENDBUFFERSIZE_PARAM = "server.bootstrap.sendbuffersize";
+    public static final String SERVER_BOOTSTRAP_RECIEVEBUFFERSIZE_PARAM = "server.bootstrap.recievebuffersize";
+    public static final String SERVER_BOOTSTRAP_CONNECT_TIMEOUT_PARAM = "server.bootstrap.connect.timeout";
+    public static final String SERVER_BOOTSTRAP_SOCKET_REUSE_PARAM = "server.bootstrap.socket.reuse";
+    public static final String SERVER_BOOTSTRAP_SOCKET_TIMEOUT_PARAM = "server.bootstrap.socket.timeout";
+    public static final String SERVER_BOOTSTRAP_SOCKET_BACKLOG_PARAM = "server.bootstrap.socket.backlog";
     
     //http source transport properties
     public static final String CLIENT_CONNECTION_POOL_COUNT = "client.connection.pool.count";

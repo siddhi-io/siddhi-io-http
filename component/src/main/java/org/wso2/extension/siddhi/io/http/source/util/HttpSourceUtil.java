@@ -48,17 +48,17 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.REQUEST_SIZE_
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.REQUEST_SIZE_VALIDATION_REJECT_MESSAGE;
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.REQUEST_SIZE_VALIDATION_REJECT_MESSAGE_CONTENT_TYPE;
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.REQUEST_SIZE_VALIDATION_REJECT_STATUS_CODE;
-import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_BOSS_GROUP_SIZE1;
-import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE1;
-import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_CONNECT_TIMEOUT;
-import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_KEEPALIVE;
-import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_NODELAY;
-import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_RECIEVEBUFFERSIZE;
-import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_SENDBUFFERSIZE;
-import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_SOCKET_BACKLOG;
-import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_SOCKET_REUSE;
-import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT;
-import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_WORKER_GROUP_SIZE1;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_BOSS_GROUP_SIZE_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_CONNECT_TIMEOUT_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_KEEPALIVE_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_NODELAY_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_RECIEVEBUFFERSIZE_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_SENDBUFFERSIZE_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_SOCKET_BACKLOG_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_SOCKET_REUSE_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT_PARAM;
+import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTSTRAP_WORKER_GROUP_SIZE_PARAM;
 
 /**
  * Handles the http source util functions.
@@ -237,17 +237,17 @@ public class HttpSourceUtil {
         trpPropertyTypes.put(HEADER_VALIDATION_REJECT_STATUS_CODE, TrpPropertyTypes.INTEGER);
         trpPropertyTypes.put(HEADER_VALIDATION_REJECT_MESSAGE, TrpPropertyTypes.STRING);
         trpPropertyTypes.put(HEADER_VALIDATION_REJECT_MESSAGE_CONTENT_TYPE, TrpPropertyTypes.STRING);
-        trpPropertyTypes.put(SERVER_BOOTSTRAP_BOSS_GROUP_SIZE1, TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put(SERVER_BOOTSTRAP_WORKER_GROUP_SIZE1, TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put(SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE1, TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put(SERVER_BOOTSTRAP_NODELAY, TrpPropertyTypes.BOOLEAN);
-        trpPropertyTypes.put(SERVER_BOOTSTRAP_KEEPALIVE, TrpPropertyTypes.BOOLEAN);
-        trpPropertyTypes.put(SERVER_BOOTSTRAP_SENDBUFFERSIZE, TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put(SERVER_BOOTSTRAP_RECIEVEBUFFERSIZE, TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put(SERVER_BOOTSTRAP_CONNECT_TIMEOUT, TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put(SERVER_BOOTSTRAP_SOCKET_REUSE, TrpPropertyTypes.BOOLEAN);
-        trpPropertyTypes.put(SERVER_BOOTSTRAP_SOCKET_TIMEOUT, TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put(SERVER_BOOTSTRAP_SOCKET_BACKLOG, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_BOSS_GROUP_SIZE_PARAM, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_WORKER_GROUP_SIZE_PARAM, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE_PARAM, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_NODELAY_PARAM, TrpPropertyTypes.BOOLEAN);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_KEEPALIVE_PARAM, TrpPropertyTypes.BOOLEAN);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_SENDBUFFERSIZE_PARAM, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_RECIEVEBUFFERSIZE_PARAM, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_CONNECT_TIMEOUT_PARAM, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_SOCKET_REUSE_PARAM, TrpPropertyTypes.BOOLEAN);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_SOCKET_TIMEOUT_PARAM, TrpPropertyTypes.INTEGER);
+        trpPropertyTypes.put(SERVER_BOOTSTRAP_SOCKET_BACKLOG_PARAM, TrpPropertyTypes.INTEGER);
         return trpPropertyTypes;
     }
 }

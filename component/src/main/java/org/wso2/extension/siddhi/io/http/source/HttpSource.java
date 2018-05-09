@@ -323,7 +323,7 @@ import java.util.Map;
                                 "`Authorization:'Basic encodeBase64(username:Password)'` header.")},
         systemParameter = {
                 @SystemParameter(
-                        name = "SERVER_BOOTSTRAP_BOSS_GROUP_SIZE1",
+                        name = "serverBootstrapBossGroupSize",
                         description = "property to configure number of boss threads, which accepts incoming " +
                                 "connections until the ports are unbound. Once connection accepts successfully, " +
                                 "boss thread passes the accepted channel to one of the worker threads.",
@@ -331,14 +331,14 @@ import java.util.Map;
                         possibleParameters = "Any integer"
                 ),
                 @SystemParameter(
-                        name = "SERVER_BOOTSTRAP_WORKER_GROUP_SIZE1",
+                        name = "serverBootstrapWorkerGroupSize",
                         description = "property to configure number of worker threads, which performs non " +
                                 "blocking read and write for one or more channels in non-blocking mode.",
                         defaultValue = "(Number of available processors)*2",
                         possibleParameters = "Any integer"
                 ),
                 @SystemParameter(
-                        name = "SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE1",
+                        name = "serverBootstrapClientGroupSize",
                         description = "property to configure number of client threads, which performs non " +
                                 "blocking read and write for one or more channels in non-blocking mode.",
                         defaultValue = "(Number of available processors)*2",
