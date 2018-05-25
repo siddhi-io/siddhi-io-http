@@ -55,10 +55,10 @@ class HttpConnectorRegistry {
     private static HttpConnectorRegistry instance = new HttpConnectorRegistry();
     private Map<String, HttpServerConnectorContext> serverConnectorPool = new ConcurrentHashMap<>();
     private Map<String, HttpSourceListener> sourceListenersMap = new ConcurrentHashMap<>();
-    private TransportsConfiguration trpConfig;
-    private HttpWsConnectorFactory httpConnectorFactory;
+    protected TransportsConfiguration trpConfig;
+    protected HttpWsConnectorFactory httpConnectorFactory;
     
-    private HttpConnectorRegistry() {
+    protected HttpConnectorRegistry() {
     }
     
     RequestSizeValidationConfig populateRequestSizeValidationConfiguration() {
@@ -324,7 +324,7 @@ class HttpConnectorRegistry {
         return false;
     }
     
-    private void setConnectorListeners(ServerConnectorFuture connectorFuture, String serverConnectorId,
+    protected void setConnectorListeners(ServerConnectorFuture connectorFuture, String serverConnectorId,
                                        ConnectorStartupSynchronizer startupSyncer) {
         connectorFuture.setHttpConnectorListener(new HTTPConnectorListener());
         connectorFuture.setPortBindingEventListener(

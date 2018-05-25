@@ -21,7 +21,6 @@ package org.wso2.extension.siddhi.io.http.source;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
-import org.wso2.extension.siddhi.io.http.util.HttpIoUtil;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
@@ -29,23 +28,15 @@ import org.wso2.siddhi.annotation.SystemParameter;
 import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
-import org.wso2.siddhi.core.stream.input.source.Source;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.transport.OptionHolder;
-import org.wso2.transport.http.netty.config.ListenerConfiguration;
-
-import java.util.Locale;
-import java.util.Map;
-
-import static org.wso2.extension.siddhi.io.http.util.HttpConstants.DEFAULT_WORKER_COUNT;
-import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_TIMEOUT_VALUE;
 
 /**
  * Http source for receive the http and https request.
  */
-@Extension(name = "http", namespace = "source", description = "The HTTP source receives POST requests via HTTP or " +
-        "HTTPS in format such as `text`, `XML` and `JSON`. If required, you can enable basic authentication to " +
+@Extension(name = "http-sync", namespace = "source", description = "The HTTP source receives POST requests via HTTP " +
+        "or HTTPS in format such as `text`, `XML` and `JSON`. If required, you can enable basic authentication to " +
         "ensure that events are received only from users who are authorized to access the service.",
         parameters = {
                 @Parameter(name = "receiver.url",
@@ -58,6 +49,9 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "http://0.0.0.0:9763/<appNAme>/<streamName>"),
+                @Parameter(name = "source.id",
+                        description = "Identifier need to map the source to sink.",
+                        type = {DataType.STRING}),
                 @Parameter(name = "basic.auth.enabled",
                         description = "If this is set to `true`, " +
                                 "basic authentication is enabled for incoming events, and the credentials with " +
@@ -148,7 +142,7 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "null"),
-                
+
                 //header validation parameters
                 @Parameter(
                         name = "request.size.validation.configuration",
@@ -236,7 +230,7 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "plain/text"),
-                
+
                 //bootstrap configuration
                 @Parameter(
                         name = "server.bootstrap.configuration",
@@ -300,27 +294,27 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                         defaultValue = "false",
                         optional = true,
                         type = {DataType.BOOL}
-                
+
                 )
         },
         examples = {
-                @Example(syntax = "@source(type='http', receiver.url='http://localhost:9055/endpoints/RecPro', " +
+                @Example(syntax = "@source(type='http-sync', source.id='samplesourceid, " +
+                        "receiver.url='http://localhost:9055/endpoints/RecPro', " +
                         "socketIdleTimeout='150000', parameters=\"'ciphers : TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256'," +
                         " 'sslEnabledProtocols:TLSv1.1,TLSv1.2'\",request.size.validation.configuration=\"request" +
                         ".size.validation:true\",server.bootstrap.configuration=\"server.bootstrap.socket" +
                         ".timeout:25\" " +
-                        "@map(type='xml'))\n"
-                        + "define stream FooStream (symbol string, price float, volume long);\n",
-                        description = "Above source listenerConfiguration performs a default XML input mapping. " +
-                                "The expected "
-                                + "input is as follows:"
-                                + "<events>\n"
-                                + "    <event>\n"
-                                + "        <symbol>WSO2</symbol>\n"
-                                + "        <price>55.6</price>\n"
-                                + "        <volume>100</volume>\n"
-                                + "    </event>\n"
-                                + "</events>\n"
+                        "@map(type='json @attributes(messageId='trp:messageId',symbol='$.events.event.symbol'," +
+                        "price='$.events.event.price',volume='$.events.event.volume')))\n"
+                        + "define stream FooStream (messageId string, symbol string, price float, volume long);\n",
+                        description = "The expected input is as follows:"
+                                + "{\"events\":\n"
+                                + "    {\"event\":\n"
+                                + "        \"symbol\":WSO2,\n"
+                                + "        \"price\":55.6,\n"
+                                + "        \"volume\":100,\n"
+                                + "    }\n"
+                                + "}\n"
                                 + "If basic authentication is enabled via the `basic.auth.enabled='true` setting, " +
                                 "each input event is also expected to contain the " +
                                 "`Authorization:'Basic encodeBase64(username:Password)'` header.")},
@@ -391,16 +385,12 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                 )
         }
 )
-public class HttpSource extends Source {
-    private static final Logger log = Logger.getLogger(HttpSource.class);
-    protected String listenerUrl;
-    private HttpConnectorRegistry httpConnectorRegistry;
-    protected Boolean isAuth;
-    protected String workerThread;
-    protected SourceEventListener sourceEventListener;
-    protected String[] requestedTransportPropertyNames;
-    protected ListenerConfiguration listenerConfiguration;
-    
+public class HttpSyncSource extends HttpSource {
+
+    private static final Logger log = Logger.getLogger(HttpSyncSource.class);
+    private HttpSyncConnectorRegistry httpConnectorRegistry;
+    private String sourceId;
+
     /**
      * The initialization method for {@link Source}, which will be called before other methods and validate
      * the all listenerConfiguration and getting the intial values.
@@ -416,76 +406,21 @@ public class HttpSource extends Source {
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
                      String[] requestedTransportPropertyNames, ConfigReader configReader,
                      SiddhiAppContext siddhiAppContext) {
-        String scheme = configReader.readConfig(HttpConstants.DEFAULT_SOURCE_SCHEME, HttpConstants
-                .DEFAULT_SOURCE_SCHEME_VALUE);
-        //generate default URL
-        String defaultURL;
-        if (HttpConstants.SCHEME_HTTPS.equals(scheme)) {
-            defaultURL = HttpConstants.SCHEME_HTTPS + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
-                    readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
-                    HttpConstants.PORT_HOST_SEPARATOR + configReader.readConfig(HttpConstants.
-                    HTTPS_PORT, HttpConstants.HTTPS_PORT_VALUE) + HttpConstants.
-                    PORT_CONTEXT_SEPARATOR + siddhiAppContext.getName()
-                    + HttpConstants.PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
-        } else {
-            defaultURL = HttpConstants.SCHEME_HTTP + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
-                    readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
-                    HttpConstants.PORT_HOST_SEPARATOR + configReader.readConfig(HttpConstants.
-                    HTTP_PORT, HttpConstants.HTTP_PORT_VALUE) + HttpConstants.
-                    PORT_CONTEXT_SEPARATOR + siddhiAppContext.getName()
-                    + HttpConstants.PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
-        }
-        //read configuration
-        this.listenerUrl = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_URL, defaultURL);
-        this.isAuth = Boolean.parseBoolean(optionHolder
-                .validateAndGetStaticValue(HttpConstants.IS_AUTH, HttpConstants.EMPTY_IS_AUTH)
-                .toLowerCase(Locale.ENGLISH));
-        this.workerThread = optionHolder
-                .validateAndGetStaticValue(HttpConstants.WORKER_COUNT, DEFAULT_WORKER_COUNT);
-        this.sourceEventListener = sourceEventListener;
-        this.requestedTransportPropertyNames = requestedTransportPropertyNames.clone();
-        int socketIdleTimeout = Integer.parseInt(optionHolder
-                .validateAndGetStaticValue(HttpConstants.SOCKET_IDEAL_TIMEOUT, SOCKET_IDEAL_TIMEOUT_VALUE));
-        String verifyClient = optionHolder
-                .validateAndGetStaticValue(HttpConstants.SSL_VERIFY_CLIENT, HttpConstants.EMPTY_STRING);
-        String sslProtocol = optionHolder
-                .validateAndGetStaticValue(HttpConstants.SSL_PROTOCOL, HttpConstants.EMPTY_STRING);
-        String tlsStoreType = optionHolder
-                .validateAndGetStaticValue(HttpConstants.TLS_STORE_TYPE, HttpConstants.EMPTY_STRING);
+
+        super.init(sourceEventListener, optionHolder, requestedTransportPropertyNames, configReader, siddhiAppContext);
+
+        this.sourceId = optionHolder.validateAndGetStaticValue(HttpConstants.SOURCE_ID);
+
         String requestSizeValidationConfigList = optionHolder
                 .validateAndGetStaticValue(HttpConstants.REQUEST_SIZE_VALIDATION_CONFIG, HttpConstants.EMPTY_STRING);
         String serverBootstrapPropertiesList = optionHolder
                 .validateAndGetStaticValue(HttpConstants.SERVER_BOOTSTRAP_CONFIGURATION, HttpConstants.EMPTY_STRING);
-        String parameterList = optionHolder
-                .validateAndGetStaticValue(HttpConstants.SOURCE_PARAMETERS, HttpConstants.EMPTY_STRING);
-        String traceLog = optionHolder.validateAndGetStaticValue(HttpConstants.TRACE_LOG_ENABLED, configReader
-                .readConfig(HttpConstants.DEFAULT_TRACE_LOG_ENABLED, HttpConstants.EMPTY_STRING));
-        this.listenerConfiguration = HttpSourceUtil.getListenerConfiguration(this.listenerUrl, configReader);
-        if (socketIdleTimeout != -1) {
-            this.listenerConfiguration.setSocketIdleTimeout(socketIdleTimeout);
-        }
-        if (!HttpConstants.EMPTY_STRING.equals(verifyClient)) {
-            this.listenerConfiguration.setVerifyClient(verifyClient);
-        }
-        if (!HttpConstants.EMPTY_STRING.equals(sslProtocol)) {
-            this.listenerConfiguration.setSSLProtocol(sslProtocol);
-        }
-        if (!HttpConstants.EMPTY_STRING.equals(tlsStoreType)) {
-            this.listenerConfiguration.setTLSStoreType(tlsStoreType);
-        }
-        if (!HttpConstants.EMPTY_STRING.equals(traceLog)) {
-            this.listenerConfiguration.setHttpTraceLogEnabled(Boolean.parseBoolean(traceLog));
-        }
-        this.httpConnectorRegistry = HttpConnectorRegistry.getInstance();
+
+        this.httpConnectorRegistry = HttpSyncConnectorRegistry.getInstance();
         this.httpConnectorRegistry.initBootstrapConfigIfFirst(configReader);
         this.httpConnectorRegistry.setTransportConfig(serverBootstrapPropertiesList, requestSizeValidationConfigList);
-        if (!HttpConstants.EMPTY_STRING.equals(requestSizeValidationConfigList)) {
-            this.listenerConfiguration.setRequestSizeValidationConfig(HttpConnectorRegistry.getInstance()
-                    .populateRequestSizeValidationConfiguration());
-        }
-        listenerConfiguration.setParameters(HttpIoUtil.populateParameters(parameterList));
     }
-    
+
     /**
      * Returns the list of classes which this source can output.
      *
@@ -496,7 +431,7 @@ public class HttpSource extends Source {
     public Class[] getOutputEventClasses() {
         return new Class[] {String.class};
     }
-    
+
     /**
      * Intialy Called to connect to the end point for start  retriving the messages asynchronisly .
      *
@@ -508,10 +443,10 @@ public class HttpSource extends Source {
     @Override
     public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
         this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration);
-        this.httpConnectorRegistry.registerSourceListener(sourceEventListener, this.listenerUrl,
-                Integer.parseInt(workerThread), isAuth, requestedTransportPropertyNames);
+        this.httpConnectorRegistry.registerSourceListener(sourceEventListener, listenerUrl,
+                Integer.parseInt(workerThread), isAuth, requestedTransportPropertyNames, sourceId);
     }
-    
+
     /**
      * This method can be called when it is needed to disconnect from the end point.
      */
@@ -520,59 +455,25 @@ public class HttpSource extends Source {
         this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl);
         this.httpConnectorRegistry.unregisterServerConnector(this.listenerUrl);
     }
-    
-    /**
-     * Called at the end to clean all the resources consumed by the {@link Source}
-     */
-    @Override
-    public void destroy() {
-        this.httpConnectorRegistry.clearBootstrapConfigIfLast();
-    }
-    
-    /**
-     * Called to pause event consumption
-     */
+
     @Override
     public void pause() {
-        HttpSourceListener httpSourceListener = this.httpConnectorRegistry.getSourceListenersMap().get(HttpSourceUtil
-                .getSourceListenerKey(listenerUrl));
+        HttpSourceListener httpSourceListener = this.httpConnectorRegistry.getSyncSourceListenersMap()
+                .get(HttpSourceUtil.getSourceListenerKey(listenerUrl));
         if ((httpSourceListener != null) && (httpSourceListener.isRunning())) {
             httpSourceListener.pause();
         }
     }
-    
+
     /**
      * Called to resume event consumption
      */
     @Override
     public void resume() {
-        HttpSourceListener httpSourceListener = this.httpConnectorRegistry.getSourceListenersMap()
+        HttpSourceListener httpSourceListener = this.httpConnectorRegistry.getSyncSourceListenersMap()
                 .get(HttpSourceUtil.getSourceListenerKey(listenerUrl));
         if ((httpSourceListener != null) && (httpSourceListener.isPaused())) {
             httpSourceListener.resume();
         }
-    }
-    
-    /**
-     * Used to collect the serializable state of the processing element, that need to be
-     * persisted for the reconstructing the element to the same state on a different point of time
-     *
-     * @return stateful objects of the processing element as a map
-     */
-    @Override
-    public Map<String, Object> currentState() {
-        //no current state
-        return null;
-    }
-    
-    /**
-     * Used to restore serialized state of the processing element, for reconstructing
-     *
-     * @param map stateful objects of the element as a map.
-     *            This is the same map that is created upon calling currentState() method.
-     */
-    @Override
-    public void restoreState(Map<String, Object> map) {
-        // no state to restore
     }
 }
