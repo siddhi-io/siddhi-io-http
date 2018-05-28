@@ -52,11 +52,12 @@ public class SyncResultHandler {
     private static HashedWheelTimer timer = new HashedWheelTimer();
     private static WeakHashMap<String, Timeout> schedularMap = new WeakHashMap<>();
 
-    public static void registerCallback(HTTPCarbonMessage carbonMessage, String sourceId, String messageId) {
+    public static void registerCallback(HTTPCarbonMessage carbonMessage, String sourceId, String messageId, long
+            connectionTimeout) {
 
         // Add timeout handler to the timer.
         // TODO : set proper value for message timeout
-        addTimeout(sourceId, messageId, 10000);
+        addTimeout(sourceId, messageId, connectionTimeout);
 
         if (resultContainerMap.get(sourceId) == null) {
             resultContainerMap.put(sourceId, new ConcurrentHashMap<>());

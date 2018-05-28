@@ -52,6 +52,11 @@ import org.wso2.siddhi.core.util.transport.OptionHolder;
                 @Parameter(name = "source.id",
                         description = "Identifier need to map the source to sink.",
                         type = {DataType.STRING}),
+                @Parameter(name = "connection.timeout",
+                        description = "Connection timeout in milliseconds.",
+                        type = {DataType.INT},
+                        optional = true,
+                        defaultValue = "120000"),
                 @Parameter(name = "basic.auth.enabled",
                         description = "If this is set to `true`, " +
                                 "basic authentication is enabled for incoming events, and the credentials with " +
@@ -390,6 +395,7 @@ public class HttpSyncSource extends HttpSource {
     private static final Logger log = Logger.getLogger(HttpSyncSource.class);
     private HttpSyncConnectorRegistry httpConnectorRegistry;
     private String sourceId;
+    private long connectionTimeout;
 
     /**
      * The initialization method for {@link Source}, which will be called before other methods and validate
@@ -410,6 +416,8 @@ public class HttpSyncSource extends HttpSource {
         super.init(sourceEventListener, optionHolder, requestedTransportPropertyNames, configReader, siddhiAppContext);
 
         this.sourceId = optionHolder.validateAndGetStaticValue(HttpConstants.SOURCE_ID);
+        this.connectionTimeout = Long.parseLong(
+                optionHolder.validateAndGetStaticValue(HttpConstants.CONNECTION_TIMEOUT, "120000"));
 
         String requestSizeValidationConfigList = optionHolder
                 .validateAndGetStaticValue(HttpConstants.REQUEST_SIZE_VALIDATION_CONFIG, HttpConstants.EMPTY_STRING);
@@ -444,7 +452,7 @@ public class HttpSyncSource extends HttpSource {
     public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
         this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration);
         this.httpConnectorRegistry.registerSourceListener(sourceEventListener, listenerUrl,
-                Integer.parseInt(workerThread), isAuth, requestedTransportPropertyNames, sourceId);
+                Integer.parseInt(workerThread), isAuth, requestedTransportPropertyNames, sourceId, connectionTimeout);
     }
 
     /**

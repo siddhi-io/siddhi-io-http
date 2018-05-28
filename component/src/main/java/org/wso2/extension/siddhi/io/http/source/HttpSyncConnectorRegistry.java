@@ -72,12 +72,13 @@ class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
      * @param isAuth              the authentication is required for source listener.
      */
     void registerSourceListener(SourceEventListener sourceEventListener, String listenerUrl, int
-            workerThread, Boolean isAuth, String[] requestedTransportPropertyNames, String sourceId) {
+            workerThread, Boolean isAuth, String[] requestedTransportPropertyNames, String sourceId, long
+            connectionTimeout) {
 
         String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl);
         HttpSourceListener httpSourceListener = this.sourceListenersMap.putIfAbsent(listenerKey,
                 new HttpSyncSourceListener(workerThread, listenerUrl, isAuth, sourceEventListener
-                        , requestedTransportPropertyNames, sourceId));
+                        , requestedTransportPropertyNames, sourceId, connectionTimeout));
         if (httpSourceListener != null) {
             throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected");
         }

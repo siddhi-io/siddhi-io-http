@@ -44,15 +44,18 @@ public class HttpSyncWorkerThread implements Runnable {
     private String[] trpProperties;
     private String sourceId;
     private String messageId;
+    private long connectionTimeout;
 
     HttpSyncWorkerThread(HTTPCarbonMessage cMessage, SourceEventListener sourceEventListener,
-                     String sourceID, String[] trpProperties, String sourceId, String messageId) {
+                     String sourceID, String[] trpProperties, String sourceId, String messageId, long
+                                 connectionTimeout) {
         this.carbonMessage = cMessage;
         this.sourceEventListener = sourceEventListener;
         this.sourceID = sourceID;
         this.trpProperties = trpProperties;
         this.messageId = messageId;
         this.sourceId = sourceId;
+        this.connectionTimeout = connectionTimeout;
     }
 
     @Override
@@ -64,7 +67,7 @@ public class HttpSyncWorkerThread implements Runnable {
             String payload = buf.lines().collect(Collectors.joining("\n"));
 
             if (!payload.equals(HttpConstants.EMPTY_STRING)) {
-                SyncResultHandler.registerCallback(carbonMessage, sourceId, messageId);
+                SyncResultHandler.registerCallback(carbonMessage, sourceId, messageId, connectionTimeout);
                 sourceEventListener.onEvent(payload, trpProperties);
                 if (logger.isDebugEnabled()) {
                     logger.debug("Submitted Event " + payload + " Stream");
