@@ -18,8 +18,20 @@
  */
 package org.wso2.extension.siddhi.io.http.source;
 
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.DefaultHttpResponse;
+import io.netty.handler.codec.http.DefaultLastHttpContent;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timeout;
+import io.netty.util.TimerTask;
 import org.apache.log4j.Logger;
+import org.wso2.carbon.messaging.Header;
+import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
+import org.wso2.extension.siddhi.io.http.util.HTTPSourceRegistry;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
@@ -31,13 +43,21 @@ import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.transport.OptionHolder;
+import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
+
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Http source for receive the http and https request.
  */
-@Extension(name = "http-sync", namespace = "source", description = "The HTTP source receives POST requests via HTTP " +
-        "or HTTPS in format such as `text`, `XML` and `JSON`. If required, you can enable basic authentication to " +
-        "ensure that events are received only from users who are authorized to access the service.",
+@Extension(name = "http-request", namespace = "source", description = "The HTTP source receives POST requests via " +
+        "HTTP or HTTPS in format such as `text`, `XML` and `JSON`. If required, you can enable basic authentication " +
+        "to ensure that events are received only from users who are authorized to access the service.",
         parameters = {
                 @Parameter(name = "receiver.url",
                         description = "The URL to which the events should be received. " +
@@ -53,7 +73,8 @@ import org.wso2.siddhi.core.util.transport.OptionHolder;
                         description = "Identifier need to map the source to sink.",
                         type = {DataType.STRING}),
                 @Parameter(name = "connection.timeout",
-                        description = "Connection timeout in milliseconds.",
+                        description = "Connection timeout in milliseconds. If the mapped http-response sink does not " +
+                                "get a correlated message, after this timeout value, a timeout response is sent",
                         type = {DataType.INT},
                         optional = true,
                         defaultValue = "120000"),
@@ -390,12 +411,17 @@ import org.wso2.siddhi.core.util.transport.OptionHolder;
                 )
         }
 )
-public class HttpSyncSource extends HttpSource {
+public class HttpRequestSource extends HttpSource {
 
-    private static final Logger log = Logger.getLogger(HttpSyncSource.class);
+    private static final Logger log = Logger.getLogger(HttpRequestSource.class);
     private HttpSyncConnectorRegistry httpConnectorRegistry;
     private String sourceId;
     private long connectionTimeout;
+
+    private Map<String, HTTPCarbonMessage> requestContainerMap = new ConcurrentHashMap<>();
+
+    private HashedWheelTimer timer;
+    private WeakHashMap<String, Timeout> schedularMap = new WeakHashMap<>();
 
     /**
      * The initialization method for {@link Source}, which will be called before other methods and validate
@@ -413,11 +439,23 @@ public class HttpSyncSource extends HttpSource {
                      String[] requestedTransportPropertyNames, ConfigReader configReader,
                      SiddhiAppContext siddhiAppContext) {
 
-        super.init(sourceEventListener, optionHolder, requestedTransportPropertyNames, configReader, siddhiAppContext);
+        initSource(sourceEventListener, optionHolder, requestedTransportPropertyNames, configReader, siddhiAppContext);
+        initConnectorRegistry(optionHolder, configReader);
+        timer = new HashedWheelTimer();
+    }
 
+    protected void initSource(SourceEventListener sourceEventListener, OptionHolder optionHolder,
+                              String[] requestedTransportPropertyNames, ConfigReader configReader,
+                              SiddhiAppContext siddhiAppContext) {
+
+        super.initSource(sourceEventListener, optionHolder, requestedTransportPropertyNames, configReader,
+                siddhiAppContext);
         this.sourceId = optionHolder.validateAndGetStaticValue(HttpConstants.SOURCE_ID);
         this.connectionTimeout = Long.parseLong(
                 optionHolder.validateAndGetStaticValue(HttpConstants.CONNECTION_TIMEOUT, "120000"));
+    }
+
+    protected void initConnectorRegistry(OptionHolder optionHolder, ConfigReader configReader) {
 
         String requestSizeValidationConfigList = optionHolder
                 .validateAndGetStaticValue(HttpConstants.REQUEST_SIZE_VALIDATION_CONFIG, HttpConstants.EMPTY_STRING);
@@ -452,7 +490,9 @@ public class HttpSyncSource extends HttpSource {
     public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
         this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration);
         this.httpConnectorRegistry.registerSourceListener(sourceEventListener, listenerUrl,
-                Integer.parseInt(workerThread), isAuth, requestedTransportPropertyNames, sourceId, connectionTimeout);
+                Integer.parseInt(workerThread), isAuth, requestedTransportPropertyNames, sourceId);
+
+        HTTPSourceRegistry.registerSource(sourceId, this);
     }
 
     /**
@@ -462,6 +502,21 @@ public class HttpSyncSource extends HttpSource {
     public void disconnect() {
         this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl);
         this.httpConnectorRegistry.unregisterServerConnector(this.listenerUrl);
+
+        HTTPSourceRegistry.removeSource(sourceId);
+        for (Map.Entry<String, HTTPCarbonMessage> entry : requestContainerMap.entrySet()) {
+            cancelRequest(entry.getKey(), entry.getValue());
+        }
+    }
+
+    /**
+     * Called at the end to clean all the resources consumed by the {@link Source}
+     */
+    @Override
+    public void destroy() {
+
+        this.httpConnectorRegistry.clearBootstrapConfigIfLast();
+        timer.stop();
     }
 
     @Override
@@ -482,6 +537,111 @@ public class HttpSyncSource extends HttpSource {
                 .get(HttpSourceUtil.getSourceListenerKey(listenerUrl));
         if ((httpSourceListener != null) && (httpSourceListener.isPaused())) {
             httpSourceListener.resume();
+        }
+    }
+
+    public void registerCallback(HTTPCarbonMessage carbonMessage, String messageId) {
+
+        // Add timeout handler to the timer.
+        addTimeout(messageId);
+
+        requestContainerMap.put(messageId, carbonMessage);
+    }
+
+    public void handleCallback(String messageId, String payload, List<Header> headersList, String contentType) {
+
+        HTTPCarbonMessage carbonMessage = requestContainerMap.get(messageId);
+        if (carbonMessage != null) {
+            // Remove the message from the map as we are going to reply to the message.
+            requestContainerMap.remove(messageId);
+            // Remove the timeout task as are replying to the message.
+            removeTimeout(messageId);
+            // Send the response to the correlating message.
+            handleResponse(carbonMessage, 200, payload, headersList, contentType);
+        } else {
+            log.warn("No source message found for source: " + sourceId + " and message: " + messageId);
+        }
+    }
+
+    private void addTimeout(String messageId) {
+
+        Timeout timeout = timer.newTimeout(new HttpRequestSource.TimerTaskImpl(messageId), connectionTimeout,
+                TimeUnit.MILLISECONDS);
+        schedularMap.put(messageId, timeout);
+    }
+
+    private void removeTimeout(String messageId) {
+
+        schedularMap.get(messageId).cancel();
+    }
+
+    private void handleResponse(HTTPCarbonMessage requestMsg, HTTPCarbonMessage responseMsg) {
+
+        try {
+            requestMsg.respond(responseMsg);
+        } catch (org.wso2.transport.http.netty.contract.ServerConnectorException e) {
+            throw new HttpSourceAdaptorRuntimeException("Error occurred during response", e);
+        }
+    }
+
+    private void handleResponse(HTTPCarbonMessage requestMessage, Integer code, String payload, List<Header>
+            headers, String contentType) {
+
+        int statusCode = (code == null) ? 500 : code;
+        String responsePayload = (payload != null) ? payload : "";
+        handleResponse(requestMessage, createResponseMessage(responsePayload, statusCode, headers, contentType));
+    }
+
+    private void cancelRequest(String messageId, HTTPCarbonMessage carbonMessage) {
+
+        requestContainerMap.remove(messageId);
+        schedularMap.remove(messageId);
+        handleResponse(carbonMessage, 504, null, null, null);
+    }
+
+    private HTTPCarbonMessage createResponseMessage(String payload, int statusCode, List<Header> headers,
+                                                    String contentType) {
+
+        HTTPCarbonMessage response = new HTTPCarbonMessage(
+                new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
+        response.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(payload
+                .getBytes(Charset.defaultCharset()))));
+
+        HttpHeaders httpHeaders = response.getHeaders();
+
+        response.setProperty(org.wso2.transport.http.netty.common.Constants.HTTP_STATUS_CODE, statusCode);
+        response.setProperty(org.wso2.carbon.messaging.Constants.DIRECTION,
+                org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE);
+
+        // Set the Content-Type header as the system generated value. If the user has defined a specific Content-Type
+        // header this will be overridden.
+        if (contentType != null) {
+            httpHeaders.set(HttpConstants.HTTP_CONTENT_TYPE, contentType);
+        }
+
+        if (headers != null) {
+            for (Header header : headers) {
+                httpHeaders.set(header.getName(), header.getValue());
+            }
+        }
+
+        return response;
+    }
+
+    class TimerTaskImpl implements TimerTask {
+
+        String messageId;
+
+        TimerTaskImpl(String messageId) {
+
+            this.messageId = messageId;
+        }
+
+        @Override
+        public void run(Timeout timeout) {
+
+            HTTPCarbonMessage carbonMessage = requestContainerMap.get(messageId);
+            cancelRequest(messageId, carbonMessage);
         }
     }
 }

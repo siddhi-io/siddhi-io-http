@@ -21,8 +21,8 @@ package org.wso2.extension.siddhi.io.http.sink;
 import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpSinkUtil;
+import org.wso2.extension.siddhi.io.http.util.HTTPSourceRegistry;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
-import org.wso2.extension.siddhi.io.http.util.SyncResultHandler;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
@@ -38,12 +38,11 @@ import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
- * {@code HttpSyncSink} Handle the HTTP publishing tasks.
+ * {@code HttpResponseSink} Handle the HTTP publishing tasks.
  */
-@Extension(name = "http-sync", namespace = "sink",
+@Extension(name = "http-response", namespace = "sink",
         description = "This extension send the response to the http-sync source having the same source.id. user can " +
                 "add any number of response headers for each event dynamically.",
         parameters = {
@@ -54,6 +53,7 @@ import java.util.UUID;
                 @Parameter(
                         name = "message.id",
                         description = "Identifier of the message.",
+                        dynamic = true,
                         type = {DataType.STRING}),
                 @Parameter(
                         name = "headers",
@@ -105,9 +105,9 @@ import java.util.UUID;
                                         + "Content-Type:'application/json',"
                 )}
 )
-public class HttpSyncSink extends Sink {
+public class HttpResponseSink extends Sink {
 
-    private static final Logger log = Logger.getLogger(HttpSyncSink.class);
+    private static final Logger log = Logger.getLogger(HttpResponseSink.class);
     private Option messageIdOption;
     private String sourceId;
     private Option httpHeaderOption;
@@ -155,7 +155,7 @@ public class HttpSyncSink extends Sink {
     protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
                         ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
         //read configurations
-        this.messageIdOption = optionHolder.getOrCreateOption(HttpConstants.MESSAGE_ID, UUID.randomUUID().toString());
+        this.messageIdOption = optionHolder.validateAndGetOption(HttpConstants.MESSAGE_ID);
         this.sourceId = optionHolder.validateAndGetStaticValue(HttpConstants.SOURCE_ID);
         this.httpHeaderOption = optionHolder.getOrCreateOption(HttpConstants.HEADERS, HttpConstants.DEFAULT_HEADER);
         this.mapType = outputStreamDefinition.getAnnotations().get(0).getAnnotations().get(0).getElements().get(0)
@@ -178,7 +178,7 @@ public class HttpSyncSink extends Sink {
         List<Header> headersList = HttpSinkUtil.getHeaders(headers);
         String messageId = messageIdOption.getValue(dynamicOptions);
         String contentType = HttpSinkUtil.getContentType(mapType, headersList);
-        SyncResultHandler.handleCallback(sourceId, messageId, (String) payload, headersList, contentType);
+        HTTPSourceRegistry.getSource(sourceId).handleCallback(messageId, (String) payload, headersList, contentType);
     }
     /**
      * This method will be called before the processing method.

@@ -375,13 +375,13 @@
 ```
 <p style="word-wrap: break-word">If it is xml mapping expected input should be in following format for FooStream:{&lt;events&gt;    &lt;event&gt;        &lt;symbol&gt;WSO2&lt;/symbol&gt;        &lt;price&gt;55.6&lt;/price&gt;        &lt;volume&gt;100&lt;/volume&gt;    &lt;/event&gt;&lt;/events&gt;,POST,Content-Length:24#Content-Location:USA#Retry-After:120}Above event will generate output as below.~Output http event payload&lt;events&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;event&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;symbol&gt;WSO2&lt;/symbol&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;price&gt;55.6&lt;/price&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;volume&gt;100&lt;/volume&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/event&gt;<br>&lt;/events&gt;<br>~Output http event headersContent-Length:24,Content-Location:'USA',Retry-After:120,Content-Type:'application/xml',HTTP_METHOD:'POST',~Output http event propertiesHTTP_METHOD:'POST',HOST:'localhost',PORT:8009PROTOCOL:'http'TO:'/foo'</p>
 
-### http-sync *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink">(Sink)</a>*
+### http-response *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink">(Sink)</a>*
 
 <p style="word-wrap: break-word">This extension send the response to the http-sync source having the same source.id. user can add any number of response headers for each event dynamically.</p>
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-@sink(type="http-sync", source.id="<STRING>", message.id="<STRING>", headers="<STRING>", @map(...)))
+@sink(type="http-response", source.id="<STRING>", message.id="<STRING>", headers="<STRING>", @map(...)))
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -408,7 +408,7 @@
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">No</td>
-        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
     </tr>
     <tr>
         <td style="vertical-align: top">headers</td>
@@ -818,13 +818,13 @@ define stream FooStream (symbol string, price float, volume long);
 ```
 <p style="word-wrap: break-word">Above source listenerConfiguration performs a default XML input mapping. The expected input is as follows:&lt;events&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;event&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;symbol&gt;WSO2&lt;/symbol&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;price&gt;55.6&lt;/price&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;volume&gt;100&lt;/volume&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/event&gt;<br>&lt;/events&gt;<br>If basic authentication is enabled via the <code>basic.auth.enabled='true</code> setting, each input event is also expected to contain the <code>Authorization:'Basic encodeBase64(username:Password)'</code> header.</p>
 
-### http-sync *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a>*
+### http-request *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a>*
 
 <p style="word-wrap: break-word">The HTTP source receives POST requests via HTTP or HTTPS in format such as <code>text</code>, <code>XML</code> and <code>JSON</code>. If required, you can enable basic authentication to ensure that events are received only from users who are authorized to access the service.</p>
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-@source(type="http-sync", receiver.url="<STRING>", source.id="<STRING>", connection.timeout="<INT>", basic.auth.enabled="<STRING>", worker.count="<STRING>", socket.idle.timeout="<INT>", ssl.verify.client="<STRING>", ssl.protocol="<STRING>", tls.store.type="<STRING>", parameters="<STRING>", ciphers="<STRING>", ssl.enabled.protocols="<STRING>", server.enable.session.creation="<STRING>", server.supported.snimatchers="<STRING>", server.suported.server.names="<STRING>", request.size.validation.configuration="<STRING>", request.size.validation="<STRING>", request.size.validation.maximum.value="<STRING>", request.size.validation.reject.status.code="<STRING>", request.size.validation.reject.message="<STRING>", request.size.validation.reject.message.content.type="<STRING>", header.size.validation="<STRING>", header.validation.maximum.request.line="<STRING>", header.validation.maximum.size="<STRING>", header.validation.maximum.chunk.size="<STRING>", header.validation.reject.status.code="<STRING>", header.validation.reject.message="<STRING>", header.validation.reject.message.content.type="<STRING>", server.bootstrap.configuration="<OBJECT>", server.bootstrap.nodelay="<BOOL>", server.bootstrap.keepalive="<BOOL>", server.bootstrap.sendbuffersize="<INT>", server.bootstrap.recievebuffersize="<INT>", server.bootstrap.connect.timeout="<INT>", server.bootstrap.socket.reuse="<BOOL>", server.bootstrap.socket.timeout="<BOOL>", server.bootstrap.socket.backlog="<BOOL>", trace.log.enabled="<BOOL>", @map(...)))
+@source(type="http-request", receiver.url="<STRING>", source.id="<STRING>", connection.timeout="<INT>", basic.auth.enabled="<STRING>", worker.count="<STRING>", socket.idle.timeout="<INT>", ssl.verify.client="<STRING>", ssl.protocol="<STRING>", tls.store.type="<STRING>", parameters="<STRING>", ciphers="<STRING>", ssl.enabled.protocols="<STRING>", server.enable.session.creation="<STRING>", server.supported.snimatchers="<STRING>", server.suported.server.names="<STRING>", request.size.validation.configuration="<STRING>", request.size.validation="<STRING>", request.size.validation.maximum.value="<STRING>", request.size.validation.reject.status.code="<STRING>", request.size.validation.reject.message="<STRING>", request.size.validation.reject.message.content.type="<STRING>", header.size.validation="<STRING>", header.validation.maximum.request.line="<STRING>", header.validation.maximum.size="<STRING>", header.validation.maximum.chunk.size="<STRING>", header.validation.reject.status.code="<STRING>", header.validation.reject.message="<STRING>", header.validation.reject.message.content.type="<STRING>", server.bootstrap.configuration="<OBJECT>", server.bootstrap.nodelay="<BOOL>", server.bootstrap.keepalive="<BOOL>", server.bootstrap.sendbuffersize="<INT>", server.bootstrap.recievebuffersize="<INT>", server.bootstrap.connect.timeout="<INT>", server.bootstrap.socket.reuse="<BOOL>", server.bootstrap.socket.timeout="<BOOL>", server.bootstrap.socket.backlog="<BOOL>", trace.log.enabled="<BOOL>", @map(...)))
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -855,7 +855,7 @@ define stream FooStream (symbol string, price float, volume long);
     </tr>
     <tr>
         <td style="vertical-align: top">connection.timeout</td>
-        <td style="vertical-align: top; word-wrap: break-word">Connection timeout in milliseconds.</td>
+        <td style="vertical-align: top; word-wrap: break-word">Connection timeout in milliseconds. If the mapped http-response sink does not get a correlated message, after this timeout value, a timeout response is sent</td>
         <td style="vertical-align: top">120000</td>
         <td style="vertical-align: top">INT</td>
         <td style="vertical-align: top">Yes</td>

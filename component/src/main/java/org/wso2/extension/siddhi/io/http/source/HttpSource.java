@@ -416,6 +416,27 @@ public class HttpSource extends Source {
     public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
                      String[] requestedTransportPropertyNames, ConfigReader configReader,
                      SiddhiAppContext siddhiAppContext) {
+
+        initSource(sourceEventListener, optionHolder, requestedTransportPropertyNames, configReader, siddhiAppContext);
+        initConnectorRegistry(optionHolder, configReader);
+    }
+
+    protected void initConnectorRegistry(OptionHolder optionHolder, ConfigReader configReader) {
+
+        String requestSizeValidationConfigList = optionHolder
+                .validateAndGetStaticValue(HttpConstants.REQUEST_SIZE_VALIDATION_CONFIG, HttpConstants.EMPTY_STRING);
+        String serverBootstrapPropertiesList = optionHolder
+                .validateAndGetStaticValue(HttpConstants.SERVER_BOOTSTRAP_CONFIGURATION, HttpConstants.EMPTY_STRING);
+
+        this.httpConnectorRegistry = HttpConnectorRegistry.getInstance();
+        this.httpConnectorRegistry.initBootstrapConfigIfFirst(configReader);
+        this.httpConnectorRegistry.setTransportConfig(serverBootstrapPropertiesList, requestSizeValidationConfigList);
+    }
+
+    protected void initSource(SourceEventListener sourceEventListener, OptionHolder optionHolder,
+                              String[] requestedTransportPropertyNames, ConfigReader configReader,
+                              SiddhiAppContext siddhiAppContext) {
+
         String scheme = configReader.readConfig(HttpConstants.DEFAULT_SOURCE_SCHEME, HttpConstants
                 .DEFAULT_SOURCE_SCHEME_VALUE);
         //generate default URL
@@ -454,8 +475,6 @@ public class HttpSource extends Source {
                 .validateAndGetStaticValue(HttpConstants.TLS_STORE_TYPE, HttpConstants.EMPTY_STRING);
         String requestSizeValidationConfigList = optionHolder
                 .validateAndGetStaticValue(HttpConstants.REQUEST_SIZE_VALIDATION_CONFIG, HttpConstants.EMPTY_STRING);
-        String serverBootstrapPropertiesList = optionHolder
-                .validateAndGetStaticValue(HttpConstants.SERVER_BOOTSTRAP_CONFIGURATION, HttpConstants.EMPTY_STRING);
         String parameterList = optionHolder
                 .validateAndGetStaticValue(HttpConstants.SOURCE_PARAMETERS, HttpConstants.EMPTY_STRING);
         String traceLog = optionHolder.validateAndGetStaticValue(HttpConstants.TRACE_LOG_ENABLED, configReader
@@ -476,9 +495,6 @@ public class HttpSource extends Source {
         if (!HttpConstants.EMPTY_STRING.equals(traceLog)) {
             this.listenerConfiguration.setHttpTraceLogEnabled(Boolean.parseBoolean(traceLog));
         }
-        this.httpConnectorRegistry = HttpConnectorRegistry.getInstance();
-        this.httpConnectorRegistry.initBootstrapConfigIfFirst(configReader);
-        this.httpConnectorRegistry.setTransportConfig(serverBootstrapPropertiesList, requestSizeValidationConfigList);
         if (!HttpConstants.EMPTY_STRING.equals(requestSizeValidationConfigList)) {
             this.listenerConfiguration.setRequestSizeValidationConfig(HttpConnectorRegistry.getInstance()
                     .populateRequestSizeValidationConfiguration());

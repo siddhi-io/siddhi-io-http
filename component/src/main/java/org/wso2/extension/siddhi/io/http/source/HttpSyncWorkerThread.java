@@ -21,8 +21,8 @@ package org.wso2.extension.siddhi.io.http.source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
+import org.wso2.extension.siddhi.io.http.util.HTTPSourceRegistry;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
-import org.wso2.extension.siddhi.io.http.util.SyncResultHandler;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 import org.wso2.transport.http.netty.message.HttpMessageDataStreamer;
@@ -44,18 +44,15 @@ public class HttpSyncWorkerThread implements Runnable {
     private String[] trpProperties;
     private String sourceId;
     private String messageId;
-    private long connectionTimeout;
 
     HttpSyncWorkerThread(HTTPCarbonMessage cMessage, SourceEventListener sourceEventListener,
-                     String sourceID, String[] trpProperties, String sourceId, String messageId, long
-                                 connectionTimeout) {
+                     String sourceID, String[] trpProperties, String sourceId, String messageId) {
         this.carbonMessage = cMessage;
         this.sourceEventListener = sourceEventListener;
         this.sourceID = sourceID;
         this.trpProperties = trpProperties;
         this.messageId = messageId;
         this.sourceId = sourceId;
-        this.connectionTimeout = connectionTimeout;
     }
 
     @Override
@@ -67,7 +64,7 @@ public class HttpSyncWorkerThread implements Runnable {
             String payload = buf.lines().collect(Collectors.joining("\n"));
 
             if (!payload.equals(HttpConstants.EMPTY_STRING)) {
-                SyncResultHandler.registerCallback(carbonMessage, sourceId, messageId, connectionTimeout);
+                HTTPSourceRegistry.getSource(sourceId).registerCallback(carbonMessage, messageId);
                 sourceEventListener.onEvent(payload, trpProperties);
                 if (logger.isDebugEnabled()) {
                     logger.debug("Submitted Event " + payload + " Stream");

@@ -35,16 +35,13 @@ class HttpSyncSourceListener extends HttpSourceListener {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpSyncSourceListener.class);
     private String sourceId;
-    private long connectionTimeout;
 
     protected HttpSyncSourceListener(int workerThread, String url, Boolean auth,
                                      SourceEventListener sourceEventListener,
-                                     String[] requestedTransportPropertyNames, String sourceId, long
-                                             connectionTimeout) {
+                                     String[] requestedTransportPropertyNames, String sourceId) {
 
         super(workerThread, url, auth, sourceEventListener, requestedTransportPropertyNames);
         this.sourceId = sourceId;
-        this.connectionTimeout = connectionTimeout;
     }
 
     /**
@@ -80,7 +77,7 @@ class HttpSyncSourceListener extends HttpSourceListener {
         populateTransportProperties(trpProperties, messageId);
         executorService.execute(new HttpSyncWorkerThread(carbonMessage,
                 sourceEventListener, sourceEventListener.getStreamDefinition().toString(), trpProperties,
-                sourceId, messageId, connectionTimeout));
+                sourceId, messageId));
 
     }
 
