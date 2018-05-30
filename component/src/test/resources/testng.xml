@@ -34,6 +34,7 @@ limitations under the License.
             <class name="org.wso2.extension.siddhi.io.http.source.HttpsSSLSourceTestCase"/>
             <class name="org.wso2.extension.siddhi.io.http.source.HttpCustomConfigTestCase"/>
             <class name="org.wso2.extension.siddhi.io.http.source.HttpSourceConflictsTestCase"/>
+            <class name="org.wso2.extension.siddhi.io.http.source.HttpRequestResponseTestCase"/>
         </classes>
     </test>
 </suite>

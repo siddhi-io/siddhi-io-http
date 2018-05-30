@@ -20,8 +20,12 @@ package org.wso2.extension.siddhi.io.http.source.util;
 
 import io.netty.handler.codec.http.HttpMethod;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -110,6 +114,54 @@ public class HttpTestUtil {
         } catch (IOException e) {
             HttpServerUtil.handleException(e);
         }
+    }
+
+    public static String sendHttpEvent(String event, URI baseURI, String path, Boolean auth, String mapping) {
+
+        try {
+            HttpURLConnection urlConn = null;
+            try {
+                urlConn = HttpServerUtil.request(baseURI, path, HttpMethod.POST.name());
+            } catch (IOException e) {
+                HttpServerUtil.handleException(e);
+            }
+            if (auth) {
+                HttpServerUtil.setHeader(urlConn, "Authorization",
+                        "Basic " + java.util.Base64.getEncoder().encodeToString(("admin" + ":" + "admin").getBytes()));
+            }
+            HttpServerUtil.setHeader(urlConn, "Content-Type", mapping);
+            HttpServerUtil.setHeader(urlConn, "HTTP_METHOD", HttpMethod.POST.name());
+            HttpServerUtil.writeContent(urlConn, event);
+            assert urlConn != null;
+            logger.info("Event response code " + urlConn.getResponseCode());
+            String result = null;
+            StringBuilder sb = new StringBuilder();
+            InputStream is = null;
+            try {
+                is = new BufferedInputStream(urlConn.getInputStream());
+                BufferedReader br = new BufferedReader(new InputStreamReader(is));
+                String inputLine = "";
+                while ((inputLine = br.readLine()) != null) {
+                    sb.append(inputLine);
+                }
+                result = sb.toString();
+            } finally {
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                        logger.info("Error closing InputStream");
+                    }
+                }
+            }
+
+            logger.info("Event response message " + result);
+            urlConn.disconnect();
+            return result;
+        } catch (IOException e) {
+            HttpServerUtil.handleException(e);
+        }
+        return null;
     }
     
     public static void httpsPublishEvent(String event)
