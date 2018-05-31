@@ -134,7 +134,7 @@ class HttpConnectorRegistry {
      *
      * @param listenerUrl the listener url
      */
-    void unregisterSourceListener(String listenerUrl) {
+    protected void unregisterSourceListener(String listenerUrl) {
         String key = HttpSourceUtil.getSourceListenerKey(listenerUrl);
         HttpSourceListener httpSourceListener = this.sourceListenersMap.remove(key);
         if (httpSourceListener != null) {
@@ -147,7 +147,7 @@ class HttpConnectorRegistry {
      *
      * @param sourceConfigReader the siddhi source config reader.
      */
-    synchronized void initBootstrapConfigIfFirst(ConfigReader sourceConfigReader) {
+    protected synchronized void initBootstrapConfigIfFirst(ConfigReader sourceConfigReader) {
         // to make sure it will create only once
         if ((this.sourceListenersMap.isEmpty()) && (httpConnectorFactory == null)) {
             String bootstrapWorker = sourceConfigReader.readConfig(HttpConstants
@@ -174,7 +174,7 @@ class HttpConnectorRegistry {
     /**
      * Stop server connector controller.
      */
-    void clearBootstrapConfigIfLast() {
+    protected void clearBootstrapConfigIfLast() {
         synchronized (this) {
             if ((this.sourceListenersMap.isEmpty()) && (httpConnectorFactory != null)) {
                 this.httpConnectorFactory = null;

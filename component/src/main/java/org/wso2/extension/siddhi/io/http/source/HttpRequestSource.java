@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -43,6 +43,7 @@ import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.transport.OptionHolder;
+import org.wso2.transport.http.netty.contract.ServerConnectorException;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import java.nio.charset.Charset;
@@ -516,6 +517,7 @@ public class HttpRequestSource extends HttpSource {
     public void destroy() {
 
         this.httpConnectorRegistry.clearBootstrapConfigIfLast();
+        HTTPSourceRegistry.removeSource(sourceId);
         timer.stop();
     }
 
@@ -579,7 +581,7 @@ public class HttpRequestSource extends HttpSource {
 
         try {
             requestMsg.respond(responseMsg);
-        } catch (org.wso2.transport.http.netty.contract.ServerConnectorException e) {
+        } catch (ServerConnectorException e) {
             throw new HttpSourceAdaptorRuntimeException("Error occurred during response", e);
         }
     }

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * {@code HttpConnectorRegistry} The code is responsible for maintaining the all active server connectors.
  */
-class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
+public class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
 
     private final Logger log = Logger.getLogger(HttpSyncConnectorRegistry.class);
     private static HttpSyncConnectorRegistry instance = new HttpSyncConnectorRegistry();
@@ -48,7 +48,7 @@ class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
      *
      * @return HttpConnectorRegistry instance
      */
-    static HttpSyncConnectorRegistry getInstance() {
+    public static HttpSyncConnectorRegistry getInstance() {
 
         return instance;
     }
@@ -58,7 +58,7 @@ class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
      *
      * @return the source listener map
      */
-    Map<String, HttpSyncSourceListener> getSyncSourceListenersMap() {
+    protected Map<String, HttpSyncSourceListener> getSyncSourceListenersMap() {
 
         return this.sourceListenersMap;
     }
@@ -71,7 +71,7 @@ class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
      * @param workerThread        the worker thread count of siddhi level thread pool executor.
      * @param isAuth              the authentication is required for source listener.
      */
-    void registerSourceListener(SourceEventListener sourceEventListener, String listenerUrl, int
+    protected void registerSourceListener(SourceEventListener sourceEventListener, String listenerUrl, int
             workerThread, Boolean isAuth, String[] requestedTransportPropertyNames, String sourceId) {
 
         String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl);
@@ -88,7 +88,7 @@ class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
      *
      * @param listenerUrl the listener url
      */
-    void unregisterSourceListener(String listenerUrl) {
+    protected void unregisterSourceListener(String listenerUrl) {
 
         String key = HttpSourceUtil.getSourceListenerKey(listenerUrl);
         HttpSourceListener httpSourceListener = this.sourceListenersMap.remove(key);
@@ -102,7 +102,7 @@ class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
      *
      * @param sourceConfigReader the siddhi source config reader.
      */
-    synchronized void initBootstrapConfigIfFirst(ConfigReader sourceConfigReader) {
+    protected synchronized void initBootstrapConfigIfFirst(ConfigReader sourceConfigReader) {
         // to make sure it will create only once
         if ((this.sourceListenersMap.isEmpty()) && (httpConnectorFactory == null)) {
             String bootstrapWorker = sourceConfigReader.readConfig(HttpConstants
@@ -129,7 +129,7 @@ class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
     /**
      * Stop server connector controller.
      */
-    void clearBootstrapConfigIfLast() {
+    protected void clearBootstrapConfigIfLast() {
 
         synchronized (this) {
             if ((this.sourceListenersMap.isEmpty()) && (httpConnectorFactory != null)) {

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -31,7 +31,7 @@ import java.util.UUID;
  * {@code HttpSourceListener } This class maintain the states of each and every source listener which are created
  * such as is currently paused or not,  need isAuthEnabled or not.
  */
-class HttpSyncSourceListener extends HttpSourceListener {
+public class HttpSyncSourceListener extends HttpSourceListener {
 
     private static final Logger logger = LoggerFactory.getLogger(HttpSyncSourceListener.class);
     private String sourceId;
