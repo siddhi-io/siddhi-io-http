@@ -425,13 +425,15 @@ public class HttpRequestSource extends HttpSource {
     private WeakHashMap<String, Timeout> schedularMap = new WeakHashMap<>();
 
     /**
-     * The initialization method for {@link Source}, which will be called before other methods and validate
-     * the all listenerConfiguration and getting the intial values.
+     * The initialization method for {@link org.wso2.siddhi.core.stream.input.source.Source}, which will be called
+     * before other methods and validate the all listenerConfiguration and getting the intial values.
      *
      * @param sourceEventListener After receiving events, the source should trigger onEvent() of this listener.
      *                            Listener will then pass on the events to the appropriate mappers for processing .
-     * @param optionHolder        Option holder containing static listenerConfiguration related to the {@link Source}
-     * @param configReader        to read the {@link Source} related system listenerConfiguration.
+     * @param optionHolder        Option holder containing static listenerConfiguration related to the
+     * {@link org.wso2.siddhi.core.stream.input.source.Source}
+     * @param configReader        to read the {@link org.wso2.siddhi.core.stream.input.source.Source} related system
+     *                            listenerConfiguration.
      * @param siddhiAppContext    the context of the {@link org.wso2.siddhi.query.api.SiddhiApp} used to get siddhi
      *                            related utilty functions.
      */
@@ -511,7 +513,8 @@ public class HttpRequestSource extends HttpSource {
     }
 
     /**
-     * Called at the end to clean all the resources consumed by the {@link Source}
+     * Called at the end to clean all the resources consumed by the
+     * {@link org.wso2.siddhi.core.stream.input.source.Source}
      */
     @Override
     public void destroy() {

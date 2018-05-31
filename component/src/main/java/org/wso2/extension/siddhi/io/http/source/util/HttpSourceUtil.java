@@ -117,6 +117,8 @@ public class HttpSourceUtil {
     
     /**
      * Method is responsible for set transportation configuration values.
+     * @param serverBootstrapConfigurationList  server bootstrap configuration list
+     * @param transportProperties               transport properties set
      *
      * @return return the set of config transportation configuration.
      */

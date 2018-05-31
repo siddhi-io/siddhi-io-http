@@ -66,10 +66,12 @@ public class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
     /**
      * Register new source listener.
      *
-     * @param sourceEventListener the source event listener.
-     * @param listenerUrl         the listener url.
-     * @param workerThread        the worker thread count of siddhi level thread pool executor.
-     * @param isAuth              the authentication is required for source listener.
+     * @param sourceEventListener               the source event listener.
+     * @param listenerUrl                       the listener url.
+     * @param workerThread                      the worker thread count of siddhi level thread pool executor.
+     * @param isAuth                            the authentication is required for source listener.
+     * @param requestedTransportPropertyNames   requested transport property names.
+     * @param sourceId                          source Id.
      */
     protected void registerSourceListener(SourceEventListener sourceEventListener, String listenerUrl, int
             workerThread, Boolean isAuth, String[] requestedTransportPropertyNames, String sourceId) {
