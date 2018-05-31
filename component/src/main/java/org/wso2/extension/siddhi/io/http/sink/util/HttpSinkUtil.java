@@ -121,6 +121,8 @@ public class HttpSinkUtil {
      * user can give custom truststore file if user did not give then custom then system read
      * the default values which is in the deployment yaml.
      *
+     * @param sinkConfigReader      configuration reader for sink.
+     *
      * @return default trust store file path.
      */
     public static String trustStorePath(ConfigReader sinkConfigReader) {
@@ -132,6 +134,8 @@ public class HttpSinkUtil {
      * user can give custom truststore password if user did not give then custom then system read
      * the default values which is in the deployment yaml.
      *
+     * @param sinkConfigReader      configuration reader for sink.
+     *
      * @return default trust password.
      */
     public static String trustStorePassword(ConfigReader sinkConfigReader) {
@@ -142,9 +146,10 @@ public class HttpSinkUtil {
     /**
      * Method is responsible for set sender configuration values .
      *
-     * @param httpStaticProperties the map that url details.
-     * @param clientStoreFile      the client trust store file path.
-     * @param clientStorePass      the client trust store pass path.
+     * @param httpStaticProperties  the map that url details.
+     * @param clientStoreFile       the client trust store file path.
+     * @param clientStorePass       the client trust store pass path.
+     * @param configReader          configuration reader.
      * @return set of sender configurations.
      */
     public static SenderConfiguration getSenderConfigurations(Map<String, String> httpStaticProperties, String
@@ -171,6 +176,9 @@ public class HttpSinkUtil {
     
     /**
      * Method is responsible for set transportation configuration values.
+     *
+     * @param clientBootstrapConfigurationList  client bootstrap configuration list.
+     * @param clientConnectionConfiguration     client connection configuration.
      *
      * @return return the set of config transportation configuration.
      */
