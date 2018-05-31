@@ -396,7 +396,7 @@
         <org.wso2.carbon.transport.http.netty.version>5.0.1</org.wso2.carbon.transport.http.netty.version>
         <msf4j.version>2.6.1</msf4j.version>
         <javax.servlet.version>3.1.0</javax.servlet.version>
-        <siddhi.mapper.json.version>4.0.15</siddhi.mapper.json.version>
+        <siddhi.mapper.json.version>4.0.21</siddhi.mapper.json.version>
         <siddhi.mapper.text.version>1.0.9</siddhi.mapper.text.version>
         <siddhi.mapper.xml.version>4.0.11</siddhi.mapper.xml.version>
         <siddhi.version>4.0.4</siddhi.version>
