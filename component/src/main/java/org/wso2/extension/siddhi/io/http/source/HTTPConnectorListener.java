@@ -47,8 +47,7 @@ public class HTTPConnectorListener implements HttpConnectorListener {
     
     @Override
     public void onMessage(HTTPCarbonMessage carbonMessage) {
-        if (HttpConstants.PROTOCOL_ID.equals(carbonMessage.getProperty(HttpConstants.PROTOCOL)) &&
-                HttpConnectorRegistry.getInstance().getServerConnectorPool().containsKey(getInterface(carbonMessage))) {
+        if (isValidRequest(carbonMessage)) {
             //Check the message is a response or direct message
             if (carbonMessage.getProperty(org.wso2.carbon.messaging.Constants.DIRECTION) != null &&
                     carbonMessage.getProperty(org.wso2.carbon.messaging.Constants.DIRECTION)
@@ -66,8 +65,7 @@ public class HTTPConnectorListener implements HttpConnectorListener {
                             .valueOf(carbonMessage.getProperty(HttpConstants.LISTENER_PORT)))
                             .append(HttpConstants.PORT_CONTEXT_KEY_SEPARATOR)
                             .append(carbonMessage.getProperty(HttpConstants.TO));
-                    HttpSourceListener sourceListener = HttpConnectorRegistry.getInstance()
-                            .getSourceListenersMap().get(sourceListenerKey.toString());
+                    HttpSourceListener sourceListener = getSourceListener(sourceListenerKey);
                     if (sourceListener != null) {
                         sourceListener.send(carbonMessage);
                     } else {
@@ -87,7 +85,18 @@ public class HTTPConnectorListener implements HttpConnectorListener {
             HttpSourceUtil.handleCallback(carbonMessage, 404);
         }
     }
-    
+
+    protected boolean isValidRequest(HTTPCarbonMessage carbonMessage) {
+
+        return HttpConstants.PROTOCOL_ID.equals(carbonMessage.getProperty(HttpConstants.PROTOCOL)) &&
+                HttpConnectorRegistry.getInstance().getServerConnectorPool().containsKey(getInterface(carbonMessage));
+    }
+
+    protected HttpSourceListener getSourceListener(StringBuilder sourceListenerKey) {
+
+        return HttpConnectorRegistry.getInstance().getSourceListenersMap().get(sourceListenerKey.toString());
+    }
+
     protected String getInterface(HTTPCarbonMessage cMsg) {
         String interfaceId = (String) cMsg.getProperty(Constants.LISTENER_INTERFACE_ID);
         if (interfaceId == null) {

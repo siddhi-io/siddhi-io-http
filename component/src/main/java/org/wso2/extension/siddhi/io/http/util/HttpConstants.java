@@ -33,6 +33,8 @@ public class HttpConstants {
     
     //--source general configuration
     public static final String RECEIVER_URL = "receiver.url";
+    public static final String SOURCE_ID = "source.id";
+    public static final String CONNECTION_TIMEOUT = "connection.timeout";
     public static final String IS_AUTH = "basic.auth.enabled";
     public static final String EMPTY_IS_AUTH = "false";
     public static final String MESSAGE_PROCESSOR_ID = "messageProcessorId";
@@ -42,6 +44,7 @@ public class HttpConstants {
     //Http siddhi sink properties
     public static final String AUTH_USERNAME_PASSWORD_SEPARATOR = ":";
     public static final String METHOD = "method";
+    public static final String MESSAGE_ID = "message.id";
     public static final String PUBLISHER_URL = "publisher.url";
     public static final String HEADERS = "headers";
     public static final String RECEIVER_USERNAME = "basic.auth.username";

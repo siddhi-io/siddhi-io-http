@@ -34,18 +34,18 @@ import java.util.concurrent.locks.ReentrantLock;
  * {@code HttpSourceListener } This class maintain the states of each and every source listener which are created
  * such as is currently paused or not,  need isAuthEnabled or not.
  */
-class HttpSourceListener {
+public class HttpSourceListener {
     private static final Logger logger = LoggerFactory.getLogger(HttpSourceListener.class);
-    private ExecutorService executorService;
-    private boolean paused;
-    private ReentrantLock lock;
-    private Condition condition;
-    private String url;
-    private Boolean isAuthEnabled;
-    private SourceEventListener sourceEventListener;
-    private String[] requestedTransportPropertyNames;
+    protected ExecutorService executorService;
+    protected boolean paused;
+    protected ReentrantLock lock;
+    protected Condition condition;
+    protected String url;
+    protected Boolean isAuthEnabled;
+    protected SourceEventListener sourceEventListener;
+    protected String[] requestedTransportPropertyNames;
     
-    HttpSourceListener(int workerThread, String url, Boolean auth, SourceEventListener sourceEventListener,
+    protected HttpSourceListener(int workerThread, String url, Boolean auth, SourceEventListener sourceEventListener,
                        String[] requestedTransportPropertyNames) {
         this.executorService = Executors.newFixedThreadPool(workerThread);
         this.paused = false;
@@ -63,7 +63,7 @@ class HttpSourceListener {
      *
      * @param carbonMessage the carbon message received from carbon transport.
      */
-    void send(HTTPCarbonMessage carbonMessage) {
+    protected void send(HTTPCarbonMessage carbonMessage) {
         if (paused) {
             lock.lock();
             try {
@@ -91,7 +91,7 @@ class HttpSourceListener {
         
     }
     
-    private void populateTransportHeaders(HTTPCarbonMessage carbonMessage, String[] properties) {
+    protected void populateTransportHeaders(HTTPCarbonMessage carbonMessage, String[] properties) {
         if (requestedTransportPropertyNames.length > 0) {      //cannot be null according to siddhi impl
             int i = 0;
             for (String property : requestedTransportPropertyNames) {
@@ -100,8 +100,8 @@ class HttpSourceListener {
             }
         }
     }
-    
-    private void populateTransportProperties(HTTPCarbonMessage carbonMessage, String[] properties) {
+
+    protected void populateTransportProperties(HTTPCarbonMessage carbonMessage, String[] properties) {
         if (requestedTransportPropertyNames.length > 0) {      //cannot be null according to siddhi impl
             int i = 0;
             for (String property : requestedTransportPropertyNames) {
