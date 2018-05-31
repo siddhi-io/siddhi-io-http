@@ -18,7 +18,7 @@
     <parent>
         <artifactId>siddhi-io-http-parent</artifactId>
         <groupId>org.wso2.extension.siddhi.io.http</groupId>
-        <version>1.0.21</version>
+        <version>1.0.22-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
