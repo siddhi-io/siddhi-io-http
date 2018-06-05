@@ -325,16 +325,16 @@ import java.util.concurrent.TimeUnit;
                 )
         },
         examples = {
-                @Example(syntax = "@source(type='http-sync', source.id='samplesourceid, " +
+                @Example(syntax = "@source(type='http-request', source.id='sampleSourceId, " +
                         "receiver.url='http://localhost:9055/endpoints/RecPro', " +
-                        "socketIdleTimeout='150000', parameters=\"'ciphers : TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256'," +
+                        "connection.timeout='150000', parameters=\"'ciphers : TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256'," +
                         " 'sslEnabledProtocols:TLSv1.1,TLSv1.2'\",request.size.validation.configuration=\"request" +
                         ".size.validation:true\",server.bootstrap.configuration=\"server.bootstrap.socket" +
                         ".timeout:25\" " +
                         "@map(type='json @attributes(messageId='trp:messageId',symbol='$.events.event.symbol'," +
                         "price='$.events.event.price',volume='$.events.event.volume')))\n"
                         + "define stream FooStream (messageId string, symbol string, price float, volume long);\n",
-                        description = "The expected input is as follows:"
+                        description = "The expected input is as follows:\n"
                                 + "{\"events\":\n"
                                 + "    {\"event\":\n"
                                 + "        \"symbol\":WSO2,\n"

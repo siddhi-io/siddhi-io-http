@@ -72,9 +72,9 @@ import java.util.Map;
         },
         examples = {
                 @Example(syntax =
-                        "@sink(type='http-sync',source.id='sampleSourceId',message.id='{{messageId}}',"
+                        "@sink(type='http-response',source.id='sampleSourceId',message.id='{{messageId}}',"
                                 + "headers=\"'content-type:json','content-length:94'\""
-                                + "@map(type='json' , @payload('{{payloadBody}}')))"
+                                + "@map(type='json' , @payload('{{payloadBody}}')))\n"
                                 + "define stream FooStream (payloadBody String, messageId string, headers string);\n",
                         description =
                                 "If it is json mapping expected input should be in following format for FooStream:"
