@@ -335,49 +335,48 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
         examples = {
                 @Example(syntax =
                         "@sink(type='http',publisher.url='http://localhost:8009/foo', method='{{method}}',"
-                                + "headers=\"'content-type:xml','content-length:94'\",client.bootstrap" +
+                                + "headers=\"'content-type:xml','content-length:94'\", client.bootstrap" +
                                 ".configuration=\"'client" +
                                 ".bootstrap" +
                                 ".socket" +
-                                ".timeout:20','client.bootstrap.worker.group.size:10'\",client.pool" +
+                                ".timeout:20', 'client.bootstrap.worker.group.size:10'\", client.pool" +
                                 ".configuration=\"'client.connection.pool.count:10','client.max.active.connections" +
-                                ".per.pool:1'\" "
-                                + "@map(type='xml' , @payload('{{payloadBody}}')))"
+                                ".per.pool:1'\", "
+                                + "@map(type='xml', @payload('{{payloadBody}}')))\n"
                                 + "define stream FooStream (payloadBody String, method string, headers string);\n",
                         description =
-                                "If it is xml mapping expected input should be in following format for FooStream:"
-                                        + "{"
-                                        + "<events>"
-                                        + "    <event>"
-                                        + "        <symbol>WSO2</symbol>"
-                                        + "        <price>55.6</price>"
-                                        + "        <volume>100</volume>"
-                                        + "    </event>"
-                                        + "</events>,"
-                                        + "POST,"
-                                        + "Content-Length:24#Content-Location:USA#Retry-After:120"
-                                        + "}"
-                                        
-                                        + "Above event will generate output as below."
-                                        + "~Output http event payload"
+                                "If it is xml mapping expected input should be in following format for FooStream:\n"
+                                        + "{\n"
                                         + "<events>\n"
                                         + "    <event>\n"
                                         + "        <symbol>WSO2</symbol>\n"
                                         + "        <price>55.6</price>\n"
                                         + "        <volume>100</volume>\n"
                                         + "    </event>\n"
-                                        + "</events>\n"
-                                        + "~Output http event headers"
-                                        + "Content-Length:24,"
-                                        + "Content-Location:'USA',"
-                                        + "Retry-After:120,"
-                                        + "Content-Type:'application/xml',"
-                                        + "HTTP_METHOD:'POST',"
-                                        + "~Output http event properties"
-                                        + "HTTP_METHOD:'POST',"
-                                        + "HOST:'localhost',"
-                                        + "PORT:8009"
-                                        + "PROTOCOL:'http'"
+                                        + "</events>,\n"
+                                        + "POST,\n"
+                                        + "Content-Length:24#Content-Location:USA#Retry-After:120\n"
+                                        + "}\n\n"
+                                        + "Above event will generate output as below.\n"
+                                        + "~Output http event payload\n"
+                                        + "<events>\n"
+                                        + "    <event>\n"
+                                        + "        <symbol>WSO2</symbol>\n"
+                                        + "        <price>55.6</price>\n"
+                                        + "        <volume>100</volume>\n"
+                                        + "    </event>\n"
+                                        + "</events>\n\n"
+                                        + "~Output http event headers\n"
+                                        + "Content-Length:24,\n"
+                                        + "Content-Location:'USA',\n"
+                                        + "Retry-After:120,\n"
+                                        + "Content-Type:'application/xml',\n"
+                                        + "HTTP_METHOD:'POST',\n\n"
+                                        + "~Output http event properties\n"
+                                        + "HTTP_METHOD:'POST',\n"
+                                        + "HOST:'localhost',\n"
+                                        + "PORT:8009,\n"
+                                        + "PROTOCOL:'http',\n"
                                         + "TO:'/foo'"
                 )},
         systemParameter = {

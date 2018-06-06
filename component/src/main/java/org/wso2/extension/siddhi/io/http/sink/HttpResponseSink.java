@@ -92,7 +92,7 @@ import java.util.Map;
                                         + "Content-Length:24#Content-Location:USA\n"
                                         + "}\n\n"
                                         + "Above event will generate response for the matching source message " +
-                                        "as below.\n"
+                                        "as below.\n\n"
                                         + "~Output http event payload\n"
                                         + "{\"events\":\n"
                                         + "    {\"event\":\n"
@@ -100,7 +100,7 @@ import java.util.Map;
                                         + "        \"price\":55.6,\n"
                                         + "        \"volume\":100,\n"
                                         + "    }\n"
-                                        + "}\n"
+                                        + "}\n\n"
                                         + "~Output http event headers\n"
                                         + "Content-Length:24,\n"
                                         + "Content-Location:'USA',\n"
