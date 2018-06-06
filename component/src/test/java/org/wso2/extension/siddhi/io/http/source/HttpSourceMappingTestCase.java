@@ -123,7 +123,7 @@ public class HttpSourceMappingTestCase {
      *
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test(dependsOnMethods = "testXmlMapping")
     public void testTextMappingSingle() throws Exception {
         AtomicInteger eventCount = new AtomicInteger(0);
         int waitTime = 50;
@@ -182,7 +182,7 @@ public class HttpSourceMappingTestCase {
      *
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test(dependsOnMethods = "testTextMappingSingle")
     public void testTextMapping() throws Exception {
         logger.info("Creating test for publishing events with Text mapping.");
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
@@ -239,7 +239,7 @@ public class HttpSourceMappingTestCase {
      *
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test(dependsOnMethods = "testTextMapping")
     public void testJsonMapping() throws Exception {
         logger.info("Creating test for publishing events with Json mapping.");
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));

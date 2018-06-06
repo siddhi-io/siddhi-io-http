@@ -1,7 +1,8 @@
 siddhi-io-http
 ======================================
 
-The **siddhi-io-http extension** is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a> that allows you to receive and publish events via http and https transports. This extension can work with WSO2 Stream Processor. It can also run with standalone Siddhi.
+The **siddhi-io-http extension** is an extension to <a target="_blank" href="https://wso2.github.io/siddhi">Siddhi</a> that allows you to receive and publish events via http and https transports and 
+also allow you perform synchronous request and response. This extension works with WSO2 Stream Processor and with standalone Siddhi.
 
 Find some useful links below:
 

@@ -127,7 +127,7 @@ public class HttpsSSLSourceTestCase {
      *
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test(dependsOnMethods = "testHTTPSInputTransport")
     public void testHTTPSInputTransportInvalidKeyStore() throws Exception {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
@@ -203,7 +203,7 @@ public class HttpsSSLSourceTestCase {
      *
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test(dependsOnMethods = "testHTTPSInputTransportInvalidKeyStore")
     public void testHTTPSInputTransportInvalidKeyStorePass() throws Exception {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
@@ -278,7 +278,7 @@ public class HttpsSSLSourceTestCase {
      *
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test(dependsOnMethods = "testHTTPSInputTransportInvalidKeyStorePass")
     public void testHTTPSInputTransportInvalidCertPassword() throws Exception {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();

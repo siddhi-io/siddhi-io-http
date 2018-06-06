@@ -56,8 +56,12 @@ import java.util.concurrent.TimeUnit;
 /**
  * Http source for receive the http and https request.
  */
-@Extension(name = "http-request", namespace = "source", description = "The HTTP source receives POST requests via " +
-        "HTTP or HTTPS in format such as `text`, `XML` and `JSON`. If required, you can enable basic authentication " +
+@Extension(name = "http-request", namespace = "source", description = "The HTTP request is correlated with the " +
+        "HTTP response sink, through a unique `source.id`, and for each POST requests it receives via " +
+        "HTTP or HTTPS in format such as `text`, `XML` and `JSON` it sends the response via the HTTP response sink. " +
+        "The individual request and response messages are correlated at the sink using the `message.id` of " +
+        "the events. " +
+        "If required, you can enable basic authentication at the source " +
         "to ensure that events are received only from users who are authorized to access the service.",
         parameters = {
                 @Parameter(name = "receiver.url",
@@ -74,8 +78,8 @@ import java.util.concurrent.TimeUnit;
                         description = "Identifier need to map the source to sink.",
                         type = {DataType.STRING}),
                 @Parameter(name = "connection.timeout",
-                        description = "Connection timeout in milliseconds. If the mapped http-response sink does not " +
-                                "get a correlated message, after this timeout value, a timeout response is sent",
+                        description = "Connection timeout in milliseconds. If the mapped http-response sink does not "
+                                + "get a correlated message, after this timeout value, a timeout response is sent",
                         type = {DataType.INT},
                         optional = true,
                         defaultValue = "120000"),
@@ -325,16 +329,16 @@ import java.util.concurrent.TimeUnit;
                 )
         },
         examples = {
-                @Example(syntax = "@source(type='http-sync', source.id='samplesourceid, " +
+                @Example(syntax = "@source(type='http-request', source.id='sampleSourceId, " +
                         "receiver.url='http://localhost:9055/endpoints/RecPro', " +
-                        "socketIdleTimeout='150000', parameters=\"'ciphers : TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256'," +
-                        " 'sslEnabledProtocols:TLSv1.1,TLSv1.2'\",request.size.validation.configuration=\"request" +
-                        ".size.validation:true\",server.bootstrap.configuration=\"server.bootstrap.socket" +
-                        ".timeout:25\" " +
-                        "@map(type='json @attributes(messageId='trp:messageId',symbol='$.events.event.symbol'," +
-                        "price='$.events.event.price',volume='$.events.event.volume')))\n"
+                        "connection.timeout='150000', parameters=\"'ciphers : TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256'," +
+                        " 'sslEnabledProtocols:TLSv1.1,TLSv1.2'\", request.size.validation.configuration=\"request" +
+                        ".size.validation:true\", server.bootstrap.configuration=\"server.bootstrap.socket" +
+                        ".timeout:25\", " +
+                        "@map(type='json, @attributes(messageId='trp:messageId', symbol='$.events.event.symbol', " +
+                        "price='$.events.event.price', volume='$.events.event.volume')))\n"
                         + "define stream FooStream (messageId string, symbol string, price float, volume long);\n",
-                        description = "The expected input is as follows:"
+                        description = "The expected input is as follows:\n"
                                 + "{\"events\":\n"
                                 + "    {\"event\":\n"
                                 + "        \"symbol\":WSO2,\n"
@@ -431,7 +435,7 @@ public class HttpRequestSource extends HttpSource {
      * @param sourceEventListener After receiving events, the source should trigger onEvent() of this listener.
      *                            Listener will then pass on the events to the appropriate mappers for processing .
      * @param optionHolder        Option holder containing static listenerConfiguration related to the
-     * {@link org.wso2.siddhi.core.stream.input.source.Source}
+     *                            {@link org.wso2.siddhi.core.stream.input.source.Source}
      * @param configReader        to read the {@link org.wso2.siddhi.core.stream.input.source.Source} related system
      *                            listenerConfiguration.
      * @param siddhiAppContext    the context of the {@link org.wso2.siddhi.query.api.SiddhiApp} used to get siddhi
@@ -478,7 +482,7 @@ public class HttpRequestSource extends HttpSource {
      */
     @Override
     public Class[] getOutputEventClasses() {
-        return new Class[] {String.class};
+        return new Class[]{String.class};
     }
 
     /**

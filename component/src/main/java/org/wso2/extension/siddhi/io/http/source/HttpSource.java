@@ -313,7 +313,7 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                         + "define stream FooStream (symbol string, price float, volume long);\n",
                         description = "Above source listenerConfiguration performs a default XML input mapping. " +
                                 "The expected "
-                                + "input is as follows:"
+                                + "input is as follows:\n"
                                 + "<events>\n"
                                 + "    <event>\n"
                                 + "        <symbol>WSO2</symbol>\n"

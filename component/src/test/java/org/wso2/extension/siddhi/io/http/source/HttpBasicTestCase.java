@@ -48,12 +48,12 @@ public class HttpBasicTestCase {
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;
-    
+
     @BeforeMethod
     public void init() {
         eventCount.set(0);
     }
-    
+
     /**
      * Creating test for publishing events without URL.
      *
@@ -78,7 +78,7 @@ public class HttpBasicTestCase {
         );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-        
+
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -114,13 +114,13 @@ public class HttpBasicTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-    
+
     /**
      * Creating test for publishing events from PUT method.
      *
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test(dependsOnMethods = "testHTTPInputTransportWithoutURL")
     public void testHTTPInputTransportPutMethod() throws Exception {
         logger.info("Test case for put method");
         final TestAppender appender = new TestAppender();
@@ -180,13 +180,13 @@ public class HttpBasicTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-    
+
     /**
      * Creating test for publishing events with XML mapping.
      *
      * @throws Exception Interrupted exception
      */
-    @Test(expectedExceptions = RuntimeException.class)
+    @Test(expectedExceptions = RuntimeException.class, dependsOnMethods = "testHTTPInputTransportPutMethod")
     public void testMultipleListenersSameURL() throws Exception {
         logger.info("Creating test for same url in different execution plain.");
         final TestAppender appender = new TestAppender();
@@ -221,7 +221,7 @@ public class HttpBasicTestCase {
         );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager1
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-        
+
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -235,7 +235,7 @@ public class HttpBasicTestCase {
         siddhiAppRuntime.start();
         SiddhiAppRuntime siddhiAppRuntime2 = siddhiManager2
                 .createSiddhiAppRuntime(inStreamDefinition2 + query2);
-        
+
         siddhiAppRuntime2.addCallback("query2", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -283,17 +283,18 @@ public class HttpBasicTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-    
+
     /**
      * Creating test for publishing events without URL multiple events with same url.
      */
-    @Test(expectedExceptions = RuntimeException.class)
+    @Test(expectedExceptions = RuntimeException.class, dependsOnMethods = "testMultipleListenersSameURL")
     public void testMultipleListenersSameURLInSameExecutionPlan() throws InterruptedException {
         logger.info("Creating test for publishing events same url in same execution plain.");
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
+
         List<String> receivedEventNameListA = new ArrayList<>(2);
         List<String> receivedEventNameListB = new ArrayList<>(2);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
@@ -338,27 +339,30 @@ public class HttpBasicTestCase {
                 }
             }
         });
-        siddhiAppRuntime.start();
-        //To check weather only one is deployed
-        final List<LoggingEvent> log = appender.getLog();
-        List<String> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            logMessages.add(String.valueOf(logEvent.getMessage()));
+        try {
+            siddhiAppRuntime.start();
+            //To check weather only one is deployed
+            final List<LoggingEvent> log = appender.getLog();
+            List<String> logMessages = new ArrayList<>();
+            for (LoggingEvent logEvent : log) {
+                logMessages.add(String.valueOf(logEvent.getMessage()));
+            }
+            SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
+            Assert.assertEquals(logMessages.contains("Error while connecting at Source 'http' at 'inputStreamA', " +
+                    "Listener URL http://localhost:8006/endpoints/RecPro already connected."), true);
+            Assert.assertEquals(Collections.frequency(logMessages, "Error while connecting at Source 'http' at " +
+                    "'inputStreamA', Listener URL http://localhost:8006/endpoints/RecPro already connected."), 1);
+        } finally {
+            siddhiAppRuntime.shutdown();
         }
-        SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
-        Assert.assertEquals(logMessages.contains("Error while connecting at Source 'http' at 'inputStreamA', " +
-                "Listener URL http://localhost:8006/endpoints/RecPro already connected."), true);
-        Assert.assertEquals(Collections.frequency(logMessages, "Error while connecting at Source 'http' at " +
-                "'inputStreamA', Listener URL http://localhost:8006/endpoints/RecPro already connected."), 1);
-        siddhiAppRuntime.shutdown();
     }
-    
+
     /**
      * Creating test for publishing events with different url with same context.
      *
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test(dependsOnMethods = "testMultipleListenersSameURLInSameExecutionPlan")
     public void testHTTPInputTransportDifferentURL() throws Exception {
         logger.info("Creating test for publishing events with different url with same context.");
         URI baseURIA = URI.create(String.format("http://%s:%d", "localhost", 8005));
@@ -456,13 +460,13 @@ public class HttpBasicTestCase {
         Assert.assertEquals(receivedEventNameListB.toString(), expectedB.toString());
         siddhiAppRuntime.shutdown();
     }
-    
+
     /**
      * Creating test for publishing events with empty payload.
      *
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test(dependsOnMethods = "testHTTPInputTransportDifferentURL")
     public void testHTTPInputTransportEmployPayload() throws Exception {
         logger.info("Creating test for publishing events with empty payload.");
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
@@ -499,25 +503,25 @@ public class HttpBasicTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-    
+
     private static class TestAppender extends AppenderSkeleton {
-        
+
         private final List<LoggingEvent> log = new ArrayList<>();
-        
+
         @Override
         public boolean requiresLayout() {
             return false;
         }
-        
+
         @Override
         protected void append(final LoggingEvent loggingEvent) {
             log.add(loggingEvent);
         }
-        
+
         @Override
         public void close() {
         }
-        
+
         List<LoggingEvent> getLog() {
             return new ArrayList<>(log);
         }
