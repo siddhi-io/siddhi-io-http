@@ -74,8 +74,8 @@ import java.util.concurrent.TimeUnit;
                         description = "Identifier need to map the source to sink.",
                         type = {DataType.STRING}),
                 @Parameter(name = "connection.timeout",
-                        description = "Connection timeout in milliseconds. If the mapped http-response sink does not " +
-                                "get a correlated message, after this timeout value, a timeout response is sent",
+                        description = "Connection timeout in milliseconds. If the mapped http-response sink does not "
+                                + "get a correlated message, after this timeout value, a timeout response is sent",
                         type = {DataType.INT},
                         optional = true,
                         defaultValue = "120000"),
@@ -328,11 +328,11 @@ import java.util.concurrent.TimeUnit;
                 @Example(syntax = "@source(type='http-request', source.id='sampleSourceId, " +
                         "receiver.url='http://localhost:9055/endpoints/RecPro', " +
                         "connection.timeout='150000', parameters=\"'ciphers : TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256'," +
-                        " 'sslEnabledProtocols:TLSv1.1,TLSv1.2'\",request.size.validation.configuration=\"request" +
-                        ".size.validation:true\",server.bootstrap.configuration=\"server.bootstrap.socket" +
-                        ".timeout:25\" " +
-                        "@map(type='json @attributes(messageId='trp:messageId',symbol='$.events.event.symbol'," +
-                        "price='$.events.event.price',volume='$.events.event.volume')))\n"
+                        " 'sslEnabledProtocols:TLSv1.1,TLSv1.2'\", request.size.validation.configuration=\"request" +
+                        ".size.validation:true\", server.bootstrap.configuration=\"server.bootstrap.socket" +
+                        ".timeout:25\", " +
+                        "@map(type='json, @attributes(messageId='trp:messageId', symbol='$.events.event.symbol', " +
+                        "price='$.events.event.price', volume='$.events.event.volume')))\n"
                         + "define stream FooStream (messageId string, symbol string, price float, volume long);\n",
                         description = "The expected input is as follows:\n"
                                 + "{\"events\":\n"
@@ -431,7 +431,7 @@ public class HttpRequestSource extends HttpSource {
      * @param sourceEventListener After receiving events, the source should trigger onEvent() of this listener.
      *                            Listener will then pass on the events to the appropriate mappers for processing .
      * @param optionHolder        Option holder containing static listenerConfiguration related to the
-     * {@link org.wso2.siddhi.core.stream.input.source.Source}
+     *                            {@link org.wso2.siddhi.core.stream.input.source.Source}
      * @param configReader        to read the {@link org.wso2.siddhi.core.stream.input.source.Source} related system
      *                            listenerConfiguration.
      * @param siddhiAppContext    the context of the {@link org.wso2.siddhi.query.api.SiddhiApp} used to get siddhi
@@ -478,7 +478,7 @@ public class HttpRequestSource extends HttpSource {
      */
     @Override
     public Class[] getOutputEventClasses() {
-        return new Class[] {String.class};
+        return new Class[]{String.class};
     }
 
     /**

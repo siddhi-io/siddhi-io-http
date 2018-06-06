@@ -134,7 +134,7 @@ public class HttpCustomConfigTestCase {
      *
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test(dependsOnMethods = "testCustomConfiguration")
     public void testPauseResume() throws Exception {
         logger.info("Creating test for publishing events with XML mapping.");
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
@@ -200,7 +200,7 @@ public class HttpCustomConfigTestCase {
      *
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test(dependsOnMethods = "testPauseResume")
     public void testPauseResume2() throws Exception {
         logger.info("Creating test for publishing events with XML mapping.");
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));

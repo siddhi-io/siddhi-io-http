@@ -121,7 +121,7 @@ public class HttpSourceBasicAuthTestCase {
      *
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test(dependsOnMethods = "testBasicAuthFalse")
     public void testBasicAuthTrue() throws Exception {
         logger.info(" Creating test for publishing events with basic auth false.");
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));

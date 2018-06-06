@@ -48,13 +48,13 @@ public class HttpSourceConflictsTestCase {
     private AtomicInteger eventCountB = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;
-    
+
     @BeforeMethod
     public void init() {
         eventCountA.set(0);
         eventCountB.set(0);
     }
-    
+
     /**
      * Creating test for publishing events with multiple formats synchronously.
      *
@@ -94,40 +94,43 @@ public class HttpSourceConflictsTestCase {
                 }
             }
         });
-        siddhiAppRuntime.start();
-        masterConfigs.put("source.http.keyStorePassword", "wso2carbon2");
-        masterConfigs.put("source.http.certPassword", "wso2carbon2");
-        String inStreamDefinitionB = "@source(type='http', @map(type='xml'), receiver.url='https://localhost:8005"
-                + "/endpoints/RecPro')"
-                + "define stream inputStream2 (name string, age int, country string);";
-        String queryB = ("@info(name = 'query2') "
-                + "from inputStream2 "
-                + "select *  "
-                + "insert into outputStream2;"
-        );
-        SiddhiAppRuntime siddhiAppRuntime2 = siddhiManager
-                .createSiddhiAppRuntime(inStreamDefinitionB + queryB);
-        siddhiAppRuntime2.start();
-        // publishing events
-        List<String> expected = new ArrayList<>(2);
-        String event1 = "<events>"
-                + "<event>"
-                + "<name>John</name>"
-                + "<age>100</age>"
-                + "<country>AUS</country>"
-                + "</event>"
-                + "</events>";
-        String event2 = "<events>"
-                + "<event>"
-                + "<name>Mike</name>"
-                + "<age>20</age>"
-                + "<country>USA</country>"
-                + "</event>"
-                + "</events>";
-        HttpTestUtil.httpsPublishEvent(event1);
-        HttpTestUtil.httpsPublishEvent(event2);
-        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCountA, timeout);
-        Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
-        siddhiAppRuntime.shutdown();
+        try {
+            siddhiAppRuntime.start();
+            masterConfigs.put("source.http.keyStorePassword", "wso2carbon2");
+            masterConfigs.put("source.http.certPassword", "wso2carbon2");
+            String inStreamDefinitionB = "@source(type='http', @map(type='xml'), receiver.url='https://localhost:8005"
+                    + "/endpoints/RecPro')"
+                    + "define stream inputStream2 (name string, age int, country string);";
+            String queryB = ("@info(name = 'query2') "
+                    + "from inputStream2 "
+                    + "select *  "
+                    + "insert into outputStream2;"
+            );
+            SiddhiAppRuntime siddhiAppRuntime2 = siddhiManager
+                    .createSiddhiAppRuntime(inStreamDefinitionB + queryB);
+            siddhiAppRuntime2.start();
+            // publishing events
+            List<String> expected = new ArrayList<>(2);
+            String event1 = "<events>"
+                    + "<event>"
+                    + "<name>John</name>"
+                    + "<age>100</age>"
+                    + "<country>AUS</country>"
+                    + "</event>"
+                    + "</events>";
+            String event2 = "<events>"
+                    + "<event>"
+                    + "<name>Mike</name>"
+                    + "<age>20</age>"
+                    + "<country>USA</country>"
+                    + "</event>"
+                    + "</events>";
+            HttpTestUtil.httpsPublishEvent(event1);
+            HttpTestUtil.httpsPublishEvent(event2);
+            SiddhiTestHelper.waitForEvents(waitTime, 2, eventCountA, timeout);
+            Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
     }
 }

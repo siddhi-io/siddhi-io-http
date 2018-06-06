@@ -1,4 +1,4 @@
-# API Docs - v1.0.22
+# API Docs - v1.0.23-SNAPSHOT
 
 ## Sink
 
@@ -423,10 +423,11 @@
 <span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
 ```
-@sink(type='http-sync',source.id='sampleSourceId',message.id='{{messageId}}',headers="'content-type:json','content-length:94'"@map(type='json' , @payload('{{payloadBody}}')))define stream FooStream (payloadBody String, messageId string, headers string);
+@sink(type='http-response', source.id='sampleSourceId', message.id='{{messageId}}', headers="'content-type:json','content-length:94'"@map(type='json', @payload('{{payloadBody}}')))
+define stream FooStream (payloadBody String, messageId string, headers string);
 
 ```
-<p style="word-wrap: break-word">If it is json mapping expected input should be in following format for FooStream:{{"events":<br>&nbsp;&nbsp;&nbsp;&nbsp;{"event":<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"symbol":WSO2,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"price":55.6,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"volume":100,<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>},0cf708b1-7eae-440b-a93e-e72f801b486a,Content-Length:24#Content-Location:USA}Above event will generate response for the matching source message as below.~Output http event payload{"events":<br>&nbsp;&nbsp;&nbsp;&nbsp;{"event":<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"symbol":WSO2,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"price":55.6,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"volume":100,<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>}<br>~Output http event headersContent-Length:24,Content-Location:'USA',Content-Type:'application/json',</p>
+<p style="word-wrap: break-word">If it is json mapping expected input should be in following format for FooStream:{{"events":<br>&nbsp;&nbsp;&nbsp;&nbsp;{"event":<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"symbol":WSO2,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"price":55.6,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"volume":100,<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>},0cf708b1-7eae-440b-a93e-e72f801b486a,Content-Length:24#Content-Location:USA}Above event will generate response for the matching source message as below.~Output http event payload<br>{"events":<br>&nbsp;&nbsp;&nbsp;&nbsp;{"event":<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"symbol":WSO2,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"price":55.6,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"volume":100,<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>}<br>~Output http event headers<br>Content-Length:24,Content-Location:'USA',Content-Type:'application/json',</p>
 
 ## Source
 
@@ -1216,9 +1217,9 @@ define stream FooStream (symbol string, price float, volume long);
 <span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
 ```
-@source(type='http-sync', source.id='samplesourceid, receiver.url='http://localhost:9055/endpoints/RecPro', socketIdleTimeout='150000', parameters="'ciphers : TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256', 'sslEnabledProtocols:TLSv1.1,TLSv1.2'",request.size.validation.configuration="request.size.validation:true",server.bootstrap.configuration="server.bootstrap.socket.timeout:25" @map(type='json @attributes(messageId='trp:messageId',symbol='$.events.event.symbol',price='$.events.event.price',volume='$.events.event.volume')))
+@source(type='http-request', source.id='sampleSourceId, receiver.url='http://localhost:9055/endpoints/RecPro', connection.timeout='150000', parameters="'ciphers : TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256', 'sslEnabledProtocols:TLSv1.1,TLSv1.2'",request.size.validation.configuration="request.size.validation:true",server.bootstrap.configuration="server.bootstrap.socket.timeout:25" @map(type='json @attributes(messageId='trp:messageId',symbol='$.events.event.symbol',price='$.events.event.price',volume='$.events.event.volume')))
 define stream FooStream (messageId string, symbol string, price float, volume long);
 
 ```
-<p style="word-wrap: break-word">The expected input is as follows:{"events":<br>&nbsp;&nbsp;&nbsp;&nbsp;{"event":<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"symbol":WSO2,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"price":55.6,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"volume":100,<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>}<br>If basic authentication is enabled via the <code>basic.auth.enabled='true</code> setting, each input event is also expected to contain the <code>Authorization:'Basic encodeBase64(username:Password)'</code> header.</p>
+<p style="word-wrap: break-word">The expected input is as follows:<br>{"events":<br>&nbsp;&nbsp;&nbsp;&nbsp;{"event":<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"symbol":WSO2,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"price":55.6,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"volume":100,<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>}<br>If basic authentication is enabled via the <code>basic.auth.enabled='true</code> setting, each input event is also expected to contain the <code>Authorization:'Basic encodeBase64(username:Password)'</code> header.</p>
 
