@@ -56,8 +56,12 @@ import java.util.concurrent.TimeUnit;
 /**
  * Http source for receive the http and https request.
  */
-@Extension(name = "http-request", namespace = "source", description = "The HTTP source receives POST requests via " +
-        "HTTP or HTTPS in format such as `text`, `XML` and `JSON`. If required, you can enable basic authentication " +
+@Extension(name = "http-request", namespace = "source", description = "The HTTP request is correlated with the " +
+        "HTTP response sink, through a unique `source.id`, and for each POST requests it receives via " +
+        "HTTP or HTTPS in format such as `text`, `XML` and `JSON` it sends the response via the HTTP response sink. " +
+        "The individual request and response messages are correlated at the sink using the `message.id` of " +
+        "the events. " +
+        "If required, you can enable basic authentication at the source " +
         "to ensure that events are received only from users who are authorized to access the service.",
         parameters = {
                 @Parameter(name = "receiver.url",

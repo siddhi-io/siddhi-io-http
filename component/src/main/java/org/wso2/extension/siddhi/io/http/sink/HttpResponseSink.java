@@ -43,8 +43,10 @@ import java.util.Map;
  * {@code HttpResponseSink} Handle the HTTP publishing tasks.
  */
 @Extension(name = "http-response", namespace = "sink",
-        description = "This extension send the response to the http-sync source having the same source.id. user can " +
-                "add any number of response headers for each event dynamically.",
+        description = "HTTP response sink is correlated with the " +
+                "The HTTP request source, through a unique `source.id`, and it send a response to the HTTP request " +
+                "source having the same `source.id`. The response message can be formatted in `text`, `XML` or `JSON` "
+                + "and can be sent with appropriate headers.",
         parameters = {
                 @Parameter(
                         name = "source.id",
