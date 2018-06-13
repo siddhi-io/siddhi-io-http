@@ -16,7 +16,7 @@
     
     
       
-        <title>1.0.13 - Siddhi-IO-HTTP</title>
+        <title>1.0.25 - Siddhi-IO-HTTP</title>
       
     
     
@@ -84,7 +84,7 @@
                 </span>
               
             
-            1.0.13
+            1.0.25
           
         </span>
       </div>
@@ -181,11 +181,94 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../1.0.25/" title="1.0.25" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        1.0.25
+      </label>
+    
+    <a href="./" title="1.0.25" class="md-nav__link md-nav__link--active">
       1.0.25
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#sink" title="Sink" class="md-nav__link">
+    Sink
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#http-sink" title="http (Sink)" class="md-nav__link">
+    http (Sink)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#http-response-sink" title="http-response (Sink)" class="md-nav__link">
+    http-response (Sink)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#source" title="Source" class="md-nav__link">
+    Source
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#http-source" title="http (Source)" class="md-nav__link">
+    http (Source)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#http-request-source" title="http-request (Source)" class="md-nav__link">
+    http-request (Source)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -313,80 +396,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="toc">
-        1.0.13
-      </label>
-    
-    <a href="./" title="1.0.13" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../1.0.13/" title="1.0.13" class="md-nav__link">
       1.0.13
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#sink" title="Sink" class="md-nav__link">
-    Sink
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#http-sink" title="http (Sink)" class="md-nav__link">
-    http (Sink)
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#source" title="Source" class="md-nav__link">
-    Source
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#http-source" title="http (Source)" class="md-nav__link">
-    http (Source)
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-      
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
         
@@ -502,6 +516,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#http-response-sink" title="http-response (Sink)" class="md-nav__link">
+    http-response (Sink)
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -518,6 +539,13 @@
           <li class="md-nav__item">
   <a href="#http-source" title="http (Source)" class="md-nav__link">
     http (Source)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#http-request-source" title="http-request (Source)" class="md-nav__link">
+    http-request (Source)
   </a>
   
 </li>
@@ -542,10 +570,10 @@
               
                 
                 
-                <h1 id="api-docs-v1013">API Docs - v1.0.13</h1>
+                <h1 id="api-docs-v1025">API Docs - v1.0.25</h1>
 <h2 id="sink">Sink</h2>
 <h3 id="http-sink">http <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink">(Sink)</a></em></h3>
-<p style="word-wrap: break-word">This extension publish the HTTP events in any HTTP method  POST, GET, PUT, DELETE  via HTTP or https protocols. As the additional features this component can provide basic authentication as well as user can publish events using custom client truststore files when publishing events via https protocol. And also user can add any number of headers including HTTP_METHOD header for each event dynamically.</p>
+<p style="word-wrap: break-word">This extension publish the HTTP events in any HTTP method  POST, GET, PUT, DELETE  via HTTP or https protocols. As the additional features this component can provide basic authentication as well as user can publish events using custom client truststore files when publishing events via https protocol. And also user can add any number of headers including HTTP_METHOD header for each event dynamically.<br>Following content types will be set by default according to the type of sink mapper used.<br>You can override them by setting the new content types in headers.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- TEXT : text/plain<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- XML : application/xml<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- JSON : application/json<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- KEYVALUE : application/x-www-form-urlencoded</p>
 
 <p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
 <pre><code>@sink(type=&quot;http&quot;, publisher.url=&quot;&lt;STRING&gt;&quot;, basic.auth.username=&quot;&lt;STRING&gt;&quot;, basic.auth.password=&quot;&lt;STRING&gt;&quot;, https.truststore.file=&quot;&lt;STRING&gt;&quot;, https.truststore.password=&quot;&lt;STRING&gt;&quot;, headers=&quot;&lt;STRING&gt;&quot;, method=&quot;&lt;STRING&gt;&quot;, socket.idle.timeout=&quot;&lt;INT&gt;&quot;, chunk.disabled=&quot;&lt;BOOL&gt;&quot;, ssl.protocol=&quot;&lt;STRING&gt;&quot;, parameters=&quot;&lt;STRING&gt;&quot;, ciphers=&quot;&lt;STRING&gt;&quot;, ssl.enabled.protocols=&quot;&lt;STRING&gt;&quot;, client.enable.session.creation=&quot;&lt;STRING&gt;&quot;, follow.redirect=&quot;&lt;BOOL&gt;&quot;, max.redirect.count=&quot;&lt;INT&gt;&quot;, tls.store.type=&quot;&lt;STRING&gt;&quot;, proxy.host=&quot;&lt;STRING&gt;&quot;, proxy.port=&quot;&lt;STRING&gt;&quot;, proxy.username=&quot;&lt;STRING&gt;&quot;, proxy.password=&quot;&lt;STRING&gt;&quot;, client.bootstrap.configuration=&quot;&lt;STRING&gt;&quot;, client.bootstrap.nodelay=&quot;&lt;BOOL&gt;&quot;, client.bootstrap.keepalive=&quot;&lt;BOOL&gt;&quot;, client.bootstrap.sendbuffersize=&quot;&lt;INT&gt;&quot;, client.bootstrap.recievebuffersize=&quot;&lt;INT&gt;&quot;, client.bootstrap.connect.timeout=&quot;&lt;INT&gt;&quot;, client.bootstrap.socket.reuse=&quot;&lt;BOOL&gt;&quot;, client.bootstrap.socket.timeout=&quot;&lt;STRING&gt;&quot;, client.threadpool.configurations=&quot;&lt;STRING&gt;&quot;, client.connection.pool.count=&quot;&lt;INT&gt;&quot;, client.max.active.connections.per.pool=&quot;&lt;INT&gt;&quot;, client.min.idle.connections.per.pool=&quot;&lt;INT&gt;&quot;, client.max.idle.connections.per.pool=&quot;&lt;INT&gt;&quot;, client.min.eviction.idle.time=&quot;&lt;STRING&gt;&quot;, sender.thread.count=&quot;&lt;STRING&gt;&quot;, event.group.executor.thread.size=&quot;&lt;STRING&gt;&quot;, max.wait.for.client.connection.pool=&quot;&lt;STRING&gt;&quot;, @map(...)))
@@ -603,7 +631,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">headers</td>
-        <td style="vertical-align: top; word-wrap: break-word">The headers that should be included as a HTTP request headers. There can be any number of headers concatenated on following format. header1:value1#header2:value2. User can include content-type header if he need to any specific type for payload if not system get the mapping type as the content-Type header (ie. @map(xml):application/xml,@map(json):application/json,@map(text):plain/text ) and if user does not include any mapping type then system gets the 'plain/text' as default Content-Type header. If user does not include Content-Length header then system calculate the bytes size of payload and include it as content-length header.</td>
+        <td style="vertical-align: top; word-wrap: break-word">The headers that should be included as a HTTP request headers. There can be any number of headers concatenated on following format. "'header1:value1','header2:value2'". User can include content-type header if he need to any specific type for payload if not system get the mapping type as the content-Type header (ie. @map(xml):application/xml,@map(json):application/json,@map(text):plain/text ) and if user does not include any mapping type then system gets the 'plain/text' as default Content-Type header. If user does not include Content-Length header then system calculate the bytes size of payload and include it as content-length header.</td>
         <td style="vertical-align: top"> </td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -877,13 +905,19 @@
     <tr>
         <td style="vertical-align: top">clientBootstrapBossGroupSize</td>
         <td style="vertical-align: top; word-wrap: break-word">property to configure number of boss threads, which accepts incoming connections until the ports are unbound. Once connection accepts successfully, boss thread passes the accepted channel to one of the worker threads.</td>
-        <td style="vertical-align: top">4</td>
+        <td style="vertical-align: top">Number of available processors</td>
         <td style="vertical-align: top">Any integer</td>
     </tr>
     <tr>
         <td style="vertical-align: top">clientBootstrapWorkerGroupSize</td>
         <td style="vertical-align: top; word-wrap: break-word">property to configure number of worker threads, which performs non blocking read and write for one or more channels in non-blocking mode.</td>
-        <td style="vertical-align: top">8</td>
+        <td style="vertical-align: top">(Number of available processors)<em>2</td>
+        <td style="vertical-align: top">Any integer</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">clientBootstrapClientGroupSize</td>
+        <td style="vertical-align: top; word-wrap: break-word">property to configure number of client threads, which performs non blocking read and write for one or more channels in non-blocking mode.</td>
+        <td style="vertical-align: top">(Number of available processors)</em>2</td>
         <td style="vertical-align: top">Any integer</td>
     </tr>
     <tr>
@@ -901,11 +935,63 @@
 </table></p>
 <p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
-<pre><code>@sink(type='http',publisher.url='http://localhost:8009/foo', method='{{method}}',headers='{{headers}}',client.bootstrap.configuration=&quot;'client.bootstrap.socket.timeout:20','client.bootstrap.worker.group.size:10'&quot;,client.pool.configuration=&quot;'client.connection.pool.count:10','client.max.active.connections.per.pool:1'&quot; @map(type='xml' , @payload('{{payloadBody}}')))define stream FooStream (payloadBody String, method string, headers string);
+<pre><code>@sink(type='http',publisher.url='http://localhost:8009/foo', method='{{method}}',headers=&quot;'content-type:xml','content-length:94'&quot;, client.bootstrap.configuration=&quot;'client.bootstrap.socket.timeout:20', 'client.bootstrap.worker.group.size:10'&quot;, client.pool.configuration=&quot;'client.connection.pool.count:10','client.max.active.connections.per.pool:1'&quot;, @map(type='xml', @payload('{{payloadBody}}')))
+define stream FooStream (payloadBody String, method string, headers string);
 
 </code></pre>
 
-<p style="word-wrap: break-word">If it is xml mapping expected input should be in following format for FooStream:{&lt;events&gt;    &lt;event&gt;        &lt;symbol&gt;WSO2&lt;/symbol&gt;        &lt;price&gt;55.6&lt;/price&gt;        &lt;volume&gt;100&lt;/volume&gt;    &lt;/event&gt;&lt;/events&gt;,POST,Content-Length:24#Content-Location:USA#Retry-After:120}Above event will generate output as below.~Output http event payload&lt;events&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;event&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;symbol&gt;WSO2&lt;/symbol&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;price&gt;55.6&lt;/price&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;volume&gt;100&lt;/volume&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/event&gt;<br>&lt;/events&gt;<br>~Output http event headersContent-Length:24,Content-Location:'USA',Retry-After:120,Content-Type:'application/xml',HTTP_METHOD:'POST',~Output http event propertiesHTTP_METHOD:'POST',HOST:'localhost',PORT:8009PROTOCOL:'http'TO:'/foo'</p>
+<p style="word-wrap: break-word">If it is xml mapping expected input should be in following format for FooStream:<br>{<br>&lt;events&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;event&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;symbol&gt;WSO2&lt;/symbol&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;price&gt;55.6&lt;/price&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;volume&gt;100&lt;/volume&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/event&gt;<br>&lt;/events&gt;,<br>POST,<br>Content-Length:24#Content-Location:USA#Retry-After:120<br>}<br><br>Above event will generate output as below.<br>~Output http event payload<br>&lt;events&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;event&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;symbol&gt;WSO2&lt;/symbol&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;price&gt;55.6&lt;/price&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;volume&gt;100&lt;/volume&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/event&gt;<br>&lt;/events&gt;<br><br>~Output http event headers<br>Content-Length:24,<br>Content-Location:'USA',<br>Retry-After:120,<br>Content-Type:'application/xml',<br>HTTP_METHOD:'POST',<br><br>~Output http event properties<br>HTTP_METHOD:'POST',<br>HOST:'localhost',<br>PORT:8009,<br>PROTOCOL:'http',<br>TO:'/foo'</p>
+
+<h3 id="http-response-sink">http-response <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink">(Sink)</a></em></h3>
+<p style="word-wrap: break-word">HTTP response sink is correlated with the The HTTP request source, through a unique <code>source.id</code>, and it send a response to the HTTP request source having the same <code>source.id</code>. The response message can be formatted in <code>text</code>, <code>XML</code> or <code>JSON</code> and can be sent with appropriate headers.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>@sink(type=&quot;http-response&quot;, source.id=&quot;&lt;STRING&gt;&quot;, message.id=&quot;&lt;STRING&gt;&quot;, headers=&quot;&lt;STRING&gt;&quot;, @map(...)))
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">source.id</td>
+        <td style="vertical-align: top; word-wrap: break-word">Identifier of the source.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">message.id</td>
+        <td style="vertical-align: top; word-wrap: break-word">Identifier of the message.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">Yes</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">headers</td>
+        <td style="vertical-align: top; word-wrap: break-word">The headers that should be included as HTTP response headers. There can be any number of headers concatenated on following format. "'header1:value1','header2:value2'" User can include content-type header if he/she need to have any specific type for payload. If not system get the mapping type as the content-Type header (ie.<code>@map(xml)</code>:<code>application/xml</code>, <code>@map(json)</code>:<code>application/json</code>, <code>@map(text)</code>:<code>plain/text</code>) and if user does not include any mapping type then system gets the <code>plain/text</code> as default Content-Type header. If user does not include Content-Length header then system calculate the bytes size of payload and include it as content-length header.</td>
+        <td style="vertical-align: top"> </td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>@sink(type='http-response', source.id='sampleSourceId', message.id='{{messageId}}', headers=&quot;'content-type:json','content-length:94'&quot;@map(type='json', @payload('{{payloadBody}}')))
+define stream FooStream (payloadBody String, messageId string, headers string);
+
+</code></pre>
+
+<p style="word-wrap: break-word">If it is json mapping expected input should be in following format for FooStream:<br>{<br>{"events":<br>&nbsp;&nbsp;&nbsp;&nbsp;{"event":<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"symbol":WSO2,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"price":55.6,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"volume":100,<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>},<br>0cf708b1-7eae-440b-a93e-e72f801b486a,<br>Content-Length:24#Content-Location:USA<br>}<br><br>Above event will generate response for the matching source message as below.<br><br>~Output http event payload<br>{"events":<br>&nbsp;&nbsp;&nbsp;&nbsp;{"event":<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"symbol":WSO2,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"price":55.6,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"volume":100,<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>}<br><br>~Output http event headers<br>Content-Length:24,<br>Content-Location:'USA',<br>Content-Type:'application/json'<br></p>
 
 <h2 id="source">Source</h2>
 <h3 id="http-source">http <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a></em></h3>
@@ -1225,13 +1311,19 @@
     <tr>
         <td style="vertical-align: top">serverBootstrapBossGroupSize</td>
         <td style="vertical-align: top; word-wrap: break-word">property to configure number of boss threads, which accepts incoming connections until the ports are unbound. Once connection accepts successfully, boss thread passes the accepted channel to one of the worker threads.</td>
-        <td style="vertical-align: top">4</td>
+        <td style="vertical-align: top">Number of available processors</td>
         <td style="vertical-align: top">Any integer</td>
     </tr>
     <tr>
         <td style="vertical-align: top">serverBootstrapWorkerGroupSize</td>
         <td style="vertical-align: top; word-wrap: break-word">property to configure number of worker threads, which performs non blocking read and write for one or more channels in non-blocking mode.</td>
-        <td style="vertical-align: top">8</td>
+        <td style="vertical-align: top">(Number of available processors)<em>2</td>
+        <td style="vertical-align: top">Any integer</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">serverBootstrapClientGroupSize</td>
+        <td style="vertical-align: top; word-wrap: break-word">property to configure number of client threads, which performs non blocking read and write for one or more channels in non-blocking mode.</td>
+        <td style="vertical-align: top">(Number of available processors)</em>2</td>
         <td style="vertical-align: top">Any integer</td>
     </tr>
     <tr>
@@ -1284,7 +1376,407 @@ define stream FooStream (symbol string, price float, volume long);
 
 </code></pre>
 
-<p style="word-wrap: break-word">Above source listenerConfiguration performs a default XML input mapping. The expected input is as follows:&lt;events&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;event&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;symbol&gt;WSO2&lt;/symbol&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;price&gt;55.6&lt;/price&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;volume&gt;100&lt;/volume&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/event&gt;<br>&lt;/events&gt;<br>If basic authentication is enabled via the <code>basic.auth.enabled='true</code> setting, each input event is also expected to contain the <code>Authorization:'Basic encodeBase64(username:Password)'</code> header.</p>
+<p style="word-wrap: break-word">Above source listenerConfiguration performs a default XML input mapping. The expected input is as follows:<br>&lt;events&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;event&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;symbol&gt;WSO2&lt;/symbol&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;price&gt;55.6&lt;/price&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;volume&gt;100&lt;/volume&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/event&gt;<br>&lt;/events&gt;<br>If basic authentication is enabled via the <code>basic.auth.enabled='true</code> setting, each input event is also expected to contain the <code>Authorization:'Basic encodeBase64(username:Password)'</code> header.</p>
+
+<h3 id="http-request-source">http-request <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a></em></h3>
+<p style="word-wrap: break-word">The HTTP request is correlated with the HTTP response sink, through a unique <code>source.id</code>, and for each POST requests it receives via HTTP or HTTPS in format such as <code>text</code>, <code>XML</code> and <code>JSON</code> it sends the response via the HTTP response sink. The individual request and response messages are correlated at the sink using the <code>message.id</code> of the events. If required, you can enable basic authentication at the source to ensure that events are received only from users who are authorized to access the service.</p>
+
+<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>@source(type=&quot;http-request&quot;, receiver.url=&quot;&lt;STRING&gt;&quot;, source.id=&quot;&lt;STRING&gt;&quot;, connection.timeout=&quot;&lt;INT&gt;&quot;, basic.auth.enabled=&quot;&lt;STRING&gt;&quot;, worker.count=&quot;&lt;STRING&gt;&quot;, socket.idle.timeout=&quot;&lt;INT&gt;&quot;, ssl.verify.client=&quot;&lt;STRING&gt;&quot;, ssl.protocol=&quot;&lt;STRING&gt;&quot;, tls.store.type=&quot;&lt;STRING&gt;&quot;, parameters=&quot;&lt;STRING&gt;&quot;, ciphers=&quot;&lt;STRING&gt;&quot;, ssl.enabled.protocols=&quot;&lt;STRING&gt;&quot;, server.enable.session.creation=&quot;&lt;STRING&gt;&quot;, server.supported.snimatchers=&quot;&lt;STRING&gt;&quot;, server.suported.server.names=&quot;&lt;STRING&gt;&quot;, request.size.validation.configuration=&quot;&lt;STRING&gt;&quot;, request.size.validation=&quot;&lt;STRING&gt;&quot;, request.size.validation.maximum.value=&quot;&lt;STRING&gt;&quot;, request.size.validation.reject.status.code=&quot;&lt;STRING&gt;&quot;, request.size.validation.reject.message=&quot;&lt;STRING&gt;&quot;, request.size.validation.reject.message.content.type=&quot;&lt;STRING&gt;&quot;, header.size.validation=&quot;&lt;STRING&gt;&quot;, header.validation.maximum.request.line=&quot;&lt;STRING&gt;&quot;, header.validation.maximum.size=&quot;&lt;STRING&gt;&quot;, header.validation.maximum.chunk.size=&quot;&lt;STRING&gt;&quot;, header.validation.reject.status.code=&quot;&lt;STRING&gt;&quot;, header.validation.reject.message=&quot;&lt;STRING&gt;&quot;, header.validation.reject.message.content.type=&quot;&lt;STRING&gt;&quot;, server.bootstrap.configuration=&quot;&lt;OBJECT&gt;&quot;, server.bootstrap.nodelay=&quot;&lt;BOOL&gt;&quot;, server.bootstrap.keepalive=&quot;&lt;BOOL&gt;&quot;, server.bootstrap.sendbuffersize=&quot;&lt;INT&gt;&quot;, server.bootstrap.recievebuffersize=&quot;&lt;INT&gt;&quot;, server.bootstrap.connect.timeout=&quot;&lt;INT&gt;&quot;, server.bootstrap.socket.reuse=&quot;&lt;BOOL&gt;&quot;, server.bootstrap.socket.timeout=&quot;&lt;BOOL&gt;&quot;, server.bootstrap.socket.backlog=&quot;&lt;BOOL&gt;&quot;, trace.log.enabled=&quot;&lt;BOOL&gt;&quot;, @map(...)))
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">receiver.url</td>
+        <td style="vertical-align: top; word-wrap: break-word">The URL to which the events should be received. User can provide any valid url and if the url is not provided the system will use the following format <code>http://0.0.0.0:9763/&lt;appNAme&gt;/&lt;streamName&gt;</code>If the user want to use SSL the url should be given in following format <code>https://localhost:8080/&lt;streamName&gt;</code></td>
+        <td style="vertical-align: top">http://0.0.0.0:9763/<appNAme>/<streamName></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">source.id</td>
+        <td style="vertical-align: top; word-wrap: break-word">Identifier need to map the source to sink.</td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">connection.timeout</td>
+        <td style="vertical-align: top; word-wrap: break-word">Connection timeout in milliseconds. If the mapped http-response sink does not get a correlated message, after this timeout value, a timeout response is sent</td>
+        <td style="vertical-align: top">120000</td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">basic.auth.enabled</td>
+        <td style="vertical-align: top; word-wrap: break-word">If this is set to <code>true</code>, basic authentication is enabled for incoming events, and the credentials with which each event is sent are verified to ensure that the user is authorized to access the service. If basic authentication fails, the event is not authenticated and an authentication error is logged in the CLI. By default this values 'false' </td>
+        <td style="vertical-align: top">false</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">worker.count</td>
+        <td style="vertical-align: top; word-wrap: break-word">The number of active worker threads to serve the incoming events. The value is 1 by default. This will ensure that the events are directed to the event stream in the same order in which they arrive. By increasing this value the performance might increase at the cost of loosing event ordering.</td>
+        <td style="vertical-align: top">1</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">socket.idle.timeout</td>
+        <td style="vertical-align: top; word-wrap: break-word">Idle timeout for HTTP connection.</td>
+        <td style="vertical-align: top">120000</td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ssl.verify.client</td>
+        <td style="vertical-align: top; word-wrap: break-word">The type of client certificate verification.</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ssl.protocol</td>
+        <td style="vertical-align: top; word-wrap: break-word">ssl/tls related options</td>
+        <td style="vertical-align: top">TLS</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">tls.store.type</td>
+        <td style="vertical-align: top; word-wrap: break-word">TLS store type.</td>
+        <td style="vertical-align: top">JKS</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">parameters</td>
+        <td style="vertical-align: top; word-wrap: break-word">Parameters other than basics such as ciphers,sslEnabledProtocols,client.enable.session.creation. Expected format of these parameters is as follows: "'ciphers:xxx','sslEnabledProtocols,client.enable:xxx'"</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ciphers</td>
+        <td style="vertical-align: top; word-wrap: break-word">List of ciphers to be used. This parameter should include under parameters Ex: 'ciphers:TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256'</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ssl.enabled.protocols</td>
+        <td style="vertical-align: top; word-wrap: break-word">SSL/TLS protocols to be enabled. This parameter should be in camel case format(sslEnabledProtocols) under parameters. Ex 'sslEnabledProtocols:true'</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.enable.session.creation</td>
+        <td style="vertical-align: top; word-wrap: break-word">Enable HTTP session creation.This parameter should include under parameters Ex: 'client.enable.session.creation:true'</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.supported.snimatchers</td>
+        <td style="vertical-align: top; word-wrap: break-word">Http SNIMatcher to be added. This parameter should include under parameters Ex: 'server.supported.snimatchers:SNIMatcher'</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.suported.server.names</td>
+        <td style="vertical-align: top; word-wrap: break-word">Http supported servers. This parameter should include under parameters Ex: 'server.suported.server.names:server'</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">request.size.validation.configuration</td>
+        <td style="vertical-align: top; word-wrap: break-word">Parameters that responsible for validating the http request and request headers. Expected format of these parameters is as follows: "'request.size.validation:xxx','request.size.validation.maximum.value:xxx'"</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">request.size.validation</td>
+        <td style="vertical-align: top; word-wrap: break-word">To enable the request size validation.</td>
+        <td style="vertical-align: top">false</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">request.size.validation.maximum.value</td>
+        <td style="vertical-align: top; word-wrap: break-word">If request size is validated then maximum size.</td>
+        <td style="vertical-align: top">Integer.MAX_VALUE</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">request.size.validation.reject.status.code</td>
+        <td style="vertical-align: top; word-wrap: break-word">If request is exceed maximum size and request.size.validation is enabled then status code to be send as response.</td>
+        <td style="vertical-align: top">401</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">request.size.validation.reject.message</td>
+        <td style="vertical-align: top; word-wrap: break-word">If request is exceed maximum size and request.size.validation is enabled then status message to be send as response.</td>
+        <td style="vertical-align: top">Message is bigger than the valid size</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">request.size.validation.reject.message.content.type</td>
+        <td style="vertical-align: top; word-wrap: break-word">If request is exceed maximum size and request.size.validation is enabled then content type to be send as response.</td>
+        <td style="vertical-align: top">plain/text</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">header.size.validation</td>
+        <td style="vertical-align: top; word-wrap: break-word">To enable the header size validation.</td>
+        <td style="vertical-align: top">false</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">header.validation.maximum.request.line</td>
+        <td style="vertical-align: top; word-wrap: break-word">If header header validation is enabled then the maximum request line.</td>
+        <td style="vertical-align: top">4096</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">header.validation.maximum.size</td>
+        <td style="vertical-align: top; word-wrap: break-word">If header header validation is enabled then the maximum expected header size.</td>
+        <td style="vertical-align: top">8192</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">header.validation.maximum.chunk.size</td>
+        <td style="vertical-align: top; word-wrap: break-word">If header header validation is enabled then the maximum expected chunk size.</td>
+        <td style="vertical-align: top">8192</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">header.validation.reject.status.code</td>
+        <td style="vertical-align: top; word-wrap: break-word">401</td>
+        <td style="vertical-align: top">If header is exceed maximum size and header.size.validation is enabled then status code to be send as response.</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">header.validation.reject.message</td>
+        <td style="vertical-align: top; word-wrap: break-word">If header is exceed maximum size and header.size.validation is enabled then message to be send as response.</td>
+        <td style="vertical-align: top">Message header is bigger than the valid size</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">header.validation.reject.message.content.type</td>
+        <td style="vertical-align: top; word-wrap: break-word">If header is exceed maximum size and header.size.validation is enabled then content type to be send as response.</td>
+        <td style="vertical-align: top">plain/text</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.configuration</td>
+        <td style="vertical-align: top; word-wrap: break-word">Parameters that for bootstrap configurations of the server. Expected format of these parameters is as follows: "'ciphers:xxx','sslEnabledProtocols,client.enable:xxx'"</td>
+        <td style="vertical-align: top">null</td>
+        <td style="vertical-align: top">OBJECT</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.nodelay</td>
+        <td style="vertical-align: top; word-wrap: break-word">Http server no delay.</td>
+        <td style="vertical-align: top">true</td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.keepalive</td>
+        <td style="vertical-align: top; word-wrap: break-word">Http server keep alive.</td>
+        <td style="vertical-align: top">true</td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.sendbuffersize</td>
+        <td style="vertical-align: top; word-wrap: break-word">Http server send buffer size.</td>
+        <td style="vertical-align: top">1048576</td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.recievebuffersize</td>
+        <td style="vertical-align: top; word-wrap: break-word">Http server receive buffer size.</td>
+        <td style="vertical-align: top">1048576</td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.connect.timeout</td>
+        <td style="vertical-align: top; word-wrap: break-word">Http server connection timeout.</td>
+        <td style="vertical-align: top">15000</td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.socket.reuse</td>
+        <td style="vertical-align: top; word-wrap: break-word">To enable http socket reuse.</td>
+        <td style="vertical-align: top">false</td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.socket.timeout</td>
+        <td style="vertical-align: top; word-wrap: break-word">Http server socket timeout.</td>
+        <td style="vertical-align: top">15</td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">server.bootstrap.socket.backlog</td>
+        <td style="vertical-align: top; word-wrap: break-word">THttp server socket backlog.</td>
+        <td style="vertical-align: top">100</td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">trace.log.enabled</td>
+        <td style="vertical-align: top; word-wrap: break-word">Http traffic monitoring.</td>
+        <td style="vertical-align: top">false</td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="system-parameters" class="md-typeset" style="display: block; font-weight: bold;">System Parameters</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Parameters</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">serverBootstrapBossGroupSize</td>
+        <td style="vertical-align: top; word-wrap: break-word">property to configure number of boss threads, which accepts incoming connections until the ports are unbound. Once connection accepts successfully, boss thread passes the accepted channel to one of the worker threads.</td>
+        <td style="vertical-align: top">Number of available processors</td>
+        <td style="vertical-align: top">Any integer</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">serverBootstrapWorkerGroupSize</td>
+        <td style="vertical-align: top; word-wrap: break-word">property to configure number of worker threads, which performs non blocking read and write for one or more channels in non-blocking mode.</td>
+        <td style="vertical-align: top">(Number of available processors)<em>2</td>
+        <td style="vertical-align: top">Any integer</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">serverBootstrapClientGroupSize</td>
+        <td style="vertical-align: top; word-wrap: break-word">property to configure number of client threads, which performs non blocking read and write for one or more channels in non-blocking mode.</td>
+        <td style="vertical-align: top">(Number of available processors)</em>2</td>
+        <td style="vertical-align: top">Any integer</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">defaultHost</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default host of the transport.</td>
+        <td style="vertical-align: top">0.0.0.0</td>
+        <td style="vertical-align: top">Any valid host</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">defaultHttpPort</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default port if the default scheme is 'http'.</td>
+        <td style="vertical-align: top">8280</td>
+        <td style="vertical-align: top">Any valid port</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">defaultHttpsPort</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default port if the default scheme is 'https'.</td>
+        <td style="vertical-align: top">8243</td>
+        <td style="vertical-align: top">Any valid port</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">defaultScheme</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default protocol.</td>
+        <td style="vertical-align: top">http</td>
+        <td style="vertical-align: top">http<br>https</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">keyStoreLocation</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default keystore file path.</td>
+        <td style="vertical-align: top">${carbon.home}/resources/security/wso2carbon.jks</td>
+        <td style="vertical-align: top">Path to wso2carbon.jks file</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">keyStorePassword</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default keystore password.</td>
+        <td style="vertical-align: top">wso2carbon</td>
+        <td style="vertical-align: top">String of keystore password</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">certPassword</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default cert password.</td>
+        <td style="vertical-align: top">wso2carbon</td>
+        <td style="vertical-align: top">String of cert password</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>@source(type='http-request', source.id='sampleSourceId, receiver.url='http://localhost:9055/endpoints/RecPro', connection.timeout='150000', parameters=&quot;'ciphers : TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256', 'sslEnabledProtocols:TLSv1.1,TLSv1.2'&quot;, request.size.validation.configuration=&quot;request.size.validation:true&quot;, server.bootstrap.configuration=&quot;server.bootstrap.socket.timeout:25&quot;, @map(type='json, @attributes(messageId='trp:messageId', symbol='$.events.event.symbol', price='$.events.event.price', volume='$.events.event.volume')))
+define stream FooStream (messageId string, symbol string, price float, volume long);
+
+</code></pre>
+
+<p style="word-wrap: break-word">The expected input is as follows:<br>{"events":<br>&nbsp;&nbsp;&nbsp;&nbsp;{"event":<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"symbol":WSO2,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"price":55.6,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"volume":100,<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>}<br>If basic authentication is enabled via the <code>basic.auth.enabled='true</code> setting, each input event is also expected to contain the <code>Authorization:'Basic encodeBase64(username:Password)'</code> header.</p>
                 
                   
                 
@@ -1303,7 +1795,7 @@ define stream FooStream (symbol string, price float, volume long);
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../1.0.14/" title="1.0.14" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../.." title="Welcome to WSO2 Siddhi IO HTTP" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -1312,19 +1804,19 @@ define stream FooStream (symbol string, price float, volume long);
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                1.0.14
+                Welcome to WSO2 Siddhi IO HTTP
               </span>
             </div>
           </a>
         
         
-          <a href="../1.0.12/" title="1.0.12" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../1.0.24/" title="1.0.24" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                1.0.12
+                1.0.24
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
