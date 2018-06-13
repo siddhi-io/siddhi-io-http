@@ -52,12 +52,14 @@ public class HttpConstants {
     public static final String MAP_TEXT = "text";
     public static final String MAP_JSON = "json";
     public static final String MAP_XML = "xml";
+    public static final String MAP_KEYVALUE = "keyvalue";
     public static final String HTTP_CONTENT_TYPE = "Content-Type";
     public static final String TEXT_PLAIN = "text/plain";
     public static final String APPLICATION_XML = "application/xml";
     public static final String APPLICATION_JSON = "application/json";
+    public static final String APPLICATION_URL_ENCODED = "application/x-www-form-urlencoded";
     public static final String DEFAULT_ENCODING = "UTF-8";
-    
+
     //Common util values
     public static final String HTTP_METHOD_POST = "POST"; //method name
     public static final String HTTP_METHOD = "HTTP_METHOD";
@@ -186,6 +188,8 @@ public class HttpConstants {
     
     public static final String HTTP_TRACE_LOG_ENABLED = "httpTraceLogEnabled";
     public static final String LOG_TRACE_ENABLE_DEFAULT_VALUE = "false";
+
+    public static final String DEFAULT_ENCODE_PAYLOAD_VALUE = "false";
     
     public static final String PARAMETER_SEPARATOR = "','";
     public static final String VALUE_SEPARATOR = ":";

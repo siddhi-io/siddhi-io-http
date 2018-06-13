@@ -25,6 +25,7 @@ import io.netty.handler.codec.http.DefaultLastHttpContent;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
+
 import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpSinkUtil;
@@ -38,6 +39,7 @@ import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
+import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.stream.output.sink.Sink;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.transport.DynamicOptions;
@@ -53,8 +55,11 @@ import org.wso2.transport.http.netty.contract.HttpWsConnectorFactory;
 import org.wso2.transport.http.netty.contractimpl.DefaultHttpWsConnectorFactory;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -70,7 +75,13 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                 "or https protocols. As the additional features this component can provide basic authentication " +
                 "as well as user can publish events using custom client truststore files when publishing events " +
                 "via https protocol. And also user can add any number of headers including HTTP_METHOD header for " +
-                "each event dynamically.",
+                "each event dynamically.\n" +
+                "Following content types will be set by default according to the type of sink mapper used.\n" +
+                "You can override them by setting the new content types in headers.\n" +
+                "     - TEXT : text/plain\n" +
+                "     - XML : application/xml\n" +
+                "     - JSON : application/json\n" +
+                "     - KEYVALUE : application/x-www-form-urlencoded",
         parameters = {
                 @Parameter(
                         name = "publisher.url",
@@ -275,7 +286,7 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "15"),
-                
+
                 @Parameter(
                         name = "client.threadpool.configurations",
                         description = "Thread pool configuration. Expected format of these parameters is as follows:" +
@@ -428,7 +439,7 @@ public class HttpSink extends Sink {
     private String userName;
     private String userPassword;
     private String publisherURL;
-    
+
     /**
      * Returns the list of classes which this sink can consume.
      * Based on the type of the sink, it may be limited to being able to publish specific type of classes.
@@ -439,9 +450,9 @@ public class HttpSink extends Sink {
      */
     @Override
     public Class[] getSupportedInputEventClasses() {
-        return new Class[] {String.class};
+        return new Class[] {String.class, Map.class};
     }
-    
+
     /**
      * Returns a list of supported dynamic options (that means for each event value of the option can change) by
      * the transport
@@ -452,7 +463,7 @@ public class HttpSink extends Sink {
     public String[] getSupportedDynamicOptions() {
         return new String[] {HttpConstants.HEADERS, HttpConstants.METHOD};
     }
-    
+
     /**
      * The initialization method for {@link Sink}, which will be called before other methods and validate
      * the all configuration and getting the intial values.
@@ -546,7 +557,7 @@ public class HttpSink extends Sink {
         } else {
             httpConnectorFactory = new DefaultHttpWsConnectorFactory();
         }
-        
+
         //if proxy username and password not equal to null then create proxy configurations
         if (!EMPTY_STRING.equals(proxyHost) && !EMPTY_STRING.equals(proxyPort)) {
             try {
@@ -590,15 +601,15 @@ public class HttpSink extends Sink {
         if (!EMPTY_STRING.equals(parametersList)) {
             senderConfig.setParameters(HttpIoUtil.populateParameters(parametersList));
         }
-        
+
         //overwrite default transport configuration
         Map<String, Object> properties = HttpSinkUtil
                 .populateTransportConfiguration(clientBootstrapConfiguration, clientPoolConfiguration);
-        
+
         clientConnector = httpConnectorFactory.createHttpClientConnector(properties, senderConfig);
     }
-    
-    
+
+
     /**
      * This method will be called when events need to be published via this sink
      *
@@ -612,7 +623,7 @@ public class HttpSink extends Sink {
                 HttpConstants.METHOD_DEFAULT : httpMethodOption.getValue(dynamicOptions);
         List<Header> headersList = HttpSinkUtil.getHeaders(headers);
         String contentType = HttpSinkUtil.getContentType(mapType, headersList);
-        String messageBody = (String) payload;
+        String messageBody = getMessageBody(payload);
         HttpMethod httpReqMethod = new HttpMethod(httpMethod);
         HTTPCarbonMessage cMessage = new HTTPCarbonMessage(
                 new DefaultHttpRequest(HttpVersion.HTTP_1_1, httpReqMethod, EMPTY_STRING));
@@ -624,7 +635,7 @@ public class HttpSink extends Sink {
         cMessage.completeMessage();
         clientConnector.send(cMessage);
     }
-    
+
     /**
      * This method will be called before the processing method.
      * Intention to establish connection to publish event.
@@ -635,9 +646,9 @@ public class HttpSink extends Sink {
     @Override
     public void connect() throws ConnectionUnavailableException {
         log.info(streamID + " has successfully connected to " + publisherURL);
-        
+
     }
-    
+
     /**
      * Called after all publishing is done, or when {@link ConnectionUnavailableException} is thrown
      * Implementation of this method should contain the steps needed to disconnect from the sink.
@@ -649,7 +660,7 @@ public class HttpSink extends Sink {
             log.info("Server connector for url " + publisherURL + " disconnected.");
         }
     }
-    
+
     /**
      * The method can be called when removing an event receiver.
      * The cleanups that has to be done when removing the receiver has to be done here.
@@ -661,7 +672,7 @@ public class HttpSink extends Sink {
             log.info("Server connector for url " + publisherURL + " disconnected.");
         }
     }
-    
+
     /**
      * Used to collect the serializable state of the processing element, that need to be
      * persisted for reconstructing the element to the same state on a different point of time
@@ -674,7 +685,7 @@ public class HttpSink extends Sink {
         //no current state.
         return null;
     }
-    
+
     /**
      * Used to restore serialized state of the processing element, for reconstructing
      * the element to the same state as if was on a previous point of time.
@@ -686,7 +697,7 @@ public class HttpSink extends Sink {
     public void restoreState(Map<String, Object> state) {
         //no need to maintain.
     }
-    
+
     /**
      * The method is responsible of generating carbon message to send.
      *
@@ -723,7 +734,7 @@ public class HttpSink extends Sink {
             log.error("One of the basic authentication username or password missing. Hence basic authentication not " +
                     "supported.");
         }
-        
+
         /*
          *set request headers.
          */
@@ -740,5 +751,24 @@ public class HttpSink extends Sink {
         //set method-type header
         httpHeaders.set(HttpConstants.HTTP_METHOD, httpMethod);
         return cMessage;
+    }
+
+    private String getMessageBody(Object payload) {
+        if (HttpConstants.MAP_KEYVALUE.equals(mapType)) {
+            Map<String, Object> params = (HashMap) payload;
+            return params.entrySet().stream()
+                    .map(p -> encodeMessage(p.getKey()) + "=" + encodeMessage(p.getValue()))
+                    .reduce("", (p1, p2) -> p1 + "&" + p2);
+        } else {
+            return (String) payload;
+        }
+    }
+
+    private String encodeMessage(Object s) {
+        try {
+            return URLEncoder.encode((String) s, HttpConstants.DEFAULT_ENCODING);
+        } catch (UnsupportedEncodingException e) {
+            throw new SiddhiAppRuntimeException("Execution failed due to " + e.getMessage(), e);
+        }
     }
 }
