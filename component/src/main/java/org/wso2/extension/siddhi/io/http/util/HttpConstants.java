@@ -54,13 +54,11 @@ public class HttpConstants {
     public static final String MAP_XML = "xml";
     public static final String MAP_KEYVALUE = "keyvalue";
     public static final String HTTP_CONTENT_TYPE = "Content-Type";
-    public static final String CONTENT_TYPE = "content.type";
     public static final String TEXT_PLAIN = "text/plain";
     public static final String APPLICATION_XML = "application/xml";
     public static final String APPLICATION_JSON = "application/json";
     public static final String APPLICATION_URL_ENCODED = "application/x-www-form-urlencoded";
     public static final String DEFAULT_ENCODING = "UTF-8";
-    public static final String ENCODE = "encode.payload";
 
     //Common util values
     public static final String HTTP_METHOD_POST = "POST"; //method name

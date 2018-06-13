@@ -46,7 +46,6 @@ import org.wso2.siddhi.core.util.transport.DynamicOptions;
 import org.wso2.siddhi.core.util.transport.Option;
 import org.wso2.siddhi.core.util.transport.OptionHolder;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
-import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.transport.http.netty.common.Constants;
 import org.wso2.transport.http.netty.common.ProxyServerConfiguration;
 import org.wso2.transport.http.netty.config.ChunkConfig;
@@ -61,7 +60,6 @@ import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Map;
 
@@ -77,7 +75,13 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                 "or https protocols. As the additional features this component can provide basic authentication " +
                 "as well as user can publish events using custom client truststore files when publishing events " +
                 "via https protocol. And also user can add any number of headers including HTTP_METHOD header for " +
-                "each event dynamically.",
+                "each event dynamically.\n" +
+                "Following content types will be set by default according to the type of sink mapper used.\n" +
+                "You can override them by setting the new content types in headers.\n" +
+                "     - TEXT : text/plain\n" +
+                "     - XML : application/xml\n" +
+                "     - JSON : application/json\n" +
+                "     - KEYVALUE : application/x-www-form-urlencoded",
         parameters = {
                 @Parameter(
                         name = "publisher.url",
@@ -134,14 +138,6 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = " "),
-                @Parameter(
-                        name = "encode.payload",
-                        description = "This defines whether the body of the payload of http message should be encoded" +
-                                " or not. This is useful when sending form data as url encoded values." +
-                                " Note that this can be used only when the mapper type is keyvalue.",
-                        type = {DataType.BOOL},
-                        optional = true,
-                        defaultValue = "false"),
                 @Parameter(
                         name = "method",
                         description = "For HTTP events, HTTP_METHOD header should be included as a request header." +
@@ -443,7 +439,6 @@ public class HttpSink extends Sink {
     private String userName;
     private String userPassword;
     private String publisherURL;
-    private boolean encodePayload;
 
     /**
      * Returns the list of classes which this sink can consume.
@@ -455,7 +450,7 @@ public class HttpSink extends Sink {
      */
     @Override
     public Class[] getSupportedInputEventClasses() {
-        return new Class[] {String.class, Object.class};
+        return new Class[] {String.class, Map.class};
     }
 
     /**
@@ -466,7 +461,7 @@ public class HttpSink extends Sink {
      */
     @Override
     public String[] getSupportedDynamicOptions() {
-        return new String[] {HttpConstants.HEADERS, HttpConstants.METHOD, HttpConstants.CONTENT_TYPE};
+        return new String[] {HttpConstants.HEADERS, HttpConstants.METHOD};
     }
 
     /**
@@ -518,15 +513,6 @@ public class HttpSink extends Sink {
                 .validateAndGetStaticValue(HttpConstants.CLIENT_BOOTSTRAP_CONFIGURATION, EMPTY_STRING);
         String clientPoolConfiguration = optionHolder
                 .validateAndGetStaticValue(HttpConstants.CLIENT_POOL_CONFIGURATION, EMPTY_STRING);
-
-        try {
-            encodePayload =
-                    Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants.ENCODE,
-                            HttpConstants.DEFAULT_ENCODE_PAYLOAD_VALUE));
-        } catch (InputMismatchException e) {
-            throw new SiddhiAppValidationException("Option value provided for attribute " +
-                    "'encodePayload' is not of type Boolean.");
-        }
         //read trp globe configuration
         String bootstrapWorker = configReader
                 .readConfig(HttpConstants.CLIENT_BOOTSTRAP_WORKER_GROUP_SIZE, EMPTY_STRING);
@@ -637,7 +623,7 @@ public class HttpSink extends Sink {
                 HttpConstants.METHOD_DEFAULT : httpMethodOption.getValue(dynamicOptions);
         List<Header> headersList = HttpSinkUtil.getHeaders(headers);
         String contentType = HttpSinkUtil.getContentType(mapType, headersList);
-        String messageBody = getPayload(payload);
+        String messageBody = getMessageBody(payload);
         HttpMethod httpReqMethod = new HttpMethod(httpMethod);
         HTTPCarbonMessage cMessage = new HTTPCarbonMessage(
                 new DefaultHttpRequest(HttpVersion.HTTP_1_1, httpReqMethod, EMPTY_STRING));
@@ -767,25 +753,20 @@ public class HttpSink extends Sink {
         return cMessage;
     }
 
-    private String getPayload(Object payload) {
+    private String getMessageBody(Object payload) {
         if (HttpConstants.MAP_KEYVALUE.equals(mapType)) {
             Map<String, Object> params = (HashMap) payload;
-            if (encodePayload) {
-                return params.entrySet().stream()
-                        .map(p -> encodeParameter(p.getKey()) + "=" + encodeParameter(p.getValue()))
-                        .reduce("", (p1, p2) -> p1 + "&" + p2);
-            } else {
-                return params.entrySet().stream()
-                        .map(p -> p.getKey() + "=" + p.getValue())
-                        .reduce("", (p1, p2) -> p1 + "&" + p2);
-            }
+            return params.entrySet().stream()
+                    .map(p -> encodeMessage(p.getKey()) + "=" + encodeMessage(p.getValue()))
+                    .reduce("", (p1, p2) -> p1 + "&" + p2);
+        } else {
+            return (String) payload;
         }
-        return (String) payload;
     }
 
-    private String encodeParameter(Object s) {
+    private String encodeMessage(Object s) {
         try {
-            return URLEncoder.encode(s.toString(), HttpConstants.DEFAULT_ENCODING);
+            return URLEncoder.encode((String) s, HttpConstants.DEFAULT_ENCODING);
         } catch (UnsupportedEncodingException e) {
             throw new SiddhiAppRuntimeException("Execution failed due to " + e.getMessage(), e);
         }
