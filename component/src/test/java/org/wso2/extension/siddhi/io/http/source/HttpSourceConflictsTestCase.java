@@ -21,7 +21,6 @@ import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.source.util.HttpTestUtil;
 import org.wso2.extension.siddhi.map.xml.sourcemapper.XmlSourceMapper;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
@@ -60,7 +59,7 @@ public class HttpSourceConflictsTestCase {
      *
      * @throws Exception Interrupted exception
      */
-    @Test(expectedExceptions = HttpSourceAdaptorRuntimeException.class)
+    @Test
     public void testHTTPDifferentFormat() throws Exception {
         logger.info("Creating test for publishing events with https protocol.");
         HttpTestUtil.setCarbonHome();

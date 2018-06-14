@@ -115,11 +115,6 @@
             <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.analytics-common</groupId>
-            <artifactId>org.wso2.orbit.org.owasp.encoder.feature</artifactId>
-            <type>zip</type>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.transport</groupId>
             <artifactId>org.wso2.carbon.connector.framework.feature</artifactId>
 
@@ -274,10 +269,6 @@
                                     <version>${carbon.analytc.version}</version>
                                 </feature>
                                 <feature>
-                                    <id>org.wso2.orbit.org.owasp.encoder.feature</id>
-                                    <version>${carbon.analytics.common.version}</version>
-                                </feature>
-                                <feature>
                                     <id>org.wso2.carbon.analytics.idp.client.feature</id>
                                     <version>${carbon.analytics.common.version}</version>
                                 </feature>
@@ -362,10 +353,6 @@
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.analytics.idp.client.feature</id>
-                                    <version>${carbon.analytics.common.version}</version>
-                                </feature>
-                                <feature>
-                                    <id>org.wso2.orbit.org.owasp.encoder.feature</id>
                                     <version>${carbon.analytics.common.version}</version>
                                 </feature>
                             </features>
