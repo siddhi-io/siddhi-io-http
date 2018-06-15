@@ -48,12 +48,12 @@ public class HttpSourceMappingTestCase {
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;
-    
+
     @BeforeMethod
     public void init() {
         eventCount.set(0);
     }
-    
+
     /**
      * Creating test for publishing events with XML mapping.
      *
@@ -62,14 +62,14 @@ public class HttpSourceMappingTestCase {
     @Test
     public void testXmlMapping() throws Exception {
         logger.info("Creating test for publishing events with XML mapping.");
-        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
+        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8006));
         List<String> receivedEventNameList = new ArrayList<>(2);
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("xml-input-mapper", XmlSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http', @map(type='xml'), "
-                + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
+                + "receiver.url='http://localhost:8006/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = (
                 "@info(name = 'query') "
@@ -79,7 +79,7 @@ public class HttpSourceMappingTestCase {
         );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-        
+
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -117,7 +117,7 @@ public class HttpSourceMappingTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-    
+
     /**
      * Creating test for publishing events with Text mapping.
      *
@@ -128,14 +128,14 @@ public class HttpSourceMappingTestCase {
         AtomicInteger eventCount = new AtomicInteger(0);
         int waitTime = 50;
         int timeout = 30000;
-        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
+        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8006));
         List<String> receivedEventNameList = new ArrayList<>(2);
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("text", TextSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http',  @map(type='text'), "
-                + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
+                + "receiver.url='http://localhost:8006/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = (
                 "@info(name = 'query') "
@@ -145,7 +145,7 @@ public class HttpSourceMappingTestCase {
         );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-        
+
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -157,7 +157,7 @@ public class HttpSourceMappingTestCase {
             }
         });
         siddhiAppRuntime.start();
-        
+
         // publishing events
         List<String> expected = new ArrayList<>(2);
         expected.add("John");
@@ -176,7 +176,7 @@ public class HttpSourceMappingTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-    
+
     /**
      * Creating test for publishing events with Text mapping.
      *
@@ -185,14 +185,14 @@ public class HttpSourceMappingTestCase {
     @Test(dependsOnMethods = "testTextMappingSingle")
     public void testTextMapping() throws Exception {
         logger.info("Creating test for publishing events with Text mapping.");
-        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
+        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8006));
         List<String> receivedEventNameList = new ArrayList<>(2);
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("text", TextSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http',  @map(type='text',fail.on.missing.attribute='false'), "
-                + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
+                + "receiver.url='http://localhost:8006/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = (
                 "@info(name = 'query') "
@@ -202,7 +202,7 @@ public class HttpSourceMappingTestCase {
         );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-        
+
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -214,7 +214,7 @@ public class HttpSourceMappingTestCase {
             }
         });
         siddhiAppRuntime.start();
-        
+
         // publishing events
         List<String> expected = new ArrayList<>(2);
         expected.add("John");
@@ -233,7 +233,7 @@ public class HttpSourceMappingTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-    
+
     /**
      * Creating test for publishing events with Json mapping.
      *
@@ -242,14 +242,14 @@ public class HttpSourceMappingTestCase {
     @Test(dependsOnMethods = "testTextMapping")
     public void testJsonMapping() throws Exception {
         logger.info("Creating test for publishing events with Json mapping.");
-        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
+        URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8006));
         List<String> receivedEventNameList = new ArrayList<>(2);
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("xml-input-mapper", JsonSourceMapper.class);
         String inStreamDefinition = "" + "@source(type='http', @map(type='json'), "
-                + "receiver.url='http://localhost:8005/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
+                + "receiver.url='http://localhost:8006/endpoints/RecPro', " + "basic.auth.enabled='false'" + ")"
                 + "define stream inputStream (name string, age int, country string);";
         String query = ("@info(name = 'query') "
                 + "from inputStream "
@@ -258,7 +258,7 @@ public class HttpSourceMappingTestCase {
         );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-        
+
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -269,31 +269,36 @@ public class HttpSourceMappingTestCase {
                 }
             }
         });
-        siddhiAppRuntime.start();
-        // publishing events
         List<String> expected = new ArrayList<>(2);
-        expected.add("John");
-        expected.add("Mike");
-        String event1 = " {\n" +
-                "      \"event\":{\n" +
-                "         \"name\":\"John\",\n" +
-                "         \"age\":55,\n" +
-                "         \"country\":\"US\"\n" +
-                "      }\n" +
-                " }";
-        String event2 = " {\n" +
-                "      \"event\":{\n" +
-                "         \"name\":\"Mike\",\n" +
-                "         \"age\":55,\n" +
-                "         \"country\":\"US\"\n" +
-                "      }\n" +
-                " }";
-        HttpTestUtil.httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
-                "POST");
-        HttpTestUtil.httpPublishEvent(event2, baseURI, "/endpoints/RecPro",
-                "POST");
-        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        try {
+            siddhiAppRuntime.start();
+            // publishing events
+            expected.add("John");
+            expected.add("Mike");
+            String event1 = " {\n" +
+                    "      \"event\":{\n" +
+                    "         \"name\":\"John\",\n" +
+                    "         \"age\":55,\n" +
+                    "         \"country\":\"US\"\n" +
+                    "      }\n" +
+                    " }";
+            String event2 = " {\n" +
+                    "      \"event\":{\n" +
+                    "         \"name\":\"Mike\",\n" +
+                    "         \"age\":55,\n" +
+                    "         \"country\":\"US\"\n" +
+                    "      }\n" +
+                    " }";
+            HttpTestUtil.httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
+                    "POST");
+            HttpTestUtil.httpPublishEvent(event2, baseURI, "/endpoints/RecPro",
+                    "POST");
+            SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        } catch (Throwable t) {
+            logger.error(t.getMessage(), t);
+        } finally {
+            siddhiAppRuntime.shutdown();
+        }
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
-        siddhiAppRuntime.shutdown();
     }
 }

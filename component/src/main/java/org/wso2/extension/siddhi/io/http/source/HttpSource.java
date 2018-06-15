@@ -148,7 +148,7 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "null"),
-                
+
                 //header validation parameters
                 @Parameter(
                         name = "request.size.validation.configuration",
@@ -236,7 +236,7 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "plain/text"),
-                
+
                 //bootstrap configuration
                 @Parameter(
                         name = "server.bootstrap.configuration",
@@ -300,7 +300,7 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                         defaultValue = "false",
                         optional = true,
                         type = {DataType.BOOL}
-                
+
                 )
         },
         examples = {
@@ -400,7 +400,8 @@ public class HttpSource extends Source {
     protected SourceEventListener sourceEventListener;
     protected String[] requestedTransportPropertyNames;
     protected ListenerConfiguration listenerConfiguration;
-    
+    private String siddhiAppName;
+
     /**
      * The initialization method for {@link Source}, which will be called before other methods and validate
      * the all listenerConfiguration and getting the intial values.
@@ -437,6 +438,7 @@ public class HttpSource extends Source {
                               String[] requestedTransportPropertyNames, ConfigReader configReader,
                               SiddhiAppContext siddhiAppContext) {
 
+        siddhiAppName = siddhiAppContext.getName();
         String scheme = configReader.readConfig(HttpConstants.DEFAULT_SOURCE_SCHEME, HttpConstants
                 .DEFAULT_SOURCE_SCHEME_VALUE);
         //generate default URL
@@ -501,7 +503,7 @@ public class HttpSource extends Source {
         }
         listenerConfiguration.setParameters(HttpIoUtil.populateParameters(parameterList));
     }
-    
+
     /**
      * Returns the list of classes which this source can output.
      *
@@ -510,9 +512,9 @@ public class HttpSource extends Source {
      */
     @Override
     public Class[] getOutputEventClasses() {
-        return new Class[] {String.class};
+        return new Class[]{String.class};
     }
-    
+
     /**
      * Intialy Called to connect to the end point for start  retriving the messages asynchronisly .
      *
@@ -525,18 +527,18 @@ public class HttpSource extends Source {
     public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
         this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration);
         this.httpConnectorRegistry.registerSourceListener(sourceEventListener, this.listenerUrl,
-                Integer.parseInt(workerThread), isAuth, requestedTransportPropertyNames);
+                Integer.parseInt(workerThread), isAuth, requestedTransportPropertyNames, siddhiAppName);
     }
-    
+
     /**
      * This method can be called when it is needed to disconnect from the end point.
      */
     @Override
     public void disconnect() {
-        this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl);
+        this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl, siddhiAppName);
         this.httpConnectorRegistry.unregisterServerConnector(this.listenerUrl);
     }
-    
+
     /**
      * Called at the end to clean all the resources consumed by the {@link Source}
      */
@@ -544,7 +546,7 @@ public class HttpSource extends Source {
     public void destroy() {
         this.httpConnectorRegistry.clearBootstrapConfigIfLast();
     }
-    
+
     /**
      * Called to pause event consumption
      */
@@ -556,7 +558,7 @@ public class HttpSource extends Source {
             httpSourceListener.pause();
         }
     }
-    
+
     /**
      * Called to resume event consumption
      */
@@ -568,7 +570,7 @@ public class HttpSource extends Source {
             httpSourceListener.resume();
         }
     }
-    
+
     /**
      * Used to collect the serializable state of the processing element, that need to be
      * persisted for the reconstructing the element to the same state on a different point of time
@@ -580,7 +582,7 @@ public class HttpSource extends Source {
         //no current state
         return null;
     }
-    
+
     /**
      * Used to restore serialized state of the processing element, for reconstructing
      *

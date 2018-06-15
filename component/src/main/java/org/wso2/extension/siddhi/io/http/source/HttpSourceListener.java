@@ -44,10 +44,12 @@ public class HttpSourceListener {
     protected Boolean isAuthEnabled;
     protected SourceEventListener sourceEventListener;
     protected String[] requestedTransportPropertyNames;
-    
+    private String siddhiAppName;
+
     protected HttpSourceListener(int workerThread, String url, Boolean auth, SourceEventListener sourceEventListener,
-                       String[] requestedTransportPropertyNames) {
+                                 String[] requestedTransportPropertyNames, String siddhiAppName) {
         this.executorService = Executors.newFixedThreadPool(workerThread);
+        this.siddhiAppName = siddhiAppName;
         this.paused = false;
         this.lock = new ReentrantLock();
         this.condition = lock.newCondition();
@@ -55,9 +57,12 @@ public class HttpSourceListener {
         this.isAuthEnabled = auth;
         this.sourceEventListener = sourceEventListener;
         this.requestedTransportPropertyNames = requestedTransportPropertyNames;
-        logger.info("Source Listener has created for url " + this.url);
     }
-    
+
+    public String getSiddhiAppName() {
+        return siddhiAppName;
+    }
+
     /**
      * This method is handle the submit carbon message to executor service.
      *

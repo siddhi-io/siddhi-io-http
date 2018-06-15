@@ -50,12 +50,12 @@ public class HttpsSSLSourceTestCase {
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;
-    
+
     @BeforeMethod
     public void init() {
         eventCount.set(0);
     }
-    
+
     /**
      * Creating test for publishing events with https protocol.
      *
@@ -85,7 +85,7 @@ public class HttpsSSLSourceTestCase {
         );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-        
+
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -121,7 +121,7 @@ public class HttpsSSLSourceTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-    
+
     /**
      * Creating test for publishing events with https protocol with invalid keystore.
      *
@@ -138,7 +138,7 @@ public class HttpsSSLSourceTestCase {
         masterConfigs.put("source.http.keyStoreLocation", "${carbon.home}/resources/security/store.jks");
         masterConfigs.put("source.http.keyStorePassword", "wso2carbon");
         masterConfigs.put("source.http.certPassword", "wso2carbon");
-        
+
         List<String> receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
         InMemoryConfigManager inMemoryConfigManager = new InMemoryConfigManager(masterConfigs, null);
@@ -156,7 +156,7 @@ public class HttpsSSLSourceTestCase {
         );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-        
+
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -197,7 +197,7 @@ public class HttpsSSLSourceTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-    
+
     /**
      * Creating test for publishing events with https protocol with invalid keystore pass.
      *
@@ -231,7 +231,7 @@ public class HttpsSSLSourceTestCase {
         );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-        
+
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -243,36 +243,42 @@ public class HttpsSSLSourceTestCase {
             }
         });
         siddhiAppRuntime.start();
-        // publishing events
         List<String> expected = new ArrayList<>(2);
-        String event1 = "<events>"
-                + "<event>"
-                + "<name>John</name>"
-                + "<age>100</age>"
-                + "<country>AUS</country>"
-                + "</event>"
-                + "</events>";
-        String event2 = "<events>"
-                + "<event>"
-                + "<name>Mike</name>"
-                + "<age>20</age>"
-                + "<country>USA</country>"
-                + "</event>"
-                + "</events>";
-        HttpTestUtil.httpsPublishEvent(event1);
-        HttpTestUtil.httpsPublishEvent(event2);
-        final List<LoggingEvent> log = appender.getLog();
-        List<Object> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            logMessages.add(logEvent.getLevel());
+
+        try {
+            // publishing events
+            String event1 = "<events>"
+                    + "<event>"
+                    + "<name>John</name>"
+                    + "<age>100</age>"
+                    + "<country>AUS</country>"
+                    + "</event>"
+                    + "</events>";
+            String event2 = "<events>"
+                    + "<event>"
+                    + "<name>Mike</name>"
+                    + "<age>20</age>"
+                    + "<country>USA</country>"
+                    + "</event>"
+                    + "</events>";
+            HttpTestUtil.httpsPublishEvent(event1);
+            HttpTestUtil.httpsPublishEvent(event2);
+            final List<LoggingEvent> log = appender.getLog();
+            List<Object> logMessages = new ArrayList<>();
+            for (LoggingEvent logEvent : log) {
+                logMessages.add(logEvent.getLevel());
+            }
+            Assert.assertEquals(logMessages.contains(Level.ERROR), true);
+            Assert.assertEquals(Collections.frequency(logMessages, Level.ERROR), 2);
+            SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
+        } catch (Throwable t) {
+            logger.error(t.getMessage(), t);
+        } finally {
+            siddhiAppRuntime.shutdown();
         }
-        Assert.assertEquals(logMessages.contains(Level.ERROR), true);
-        Assert.assertEquals(Collections.frequency(logMessages, Level.ERROR), 2);
-        SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
-        siddhiAppRuntime.shutdown();
     }
-    
+
     /**
      * Creating test for publishing events with https protocol with invalid cert pass.
      *
@@ -305,7 +311,7 @@ public class HttpsSSLSourceTestCase {
         );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-        
+
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -346,24 +352,24 @@ public class HttpsSSLSourceTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-    
+
     private class TestAppender extends AppenderSkeleton {
         private final List<LoggingEvent> log = new ArrayList<>();
-        
+
         @Override
         public boolean requiresLayout() {
             return false;
         }
-        
+
         @Override
         protected void append(final LoggingEvent loggingEvent) {
             log.add(loggingEvent);
         }
-        
+
         @Override
         public void close() {
         }
-        
+
         List<LoggingEvent> getLog() {
             return new ArrayList<LoggingEvent>(log);
         }
