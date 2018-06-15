@@ -126,15 +126,18 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                         optional = true, defaultValue = "wso2carbon"),
                 @Parameter(
                         name = "headers",
-                        description = "The headers that should be included as a HTTP request headers. There can be " +
-                                "any number of headers concatenated on following format. " +
-                                "\"'header1:value1','header2:value2'\". User can include content-type header if he " +
-                                "need to any specific type for payload if not system get the mapping type as the " +
-                                "content-Type header (ie. @map(xml):application/xml,@map(json):application/json," +
-                                "@map(text):plain/text ) and if user does not include any mapping type then system " +
-                                "gets the 'plain/text' as default Content-Type header. If user does not include " +
-                                "Content-Length header then system calculate the bytes size of payload and include it" +
-                                " as content-length header.",
+                        description = "The headers that should be included as HTTP request headers. \n" +
+                                "There can be any number of headers concatenated in following format. " +
+                                "\"'header1:value1','header2:value2'\". User can include Content-Type header if he " +
+                                "needs to use a specific content-type for the payload. Or else, system decides the " +
+                                "Content-Type by considering the type of sink mapper, in following way.\n" +
+                                " - @map(xml):application/xml\n" +
+                                " - @map(json):application/json\n" +
+                                " - @map(text):plain/text )\n" +
+                                " - if user does not include any mapping type then the system gets 'plain/text' " +
+                                "as default Content-Type header.\n" +
+                                "Note that providing content-length as a header is not supported. The size of the " +
+                                "payload will be automatically calculated and included in the content-length header.",
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = " "),
