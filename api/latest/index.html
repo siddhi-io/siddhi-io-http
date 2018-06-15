@@ -183,6 +183,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../1.0.27/" title="1.0.27" class="md-nav__link">
+      1.0.27
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../1.0.26/" title="1.0.26" class="md-nav__link">
       1.0.26
     </a>
@@ -582,7 +594,7 @@
               
                 
                 
-                <h1 id="api-docs-v1026">API Docs - v1.0.26</h1>
+                <h1 id="api-docs-v1027">API Docs - v1.0.27</h1>
 <h2 id="sink">Sink</h2>
 <h3 id="http-sink">http <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink">(Sink)</a></em></h3>
 <p style="word-wrap: break-word">This extension publish the HTTP events in any HTTP method  POST, GET, PUT, DELETE  via HTTP or https protocols. As the additional features this component can provide basic authentication as well as user can publish events using custom client truststore files when publishing events via https protocol. And also user can add any number of headers including HTTP_METHOD header for each event dynamically.<br>Following content types will be set by default according to the type of sink mapper used.<br>You can override them by setting the new content types in headers.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- TEXT : text/plain<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- XML : application/xml<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- JSON : application/json<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- KEYVALUE : application/x-www-form-urlencoded</p>
@@ -643,7 +655,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">headers</td>
-        <td style="vertical-align: top; word-wrap: break-word">The headers that should be included as a HTTP request headers. There can be any number of headers concatenated on following format. "'header1:value1','header2:value2'". User can include content-type header if he need to any specific type for payload if not system get the mapping type as the content-Type header (ie. @map(xml):application/xml,@map(json):application/json,@map(text):plain/text ) and if user does not include any mapping type then system gets the 'plain/text' as default Content-Type header. If user does not include Content-Length header then system calculate the bytes size of payload and include it as content-length header.</td>
+        <td style="vertical-align: top; word-wrap: break-word">The headers that should be included as HTTP request headers. <br>There can be any number of headers concatenated in following format. "'header1:value1','header2:value2'". User can include Content-Type header if he needs to use a specific content-type for the payload. Or else, system decides the Content-Type by considering the type of sink mapper, in following way.<br>&nbsp;- @map(xml):application/xml<br>&nbsp;- @map(json):application/json<br>&nbsp;- @map(text):plain/text )<br>&nbsp;- if user does not include any mapping type then the system gets 'plain/text' as default Content-Type header.<br>Note that providing content-length as a header is not supported. The size of the payload will be automatically calculated and included in the content-length header.</td>
         <td style="vertical-align: top"> </td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
