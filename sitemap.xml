@@ -12,6 +12,12 @@
     
         
     <url>
+     <loc>/api/1.0.28/</loc>
+     <lastmod>2018-06-15</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
      <loc>/api/1.0.27/</loc>
      <lastmod>2018-06-15</lastmod>
      <changefreq>daily</changefreq>
