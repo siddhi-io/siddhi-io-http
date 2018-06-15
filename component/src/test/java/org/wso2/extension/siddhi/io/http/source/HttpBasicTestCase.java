@@ -186,7 +186,7 @@ public class HttpBasicTestCase {
      *
      * @throws Exception Interrupted exception
      */
-    @Test
+    @Test(dependsOnMethods = "testHTTPInputTransportPutMethod")
     public void testMultipleListenersSameURL() throws Exception {
         logger.info("Creating test for same url in different execution plain.");
         final TestAppender appender = new TestAppender();
@@ -232,59 +232,71 @@ public class HttpBasicTestCase {
                 }
             }
         });
-        siddhiAppRuntime.start();
-        SiddhiAppRuntime siddhiAppRuntime2 = siddhiManager2
-                .createSiddhiAppRuntime(inStreamDefinition2 + query2);
-
-        siddhiAppRuntime2.addCallback("query2", new QueryCallback() {
-            @Override
-            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                EventPrinter.print(timeStamp, inEvents, removeEvents);
-                for (Event event : inEvents) {
-                    eventCount.incrementAndGet();
-                    receivedEventNameList.add(event.getData(0).toString());
-                }
-            }
-        });
-        siddhiAppRuntime2.start();
-        // publishing events
         List<String> expected = new ArrayList<>(2);
-        expected.add("John");
-        expected.add("Mike");
-        String event1 = "<events>"
-                + "<event>"
-                + "<name>John</name>"
-                + "<age>100</age>"
-                + "<country>AUS</country>"
-                + "</event>"
-                + "</events>";
-        String event2 = "<events>"
-                + "<event>"
-                + "<name>Mike</name>"
-                + "<age>20</age>"
-                + "<country>USA</country>"
-                + "</event>"
-                + "</events>";
+        try {
+            siddhiAppRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime2 = siddhiManager2
+                    .createSiddhiAppRuntime(inStreamDefinition2 + query2);
 
-        HttpTestUtil.httpPublishEvent(event1, baseURI, "/endpoints/abc",
-                "POST");
-        HttpTestUtil.httpPublishEvent(event2, baseURI, "/endpoints/abc",
-                "POST");
-        final List<LoggingEvent> log = appender.getLog();
-        List<String> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            logMessages.add(String.valueOf(logEvent.getMessage()));
+            siddhiAppRuntime2.addCallback("query2", new QueryCallback() {
+                @Override
+                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
+                    for (Event event : inEvents) {
+                        eventCount.incrementAndGet();
+                        receivedEventNameList.add(event.getData(0).toString());
+                    }
+                }
+            });
+            try {
+                siddhiAppRuntime2.start();
+                // publishing events
+                expected.add("John");
+                expected.add("Mike");
+                String event1 = "<events>"
+                        + "<event>"
+                        + "<name>John</name>"
+                        + "<age>100</age>"
+                        + "<country>AUS</country>"
+                        + "</event>"
+                        + "</events>";
+                String event2 = "<events>"
+                        + "<event>"
+                        + "<name>Mike</name>"
+                        + "<age>20</age>"
+                        + "<country>USA</country>"
+                        + "</event>"
+                        + "</events>";
+
+                HttpTestUtil.httpPublishEvent(event1, baseURI, "/endpoints/abc",
+                        "POST");
+                HttpTestUtil.httpPublishEvent(event2, baseURI, "/endpoints/abc",
+                        "POST");
+                final List<LoggingEvent> log = appender.getLog();
+                List<String> logMessages = new ArrayList<>();
+                for (LoggingEvent logEvent : log) {
+                    logMessages.add(String.valueOf(logEvent.getMessage()));
+                }
+                SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+                Assert.assertEquals(logMessages.contains("Error on '" + siddhiAppRuntime2.getName() +
+                                "'. Listener URL http://localhost:8008/endpoints/abc already connected" +
+                                "Error while connecting at Source 'http' at 'inputStream2'.")
+                        , true);
+                Assert.assertEquals(Collections.frequency(logMessages, "Error on '" + siddhiAppRuntime2.getName() +
+                        "'. Listener URL http://localhost:8008/endpoints/abc already connected" +
+                        "Error while connecting at Source 'http' at 'inputStream2'."), 1);
+            } catch (Throwable t) {
+                logger.error(t.getMessage(), t);
+            } finally {
+                siddhiAppRuntime2.shutdown();
+            }
+        } catch (Throwable t) {
+            logger.error(t.getMessage(), t);
+        } finally {
+            siddhiAppRuntime.shutdown();
         }
-        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
-        Assert.assertEquals(logMessages.contains("Error on '" + siddhiAppRuntime2.getName() + "'. Listener URL " +
-                        "http://localhost:8008/endpoints/abc already connected" +
-                        "Error while connecting at Source 'http' at 'inputStream2'.")
-                , true);
-        Assert.assertEquals(Collections.frequency(logMessages, "Error on '" + siddhiAppRuntime2.getName() +
-                "'. Listener URL http://localhost:8008/endpoints/abc already connected" +
-                "Error while connecting at Source 'http' at 'inputStream2'."), 1);
-        //Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
-        siddhiAppRuntime.shutdown();
+        Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
+
     }
 
     /**
@@ -357,6 +369,8 @@ public class HttpBasicTestCase {
             Assert.assertEquals(Collections.frequency(logMessages, "Error on '" + siddhiAppRuntime.getName() +
                     "'. Listener URL http://localhost:8006/endpoints/RecPro already connectedError while " +
                     "connecting at Source 'http' at 'inputStreamA'."), 1);
+        } catch (Throwable t) {
+            logger.error(t.getMessage(), t);
         } finally {
             siddhiAppRuntime.shutdown();
         }

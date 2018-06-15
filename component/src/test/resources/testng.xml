@@ -17,14 +17,6 @@ limitations under the License.
 <suite name="Siddhi-io-http-Test-Suite">
     <test name="Siddhi-io-http-tests" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2.extension.siddhi.io.http.sink.HttpAuthTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.sink.HttpSinkMappingTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.sink.HttpSinkMethodTypeTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.sink.HttpMultipleEventSinkTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.sink.HttpSinkTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.sink.HttpsSinkTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.sink.HttpSinkCustomConfigurationTestCase"/>
-
             <class name="org.wso2.extension.siddhi.io.http.source.HttpBasicTestCase"/>
             <class name="org.wso2.extension.siddhi.io.http.source.HttpCustomThreadPoolConfigTestCase"/>
             <class name="org.wso2.extension.siddhi.io.http.source.HttpMultipleFormatSourcesTestCase"/>
@@ -35,6 +27,15 @@ limitations under the License.
             <class name="org.wso2.extension.siddhi.io.http.source.HttpCustomConfigTestCase"/>
             <class name="org.wso2.extension.siddhi.io.http.source.HttpSourceConflictsTestCase"/>
             <class name="org.wso2.extension.siddhi.io.http.source.HttpRequestResponseTestCase"/>
-        </classes>
+
+            <class name="org.wso2.extension.siddhi.io.http.sink.HttpAuthTestCase"/>
+            <class name="org.wso2.extension.siddhi.io.http.sink.HttpSinkMappingTestCase"/>
+            <class name="org.wso2.extension.siddhi.io.http.sink.HttpSinkMethodTypeTestCase"/>
+            <class name="org.wso2.extension.siddhi.io.http.sink.HttpMultipleEventSinkTestCase"/>
+            <class name="org.wso2.extension.siddhi.io.http.sink.HttpSinkTestCase"/>
+            <class name="org.wso2.extension.siddhi.io.http.sink.HttpsSinkTestCase"/>
+            <class name="org.wso2.extension.siddhi.io.http.sink.HttpSinkCustomConfigurationTestCase"/>
+
+          </classes>
     </test>
 </suite>

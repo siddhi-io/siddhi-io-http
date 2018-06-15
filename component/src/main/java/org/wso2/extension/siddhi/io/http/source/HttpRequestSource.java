@@ -427,6 +427,7 @@ public class HttpRequestSource extends HttpSource {
 
     private HashedWheelTimer timer;
     private WeakHashMap<String, Timeout> schedularMap = new WeakHashMap<>();
+    private String siddhiAppName;
 
     /**
      * The initialization method for {@link org.wso2.siddhi.core.stream.input.source.Source}, which will be called
@@ -460,6 +461,7 @@ public class HttpRequestSource extends HttpSource {
         this.sourceId = optionHolder.validateAndGetStaticValue(HttpConstants.SOURCE_ID);
         this.connectionTimeout = Long.parseLong(
                 optionHolder.validateAndGetStaticValue(HttpConstants.CONNECTION_TIMEOUT, "120000"));
+        siddhiAppName = siddhiAppContext.getName();
     }
 
     protected void initConnectorRegistry(OptionHolder optionHolder, ConfigReader configReader) {
@@ -497,7 +499,7 @@ public class HttpRequestSource extends HttpSource {
     public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
         this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration);
         this.httpConnectorRegistry.registerSourceListener(sourceEventListener, listenerUrl,
-                Integer.parseInt(workerThread), isAuth, requestedTransportPropertyNames, sourceId);
+                Integer.parseInt(workerThread), isAuth, requestedTransportPropertyNames, sourceId, siddhiAppName);
 
         HTTPSourceRegistry.registerSource(sourceId, this);
     }
@@ -507,7 +509,7 @@ public class HttpRequestSource extends HttpSource {
      */
     @Override
     public void disconnect() {
-        this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl);
+        this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl, siddhiAppName);
         this.httpConnectorRegistry.unregisterServerConnector(this.listenerUrl);
 
         HTTPSourceRegistry.removeSource(sourceId);

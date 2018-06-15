@@ -57,14 +57,14 @@ class HttpConnectorRegistry {
     private Map<String, HttpSourceListener> sourceListenersMap = new ConcurrentHashMap<>();
     protected TransportsConfiguration trpConfig;
     protected HttpWsConnectorFactory httpConnectorFactory;
-    
+
     protected HttpConnectorRegistry() {
     }
-    
+
     RequestSizeValidationConfig populateRequestSizeValidationConfiguration() {
         return new RequestSizeValidationConfig();
     }
-    
+
     /**
      * Set transport properties.
      *
@@ -89,7 +89,7 @@ class HttpConnectorRegistry {
                     (populateParameterMap(valueList), transportProperties));
         }
     }
-    
+
     /**
      * Get HttpConnectorRegistry instance.
      *
@@ -98,8 +98,8 @@ class HttpConnectorRegistry {
     static HttpConnectorRegistry getInstance() {
         return instance;
     }
-    
-    
+
+
     /**
      * Get the source listener map.
      *
@@ -108,8 +108,8 @@ class HttpConnectorRegistry {
     Map<String, HttpSourceListener> getSourceListenersMap() {
         return this.sourceListenersMap;
     }
-    
-    
+
+
     /**
      * Register new source listener.
      *
@@ -117,31 +117,35 @@ class HttpConnectorRegistry {
      * @param listenerUrl         the listener url.
      * @param workerThread        the worker thread count of siddhi level thread pool executor.
      * @param isAuth              the authentication is required for source listener.
+     * @param siddhiAppName       the Siddhi application name
      */
-    void registerSourceListener(SourceEventListener sourceEventListener, String listenerUrl, int
-            workerThread, Boolean isAuth, String[] requestedTransportPropertyNames) {
+    void registerSourceListener(SourceEventListener sourceEventListener, String listenerUrl,
+                                int workerThread, Boolean isAuth, String[] requestedTransportPropertyNames,
+                                String siddhiAppName) {
         String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl);
         HttpSourceListener httpSourceListener = this.sourceListenersMap.putIfAbsent(listenerKey,
-                new HttpSourceListener(workerThread, listenerUrl, isAuth, sourceEventListener
-                        , requestedTransportPropertyNames));
+                new HttpSourceListener(workerThread, listenerUrl, isAuth, sourceEventListener,
+                        requestedTransportPropertyNames, siddhiAppName));
         if (httpSourceListener != null) {
             throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected");
         }
     }
-    
+
     /**
      * Unregister the source listener.
      *
-     * @param listenerUrl the listener url
+     * @param listenerUrl   the listener url
+     * @param siddhiAppName
      */
-    protected void unregisterSourceListener(String listenerUrl) {
+    protected void unregisterSourceListener(String listenerUrl, String siddhiAppName) {
         String key = HttpSourceUtil.getSourceListenerKey(listenerUrl);
-        HttpSourceListener httpSourceListener = this.sourceListenersMap.remove(key);
-        if (httpSourceListener != null) {
+        HttpSourceListener httpSourceListener = this.sourceListenersMap.get(key);
+        if (httpSourceListener != null && httpSourceListener.getSiddhiAppName().equals(siddhiAppName)) {
+            sourceListenersMap.remove(key);
             httpSourceListener.disconnect();
         }
     }
-    
+
     /**
      * Initialize and start the server connector factory. This should be created at once for siddhi.
      *
@@ -170,7 +174,7 @@ class HttpConnectorRegistry {
             }
         }
     }
-    
+
     /**
      * Stop server connector controller.
      */
@@ -181,7 +185,7 @@ class HttpConnectorRegistry {
             }
         }
     }
-    
+
     /**
      * Create http server connector for given listener configurations.
      *
@@ -210,7 +214,7 @@ class HttpConnectorRegistry {
             this.registerServerConnector(serverConnector, listenerConfig);
         }
     }
-    
+
     /**
      * Register new server connector.
      *
@@ -231,11 +235,11 @@ class HttpConnectorRegistry {
         }
         validateConnectorStartup(startupSyncer);
     }
-    
+
     Map<String, HttpServerConnectorContext> getServerConnectorPool() {
         return serverConnectorPool;
     }
-    
+
     /**
      * Register the new server connector.
      *
@@ -257,7 +261,7 @@ class HttpConnectorRegistry {
             return false;
         }
     }
-    
+
     /**
      * The server connector context.
      */
@@ -265,34 +269,34 @@ class HttpConnectorRegistry {
         private ServerConnector serverConnector;
         private ListenerConfiguration listenerConfiguration;
         private int referenceCount = 0;
-        
+
         public HttpServerConnectorContext(ServerConnector
                                                   serverConnector, ListenerConfiguration listenerConfiguration) {
             this.serverConnector = serverConnector;
             this.listenerConfiguration = listenerConfiguration;
         }
-        
+
         public void incrementReferenceCount() {
             this.referenceCount++;
         }
-        
+
         public void decrementReferenceCount() {
             this.referenceCount--;
         }
-        
+
         public ServerConnector getServerConnector() {
             return this.serverConnector;
         }
-        
+
         public ListenerConfiguration getListenerConfiguration() {
             return this.listenerConfiguration;
         }
-        
+
         public int getReferenceCount() {
             return this.referenceCount;
         }
     }
-    
+
     /**
      * This method wil check that if there is already registered server connectors which may be http but if it have
      * jks security setup then it can be use as https transport as well
@@ -323,30 +327,30 @@ class HttpConnectorRegistry {
         }
         return false;
     }
-    
+
     protected void setConnectorListeners(ServerConnectorFuture connectorFuture, String serverConnectorId,
-                                       ConnectorStartupSynchronizer startupSyncer) {
+                                         ConnectorStartupSynchronizer startupSyncer) {
         connectorFuture.setHttpConnectorListener(new HTTPConnectorListener());
         connectorFuture.setPortBindingEventListener(
                 new HttpConnectorPortBindingListener(startupSyncer, serverConnectorId));
     }
-    
+
     private void validateConnectorStartup(ConnectorStartupSynchronizer startupSyncer) {
         int noOfExceptions = startupSyncer.getExceptions().size();
         if (noOfExceptions <= 0) {
             return;
         }
-        
+
         startupSyncer.getExceptions().forEach((connectorId, e) -> {
             log.error("siddhi: " + e.getMessage() + ": [" + connectorId + "]", e);
         });
-        
+
         if (noOfExceptions == 1) {
             // If the no. of exceptions is equal to one there is an error has occured.
             throw new HttpSourceAdaptorRuntimeException("failed to start the server connectors");
         }
     }
-    
+
     private static String getSeverConnectorKey(String listenerUrl) {
         URL aURL;
         try {
