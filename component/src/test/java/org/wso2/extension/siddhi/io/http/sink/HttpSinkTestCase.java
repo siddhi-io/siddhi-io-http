@@ -150,6 +150,57 @@ public class HttpSinkTestCase {
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
+
+    @Test
+    public void testHTTPRequestResponse() throws Exception {
+        log.info("Creating test for publishing events without Content-Type header include.");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
+        String inStreamDefinition = "" +
+                "define stream FooStream (message String,headers String);"
+                + "@sink(type='http-request',publisher.url='http://localhost:8080/hello/message'," +
+                " method='POST', connection.timeout='10000',"
+                + "headers='{{headers}}',source.id='source-1',"
+                + "@map(type='json', @payload('{{message}}'))) "
+                + "Define stream BarStream (message String,headers String);" +
+                "" +
+                "@source(type='http-response', source.id='source-1', " +
+                "@map(type='text'))" +
+                "define stream responseStream(message String);";
+        String query = (
+                "@info(name = 'query') "
+                        + "from FooStream "
+                        + "select message,headers "
+                        + "insert into BarStream;"
+        );
+
+        String payload1 =  "{\"name\":\"minudika\", \"id\":\"1234\"}";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
+                query);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+        //HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        //lst.run();
+        fooStream.send(new Object[] {payload1, "'Name:John','Age:23','content-type:application/json'"});
+       /* while (!lst.getServerListener().isMessageArrive()) {
+            Thread.sleep(10);
+        }*/
+        Thread.sleep(30000);
+        ArrayList<String> headerName = new ArrayList<>();
+        headerName.add("John");
+        LinkedList<String> headerAge = new LinkedList<>();
+        headerAge.add("23");
+        ArrayList<String> headerContentType = new ArrayList<>();
+        headerContentType.add("application/xml");
+        /*Headers headers = lst.getServerListener().getHeaders();
+        String eventData = lst.getServerListener().getData();
+        Assert.assertEquals(expected, eventData);
+        Assert.assertEquals(headers.get("Name").toString(), headerName.toString());
+        Assert.assertEquals(headers.get("Age").toString(), headerAge.toString());
+        Assert.assertEquals(headers.get("Content-Type").toString(), headerContentType.toString());*/
+        siddhiAppRuntime.shutdown();
+        //lst.shutdown();
+    }
     
 }
 

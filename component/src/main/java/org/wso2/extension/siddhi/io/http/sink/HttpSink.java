@@ -433,11 +433,11 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
 public class HttpSink extends Sink {
     private static final Logger log = Logger.getLogger(HttpSink.class);
     private String streamID;
-    private HttpClientConnector clientConnector;
-    private String mapType;
+    HttpClientConnector clientConnector;
+    String mapType;
     private Map<String, String> httpURLProperties;
-    private Option httpHeaderOption;
-    private Option httpMethodOption;
+    Option httpHeaderOption;
+    Option httpMethodOption;
     private String authorizationHeader;
     private String userName;
     private String userPassword;
@@ -710,8 +710,8 @@ public class HttpSink extends Sink {
      * @param cMessage    carbon message to be send to the endpoint.
      * @return generated carbon message.
      */
-    private HTTPCarbonMessage generateCarbonMessage(List<Header> headers, String contentType,
-                                                    String httpMethod, HTTPCarbonMessage cMessage) {
+    HTTPCarbonMessage generateCarbonMessage(List<Header> headers, String contentType,
+                                            String httpMethod, HTTPCarbonMessage cMessage) {
         /*
          * set carbon message properties which is to be used in carbon transport.
          */
@@ -756,7 +756,7 @@ public class HttpSink extends Sink {
         return cMessage;
     }
 
-    private String getMessageBody(Object payload) {
+    String getMessageBody(Object payload) {
         if (HttpConstants.MAP_KEYVALUE.equals(mapType)) {
             Map<String, Object> params = (HashMap) payload;
             return params.entrySet().stream()

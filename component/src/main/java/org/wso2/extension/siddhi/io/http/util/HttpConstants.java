@@ -139,6 +139,7 @@ public class HttpConstants {
     public static final String PROXY_USERNAME = "proxy.username";
     public static final String PROXY_PASSWORD = "proxy.password";
     public static final String SINK_PARAMETERS = "parameters";
+    public static final String MSG_ID = "msgId";
     
     //http sink transport properties
     public static final String LATENCY_METRICS_ENABLED = "latency.metrics.enabled";

@@ -19,6 +19,7 @@
 package org.wso2.extension.siddhi.io.http.util;
 
 import org.wso2.extension.siddhi.io.http.source.HttpRequestSource;
+import org.wso2.extension.siddhi.io.http.source.HttpResponseSource;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,20 +29,32 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class HTTPSourceRegistry {
 
-    private static Map<String, HttpRequestSource> sourceRegistry = new ConcurrentHashMap<>();
+    private static Map<String, HttpRequestSource> requestSourceRegistry = new ConcurrentHashMap<>();
+    private static Map<String, HttpResponseSource> responseSourceRegistry = new ConcurrentHashMap<>();
 
-    public static HttpRequestSource getSource(String sourceId) {
-
-        return sourceRegistry.get(sourceId);
+    // handle request sources
+    public static HttpRequestSource getRequestSource(String sourceId) {
+        return requestSourceRegistry.get(sourceId);
     }
 
-    public static void registerSource(String sourceId, HttpRequestSource source) {
-
-        sourceRegistry.put(sourceId, source);
+    public static void registerRequestSource(String sourceId, HttpRequestSource source) {
+        requestSourceRegistry.put(sourceId, source);
     }
 
-    public static void removeSource(String sourceId) {
+    public static void removeRequestSource(String sourceId) {
+        requestSourceRegistry.remove(sourceId);
+    }
 
-        sourceRegistry.remove(sourceId);
+    // handle response sources
+    public static HttpResponseSource getResponseSource(String sourceId) {
+        return responseSourceRegistry.get(sourceId);
+    }
+
+    public static void registerResponseSource(String sourceId, HttpResponseSource source) {
+        responseSourceRegistry.put(sourceId, source);
+    }
+
+    public static void removeResponseSource(String sourceId) {
+        responseSourceRegistry.remove(sourceId);
     }
 }

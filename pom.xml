@@ -393,7 +393,7 @@
         <siddhi.mapper.json.version>4.0.23</siddhi.mapper.json.version>
         <siddhi.mapper.text.version>1.0.18</siddhi.mapper.text.version>
         <siddhi.mapper.xml.version>4.0.14</siddhi.mapper.xml.version>
-        <siddhi.version>4.1.38</siddhi.version>
+        <siddhi.version>4.1.44</siddhi.version>
         <pax.exam.spi.version>4.10.0</pax.exam.spi.version>
         <carbon.analytics.common.version>6.0.62</carbon.analytics.common.version>
         <commons.collections.version>3.1</commons.collections.version>
