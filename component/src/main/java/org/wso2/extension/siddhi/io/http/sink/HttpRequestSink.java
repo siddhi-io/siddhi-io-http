@@ -119,18 +119,13 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
 public class HttpRequestSink extends HttpSink {
 
     private static final Logger log = Logger.getLogger(HttpRequestSink.class);
-    private String sourceId;
-    private StreamDefinition streamDefinition;
+    private String sinkId;
 
     @Override
     protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
                         ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
         super.init(outputStreamDefinition, optionHolder, configReader, siddhiAppContext);
-        this.sourceId = optionHolder.validateAndGetStaticValue(HttpConstants.SOURCE_ID);
-        this.httpHeaderOption = optionHolder.getOrCreateOption(HttpConstants.HEADERS, HttpConstants.DEFAULT_HEADER);
-        this.mapType = outputStreamDefinition.getAnnotations().get(0).getAnnotations().get(0).getElements().get(0)
-                .getValue();
-        this.streamDefinition = outputStreamDefinition;
+        this.sinkId = optionHolder.validateAndGetStaticValue(HttpConstants.SINK_ID);
     }
 
 
@@ -157,7 +152,7 @@ public class HttpRequestSink extends HttpSink {
                     .getBytes(Charset.defaultCharset()))));
         }
         cMessage.completeMessage();
-        HttpResponseSource source = HTTPSourceRegistry.getResponseSource(sourceId);
+        HttpResponseSource source = HTTPSourceRegistry.getResponseSource(sinkId);
         HttpResponseFuture httpResponseFuture = clientConnector.send(cMessage);
         httpResponseFuture.setHttpConnectorListener(source.getConnectorListener());
     }

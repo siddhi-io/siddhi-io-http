@@ -21,9 +21,7 @@ package org.wso2.extension.siddhi.io.http.source;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
-import org.wso2.transport.http.netty.common.Constants;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
@@ -35,55 +33,35 @@ import java.util.concurrent.Executors;
  */
 public class HttpResponseConnectorListener implements HttpConnectorListener {
     private static final Logger log = LoggerFactory.getLogger(HttpResponseConnectorListener.class);
-    private HttpWorkerThread httpWorkerThread;
+    private HttpResponseProcessor httpWorkerThread;
     private SourceEventListener sourceEventListener;
-    private String sourceId;
+    private String sinkId;
     private ExecutorService executorService;
     private String siddhiAppName;
 
-    public HttpResponseConnectorListener(int numnerOfThreads, SourceEventListener sourceEventListener, String sourceId,
+    public HttpResponseConnectorListener(int numnerOfThreads, SourceEventListener sourceEventListener, String sinkId,
                                          String[] trpPropertyNames, String siddhiAppName) {
         this.sourceEventListener = sourceEventListener;
-        this.sourceId = sourceId;
+        this.sinkId = sinkId;
         this.executorService = Executors.newFixedThreadPool(numnerOfThreads);
         this.siddhiAppName = siddhiAppName;
     }
 
     @Override
     public void onMessage(HTTPCarbonMessage carbonMessage) {
-        HttpWorkerThread workerThread = new HttpWorkerThread(carbonMessage, sourceEventListener, sourceId, null);
+        // TODO: 21/6/18 Handle requested transport properties
+        HttpResponseProcessor workerThread =
+                new HttpResponseProcessor(carbonMessage, sourceEventListener, sinkId, null);
         executorService.execute(workerThread);
-    }
-
-    protected boolean isValidRequest(HTTPCarbonMessage carbonMessage) {
-
-        return HttpConstants.PROTOCOL_ID.equals(carbonMessage.getProperty(HttpConstants.PROTOCOL)) &&
-                HttpConnectorRegistry.getInstance().getServerConnectorPool().containsKey(getInterface(carbonMessage));
-    }
-
-    protected HttpSourceListener getSourceListener(StringBuilder sourceListenerKey) {
-
-        return HttpConnectorRegistry.getInstance().getSourceListenersMap().get(sourceListenerKey.toString());
-    }
-
-    protected String getInterface(HTTPCarbonMessage cMsg) {
-        String interfaceId = (String) cMsg.getProperty(Constants.LISTENER_INTERFACE_ID);
-        if (interfaceId == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Interface id not found on the message, hence using the default interface");
-            }
-            interfaceId = HttpConstants.DEFAULT_INTERFACE;
-        }
-
-        return interfaceId;
     }
 
     @Override
     public void onError(Throwable throwable) {
-        log.error("Error in http server connector", throwable);
+        log.error("Error occurred during processing response for the request sent by http-request-sink with " +
+                "'sink.id' = " + sinkId, throwable);
     }
 
-    public String getSiddhiAppName() {
+    String getSiddhiAppName() {
         return siddhiAppName;
     }
 

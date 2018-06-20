@@ -46,15 +46,15 @@ public class HTTPSourceRegistry {
     }
 
     // handle response sources
-    public static HttpResponseSource getResponseSource(String sourceId) {
-        return responseSourceRegistry.get(sourceId);
+    public static HttpResponseSource getResponseSource(String sinkId) {
+        return responseSourceRegistry.get(sinkId);
     }
 
-    public static void registerResponseSource(String sourceId, HttpResponseSource source) {
-        responseSourceRegistry.put(sourceId, source);
+    public static void registerResponseSource(String sinkId, HttpResponseSource source) {
+        responseSourceRegistry.put(sinkId, source);
     }
 
-    public static void removeResponseSource(String sourceId) {
-        responseSourceRegistry.remove(sourceId);
+    public static void removeResponseSource(String sinkId) {
+        responseSourceRegistry.remove(sinkId);
     }
 }

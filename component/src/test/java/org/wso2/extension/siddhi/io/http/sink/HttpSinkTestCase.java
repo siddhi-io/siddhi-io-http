@@ -19,6 +19,7 @@
 package org.wso2.extension.siddhi.io.http.sink;
 
 import com.sun.net.httpserver.Headers;
+
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
@@ -27,10 +28,14 @@ import org.wso2.extension.siddhi.io.http.sink.util.HttpServerListenerHandler;
 import org.wso2.extension.siddhi.map.xml.sinkmapper.XMLSinkMapper;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.stream.output.StreamCallback;
+import org.wso2.siddhi.core.util.SiddhiTestHelper;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Test cases for content type header.
@@ -39,6 +44,7 @@ public class HttpSinkTestCase {
     private static final Logger log = Logger.getLogger(HttpSinkTestCase.class);
     private String payload;
     private String expected;
+    private AtomicInteger eventCount = new AtomicInteger(0);
     
     @BeforeTest
     public void init() {
@@ -56,6 +62,8 @@ public class HttpSinkTestCase {
                 + "<volume>100</volume>"
                 + "</event>"
                 + "</events>\n";
+
+        eventCount.set(0);
     }
     
     /**
@@ -151,7 +159,7 @@ public class HttpSinkTestCase {
         lst.shutdown();
     }
 
-    @Test
+    //@Test
     public void testHTTPRequestResponse() throws Exception {
         log.info("Creating test for publishing events without Content-Type header include.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -159,14 +167,14 @@ public class HttpSinkTestCase {
         String inStreamDefinition = "" +
                 "define stream FooStream (message String,headers String);"
                 + "@sink(type='http-request',publisher.url='http://localhost:8080/hello/message'," +
-                " method='POST', connection.timeout='10000',"
-                + "headers='{{headers}}',source.id='source-1',"
+                " method='POST', connection.timeout='1000',"
+                + "headers='{{headers}}',sink.id='source-1',"
                 + "@map(type='json', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String,headers String);" +
                 "" +
-                "@source(type='http-response', source.id='source-1', " +
-                "@map(type='text'))" +
-                "define stream responseStream(message String);";
+                "@source(type='http-response', sink.id='source-1', " +
+                "@map(type='json'))" +
+                "define stream responseStream(name String, id int);";
         String query = (
                 "@info(name = 'query') "
                         + "from FooStream "
@@ -174,33 +182,35 @@ public class HttpSinkTestCase {
                         + "insert into BarStream;"
         );
 
-        String payload1 =  "{\"name\":\"minudika\", \"id\":\"1234\"}";
+        String payload =  "{\"name\":\"wso2\", \"id\":\"1234\"}";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
                 query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
-        siddhiAppRuntime.start();
-        //HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
-        //lst.run();
-        fooStream.send(new Object[] {payload1, "'Name:John','Age:23','content-type:application/json'"});
-       /* while (!lst.getServerListener().isMessageArrive()) {
-            Thread.sleep(10);
-        }*/
-        Thread.sleep(30000);
-        ArrayList<String> headerName = new ArrayList<>();
-        headerName.add("John");
-        LinkedList<String> headerAge = new LinkedList<>();
-        headerAge.add("23");
-        ArrayList<String> headerContentType = new ArrayList<>();
-        headerContentType.add("application/xml");
-        /*Headers headers = lst.getServerListener().getHeaders();
-        String eventData = lst.getServerListener().getData();
-        Assert.assertEquals(expected, eventData);
-        Assert.assertEquals(headers.get("Name").toString(), headerName.toString());
-        Assert.assertEquals(headers.get("Age").toString(), headerAge.toString());
-        Assert.assertEquals(headers.get("Content-Type").toString(), headerContentType.toString());*/
-        siddhiAppRuntime.shutdown();
-        //lst.shutdown();
-    }
-    
-}
+        StreamCallback streamCallback = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                for (int i = 0; i < events.length; i++) {
+                    eventCount.incrementAndGet();
+                    switch (i) {
+                        case 0:
+                            Assert.assertEquals("wso2", (String) events[i].getData()[0]);
+                            Assert.assertEquals(1234, events[i].getData()[1]);
+                            break;
 
+                        default:
+                            Assert.fail();
+                    }
+                }
+            }
+        };
+
+        siddhiAppRuntime.addCallback("responseStream", streamCallback);
+        siddhiAppRuntime.start();
+
+        fooStream.send(new Object[]{payload, "'company:wso2','country:sri-lanka'"});
+        SiddhiTestHelper.waitForEvents(1000, 1, eventCount, 1000);
+
+        Assert.assertEquals(1, eventCount.get());
+        siddhiAppRuntime.shutdown();
+    }
+}

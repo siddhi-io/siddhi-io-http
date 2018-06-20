@@ -34,6 +34,7 @@ public class HttpConstants {
     //--source general configuration
     public static final String RECEIVER_URL = "receiver.url";
     public static final String SOURCE_ID = "source.id";
+    public static final String SINK_ID = "sink.id";
     public static final String CONNECTION_TIMEOUT = "connection.timeout";
     public static final String IS_AUTH = "basic.auth.enabled";
     public static final String EMPTY_IS_AUTH = "false";
