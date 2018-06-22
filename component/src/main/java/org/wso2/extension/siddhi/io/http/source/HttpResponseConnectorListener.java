@@ -33,11 +33,11 @@ import java.util.concurrent.Executors;
  */
 public class HttpResponseConnectorListener implements HttpConnectorListener {
     private static final Logger log = LoggerFactory.getLogger(HttpResponseConnectorListener.class);
-    private HttpResponseProcessor httpWorkerThread;
     private SourceEventListener sourceEventListener;
     private String sinkId;
     private ExecutorService executorService;
     private String siddhiAppName;
+    private String[] trpPropertyNames;
 
     public HttpResponseConnectorListener(int numnerOfThreads, SourceEventListener sourceEventListener, String sinkId,
                                          String[] trpPropertyNames, String siddhiAppName) {
@@ -45,13 +45,17 @@ public class HttpResponseConnectorListener implements HttpConnectorListener {
         this.sinkId = sinkId;
         this.executorService = Executors.newFixedThreadPool(numnerOfThreads);
         this.siddhiAppName = siddhiAppName;
+        this.trpPropertyNames = trpPropertyNames.clone();
     }
 
     @Override
     public void onMessage(HTTPCarbonMessage carbonMessage) {
-        // TODO: 21/6/18 Handle requested transport properties
+        String[] properties = new String[trpPropertyNames.length];
+        for (int i = 0; i < trpPropertyNames.length; i++) {
+            properties[i] = (String) carbonMessage.getProperty(trpPropertyNames[i]);
+        }
         HttpResponseProcessor workerThread =
-                new HttpResponseProcessor(carbonMessage, sourceEventListener, sinkId, null);
+                new HttpResponseProcessor(carbonMessage, sourceEventListener, sinkId, properties);
         executorService.execute(workerThread);
     }
 

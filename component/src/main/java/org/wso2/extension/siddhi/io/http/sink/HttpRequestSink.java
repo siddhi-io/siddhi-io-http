@@ -27,6 +27,7 @@ import io.netty.handler.codec.http.HttpVersion;
 import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpSinkUtil;
+import org.wso2.extension.siddhi.io.http.source.HttpResponseMessageListener;
 import org.wso2.extension.siddhi.io.http.source.HttpResponseSource;
 import org.wso2.extension.siddhi.io.http.util.HTTPSourceRegistry;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
@@ -35,16 +36,20 @@ import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
+import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.transport.DynamicOptions;
 import org.wso2.siddhi.core.util.transport.OptionHolder;
+import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.transport.http.netty.common.Constants;
 import org.wso2.transport.http.netty.contract.HttpResponseFuture;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
 
@@ -120,12 +125,14 @@ public class HttpRequestSink extends HttpSink {
 
     private static final Logger log = Logger.getLogger(HttpRequestSink.class);
     private String sinkId;
+    private StreamDefinition outputStreamDefinition;
 
     @Override
     protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
                         ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
         super.init(outputStreamDefinition, optionHolder, configReader, siddhiAppContext);
         this.sinkId = optionHolder.validateAndGetStaticValue(HttpConstants.SINK_ID);
+        this.outputStreamDefinition = outputStreamDefinition;
     }
 
 
@@ -154,6 +161,19 @@ public class HttpRequestSink extends HttpSink {
         cMessage.completeMessage();
         HttpResponseSource source = HTTPSourceRegistry.getResponseSource(sinkId);
         HttpResponseFuture httpResponseFuture = clientConnector.send(cMessage);
-        httpResponseFuture.setHttpConnectorListener(source.getConnectorListener());
+        HttpResponseMessageListener httpListener =
+                new HttpResponseMessageListener(getTrpProperties(dynamicOptions), source);
+        httpResponseFuture.setHttpConnectorListener(httpListener);
+    }
+
+    private Map<String, Object> getTrpProperties(DynamicOptions dynamicOptions) {
+        Event event = dynamicOptions.getEvent();
+        Object[] data = event.getData();
+        List<Attribute> attributes = outputStreamDefinition.getAttributeList();
+        Map<String, Object> trpProperties = new HashMap<>();
+        for (int i = 0; i < attributes.size(); i++) {
+            trpProperties.put(attributes.get(i).getName(), data[i]);
+        }
+        return trpProperties;
     }
 }

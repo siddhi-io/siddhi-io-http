@@ -24,7 +24,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * {@code HttpConnectorRegistry} The code is responsible for maintaining the all active server connectors.
+ * {@code HttpConnectorRegistry} The code is responsible for maintaining the all active connector listeners for
+ * response source.
  */
 class HttpResponseSourceConnectorRegistry {
     private static HttpResponseSourceConnectorRegistry instance = new HttpResponseSourceConnectorRegistry();
@@ -56,7 +57,7 @@ class HttpResponseSourceConnectorRegistry {
     /**
      * Register new source listener.
      *
-     *  @param sourceId         the source id.
+     *  @param sourceId   the source id.
      */
     void registerSourceListener(HttpResponseConnectorListener httpResponseSourceListener, String sourceId) {
         HttpResponseConnectorListener sourceListener =
@@ -70,13 +71,13 @@ class HttpResponseSourceConnectorRegistry {
     /**
      * Unregister the source listener.
      *
-     * @param sourceId   the source id
+     * @param sinkId   the sink id of the source
      * @param siddhiAppName name of the siddhi app
      */
-    void unregisterSourceListener(String sourceId, String siddhiAppName) {
-        HttpResponseConnectorListener httpSourceListener = this.sourceListenersMap.get(sourceId);
+    void unregisterSourceListener(String sinkId, String siddhiAppName) {
+        HttpResponseConnectorListener httpSourceListener = this.sourceListenersMap.get(sinkId);
         if (httpSourceListener != null && httpSourceListener.getSiddhiAppName().equals(siddhiAppName)) {
-            sourceListenersMap.remove(sourceId);
+            sourceListenersMap.remove(sinkId);
             httpSourceListener.disconnect();
         }
     }
