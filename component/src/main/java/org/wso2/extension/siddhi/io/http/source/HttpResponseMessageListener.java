@@ -19,6 +19,7 @@
 
 package org.wso2.extension.siddhi.io.http.source;
 
+import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
@@ -30,15 +31,19 @@ import java.util.Map;
 public class HttpResponseMessageListener implements HttpConnectorListener {
     private HttpResponseConnectorListener responseConnectorListener;
     private Map<String, Object> trpProperties;
+    private boolean isDownloadEnabled;
 
-    public HttpResponseMessageListener(Map<String, Object> trpProperties, HttpResponseSource source) {
+    public HttpResponseMessageListener(Map<String, Object> trpProperties, HttpResponseSource source,
+                                       boolean isDownloadEnabled) {
         this.responseConnectorListener = source.getConnectorListener();
         this.trpProperties = trpProperties;
+        this.isDownloadEnabled = isDownloadEnabled;
     }
 
     @Override
     public void onMessage(HTTPCarbonMessage carbonMessage) {
         trpProperties.forEach((k, v) -> { carbonMessage.setProperty(k, v); });
+        carbonMessage.setProperty(HttpConstants.IS_DOWNLOADABLE_CONTENT, isDownloadEnabled);
         responseConnectorListener.onMessage(carbonMessage);
     }
 
