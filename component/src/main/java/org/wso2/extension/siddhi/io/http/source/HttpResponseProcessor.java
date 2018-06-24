@@ -18,7 +18,6 @@
  */
 package org.wso2.extension.siddhi.io.http.source;
 
-import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
@@ -34,8 +33,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.stream.Collectors;
 
@@ -49,8 +46,7 @@ public class HttpResponseProcessor implements Runnable {
     private String sinkId;
     private String[] trpProperties;
 
-    String filePath;
-    String paylod = "{\"event\":{\"filePath\":\"%s\", \"fileName\":\"%s\"}}";
+    private String filePath;
 
     HttpResponseProcessor(HTTPCarbonMessage cMessage, SourceEventListener sourceEventListener,
                           String sinkId, String[] trpProperties) {
@@ -62,8 +58,16 @@ public class HttpResponseProcessor implements Runnable {
     
     @Override
     public void run() {
+        int code = carbonMessage.getNettyHttpResponse().status().code() / 100;
         boolean isDownloadableContent = (boolean) (carbonMessage.getProperty(HttpConstants.IS_DOWNLOADABLE_CONTENT));
-        if (!isDownloadableContent) {
+
+        if (isDownloadableContent && code == 2) {
+            filePath = (String) carbonMessage.getProperty(HttpConstants.DESTINATION_PATH);
+            String fileName = writeToTile(carbonMessage);
+            if (fileName != null) {
+                sourceEventListener.onEvent(fileName, trpProperties);
+            }
+        } else {
             BufferedReader buf = new BufferedReader(
                     new InputStreamReader(
                             new HttpMessageDataStreamer(carbonMessage).getInputStream(), Charset.defaultCharset()));
@@ -76,7 +80,8 @@ public class HttpResponseProcessor implements Runnable {
                     }
                 } else {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Empty payload event, hence dropping the event chunk in " + sinkId);
+                        logger.debug("Empty payload event, hence dropping the event chunk in the source with sink" +
+                                ".id : " + sinkId);
                     }
                 }
             } finally {
@@ -86,43 +91,37 @@ public class HttpResponseProcessor implements Runnable {
                     logger.error("Error closing byte buffer.", e);
                 }
             }
-        } else {
-            filePath = (String) carbonMessage.getProperty(HttpConstants.DESTINATION_PATH);
-            writeToTile(carbonMessage);
-            sourceEventListener.onEvent(String.format(paylod, filePath, getFileName()), trpProperties);
         }
     }
 
-    private void writeToTile(HTTPCarbonMessage carbonMessage) {
+    private String writeToTile(HTTPCarbonMessage carbonMessage) {
         InputStream inputStream = null;
         OutputStream outputStream = null;
+        File file = new File(filePath);
         try {
             inputStream = new HttpMessageDataStreamer(carbonMessage).getInputStream();
-            outputStream = new FileOutputStream(new File(filePath));
+            outputStream = new FileOutputStream(file);
             int read;
             byte[] bytes = new byte[1024];
             while ((read = inputStream.read(bytes)) != -1) {
                 outputStream.write(bytes, 0, read);
             }
+            return filePath;
         } catch (FileNotFoundException e) {
             logger.error("Given path to download the file : '" + filePath + "' cannot be found.", e);
         } catch (IOException e) {
             logger.error("Error occured during writing the file to '" + filePath + "' due to " + e.getMessage(), e);
         } finally {
             try {
-                inputStream.close();
-                outputStream.close();
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                if (outputStream != null) {
+                    outputStream.close();
+                }
             } catch (IOException e) {
                 logger.error("Failed to close the stream due to " + e.getMessage(), e);
             }
-        }
-    }
-
-    private String getFileName() {
-        try {
-            return FilenameUtils.getName(new URL(filePath).getPath());
-        } catch (MalformedURLException e) {
-            logger.error("Given file path '" + filePath + "' is malformed.", e);
         }
         return null;
     }

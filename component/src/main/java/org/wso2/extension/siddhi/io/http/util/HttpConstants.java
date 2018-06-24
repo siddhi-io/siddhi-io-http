@@ -202,7 +202,7 @@ public class HttpConstants {
     public static final String FALSE = "false";
 
     public static final String FILE_URL = "file.url";
-    public static final String DESTINATION_PATH = "destination.path";
+    public static final String DESTINATION_PATH = "download.path";
     public static final String IS_DOWNLOADABLE_CONTENT = "__is_downloadable_content";
 
     // HTTP codes for response source

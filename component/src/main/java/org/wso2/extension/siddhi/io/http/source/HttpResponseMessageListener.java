@@ -60,7 +60,6 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
             log.error("No source of type 'http-response' for status code '" + statusCode + "' has been " +
                     "defined. Hence dropping the response message.");
         }
-
     }
 
     @Override
