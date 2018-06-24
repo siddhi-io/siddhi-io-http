@@ -204,4 +204,13 @@ public class HttpConstants {
     public static final String FILE_URL = "file.url";
     public static final String DESTINATION_PATH = "destination.path";
     public static final String IS_DOWNLOADABLE_CONTENT = "__is_downloadable_content";
+
+    // HTTP codes for response source
+    public static final String HTTP_STATUS_CODE = "http.status.code";
+    public static final String DEFAULT_HTTP_CODE = "2**";
+    public static final String HTTP_CODE_1XX = "1**";
+    public static final String HTTP_CODE_2XX = "2**";
+    public static final String HTTP_CODE_3XX = "3**";
+    public static final String HTTP_CODE_4XX = "4**";
+    public static final String HTTP_CODE_5XX = "5**";
 }

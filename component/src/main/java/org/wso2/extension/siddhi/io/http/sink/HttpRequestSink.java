@@ -28,8 +28,6 @@ import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpSinkUtil;
 import org.wso2.extension.siddhi.io.http.source.HttpResponseMessageListener;
-import org.wso2.extension.siddhi.io.http.source.HttpResponseSource;
-import org.wso2.extension.siddhi.io.http.util.HTTPSourceRegistry;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
@@ -53,6 +51,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
+
 
 /**
  * {@code HttpRequestSink} Handle the HTTP publishing tasks.
@@ -168,10 +167,9 @@ public class HttpRequestSink extends HttpSink {
                     .getBytes(Charset.defaultCharset()))));
         }
         cMessage.completeMessage();
-        HttpResponseSource source = HTTPSourceRegistry.getResponseSource(sinkId);
         HttpResponseFuture httpResponseFuture = clientConnector.send(cMessage);
         HttpResponseMessageListener httpListener =
-                new HttpResponseMessageListener(getTrpProperties(dynamicOptions), source, isDownloadEnabled);
+                new HttpResponseMessageListener(getTrpProperties(dynamicOptions), sinkId, isDownloadEnabled);
         httpResponseFuture.setHttpConnectorListener(httpListener);
     }
 
