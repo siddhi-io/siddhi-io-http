@@ -52,7 +52,7 @@ public class HttpResponseConnectorListener implements HttpConnectorListener {
     public void onMessage(HTTPCarbonMessage carbonMessage) {
         String[] properties = new String[trpPropertyNames.length];
         for (int i = 0; i < trpPropertyNames.length; i++) {
-            properties[i] = (String) carbonMessage.getProperty(trpPropertyNames[i]);
+            properties[i] = convertToString(carbonMessage.getProperty(trpPropertyNames[i]));
         }
         HttpResponseProcessor workerThread =
                 new HttpResponseProcessor(carbonMessage, sourceEventListener, sinkId, properties);
@@ -74,5 +74,15 @@ public class HttpResponseConnectorListener implements HttpConnectorListener {
      */
     void disconnect() {
         executorService.shutdown();
+    }
+
+    private String convertToString(Object o) {
+        if (o instanceof Integer) {
+            return Integer.toString((int) o);
+        } else if (o instanceof Double) {
+            return Double.toString((double) o);
+        } else {
+            return (String) o;
+        }
     }
 }

@@ -64,7 +64,13 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
 
     @Override
     public void onError(Throwable throwable) {
-        responseConnectorListener.onError(throwable);
+        responseConnectorListener = HTTPSourceRegistry.getResponseSource(sinkId, "5**").getConnectorListener();
+        if (responseConnectorListener != null) {
+            responseConnectorListener.onError(throwable);
+        } else {
+            log.error("No source of type 'http-response' for status code '5**' has been " +
+                    "defined. Hence dropping the response message.");
+        }
     }
 
     /**

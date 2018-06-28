@@ -35,6 +35,7 @@ import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.transport.DynamicOptions;
 import org.wso2.siddhi.core.util.transport.Option;
@@ -137,6 +138,10 @@ public class HttpRequestSink extends HttpSink {
         this.isDownloadEnabled = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants
                 .DOWNLOAD_ENABLED, HttpConstants.DEFAULT_DOWNLOAD_ENABLED_VALUE));
         this.destinationPathOption = optionHolder.getOrCreateOption(HttpConstants.DESTINATION_PATH, null);
+        if (isDownloadEnabled && destinationPathOption == null) {
+            throw new SiddhiAppCreationException("Download path (download.path) must be provided when downloading is " +
+                    "enabled.");
+        }
         this.outputStreamDefinition = outputStreamDefinition;
     }
 

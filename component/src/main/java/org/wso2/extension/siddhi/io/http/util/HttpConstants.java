@@ -60,7 +60,7 @@ public class HttpConstants {
     public static final String APPLICATION_JSON = "application/json";
     public static final String APPLICATION_URL_ENCODED = "application/x-www-form-urlencoded";
     public static final String DEFAULT_ENCODING = "UTF-8";
-    public static final String DOWNLOAD_ENABLED = "download.enabled";
+    public static final String DOWNLOAD_ENABLED = "downloading.enabled";
     public static final String DEFAULT_DOWNLOAD_ENABLED_VALUE = "false";
 
     //Common util values

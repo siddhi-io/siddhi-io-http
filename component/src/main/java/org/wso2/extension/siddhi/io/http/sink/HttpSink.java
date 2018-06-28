@@ -560,6 +560,9 @@ public class HttpSink extends Sink {
     @Override
     public void publish(Object payload, DynamicOptions dynamicOptions) {
         if (publisherURLOption.isStatic()) {
+            if (clientConnector != null) {
+                clientConnector.close();
+            }
             initClientConnector(dynamicOptions);
         }
         String headers = httpHeaderOption.getValue(dynamicOptions);
@@ -589,8 +592,9 @@ public class HttpSink extends Sink {
      */
     @Override
     public void connect() throws ConnectionUnavailableException {
-        log.info(streamID + " has successfully connected to " + publisherURL);
-
+        if (publisherURLOption.isStatic()) {
+            log.info(streamID + " has successfully connected to " + publisherURL);
+        }
     }
 
     /**
