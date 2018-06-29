@@ -45,7 +45,7 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
  * Http source for receive the http and https request.
  */
 @Extension(name = "http", namespace = "source", description = "The HTTP source receives POST requests via HTTP or " +
-        "HTTPS in format such as `text`, `XML` and `JSON`. If required, you can enable basic authentication to " +
+        "HTTPS in format such as `text`, `XML` and `JSON`. In WSO2 SP, if required, you can enable basic authentication to " +
         "ensure that events are received only from users who are authorized to access the service.",
         parameters = {
                 @Parameter(name = "receiver.url",
@@ -59,13 +59,13 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                         optional = true,
                         defaultValue = "http://0.0.0.0:9763/<appNAme>/<streamName>"),
                 @Parameter(name = "basic.auth.enabled",
-                        description = "If this is set to `true`, " +
+                        description = "This works only in WSO2 SP. If this is set to `true`, " +
                                 "basic authentication is enabled for incoming events, and the credentials with " +
                                 "which each " +
                                 "event is sent are verified to ensure that the user is authorized to access the " +
                                 "service. " +
                                 "If basic authentication fails, the event is not authenticated and an " +
-                                "authentication error is logged in the CLI. By default this values 'false' ",
+                                "authentication error is logged in the CLI.",
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "false"),
