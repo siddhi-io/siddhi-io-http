@@ -45,14 +45,14 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
  * Http source for receive the http and https request.
  */
 @Extension(name = "http", namespace = "source", description = "The HTTP source receives POST requests via HTTP or " +
-        "HTTPS in format such as `text`, `XML` and `JSON`. In WSO2 SP, if required, you can enable basic authentication to " +
-        "ensure that events are received only from users who are authorized to access the service.",
+        "HTTPS in format such as `text`, `XML` and `JSON`. In WSO2 SP, if required, you can enable basic " +
+        "authentication to ensure that events are received only from users who are authorized to access " +
+        "the service.",
         parameters = {
                 @Parameter(name = "receiver.url",
                         description = "The URL to which the events should be received. " +
-                                "User can provide any valid url and if the url is not provided the system will use" +
-                                " the " +
-                                "following format `http://0.0.0.0:9763/<appNAme>/<streamName>`" +
+                                "User can provide any valid url and if the url is not provided the system will " +
+                                "use the following format `http://0.0.0.0:9763/<appNAme>/<streamName>`" +
                                 "If the user want to use SSL the url should be given in following format " +
                                 "`https://localhost:8080/<streamName>`",
                         type = {DataType.STRING},
