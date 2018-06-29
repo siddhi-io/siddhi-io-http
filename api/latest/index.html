@@ -183,6 +183,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../1.0.30/" title="1.0.30" class="md-nav__link">
+      1.0.30
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../1.0.29/" title="1.0.29" class="md-nav__link">
       1.0.29
     </a>
@@ -618,7 +630,7 @@
               
                 
                 
-                <h1 id="api-docs-v1029">API Docs - v1.0.29</h1>
+                <h1 id="api-docs-v1030">API Docs - v1.0.30</h1>
 <h2 id="sink">Sink</h2>
 <h3 id="http-sink">http <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink">(Sink)</a></em></h3>
 <p style="word-wrap: break-word">This extension publish the HTTP events in any HTTP method  POST, GET, PUT, DELETE  via HTTP or https protocols. As the additional features this component can provide basic authentication as well as user can publish events using custom client truststore files when publishing events via https protocol. And also user can add any number of headers including HTTP_METHOD header for each event dynamically.<br>Following content types will be set by default according to the type of sink mapper used.<br>You can override them by setting the new content types in headers.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- TEXT : text/plain<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- XML : application/xml<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- JSON : application/json<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- KEYVALUE : application/x-www-form-urlencoded</p>
@@ -1043,7 +1055,7 @@ define stream FooStream (payloadBody String, messageId string, headers string);
 
 <h2 id="source">Source</h2>
 <h3 id="http-source">http <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a></em></h3>
-<p style="word-wrap: break-word">The HTTP source receives POST requests via HTTP or HTTPS in format such as <code>text</code>, <code>XML</code> and <code>JSON</code>. If required, you can enable basic authentication to ensure that events are received only from users who are authorized to access the service.</p>
+<p style="word-wrap: break-word">The HTTP source receives POST requests via HTTP or HTTPS in format such as <code>text</code>, <code>XML</code> and <code>JSON</code>. In WSO2 SP, if required, you can enable basic authentication to ensure that events are received only from users who are authorized to access the service.</p>
 
 <p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
 <pre><code>@source(type=&quot;http&quot;, receiver.url=&quot;&lt;STRING&gt;&quot;, basic.auth.enabled=&quot;&lt;STRING&gt;&quot;, worker.count=&quot;&lt;STRING&gt;&quot;, socket.idle.timeout=&quot;&lt;INT&gt;&quot;, ssl.verify.client=&quot;&lt;STRING&gt;&quot;, ssl.protocol=&quot;&lt;STRING&gt;&quot;, tls.store.type=&quot;&lt;STRING&gt;&quot;, parameters=&quot;&lt;STRING&gt;&quot;, ciphers=&quot;&lt;STRING&gt;&quot;, ssl.enabled.protocols=&quot;&lt;STRING&gt;&quot;, server.enable.session.creation=&quot;&lt;STRING&gt;&quot;, server.supported.snimatchers=&quot;&lt;STRING&gt;&quot;, server.suported.server.names=&quot;&lt;STRING&gt;&quot;, request.size.validation.configuration=&quot;&lt;STRING&gt;&quot;, request.size.validation=&quot;&lt;STRING&gt;&quot;, request.size.validation.maximum.value=&quot;&lt;STRING&gt;&quot;, request.size.validation.reject.status.code=&quot;&lt;STRING&gt;&quot;, request.size.validation.reject.message=&quot;&lt;STRING&gt;&quot;, request.size.validation.reject.message.content.type=&quot;&lt;STRING&gt;&quot;, header.size.validation=&quot;&lt;STRING&gt;&quot;, header.validation.maximum.request.line=&quot;&lt;STRING&gt;&quot;, header.validation.maximum.size=&quot;&lt;STRING&gt;&quot;, header.validation.maximum.chunk.size=&quot;&lt;STRING&gt;&quot;, header.validation.reject.status.code=&quot;&lt;STRING&gt;&quot;, header.validation.reject.message=&quot;&lt;STRING&gt;&quot;, header.validation.reject.message.content.type=&quot;&lt;STRING&gt;&quot;, server.bootstrap.configuration=&quot;&lt;OBJECT&gt;&quot;, server.bootstrap.nodelay=&quot;&lt;BOOL&gt;&quot;, server.bootstrap.keepalive=&quot;&lt;BOOL&gt;&quot;, server.bootstrap.sendbuffersize=&quot;&lt;INT&gt;&quot;, server.bootstrap.recievebuffersize=&quot;&lt;INT&gt;&quot;, server.bootstrap.connect.timeout=&quot;&lt;INT&gt;&quot;, server.bootstrap.socket.reuse=&quot;&lt;BOOL&gt;&quot;, server.bootstrap.socket.timeout=&quot;&lt;BOOL&gt;&quot;, server.bootstrap.socket.backlog=&quot;&lt;BOOL&gt;&quot;, trace.log.enabled=&quot;&lt;BOOL&gt;&quot;, @map(...)))
@@ -1069,7 +1081,7 @@ define stream FooStream (payloadBody String, messageId string, headers string);
     </tr>
     <tr>
         <td style="vertical-align: top">basic.auth.enabled</td>
-        <td style="vertical-align: top; word-wrap: break-word">If this is set to <code>true</code>, basic authentication is enabled for incoming events, and the credentials with which each event is sent are verified to ensure that the user is authorized to access the service. If basic authentication fails, the event is not authenticated and an authentication error is logged in the CLI. By default this values 'false' </td>
+        <td style="vertical-align: top; word-wrap: break-word">This works only in WSO2 SP. If this is set to <code>true</code>, basic authentication is enabled for incoming events, and the credentials with which each event is sent are verified to ensure that the user is authorized to access the service. If basic authentication fails, the event is not authenticated and an authentication error is logged in the CLI.</td>
         <td style="vertical-align: top">false</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
