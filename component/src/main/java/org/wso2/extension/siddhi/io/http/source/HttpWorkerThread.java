@@ -20,7 +20,6 @@ package org.wso2.extension.siddhi.io.http.source;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
@@ -53,11 +52,6 @@ public class HttpWorkerThread implements Runnable {
     
     @Override
     public void run() {
-        boolean isDownloadableContent = (boolean) (carbonMessage.getProperty(HttpConstants.IS_DOWNLOADABLE_CONTENT));
-        if (isDownloadableContent) {
-
-        }
-
         BufferedReader buf = new BufferedReader(
                 new InputStreamReader(
                         new HttpMessageDataStreamer(carbonMessage).getInputStream(), Charset.defaultCharset()));
@@ -83,9 +77,5 @@ public class HttpWorkerThread implements Runnable {
                 logger.error("Error closing byte buf.", e);
             }
         }
-    }
-
-    private void writeToTile(CarbonMessage carbonMessage) {
-
     }
 }

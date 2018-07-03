@@ -30,7 +30,9 @@ import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 import java.util.Map;
 
 /**
- * Connector Listener for HttpResponseSource
+ * Connector Listener for HttpResponseSource.
+ * This receives responses for the requests sent by corresponding http-request sink and forward them to the
+ * http-responses sources considering their http status code.
  */
 public class HttpResponseMessageListener implements HttpConnectorListener {
     private static final Logger log = LoggerFactory.getLogger(HttpResponseMessageListener.class);
@@ -57,18 +59,19 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
             responseConnectorListener = HTTPSourceRegistry.getResponseSource(sinkId, statusCode).getConnectorListener();
             responseConnectorListener.onMessage(carbonMessage);
         } else {
-            log.error("No source of type 'http-response' for status code '" + statusCode + "' has been " +
-                    "defined. Hence dropping the response message.");
+            log.error("No source of type 'http-response' that matches with the status code '" + statusCode + "' has " +
+                    "been defined. Hence dropping the response message.");
         }
     }
 
     @Override
     public void onError(Throwable throwable) {
-        responseConnectorListener = HTTPSourceRegistry.getResponseSource(sinkId, "5**").getConnectorListener();
+        responseConnectorListener = HTTPSourceRegistry.getResponseSource(sinkId, HttpConstants.DEFAULT_HTTP_ERROR_CODE)
+                .getConnectorListener();
         if (responseConnectorListener != null) {
             responseConnectorListener.onError(throwable);
         } else {
-            log.error("No source of type 'http-response' for status code '5**' has been " +
+            log.error("No source of type 'http-response' for status code '500' has been " +
                     "defined. Hence dropping the response message.");
         }
     }

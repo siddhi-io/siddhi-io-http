@@ -62,7 +62,7 @@ public class HttpResponseProcessor implements Runnable {
         boolean isDownloadableContent = (boolean) (carbonMessage.getProperty(HttpConstants.IS_DOWNLOADABLE_CONTENT));
 
         if (isDownloadableContent && code == 2) {
-            filePath = (String) carbonMessage.getProperty(HttpConstants.DESTINATION_PATH);
+            filePath = carbonMessage.getProperty(HttpConstants.DOWNLOAD_PATH).toString();
             String fileName = writeToTile(carbonMessage);
             if (fileName != null) {
                 sourceEventListener.onEvent(fileName, trpProperties);
@@ -110,7 +110,7 @@ public class HttpResponseProcessor implements Runnable {
         } catch (FileNotFoundException e) {
             logger.error("Given path to download the file : '" + filePath + "' cannot be found.", e);
         } catch (IOException e) {
-            logger.error("Error occured during writing the file to '" + filePath + "' due to " + e.getMessage(), e);
+            logger.error("Error occurred during writing the file to '" + filePath + "' due to " + e.getMessage(), e);
         } finally {
             try {
                 if (inputStream != null) {

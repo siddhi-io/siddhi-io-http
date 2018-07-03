@@ -507,7 +507,6 @@ public class HttpSink extends Sink {
         this.mapType = outputStreamDefinition.getAnnotations().get(0).getAnnotations().get(0).getElements().get(0)
                 .getValue();
         this.publisherURLOption = optionHolder.validateAndGetOption(HttpConstants.PUBLISHER_URL);
-        //this.publisherURL = optionHolder.validateAndGetStaticValue(HttpConstants.PUBLISHER_URL);
         this.httpHeaderOption = optionHolder.getOrCreateOption(HttpConstants.HEADERS, HttpConstants.DEFAULT_HEADER);
         this.httpMethodOption = optionHolder.getOrCreateOption(HttpConstants.METHOD, HttpConstants.DEFAULT_METHOD);
         this.userName = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_USERNAME, EMPTY_STRING);
@@ -516,8 +515,6 @@ public class HttpSink extends Sink {
                 HttpSinkUtil.trustStorePath(configReader));
         clientStorePass = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD_PARAM,
                 HttpSinkUtil.trustStorePassword(configReader));
-//        String scheme = HttpSinkUtil.getScheme(publisherURL);
-//        this.httpURLProperties = HttpSinkUtil.getURLProperties(publisherURL);
         socketIdleTimeout = Integer.parseInt(optionHolder.validateAndGetStaticValue
                 (HttpConstants.SOCKET_IDEAL_TIMEOUT, SOCKET_IDEAL_TIMEOUT_VALUE));
         sslProtocol = optionHolder.validateAndGetStaticValue(HttpConstants.SSL_PROTOCOL, EMPTY_STRING);
@@ -792,7 +789,7 @@ public class HttpSink extends Sink {
                 } else {
                     senderConfig.setChunkingConfig(ChunkConfig.ALWAYS);
                 }
-            } // else AUTO
+            }
         }
         if (!EMPTY_STRING.equals(followRedirect)) {
             senderConfig.setFollowRedirect(Boolean.parseBoolean(followRedirect));

@@ -65,6 +65,10 @@ public class HttpResponseConnectorListener implements HttpConnectorListener {
                 "'sink.id' = " + sinkId, throwable);
     }
 
+    /**
+     * Returns the siddhi app name
+     * @return siddhi app name
+     */
     String getSiddhiAppName() {
         return siddhiAppName;
     }

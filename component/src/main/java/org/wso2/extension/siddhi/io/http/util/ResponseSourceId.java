@@ -3,11 +3,11 @@ package org.wso2.extension.siddhi.io.http.util;
 /**
  * Class for holding sinkid and the status code for a response source
  */
-public class ResponseSourceID {
+public class ResponseSourceId {
     String sinkId;
     String httpCode;
 
-    public ResponseSourceID(String sinkId, String httpCode) {
+    public ResponseSourceId(String sinkId, String httpCode) {
         this.sinkId = sinkId;
         this.httpCode = httpCode;
     }
@@ -21,12 +21,12 @@ public class ResponseSourceID {
             return false;
         }
 
-        ResponseSourceID that = (ResponseSourceID) o;
+        ResponseSourceId that = (ResponseSourceId) o;
 
         if (sinkId != null ? !sinkId.equals(that.sinkId) : that.sinkId != null) {
             return false;
         }
-        return httpCode != null ? httpCode.equals(that.httpCode) : that.httpCode == null;
+        return httpCode != null ? httpCode.matches(that.httpCode) : that.httpCode == null;
     }
 
     @Override

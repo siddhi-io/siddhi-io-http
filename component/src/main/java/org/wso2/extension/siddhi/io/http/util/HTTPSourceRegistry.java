@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class HTTPSourceRegistry {
 
     private static Map<String, HttpRequestSource> requestSourceRegistry = new ConcurrentHashMap<>();
-    private static Map<ResponseSourceID, HttpResponseSource> responseSourceRegistry = new ConcurrentHashMap<>();
+    private static Map<ResponseSourceId, HttpResponseSource> responseSourceRegistry = new ConcurrentHashMap<>();
 
     // handle request sources
     public static HttpRequestSource getRequestSource(String sourceId) {
@@ -47,14 +47,14 @@ public class HTTPSourceRegistry {
 
     // handle response sources
     public static HttpResponseSource getResponseSource(String sinkId, String statusCode) {
-        return responseSourceRegistry.get(new ResponseSourceID(sinkId, statusCode));
+        return responseSourceRegistry.get(new ResponseSourceId(sinkId, statusCode));
     }
 
     public static void registerResponseSource(String sinkId, String statusCode, HttpResponseSource source) {
-        responseSourceRegistry.put(new ResponseSourceID(sinkId, statusCode), source);
+        responseSourceRegistry.put(new ResponseSourceId(sinkId, statusCode), source);
     }
 
     public static void removeResponseSource(String sinkId, String statusCode) {
-        responseSourceRegistry.remove(new ResponseSourceID(sinkId, statusCode));
+        responseSourceRegistry.remove(new ResponseSourceId(sinkId, statusCode));
     }
 }

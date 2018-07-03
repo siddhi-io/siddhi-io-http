@@ -42,50 +42,39 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.DEFAULT_WORKE
 @Extension(
         name = "http-response",
         namespace = "source",
-        description = "The HTTP request is correlated with the " +
-        "HTTP response sink, through a unique `source.id`, and for each POST requests it receives via " +
-        "HTTP or HTTPS in format such as `text`, `XML` and `JSON` it sends the response via the HTTP response sink. " +
-        "The individual request and response messages are correlated at the sink using the `message.id` of " +
-        "the events. " +
-        "If required, you can enable basic authentication at the source " +
-        "to ensure that events are received only from users who are authorized to access the service.",
+        description = "" +
+                "The HTTP-RESPONSE co-relates with HTTP-REQUEST source with the parameter 'sink.id'.\n" +
+                "This receives responses for the requests sent by the HTTP-REQUEST sink which has the same sink id.\n" +
+                "Response messages can be in formats such as TEXT, JSON and XML.\n" +
+                "In order to handle the responses with different http status codes, user is allowed to defined the " +
+                "acceptable response source code using the parameter 'http.status.code'\n",
         parameters = {
-                @Parameter(name = "receiver.url",
-                        description = "The URL to which the events should be received. " +
-                                "User can provide any valid url and if the url is not provided the system will use" +
-                                " the " +
-                                "following format `http://0.0.0.0:9763/<appNAme>/<streamName>`" +
-                                "If the user want to use SSL the url should be given in following format " +
-                                "`https://localhost:8080/<streamName>`",
-                        type = {DataType.STRING},
-                        optional = true,
-                        defaultValue = "http://0.0.0.0:9763/<appNAme>/<streamName>"),
                 @Parameter(name = "sink.id",
-                        description = "Identifier need to map the source to sink.",
+                        description = "This parameter is used to map the http-response source to a " +
+                                "http-request sink. Then this source will accepts the response messages for " +
+                                "the requests sent by corresponding http-request sink.",
+                        type = {DataType.STRING}),
+                @Parameter(name = "http.status.code",
+                        description = "Acceptable http status code for the responses.\n" +
+                                "This can be a complete string or a regex.\n" +
+                                "Only the responses with matching status codes to the defined value, will be received" +
+                                " by the http-response source.\n" +
+                                "Eg: 'http.status.code = '200', http.status.code = '2*''",
                         type = {DataType.STRING})},
         examples = {
                 @Example(syntax = "" +
-                        "@sink(type='http-request',publisher.url='http://localhost:8080/hello/message', " +
-                        "method='POST', connection.timeout='1000', " +
-                        "headers='{{headers}}',sink.id='employee-info'," +
-                        "@map(type='json', @payload('{{message}}'))) " +
-                        "define stream requestStream (body String,headers String);" +
+                        "@source(type='http-response' , sink.id='employee-info', http.status.code='2**',\n" +
+                        "@map(type='text', regex.A='((.|\\n)*)', @attributes(message='A[1]'))) \n" +
+                        "define stream responseStream2xx(message string);" +
                         "" +
-                        "@source(type='http-response', sink.id='employee-info', " +
-                        "@map(type='json'))" +
-                        "define stream responseStream(name String, id int);",
+                        "@source(type='http-response' , sink.id='employee-info', http.status.code='4**' ,\n" +
+                        "@map(type='text', regex.A='((.|\\n)*)', @attributes(message='A[1]')))  \n" +
+                        "define stream responseStream4xx(message string);",
 
                         description = "" +
                                 "This source will receive the response of the request which is sent by the sink " +
-                                " which has 'employee-info' as the 'sink.id'. The response body is expected to be in " +
-                                "json format. After response is processed, relavent event will be sent to " +
-                                "responseStream.\n" +
-                                "A sample response is given below.\n" +
-                                "   {\"event\":\n" +
-                                "       \"symbol\":WSO2,\n" +
-                                "       \"price\":55.6,\n"  +
-                                "       \"volume\":100,\n" +
-                                "   }\n")}
+                                " which has 'employee-info' as the 'sink.id'. All the content of the response message" +
+                                " body will be extracted using text mapper.")}
         )
 
 public class HttpResponseSource extends Source {
@@ -114,7 +103,7 @@ public class HttpResponseSource extends Source {
         this.workerThread = optionHolder
                 .validateAndGetStaticValue(HttpConstants.WORKER_COUNT, DEFAULT_WORKER_COUNT);
         this.httpStatusCode = optionHolder.validateAndGetStaticValue(HttpConstants.HTTP_STATUS_CODE,
-                HttpConstants.HTTP_CODE_2XX);
+                HttpConstants.DEFAULT_HTTP_SUCCESS_CODE);
     }
 
     @Override
