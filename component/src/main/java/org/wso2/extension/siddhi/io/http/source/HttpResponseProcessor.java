@@ -95,12 +95,12 @@ public class HttpResponseProcessor implements Runnable {
     }
 
     private String writeToTile(HTTPCarbonMessage carbonMessage) {
-        InputStream inputStream = null;
-        OutputStream outputStream = null;
         File file = new File(filePath);
-        try {
-            inputStream = new HttpMessageDataStreamer(carbonMessage).getInputStream();
-            outputStream = new FileOutputStream(file);
+        try (
+                InputStream inputStream = new HttpMessageDataStreamer(carbonMessage).getInputStream();
+                OutputStream outputStream = new FileOutputStream(file);
+
+        ) {
             int read;
             byte[] bytes = new byte[1024];
             while ((read = inputStream.read(bytes)) != -1) {
@@ -111,17 +111,6 @@ public class HttpResponseProcessor implements Runnable {
             logger.error("Given path to download the file : '" + filePath + "' cannot be found.", e);
         } catch (IOException e) {
             logger.error("Error occurred during writing the file to '" + filePath + "' due to " + e.getMessage(), e);
-        } finally {
-            try {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-                if (outputStream != null) {
-                    outputStream.close();
-                }
-            } catch (IOException e) {
-                logger.error("Failed to close the stream due to " + e.getMessage(), e);
-            }
         }
         return null;
     }

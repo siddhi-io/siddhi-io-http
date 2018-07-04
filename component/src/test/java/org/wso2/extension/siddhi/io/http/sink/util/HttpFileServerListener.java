@@ -21,25 +21,29 @@ package org.wso2.extension.siddhi.io.http.sink.util;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
-import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Test Server Listener Manger.
+ * Test handler for file downloading feature.
  */
-public class HttpServerListener implements HttpHandler {
+public class HttpFileServerListener implements HttpHandler {
     private AtomicBoolean isEventArrived = new AtomicBoolean(false);
-    private StringBuilder stringBuilder;
     private Headers headers;
-    private static final Logger logger = Logger.getLogger(HttpServerListener.class);
-    
-    public HttpServerListener() {
+    private static final Logger logger = Logger.getLogger(HttpFileServerListener.class);
+    private String filePath;
+
+    public HttpFileServerListener() {
+        ClassLoader classLoader = getClass().getClassLoader();
+        filePath = classLoader.getResource("files").getFile();
     }
     
     @Override
@@ -49,32 +53,16 @@ public class HttpServerListener implements HttpHandler {
         headers = event.getRequestHeaders();
         InputStream inputStream = event.getRequestBody();
         // initiating
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        stringBuilder = new StringBuilder();
-        while ((line = bufferedReader.readLine()) != null) {
-            stringBuilder = stringBuilder.append(line).append("\n");
-        }
-        logger.info("Event Arrived: " + stringBuilder.toString());
+        File file = new File(filePath + File.separator + "testFile.txt");
+        InputStream fileInputStream = new FileInputStream(file);
 
-        byte[] response = stringBuilder.toString().getBytes();
+        logger.info("Event Arrived");
+
+        byte[] response = IOUtils.toByteArray(fileInputStream);
         event.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
         event.getResponseBody().write(response);
+        inputStream.close();
         event.close();
         isEventArrived.set(true);
     }
-    
-    public String getData() {
-        String data = stringBuilder.toString();
-        isEventArrived = new AtomicBoolean(false);
-        return data;
-    }
-    
-    public Headers getHeaders() {
-        return headers;
-    }
-    
-    public boolean isMessageArrive() {
-        return isEventArrived.get();
-    }
-    
 }

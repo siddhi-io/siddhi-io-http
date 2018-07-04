@@ -53,7 +53,7 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
         trpProperties.forEach((k, v) -> { carbonMessage.setProperty(k, v); });
         carbonMessage.setProperty(HttpConstants.IS_DOWNLOADABLE_CONTENT, isDownloadEnabled);
 
-        String statusCode = getStatusCode(Integer.toString(carbonMessage.getNettyHttpResponse().status().code()));
+        String statusCode = Integer.toString(carbonMessage.getNettyHttpResponse().status().code());
         Source responseSource = HTTPSourceRegistry.getResponseSource(sinkId, statusCode);
         if (responseSource != null) {
             responseConnectorListener = HTTPSourceRegistry.getResponseSource(sinkId, statusCode).getConnectorListener();
@@ -66,13 +66,20 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
 
     @Override
     public void onError(Throwable throwable) {
-        responseConnectorListener = HTTPSourceRegistry.getResponseSource(sinkId, HttpConstants.DEFAULT_HTTP_ERROR_CODE)
-                .getConnectorListener();
-        if (responseConnectorListener != null) {
-            responseConnectorListener.onError(throwable);
+        HttpResponseSource source = HTTPSourceRegistry.getResponseSource(sinkId, HttpConstants.DEFAULT_HTTP_ERROR_CODE);
+        if (source != null) {
+            responseConnectorListener = source.getConnectorListener();
         } else {
             log.error("No source of type 'http-response' for status code '500' has been " +
                     "defined. Hence dropping the response message.");
+        }
+        if (responseConnectorListener != null) {
+            responseConnectorListener.onError(throwable);
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("No connector listener for the response source with sink id '" + sinkId + "' and http " +
+                        "status code 500 found.");
+            }
         }
     }
 
@@ -83,7 +90,4 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
         responseConnectorListener.disconnect();
     }
 
-    private String getStatusCode(String httpCode) {
-        return String.format("%c**", httpCode.charAt(0));
-    }
 }
