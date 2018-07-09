@@ -166,7 +166,7 @@ public class HttpRequestResponseTestCase {
                 + "@map(type='json')) "
                 + "Define stream BarStream (name String, id int, headers String, downloadPath string);" +
                 "" +
-                "@source(type='http-response', sink.id='source-1', " +
+                "@source(type='http-response', sink.id='source-1', http.status.code='2\\d+', " +
                 "@map(type='text', regex.A='((.|\\n)*)', @attributes(headers='trp:headers', fileName='A[1]'))) " +
                 "define stream responseStream(fileName string, headers string);";
         String query = (
@@ -198,6 +198,83 @@ public class HttpRequestResponseTestCase {
 
         siddhiAppRuntime.addCallback("responseStream", streamCallback);
         HttpFileServerListenerHandler httpFileServerListenerHandler = new HttpFileServerListenerHandler(8005);
+        httpFileServerListenerHandler.run();
+        siddhiAppRuntime.start();
+
+        fooStream.send(new Object[]{"wso2", 100, "'country:sri-lanka'", downloadPath});
+
+        SiddhiTestHelper.waitForEvents(1000, 1, eventCount, 1000);
+
+        File file = new File (downloadPath);
+        Assert.assertTrue(file != null);
+        Assert.assertTrue(file.isFile());
+        Assert.assertEquals(file.getName(), "downloadedFile.txt");
+
+        Assert.assertEquals(eventCount.get(), 1);
+        siddhiAppRuntime.shutdown();
+        httpFileServerListenerHandler.shutdown();
+    }
+
+    @Test
+    public void testHTTPRequestResponse4() throws Exception {
+        log.info("Try to download a file that not exists.");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String inStreamDefinition = "" +
+                "define stream FooStream (name String, id int, headers String, downloadPath string);" +
+                "@sink(type='http-request'," +
+                "downloading.enabled='true'," +
+                "download.path='{{downloadPath}}'," +
+                "publisher.url='http://localhost:8005/files2', " +
+                "method='GET'," +
+                "headers='{{headers}}',sink.id='source-1'," +
+                "@map(type='json')) " +
+                "Define stream BarStream (name String, id int, headers String, downloadPath string);" +
+                "" +
+                "@source(type='http-response', sink.id='source-1', http.status.code='2\\d+', " +
+                "@map(type='text', regex.A='((.|\\n)*)', @attributes(headers='trp:headers', fileName='A[1]'))) " +
+                "define stream responseStream2xx(fileName string, headers string);" +
+
+                "@source(type='http-response', sink.id='source-1', http.status.code='4\\d+', " +
+                "@map(type='text', regex.A='((.|\\n)*)', @attributes(headers='trp:headers', errorMsg='A[1]'))) " +
+                "define stream responseStream4xx(errorMsg string);";
+        String query = (
+                "@info(name = 'query') "
+                        + "from FooStream "
+                        + "select * "
+                        + "insert into BarStream;"
+        );
+
+        String downloadPath = rootPath + File.separator + "downloadedFile.txt";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition + query);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        StreamCallback streamCallback2xx = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                eventCount.getAndIncrement();
+                Assert.fail();
+            }
+        };
+
+        StreamCallback streamCallback4xx = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                EventPrinter.print(events);
+                for (int i = 0; i < events.length; i++) {
+                    switch (eventCount.getAndIncrement()) {
+                        case 0:
+                            break;
+                        default:
+                            Assert.fail();
+                    }
+                }
+            }
+        };
+
+        siddhiAppRuntime.addCallback("responseStream2xx", streamCallback2xx);
+        siddhiAppRuntime.addCallback("responseStream4xx", streamCallback4xx);
+        HttpFileServerListenerHandler httpFileServerListenerHandler = new HttpFileServerListenerHandler(8005, 400);
         httpFileServerListenerHandler.run();
         siddhiAppRuntime.start();
 

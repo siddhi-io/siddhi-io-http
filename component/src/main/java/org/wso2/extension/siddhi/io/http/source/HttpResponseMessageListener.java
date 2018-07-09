@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.io.http.util.HTTPSourceRegistry;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
-import org.wso2.siddhi.core.stream.input.source.Source;
+import org.wso2.extension.siddhi.io.http.util.ResponseSourceId;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
@@ -54,9 +54,9 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
         carbonMessage.setProperty(HttpConstants.IS_DOWNLOADABLE_CONTENT, isDownloadEnabled);
 
         String statusCode = Integer.toString(carbonMessage.getNettyHttpResponse().status().code());
-        Source responseSource = HTTPSourceRegistry.getResponseSource(sinkId, statusCode);
+        HttpResponseSource responseSource = findAndGetResponseSource(statusCode);
         if (responseSource != null) {
-            responseConnectorListener = HTTPSourceRegistry.getResponseSource(sinkId, statusCode).getConnectorListener();
+            responseConnectorListener = responseSource.getConnectorListener();
             responseConnectorListener.onMessage(carbonMessage);
         } else {
             log.error("No source of type 'http-response' that matches with the status code '" + statusCode + "' has " +
@@ -88,6 +88,17 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
      */
     void disconnect() {
         responseConnectorListener.disconnect();
+    }
+
+    private HttpResponseSource findAndGetResponseSource(String statusCode) {
+        ResponseSourceId id = new ResponseSourceId(sinkId, statusCode);
+        for (Map.Entry entry : HTTPSourceRegistry.getResponseSourceRegistry().entrySet()) {
+            ResponseSourceId key = (ResponseSourceId) entry.getKey();
+            if (id.equals(key)) {
+                return (HttpResponseSource) entry.getValue();
+            }
+        }
+        return null;
     }
 
 }

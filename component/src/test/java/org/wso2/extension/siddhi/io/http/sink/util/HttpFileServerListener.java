@@ -40,29 +40,41 @@ public class HttpFileServerListener implements HttpHandler {
     private Headers headers;
     private static final Logger logger = Logger.getLogger(HttpFileServerListener.class);
     private String filePath;
+    private int expectedStatusCode = 2;
 
     public HttpFileServerListener() {
         ClassLoader classLoader = getClass().getClassLoader();
         filePath = classLoader.getResource("files").getFile();
     }
+
+    public HttpFileServerListener(int expectedStatusCode) {
+        this.expectedStatusCode = expectedStatusCode;
+    }
     
     @Override
     public void handle(HttpExchange event) throws IOException {
         // Get the paramString form the request
-        String line;
-        headers = event.getRequestHeaders();
-        InputStream inputStream = event.getRequestBody();
-        // initiating
-        File file = new File(filePath + File.separator + "testFile.txt");
-        InputStream fileInputStream = new FileInputStream(file);
+        if (expectedStatusCode == 2) {
+            headers = event.getRequestHeaders();
+            InputStream inputStream = event.getRequestBody();
+            // initiating
+            File file = new File(filePath + File.separator + "testFile.txt");
+            InputStream fileInputStream = new FileInputStream(file);
 
-        logger.info("Event Arrived");
+            logger.info("Event Arrived");
 
-        byte[] response = IOUtils.toByteArray(fileInputStream);
-        event.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
-        event.getResponseBody().write(response);
-        inputStream.close();
-        event.close();
-        isEventArrived.set(true);
+            byte[] response = IOUtils.toByteArray(fileInputStream);
+            event.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+            event.getResponseBody().write(response);
+            inputStream.close();
+            event.close();
+            isEventArrived.set(true);
+        } else if (expectedStatusCode == 4) {
+            byte[] response = "Requested file cannot be found.".getBytes();
+            event.sendResponseHeaders(HttpURLConnection.HTTP_BAD_REQUEST, response.length);
+            event.getResponseBody().write(response);
+            event.close();
+            isEventArrived.set(true);
+        }
     }
 }

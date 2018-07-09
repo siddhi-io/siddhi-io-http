@@ -4,8 +4,16 @@ package org.wso2.extension.siddhi.io.http.util;
  * Class for holding sinkid and the status code for a response source
  */
 public class ResponseSourceId {
-    String sinkId;
-    String httpCode;
+    private String sinkId;
+    private String httpCode;
+
+    public String getSinkId() {
+        return sinkId;
+    }
+
+    public String getHttpCode() {
+        return httpCode;
+    }
 
     public ResponseSourceId(String sinkId, String httpCode) {
         this.sinkId = sinkId;

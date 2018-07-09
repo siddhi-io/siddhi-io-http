@@ -57,4 +57,8 @@ public class HTTPSourceRegistry {
     public static void removeResponseSource(String sinkId, String statusCode) {
         responseSourceRegistry.remove(new ResponseSourceId(sinkId, statusCode));
     }
+
+    public static Map<ResponseSourceId, HttpResponseSource> getResponseSourceRegistry() {
+        return responseSourceRegistry;
+    }
 }

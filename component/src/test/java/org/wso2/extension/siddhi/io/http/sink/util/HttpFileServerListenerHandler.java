@@ -38,6 +38,11 @@ public class HttpFileServerListenerHandler implements Runnable {
         this.fileServerListener = new HttpFileServerListener();
         this.port = port;
     }
+
+    public HttpFileServerListenerHandler(int port, int expectedStatusCode) {
+        this.fileServerListener = new HttpFileServerListener(expectedStatusCode / 100);
+        this.port = port;
+    }
     
     @Override
     public void run() {
