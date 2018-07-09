@@ -488,7 +488,7 @@ public class HttpRequestSource extends HttpSource {
     }
 
     /**
-     * Intialy Called to connect to the end point for start  retriving the messages asynchronisly .
+     * Initially Called to connect to the end point for start retrieving the messages asynchronisly .
      *
      * @param connectionCallback Callback to pass the ConnectionUnavailableException in case of connection failure
      *                           after initial successful connection(can be used when events are receving
@@ -501,7 +501,7 @@ public class HttpRequestSource extends HttpSource {
         this.httpConnectorRegistry.registerSourceListener(sourceEventListener, listenerUrl,
                 Integer.parseInt(workerThread), isAuth, requestedTransportPropertyNames, sourceId, siddhiAppName);
 
-        HTTPSourceRegistry.registerSource(sourceId, this);
+        HTTPSourceRegistry.registerRequestSource(sourceId, this);
     }
 
     /**
@@ -512,7 +512,7 @@ public class HttpRequestSource extends HttpSource {
         this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl, siddhiAppName);
         this.httpConnectorRegistry.unregisterServerConnector(this.listenerUrl);
 
-        HTTPSourceRegistry.removeSource(sourceId);
+        HTTPSourceRegistry.removeRequestSource(sourceId);
         for (Map.Entry<String, HTTPCarbonMessage> entry : requestContainerMap.entrySet()) {
             cancelRequest(entry.getKey(), entry.getValue());
         }
@@ -524,9 +524,8 @@ public class HttpRequestSource extends HttpSource {
      */
     @Override
     public void destroy() {
-
         this.httpConnectorRegistry.clearBootstrapConfigIfLast();
-        HTTPSourceRegistry.removeSource(sourceId);
+        HTTPSourceRegistry.removeRequestSource(sourceId);
         timer.stop();
     }
 

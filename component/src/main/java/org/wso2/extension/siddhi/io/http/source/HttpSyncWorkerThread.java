@@ -64,7 +64,7 @@ public class HttpSyncWorkerThread implements Runnable {
             String payload = buf.lines().collect(Collectors.joining("\n"));
 
             if (!payload.equals(HttpConstants.EMPTY_STRING)) {
-                HTTPSourceRegistry.getSource(sourceId).registerCallback(carbonMessage, messageId);
+                HTTPSourceRegistry.getRequestSource(sourceId).registerCallback(carbonMessage, messageId);
                 sourceEventListener.onEvent(payload, trpProperties);
                 if (logger.isDebugEnabled()) {
                     logger.debug("Submitted Event " + payload + " Stream");

@@ -31,7 +31,7 @@ import java.net.URI;
  * Tests http request source and http response source.
  */
 
-public class HttpRequestResponseTestCase {
+public class HttpSyncRequestResponseTestCase {
 
     @Test
     public void testHTTPTextMappingXML() throws Exception {

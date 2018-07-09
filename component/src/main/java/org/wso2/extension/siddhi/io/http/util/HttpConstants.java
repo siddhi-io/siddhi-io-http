@@ -22,25 +22,26 @@ package org.wso2.extension.siddhi.io.http.util;
  * {@code HttpConstant }Http Sink SinkConstants.
  */
 public class HttpConstants {
-    
+
     private HttpConstants() {
     }
-    
+
     //source configuration
     //--source transport configuration
     public static final String WORKER_COUNT = "worker.count";
     public static final String DEFAULT_WORKER_COUNT = "1";
-    
+
     //--source general configuration
     public static final String RECEIVER_URL = "receiver.url";
     public static final String SOURCE_ID = "source.id";
+    public static final String SINK_ID = "sink.id";
     public static final String CONNECTION_TIMEOUT = "connection.timeout";
     public static final String IS_AUTH = "basic.auth.enabled";
     public static final String EMPTY_IS_AUTH = "false";
     public static final String MESSAGE_PROCESSOR_ID = "messageProcessorId";
     public static final String MESSAGE_PROCESSOR_ID_VALUE = "Siddhi HTTP-message-processor";
     public static final String LISTENER_PORT = "LISTENER_PORT";
-    
+
     //Http siddhi sink properties
     public static final String AUTH_USERNAME_PASSWORD_SEPARATOR = ":";
     public static final String METHOD = "method";
@@ -59,6 +60,8 @@ public class HttpConstants {
     public static final String APPLICATION_JSON = "application/json";
     public static final String APPLICATION_URL_ENCODED = "application/x-www-form-urlencoded";
     public static final String DEFAULT_ENCODING = "UTF-8";
+    public static final String DOWNLOAD_ENABLED = "downloading.enabled";
+    public static final String DEFAULT_DOWNLOAD_ENABLED_VALUE = "false";
 
     //Common util values
     public static final String HTTP_METHOD_POST = "POST"; //method name
@@ -86,7 +89,7 @@ public class HttpConstants {
     public static final String CREDENTIAL_SEPARATOR = ":";
     public static final String PORT_CONTEXT_SEPARATOR = "/";
     public static final String PORT_CONTEXT_KEY_SEPARATOR = "-";
-    
+
     //GlobaleConfigurations
     public static final String HTTP_PORT = "defaultHttpPort";
     public static final String HTTP_PORT_VALUE = "8280";
@@ -110,7 +113,7 @@ public class HttpConstants {
     public static final String DEFAULT_TRACE_LOG_ENABLED = "httpTraceLogEnabled";
     public static final String TRACE_LOG_ENABLED = "trace.log.enabled";
     public static final String DEFAULT_TRACE_LOG_ENABLED_VALUE = "false";
-    
+
     public static final String SERVER_BOOTSTRAP_BOSS_GROUP_SIZE = "serverBootstrapBossGroupSize";
     public static final String SERVER_BOOTSTRAP_WORKER_GROUP_SIZE = "serverBootstrapWorkerGroupSize";
     public static final String SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE = "serverBootstrapClientGroupSize";
@@ -118,7 +121,7 @@ public class HttpConstants {
     public static final String CLIENT_BOOTSTRAP_WORKER_GROUP_SIZE = "clientBootstrapWorkerGroupSize";
     public static final String CLIENT_BOOTSTRAP_CLIENT_GROUP_SIZE = "clientBootstrapClientGroupSize";
     public static final String DEFAULT_INTERFACE = "0.0.0.0:8280";
-    
+
     //Http Source & sink variables
     public static final String SOCKET_IDEAL_TIMEOUT = "socket.idle.timeout";
     public static final String SOCKET_IDEAL_TIMEOUT_VALUE = "-1";
@@ -128,7 +131,7 @@ public class HttpConstants {
     public static final String SOURCE_PARAMETERS = "parameters";
     public static final String REQUEST_SIZE_VALIDATION_CONFIG = "request.size.validation.configurations";
     public static final String SERVER_BOOTSTRAP_CONFIGURATION = "server.bootstrap.configurations";
-    
+
     public static final String CLIENT_CHUNK_ENABLED = "chunk.disabled";
     public static final String CLIENT_FOLLOW_REDIRECT = "follow.redirect";
     public static final String CLIENT_MAX_REDIRECT_COUNT = "max.redirect.count";
@@ -139,7 +142,8 @@ public class HttpConstants {
     public static final String PROXY_USERNAME = "proxy.username";
     public static final String PROXY_PASSWORD = "proxy.password";
     public static final String SINK_PARAMETERS = "parameters";
-    
+    public static final String MSG_ID = "msgId";
+
     //http sink transport properties
     public static final String LATENCY_METRICS_ENABLED = "latency.metrics.enabled";
     public static final String REQUEST_SIZE_VALIDATION = "request.size.validation";
@@ -168,7 +172,7 @@ public class HttpConstants {
     public static final String SERVER_BOOTSTRAP_SOCKET_REUSE_PARAM = "server.bootstrap.socket.reuse";
     public static final String SERVER_BOOTSTRAP_SOCKET_TIMEOUT_PARAM = "server.bootstrap.socket.timeout";
     public static final String SERVER_BOOTSTRAP_SOCKET_BACKLOG_PARAM = "server.bootstrap.socket.backlog";
-    
+
     //http source transport properties
     public static final String CLIENT_CONNECTION_POOL_COUNT = "client.connection.pool.count";
     public static final String CLIENT_MAX_ACTIVE_CONNECTIONS_PER_POOL = "client.max.active.connections.per.pool";
@@ -185,13 +189,24 @@ public class HttpConstants {
     public static final String CLIENT_BOOTSTRAP_CONNECT_TIMEOUT = "client.bootstrap.connect.timeout";
     public static final String CLIENT_BOOTSTRAP_SOCKET_REUSE = "client.bootstrap.socket.reuse";
     public static final String CLIENT_BOOTSTRAP_SOCKET_TIMEOUT = "client.bootstrap.socket.timeout";
-    
+
     public static final String HTTP_TRACE_LOG_ENABLED = "httpTraceLogEnabled";
     public static final String LOG_TRACE_ENABLE_DEFAULT_VALUE = "false";
 
     public static final String DEFAULT_ENCODE_PAYLOAD_VALUE = "false";
-    
+
     public static final String PARAMETER_SEPARATOR = "','";
     public static final String VALUE_SEPARATOR = ":";
-    
+
+    public static final String TRUE = "true";
+    public static final String FALSE = "false";
+
+    public static final String FILE_URL = "file.url";
+    public static final String DOWNLOAD_PATH = "download.path";
+    public static final String IS_DOWNLOADABLE_CONTENT = "__is_downloadable_content";
+
+    // HTTP codes for response source
+    public static final String HTTP_STATUS_CODE = "http.status.code";
+    public static final String DEFAULT_HTTP_SUCCESS_CODE = "200";
+    public static final String DEFAULT_HTTP_ERROR_CODE = "500";
 }

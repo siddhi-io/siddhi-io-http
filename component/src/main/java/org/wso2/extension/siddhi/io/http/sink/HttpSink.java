@@ -433,15 +433,35 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
 public class HttpSink extends Sink {
     private static final Logger log = Logger.getLogger(HttpSink.class);
     private String streamID;
-    private HttpClientConnector clientConnector;
-    private String mapType;
+    HttpClientConnector clientConnector;
+    String mapType;
     private Map<String, String> httpURLProperties;
-    private Option httpHeaderOption;
-    private Option httpMethodOption;
+    Option httpHeaderOption;
+    Option httpMethodOption;
     private String authorizationHeader;
     private String userName;
     private String userPassword;
     private String publisherURL;
+    Option publisherURLOption;
+    private String clientStoreFile;
+    private String clientStorePass;
+    private int socketIdleTimeout;
+    private String sslProtocol;
+    private String tlsStoreType;
+    private String chunkDisabled;
+    private String followRedirect;
+    private String maxRedirectCount;
+    private String parametersList;
+    private String proxyHost;
+    private String proxyPort;
+    private String proxyUsername;
+    private String proxyPassword;
+    private String clientBootstrapConfiguration;
+    private String clientPoolConfiguration;
+    private String bootstrapWorker;
+    private String bootstrapBoss;
+    private String bootstrapClient;
+    private ConfigReader configReader;
 
     /**
      * Returns the list of classes which this sink can consume.
@@ -482,46 +502,222 @@ public class HttpSink extends Sink {
     protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
                         ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
         //read configurations
+        this.configReader = configReader;
         this.streamID = siddhiAppContext.getName() + PORT_HOST_SEPARATOR + outputStreamDefinition.toString();
         this.mapType = outputStreamDefinition.getAnnotations().get(0).getAnnotations().get(0).getElements().get(0)
                 .getValue();
-        this.publisherURL = optionHolder.validateAndGetStaticValue(HttpConstants.PUBLISHER_URL);
+        this.publisherURLOption = optionHolder.validateAndGetOption(HttpConstants.PUBLISHER_URL);
         this.httpHeaderOption = optionHolder.getOrCreateOption(HttpConstants.HEADERS, HttpConstants.DEFAULT_HEADER);
         this.httpMethodOption = optionHolder.getOrCreateOption(HttpConstants.METHOD, HttpConstants.DEFAULT_METHOD);
         this.userName = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_USERNAME, EMPTY_STRING);
         this.userPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_PASSWORD, EMPTY_STRING);
-        String clientStoreFile = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PATH_PARAM,
+        clientStoreFile = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PATH_PARAM,
                 HttpSinkUtil.trustStorePath(configReader));
-        String clientStorePass = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD_PARAM,
+        clientStorePass = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD_PARAM,
                 HttpSinkUtil.trustStorePassword(configReader));
-        String scheme = HttpSinkUtil.getScheme(publisherURL);
-        this.httpURLProperties = HttpSinkUtil.getURLProperties(publisherURL);
-        int socketIdleTimeout = Integer.parseInt(optionHolder.validateAndGetStaticValue
+        socketIdleTimeout = Integer.parseInt(optionHolder.validateAndGetStaticValue
                 (HttpConstants.SOCKET_IDEAL_TIMEOUT, SOCKET_IDEAL_TIMEOUT_VALUE));
-        String sslProtocol = optionHolder.validateAndGetStaticValue(HttpConstants.SSL_PROTOCOL, EMPTY_STRING);
-        String tlsStoreType = optionHolder.validateAndGetStaticValue(HttpConstants.TLS_STORE_TYPE, EMPTY_STRING);
-        String chunkDisabled = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_CHUNK_ENABLED, EMPTY_STRING);
-        String followRedirect = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_FOLLOW_REDIRECT,
+        sslProtocol = optionHolder.validateAndGetStaticValue(HttpConstants.SSL_PROTOCOL, EMPTY_STRING);
+        tlsStoreType = optionHolder.validateAndGetStaticValue(HttpConstants.TLS_STORE_TYPE, EMPTY_STRING);
+        chunkDisabled = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_CHUNK_ENABLED, EMPTY_STRING);
+        followRedirect = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_FOLLOW_REDIRECT,
                 EMPTY_STRING);
-        String maxRedirectCount = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_MAX_REDIRECT_COUNT,
+        maxRedirectCount = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_MAX_REDIRECT_COUNT,
                 EMPTY_STRING);
-        String parametersList = optionHolder.validateAndGetStaticValue(HttpConstants.SINK_PARAMETERS, EMPTY_STRING);
-        String proxyHost = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_HOST, EMPTY_STRING);
-        String proxyPort = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_PORT, EMPTY_STRING);
-        String proxyUsername = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_USERNAME,
+        parametersList = optionHolder.validateAndGetStaticValue(HttpConstants.SINK_PARAMETERS, EMPTY_STRING);
+        proxyHost = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_HOST, EMPTY_STRING);
+        proxyPort = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_PORT, EMPTY_STRING);
+        proxyUsername = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_USERNAME,
+                 EMPTY_STRING);
+        proxyPassword = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_PASSWORD,
                 EMPTY_STRING);
-        String proxyPassword = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_PASSWORD,
-                EMPTY_STRING);
-        String clientBootstrapConfiguration = optionHolder
+        clientBootstrapConfiguration = optionHolder
                 .validateAndGetStaticValue(HttpConstants.CLIENT_BOOTSTRAP_CONFIGURATION, EMPTY_STRING);
-        String clientPoolConfiguration = optionHolder
+        clientPoolConfiguration = optionHolder
                 .validateAndGetStaticValue(HttpConstants.CLIENT_POOL_CONFIGURATION, EMPTY_STRING);
         //read trp globe configuration
-        String bootstrapWorker = configReader
+        bootstrapWorker = configReader
                 .readConfig(HttpConstants.CLIENT_BOOTSTRAP_WORKER_GROUP_SIZE, EMPTY_STRING);
-        String bootstrapBoss = configReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_BOSS_GROUP_SIZE, EMPTY_STRING);
-        String bootstrapClient = configReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_CLIENT_GROUP_SIZE,
+        bootstrapBoss = configReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_BOSS_GROUP_SIZE, EMPTY_STRING);
+        bootstrapClient = configReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_CLIENT_GROUP_SIZE,
                 EMPTY_STRING);
+
+        if (publisherURLOption.isStatic()) {
+            initClientConnector(null);
+        }
+    }
+
+
+    /**
+     * This method will be called when events need to be published via this sink
+     *
+     * @param payload        payload of the event based on the supported event class exported by the extensions
+     * @param dynamicOptions holds the dynamic options of this sink and Use this object to obtain dynamic options.
+     */
+    @Override
+    public void publish(Object payload, DynamicOptions dynamicOptions) {
+        if (publisherURLOption.isStatic()) {
+            if (clientConnector != null) {
+                clientConnector.close();
+            }
+            initClientConnector(dynamicOptions);
+        }
+        String headers = httpHeaderOption.getValue(dynamicOptions);
+        String httpMethod = EMPTY_STRING.equals(httpMethodOption.getValue(dynamicOptions)) ?
+                HttpConstants.METHOD_DEFAULT : httpMethodOption.getValue(dynamicOptions);
+        List<Header> headersList = HttpSinkUtil.getHeaders(headers);
+        String contentType = HttpSinkUtil.getContentType(mapType, headersList);
+        String messageBody = getMessageBody(payload);
+        HttpMethod httpReqMethod = new HttpMethod(httpMethod);
+        HTTPCarbonMessage cMessage = new HTTPCarbonMessage(
+                new DefaultHttpRequest(HttpVersion.HTTP_1_1, httpReqMethod, EMPTY_STRING));
+        cMessage = generateCarbonMessage(headersList, contentType, httpMethod, cMessage);
+        if (!Constants.HTTP_GET_METHOD.equals(httpMethod)) {
+            cMessage.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(messageBody
+                    .getBytes(Charset.defaultCharset()))));
+        }
+        cMessage.completeMessage();
+        clientConnector.send(cMessage);
+    }
+
+    /**
+     * This method will be called before the processing method.
+     * Intention to establish connection to publish event.
+     *
+     * @throws ConnectionUnavailableException if end point is unavailable the ConnectionUnavailableException thrown
+     *                                        such that the  system will take care retrying for connection
+     */
+    @Override
+    public void connect() throws ConnectionUnavailableException {
+        if (publisherURLOption.isStatic()) {
+            log.info(streamID + " has successfully connected to " + publisherURL);
+        }
+    }
+
+    /**
+     * Called after all publishing is done, or when {@link ConnectionUnavailableException} is thrown
+     * Implementation of this method should contain the steps needed to disconnect from the sink.
+     */
+    @Override
+    public void disconnect() {
+        if (clientConnector != null) {
+            clientConnector = null;
+            log.info("Server connector for url " + publisherURL + " disconnected.");
+        }
+    }
+
+    /**
+     * The method can be called when removing an event receiver.
+     * The cleanups that has to be done when removing the receiver has to be done here.
+     */
+    @Override
+    public void destroy() {
+        if (clientConnector != null) {
+            clientConnector = null;
+            log.info("Server connector for url " + publisherURL + " disconnected.");
+        }
+    }
+
+    /**
+     * Used to collect the serializable state of the processing element, that need to be
+     * persisted for reconstructing the element to the same state on a different point of time
+     * This is also used to identify the internal states and debuging
+     *
+     * @return all internal states should be return as an map with meaning full keys
+     */
+    @Override
+    public Map<String, Object> currentState() {
+        //no current state.
+        return null;
+    }
+
+    /**
+     * Used to restore serialized state of the processing element, for reconstructing
+     * the element to the same state as if was on a previous point of time.
+     *
+     * @param state the stateful objects of the processing element as a map.
+     *              This map will have the  same keys that is created upon calling currentState() method.
+     */
+    @Override
+    public void restoreState(Map<String, Object> state) {
+        //no need to maintain.
+    }
+
+    /**
+     * The method is responsible of generating carbon message to send.
+     *
+     * @param headers     the headers set.
+     * @param contentType the content type. Value is if user has to given it as a header or if not it is map type.
+     * @param httpMethod  http method type.
+     * @param cMessage    carbon message to be send to the endpoint.
+     * @return generated carbon message.
+     */
+    HTTPCarbonMessage generateCarbonMessage(List<Header> headers, String contentType,
+                                            String httpMethod, HTTPCarbonMessage cMessage) {
+        /*
+         * set carbon message properties which is to be used in carbon transport.
+         */
+        // Set protocol type http or https
+        cMessage.setProperty(Constants.PROTOCOL, httpURLProperties.get(Constants.PROTOCOL));
+        // Set uri
+        cMessage.setProperty(Constants.TO, httpURLProperties.get(Constants.TO));
+        // set Host
+        cMessage.setProperty(Constants.HTTP_HOST, httpURLProperties.get(Constants.HTTP_HOST));
+        //set port
+        cMessage.setProperty(Constants.HTTP_PORT, Integer.valueOf(httpURLProperties.get(Constants.HTTP_PORT)));
+        // Set method
+        cMessage.setProperty(Constants.HTTP_METHOD, httpMethod);
+        //Set request URL
+        cMessage.setProperty(Constants.REQUEST_URL, httpURLProperties.get(Constants.REQUEST_URL));
+        HttpHeaders httpHeaders = cMessage.getHeaders();
+        //if Authentication enabled
+        if (!(userName.equals(EMPTY_STRING)) && !(userPassword.equals
+                (EMPTY_STRING))) {
+            httpHeaders.set(HttpConstants.AUTHORIZATION_HEADER, authorizationHeader);
+        } else if (!(userName.equals(EMPTY_STRING)) || !(userPassword.equals
+                (EMPTY_STRING))) {
+            log.error("One of the basic authentication username or password missing. Hence basic authentication not " +
+                    "supported.");
+        }
+
+        /*
+         *set request headers.
+         */
+        // Set user given Headers
+        if (headers != null) {
+            for (Header header : headers) {
+                httpHeaders.set(header.getName(), header.getValue());
+            }
+        }
+        // Set content type if content type s not included in headers
+        if (contentType.contains(mapType)) {
+            httpHeaders.set(HttpConstants.HTTP_CONTENT_TYPE, contentType);
+        }
+        //set method-type header
+        httpHeaders.set(HttpConstants.HTTP_METHOD, httpMethod);
+        return cMessage;
+    }
+
+    String getMessageBody(Object payload) {
+        if (HttpConstants.MAP_KEYVALUE.equals(mapType)) {
+            Map<String, Object> params = (HashMap) payload;
+            return params.entrySet().stream()
+                    .map(p -> encodeMessage(p.getKey()) + "=" + encodeMessage(p.getValue()))
+                    .reduce("", (p1, p2) -> p1 + "&" + p2);
+        } else {
+            return (String) payload;
+        }
+    }
+
+    void initClientConnector(DynamicOptions dynamicOptions) {
+        if (publisherURLOption.isStatic()) {
+            publisherURL = publisherURLOption.getValue();
+        } else {
+            publisherURL = publisherURLOption.getValue(dynamicOptions);
+        }
+
+        String scheme = HttpSinkUtil.getScheme(publisherURL);
+        this.httpURLProperties = HttpSinkUtil.getURLProperties(publisherURL);
         //Generate basic sender configurations
         SenderConfiguration senderConfig = HttpSinkUtil
                 .getSenderConfigurations(httpURLProperties, clientStoreFile, clientStorePass, configReader);
@@ -593,7 +789,7 @@ public class HttpSink extends Sink {
                 } else {
                     senderConfig.setChunkingConfig(ChunkConfig.ALWAYS);
                 }
-            } // else AUTO
+            }
         }
         if (!EMPTY_STRING.equals(followRedirect)) {
             senderConfig.setFollowRedirect(Boolean.parseBoolean(followRedirect));
@@ -610,161 +806,6 @@ public class HttpSink extends Sink {
                 .populateTransportConfiguration(clientBootstrapConfiguration, clientPoolConfiguration);
 
         clientConnector = httpConnectorFactory.createHttpClientConnector(properties, senderConfig);
-    }
-
-
-    /**
-     * This method will be called when events need to be published via this sink
-     *
-     * @param payload        payload of the event based on the supported event class exported by the extensions
-     * @param dynamicOptions holds the dynamic options of this sink and Use this object to obtain dynamic options.
-     */
-    @Override
-    public void publish(Object payload, DynamicOptions dynamicOptions) {
-        String headers = httpHeaderOption.getValue(dynamicOptions);
-        String httpMethod = EMPTY_STRING.equals(httpMethodOption.getValue(dynamicOptions)) ?
-                HttpConstants.METHOD_DEFAULT : httpMethodOption.getValue(dynamicOptions);
-        List<Header> headersList = HttpSinkUtil.getHeaders(headers);
-        String contentType = HttpSinkUtil.getContentType(mapType, headersList);
-        String messageBody = getMessageBody(payload);
-        HttpMethod httpReqMethod = new HttpMethod(httpMethod);
-        HTTPCarbonMessage cMessage = new HTTPCarbonMessage(
-                new DefaultHttpRequest(HttpVersion.HTTP_1_1, httpReqMethod, EMPTY_STRING));
-        cMessage = generateCarbonMessage(headersList, contentType, httpMethod, cMessage);
-        if (!Constants.HTTP_GET_METHOD.equals(httpMethod)) {
-            cMessage.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(messageBody
-                    .getBytes(Charset.defaultCharset()))));
-        }
-        cMessage.completeMessage();
-        clientConnector.send(cMessage);
-    }
-
-    /**
-     * This method will be called before the processing method.
-     * Intention to establish connection to publish event.
-     *
-     * @throws ConnectionUnavailableException if end point is unavailable the ConnectionUnavailableException thrown
-     *                                        such that the  system will take care retrying for connection
-     */
-    @Override
-    public void connect() throws ConnectionUnavailableException {
-        log.info(streamID + " has successfully connected to " + publisherURL);
-
-    }
-
-    /**
-     * Called after all publishing is done, or when {@link ConnectionUnavailableException} is thrown
-     * Implementation of this method should contain the steps needed to disconnect from the sink.
-     */
-    @Override
-    public void disconnect() {
-        if (clientConnector != null) {
-            clientConnector = null;
-            log.info("Server connector for url " + publisherURL + " disconnected.");
-        }
-    }
-
-    /**
-     * The method can be called when removing an event receiver.
-     * The cleanups that has to be done when removing the receiver has to be done here.
-     */
-    @Override
-    public void destroy() {
-        if (clientConnector != null) {
-            clientConnector = null;
-            log.info("Server connector for url " + publisherURL + " disconnected.");
-        }
-    }
-
-    /**
-     * Used to collect the serializable state of the processing element, that need to be
-     * persisted for reconstructing the element to the same state on a different point of time
-     * This is also used to identify the internal states and debuging
-     *
-     * @return all internal states should be return as an map with meaning full keys
-     */
-    @Override
-    public Map<String, Object> currentState() {
-        //no current state.
-        return null;
-    }
-
-    /**
-     * Used to restore serialized state of the processing element, for reconstructing
-     * the element to the same state as if was on a previous point of time.
-     *
-     * @param state the stateful objects of the processing element as a map.
-     *              This map will have the  same keys that is created upon calling currentState() method.
-     */
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        //no need to maintain.
-    }
-
-    /**
-     * The method is responsible of generating carbon message to send.
-     *
-     * @param headers     the headers set.
-     * @param contentType the content type. Value is if user has to given it as a header or if not it is map type.
-     * @param httpMethod  http method type.
-     * @param cMessage    carbon message to be send to the endpoint.
-     * @return generated carbon message.
-     */
-    private HTTPCarbonMessage generateCarbonMessage(List<Header> headers, String contentType,
-                                                    String httpMethod, HTTPCarbonMessage cMessage) {
-        /*
-         * set carbon message properties which is to be used in carbon transport.
-         */
-        // Set protocol type http or https
-        cMessage.setProperty(Constants.PROTOCOL, httpURLProperties.get(Constants.PROTOCOL));
-        // Set uri
-        cMessage.setProperty(Constants.TO, httpURLProperties.get(Constants.TO));
-        // set Host
-        cMessage.setProperty(Constants.HTTP_HOST, httpURLProperties.get(Constants.HTTP_HOST));
-        //set port
-        cMessage.setProperty(Constants.HTTP_PORT, Integer.valueOf(httpURLProperties.get(Constants.HTTP_PORT)));
-        // Set method
-        cMessage.setProperty(Constants.HTTP_METHOD, httpMethod);
-        //Set request URL
-        cMessage.setProperty(Constants.REQUEST_URL, httpURLProperties.get(Constants.REQUEST_URL));
-        HttpHeaders httpHeaders = cMessage.getHeaders();
-        //if Authentication enabled
-        if (!(userName.equals(EMPTY_STRING)) && !(userPassword.equals
-                (EMPTY_STRING))) {
-            httpHeaders.set(HttpConstants.AUTHORIZATION_HEADER, authorizationHeader);
-        } else if (!(userName.equals(EMPTY_STRING)) || !(userPassword.equals
-                (EMPTY_STRING))) {
-            log.error("One of the basic authentication username or password missing. Hence basic authentication not " +
-                    "supported.");
-        }
-
-        /*
-         *set request headers.
-         */
-        // Set user given Headers
-        if (headers != null) {
-            for (Header header : headers) {
-                httpHeaders.set(header.getName(), header.getValue());
-            }
-        }
-        // Set content type if content type s not included in headers
-        if (contentType.contains(mapType)) {
-            httpHeaders.set(HttpConstants.HTTP_CONTENT_TYPE, contentType);
-        }
-        //set method-type header
-        httpHeaders.set(HttpConstants.HTTP_METHOD, httpMethod);
-        return cMessage;
-    }
-
-    private String getMessageBody(Object payload) {
-        if (HttpConstants.MAP_KEYVALUE.equals(mapType)) {
-            Map<String, Object> params = (HashMap) payload;
-            return params.entrySet().stream()
-                    .map(p -> encodeMessage(p.getKey()) + "=" + encodeMessage(p.getValue()))
-                    .reduce("", (p1, p2) -> p1 + "&" + p2);
-        } else {
-            return (String) payload;
-        }
     }
 
     private String encodeMessage(Object s) {

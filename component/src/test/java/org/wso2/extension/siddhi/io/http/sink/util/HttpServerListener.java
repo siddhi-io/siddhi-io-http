@@ -27,6 +27,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -54,6 +55,11 @@ public class HttpServerListener implements HttpHandler {
             stringBuilder = stringBuilder.append(line).append("\n");
         }
         logger.info("Event Arrived: " + stringBuilder.toString());
+
+        byte[] response = stringBuilder.toString().getBytes();
+        event.sendResponseHeaders(HttpURLConnection.HTTP_OK, response.length);
+        event.getResponseBody().write(response);
+        event.close();
         isEventArrived.set(true);
     }
     
