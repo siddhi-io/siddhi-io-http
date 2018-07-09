@@ -363,19 +363,22 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
         },
         examples = {
                 @Example(syntax =
-                        "@sink(type='http-request', sink.id='foo', publisher.url='http://localhost:8009/foo', " +
-                                "method='{{method}}'," +
-                                "headers=\"'content-type:xml','content-length:94'\", client.bootstrap" +
-                                ".configuration=\"'client" +
-                                ".bootstrap" +
-                                ".socket" +
-                                ".timeout:20', 'client.bootstrap.worker.group.size:10'\", client.pool" +
-                                ".configuration=\"'client.connection.pool.count:10','client.max.active.connections" +
-                                ".per.pool:1'\", " +
+                                "@sink(type='http-request', sink.id='foo', " +
+                                "publisher.url='http://localhost:8009/foo', " +
                                 "@map(type='xml', @payload('{{payloadBody}}')))\n" +
-                                "define stream FooStream (payloadBody String, method string, headers string);\n",
+                                "define stream FooStream (payloadBody String, method string, headers string);\n" +
+                                "" +
+                                "@source(type='http-response', sink.id='foo', http.status.code='2\\\\d+', \n" +
+                                "@map(type='text', regex.A='((.|\\n)*)', " +
+                                "@attributes(headers='trp:headers', fileName='A[1]')))\n" +
+                                "define stream responseStream2xx(fileName string, headers string);\n\n" +
+                                "" +
+                                "@source(type='http-response', sink.id='foo', http.status.code='4\\\\d+', \n" +
+                                "@map(type='text', regex.A='((.|\\n)*)', @attributes(errorMsg='A[1]'))" +
+                                ")\n" +
+                                "define stream responseStream4xx(errorMsg string);",
                         description =
-                                "In above example, expected payload body for 'FooStream' should be in following " +
+                                "In above example, the payload body for 'FooStream' will be in following " +
                                 "format.\n" +
                                 "{\n" +
                                 "<events>\n" +
@@ -385,33 +388,17 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
                                 "        <volume>100</volume>\n" +
                                 "    </event>\n" +
                                 "</events>,\n" +
-                                "POST,\n" +
-                                "Content-Length:24#Content-Location:USA#Retry-After:120\n" +
-                                "}\n\n" +
-                                "" +
-                                "Above event will generate output as below.\n" +
-                                "~Output http event payload\n" +
-                                "<events>\n" +
-                                "    <event>\n" +
-                                "        <symbol>WSO2</symbol>\n" +
-                                "        <price>55.6</price>\n" +
-                                "        <volume>100</volume>\n" +
-                                "    </event>\n" +
-                                "</events>\n\n" +
-                                "~Output http event headers\n" +
-                                "Content-Length:24,\n" +
-                                "Content-Location:'USA',\n" +
-                                "Retry-After:120,\n" +
-                                "Content-Type:'application/xml',\n" +
-                                "HTTP_METHOD:'POST',\n\n" +
-                                "~Output http event properties\n" +
-                                "HTTP_METHOD:'POST',\n" +
-                                "HOST:'localhost',\n" +
-                                "PORT:8009,\n" +
-                                "PROTOCOL:'http',\n" +
-                                "TO:'/foo'\n\n" +
-                                "In order to process this response there should be a source of type " +
-                                "'http-response' defined with the same sink id 'foo' in the siddhi app."),
+                                "This message will sent as the body of a POST request with the content-type " +
+                                "'application/xml' to the endpoint defined as the 'publisher.url' and in order to " +
+                                "process the responses for these requests, there should be a source of type " +
+                                "'http-response' defined with the same sink id 'foo' in the siddhi app.\n" +
+                                "The responses with 2xx status codes will be received by the " +
+                                "http-response source which has the http.status.code defined by the regex " +
+                                "'2\\\\d+'.\n" +
+                                "If the response has a 4xx status code, it will be received by the " +
+                                "http-response source which has the http.status.code defined by the regex " +
+                                "'4\\\\d+'.\n"),
+
                 @Example(syntax = "" +
                                 "define stream FooStream (name String, id int, headers String, downloadPath string);" +
                                 "\n" +
@@ -420,23 +407,24 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
                                 "download.path='{{downloadPath}}'," +
                                 "publisher.url='http://localhost:8005/files',\n" +
                                 "method='GET', " +
-                                "headers='{{headers}}',sink.id='source-1',\n" +
+                                "headers='{{headers}}',sink.id='download-sink',\n" +
                                 "@map(type='json')) \n" +
                                 "define stream BarStream (name String, id int, headers String, downloadPath string);" +
                                 "\n\n" +
-                                "@source(type='http-response', sink.id='source-1', http.status.code='2\\d+', \n" +
+                                "@source(type='http-response', sink.id='download-sink', " +
+                                "http.status.code='2\\\\d+', \n" +
                                 "@map(type='text', regex.A='((.|\\n)*)', " +
                                 "@attributes(headers='trp:headers', fileName='A[1]')))\n" +
                                 "define stream responseStream2xx(fileName string, headers string);\n\n" +
                                 "" +
-                                "@source(type='http-response', sink.id='source-1', http.status.code='2\\d+', \n" +
-                                "@map(type='text', regex.A='((.|\\n)*)', @attributes(errorMsg='A[1]'))" +
-                                ")\n" +
+                                "@source(type='http-response', sink.id='download-sink', " +
+                                "http.status.code='4\\\\d+', \n" +
+                                "@map(type='text', regex.A='((.|\\n)*)', @attributes(errorMsg='A[1]')))\n" +
                                 "define stream responseStream4xx(errorMsg string);",
                         description =
                                 "In above example, http-request sink will send a GET request to the publisher url and" +
                                 " the requested file will be received as the response by a corresponding " +
-                                "http-reponse source.\n" +
+                                "http-response source.\n" +
                                 "If the http status code of the response is a successful one (2xx), it will " +
                                 "be received by the http-response source which has the http.status.code " +
                                 "'2\\\\d+' and downloaded as a local file. Then the event received to the " +

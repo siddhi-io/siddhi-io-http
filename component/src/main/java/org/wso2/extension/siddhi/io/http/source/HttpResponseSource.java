@@ -37,14 +37,15 @@ import java.util.Map;
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.DEFAULT_WORKER_COUNT;
 
 /**
- * Http source for receive the http and https request.
+ * Http source for receive responses for the requests sent by http-request sinks
  */
 @Extension(
         name = "http-response",
         namespace = "source",
         description = "" +
-                "The HTTP-RESPONSE co-relates with HTTP-REQUEST source with the parameter 'sink.id'.\n" +
-                "This receives responses for the requests sent by the HTTP-REQUEST sink which has the same sink id.\n" +
+                "The http-response source co-relates with http-request sink  with the parameter 'sink.id'.\n" +
+                "This receives responses for the requests sent by the http-request sink which has the same " +
+                "sink id.\n" +
                 "Response messages can be in formats such as TEXT, JSON and XML.\n" +
                 "In order to handle the responses with different http status codes, user is allowed to defined the " +
                 "acceptable response source code using the parameter 'http.status.code'\n",
@@ -59,22 +60,35 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.DEFAULT_WORKE
                                 "This can be a complete string or a regex.\n" +
                                 "Only the responses with matching status codes to the defined value, will be received" +
                                 " by the http-response source.\n" +
-                                "Eg: 'http.status.code = '200', http.status.code = '2*''",
+                                "Eg: 'http.status.code = '200', http.status.code = '2\\\\d+''",
                         type = {DataType.STRING})},
         examples = {
                 @Example(syntax = "" +
-                        "@source(type='http-response' , sink.id='employee-info', http.status.code='2**',\n" +
+                        "@sink(type='http-request', \n" +
+                        "downloading.enabled='true',\n" +
+                        "publisher.url='http://localhost:8005/registry/employee',\n" +
+                        "method='POST', " +
+                        "headers='{{headers}}',sink.id='employee-info',\n" +
+                        "@map(type='json')) \n" +
+                        "define stream BarStream (name String, id int, headers String, downloadPath string);\n\n" +
+                        "" +
+                        "@source(type='http-response' , sink.id='employee-info', http.status.code='2\\\\d+',\n" +
                         "@map(type='text', regex.A='((.|\\n)*)', @attributes(message='A[1]'))) \n" +
                         "define stream responseStream2xx(message string);" +
                         "" +
-                        "@source(type='http-response' , sink.id='employee-info', http.status.code='4**' ,\n" +
+                        "@source(type='http-response' , sink.id='employee-info', http.status.code='4\\\\d+' ,\n" +
                         "@map(type='text', regex.A='((.|\\n)*)', @attributes(message='A[1]')))  \n" +
                         "define stream responseStream4xx(message string);",
 
                         description = "" +
-                                "This source will receive the response of the request which is sent by the sink " +
-                                " which has 'employee-info' as the 'sink.id'. All the content of the response message" +
-                                " body will be extracted using text mapper.")}
+                                "In above example, the defined http-request sink will send a POST requests to the " +
+                                "endpoint defined by 'publisher.url'.\n" +
+                                "Then for those requests, the source with the response code '2\\\\d+' and sink.id " +
+                                "'employee-info' will receive the responses with 2xx status codes. \n" +
+                                "The http-response source which has 'employee-info' as the 'sink.id' and '4\\\\d+' " +
+                                "as the http.response.code will receive all the responses with 4xx status codes.\n. " +
+                                "Then the body of the response message will be extracted using text mapper and " +
+                                "converted into siddhi events.\n.")}
         )
 
 public class HttpResponseSource extends Source {
