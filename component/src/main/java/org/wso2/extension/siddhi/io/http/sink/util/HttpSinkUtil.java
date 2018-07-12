@@ -77,9 +77,16 @@ public class HttpSinkUtil {
             URL url = new URL(publisherURL);
             httpStaticProperties = new HashMap<>();
             httpStaticProperties.put(Constants.TO, url.getPath());
+            String protocol = url.getProtocol();
+            httpStaticProperties.put(Constants.PROTOCOL, protocol);
             httpStaticProperties.put(Constants.HTTP_HOST, url.getHost());
-            httpStaticProperties.put(Constants.HTTP_PORT, Integer.toString(url.getPort()));
-            httpStaticProperties.put(Constants.PROTOCOL, url.getProtocol());
+            int port;
+            if (Constants.HTTPS_SCHEME.equalsIgnoreCase(protocol)) {
+                port = url.getPort() != -1 ? url.getPort() : HttpConstants.DEFAULT_HTTPS_PORT;
+            } else {
+                port = url.getPort() != -1 ? url.getPort() : HttpConstants.DEFAULT_HTTP_PORT;
+            }
+            httpStaticProperties.put(Constants.HTTP_PORT, Integer.toString(port));
             httpStaticProperties.put(Constants.REQUEST_URL, url.toString());
         } catch (MalformedURLException e) {
             throw new HttpSinkAdaptorRuntimeException(" Receiver url mandatory. Please insert valid url .", e);

@@ -209,4 +209,8 @@ public class HttpConstants {
     public static final String HTTP_STATUS_CODE = "http.status.code";
     public static final String DEFAULT_HTTP_SUCCESS_CODE = "200";
     public static final String DEFAULT_HTTP_ERROR_CODE = "500";
+
+    // HTTP Default ports if the port is not present in the given URL
+    public static final int DEFAULT_HTTP_PORT = 80;
+    public static final int DEFAULT_HTTPS_PORT = 443;
 }
