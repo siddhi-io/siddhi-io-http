@@ -156,7 +156,7 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                         defaultValue = "6000"),
                 @Parameter(
                         name = "chunk.disabled",
-                        description = "port: Port number of the remote service",
+                        description = "This parameter is used to disable/enable chunked transfer encoding",
                         type = {DataType.BOOL},
                         optional = true,
                         defaultValue = "false"),
@@ -689,7 +689,7 @@ public class HttpSink extends Sink {
                 httpHeaders.set(header.getName(), header.getValue());
             }
         }
-        // Set content type if content type s not included in headers
+        // Set content type if content type is not included in headers
         if (contentType.contains(mapType)) {
             httpHeaders.set(HttpConstants.HTTP_CONTENT_TYPE, contentType);
         }
