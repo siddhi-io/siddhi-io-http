@@ -28,10 +28,7 @@ import org.wso2.extension.siddhi.io.http.sink.util.HttpServerListenerHandler;
 import org.wso2.extension.siddhi.map.xml.sinkmapper.XMLSinkMapper;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.core.stream.output.StreamCallback;
-import org.wso2.siddhi.core.util.SiddhiTestHelper;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

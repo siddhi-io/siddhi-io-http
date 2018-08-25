@@ -65,7 +65,7 @@ public class HttpResponseConnectorListener implements HttpConnectorListener {
     @Override
     public void onError(Throwable throwable) {
         log.error("Error occurred during processing response for the request sent by http-request-sink with " +
-                "'sink.id' = " + sinkId, throwable);
+                "'sink.id' = " + sinkId + " in Siddhi app " + siddhiAppName + ".", throwable);
     }
 
     /**
