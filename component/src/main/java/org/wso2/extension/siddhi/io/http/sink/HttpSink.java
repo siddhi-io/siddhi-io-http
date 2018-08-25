@@ -462,6 +462,7 @@ public class HttpSink extends Sink {
     private String bootstrapBoss;
     private String bootstrapClient;
     private ConfigReader configReader;
+    private SiddhiAppContext siddhiAppContext;
 
     /**
      * Returns the list of classes which this sink can consume.
@@ -503,6 +504,7 @@ public class HttpSink extends Sink {
                         ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
         //read configurations
         this.configReader = configReader;
+        this.siddhiAppContext = siddhiAppContext;
         this.streamID = siddhiAppContext.getName() + PORT_HOST_SEPARATOR + outputStreamDefinition.toString();
         this.mapType = outputStreamDefinition.getAnnotations().get(0).getAnnotations().get(0).getElements().get(0)
                 .getValue();
@@ -723,19 +725,20 @@ public class HttpSink extends Sink {
                 .getSenderConfigurations(httpURLProperties, clientStoreFile, clientStorePass, configReader);
         if (EMPTY_STRING.equals(publisherURL)) {
             throw new SiddhiAppCreationException("Receiver URL found empty but it is Mandatory field in " +
-                    "" + HttpConstants.HTTP_SINK_ID + "in" + streamID);
+                    "" + HttpConstants.HTTP_SINK_ID + " in " + streamID);
         }
         if (HttpConstants.SCHEME_HTTPS.equals(scheme) && ((clientStoreFile == null) || (clientStorePass == null))) {
             throw new ExceptionInInitializerError("Client trustStore file path or password are empty while " +
                     "default scheme is 'https'. Please provide client " +
-                    "trustStore file path and password in" + streamID);
+                    "trustStore file path and password in " + streamID);
         }
         //if username and password both not equal to null consider as basic auth enabled if only one is null take it
         // as exception
         if ((EMPTY_STRING.equals(userName) ^
                 EMPTY_STRING.equals(userPassword))) {
             throw new SiddhiAppCreationException("Please provide user name and password in " +
-                    HttpConstants.HTTP_SINK_ID + "in" + streamID);
+                    HttpConstants.HTTP_SINK_ID + " with the stream " + streamID + " in Siddhi app " +
+                    siddhiAppContext.getName());
         } else if (!(EMPTY_STRING.equals(userName) || EMPTY_STRING.equals
                 (userPassword))) {
             byte[] val = (userName + HttpConstants.AUTH_USERNAME_PASSWORD_SEPARATOR + userPassword).getBytes(Charset
@@ -769,7 +772,8 @@ public class HttpSink extends Sink {
                 }
                 senderConfig.setProxyServerConfiguration(proxyServerConfiguration);
             } catch (UnknownHostException e) {
-                log.error("Proxy url and password is invalid in sink " + streamID, e);
+                log.error("Proxy url and password is invalid in sink " + streamID + " Siddhi app " +
+                        siddhiAppContext.getName(), e);
             }
         }
         //add advanced sender configurations
@@ -812,7 +816,8 @@ public class HttpSink extends Sink {
         try {
             return URLEncoder.encode((String) s, HttpConstants.DEFAULT_ENCODING);
         } catch (UnsupportedEncodingException e) {
-            throw new SiddhiAppRuntimeException("Execution failed due to " + e.getMessage(), e);
+            throw new SiddhiAppRuntimeException("Execution of Siddhi app " + siddhiAppContext.getName() +
+                    " failed due to " + e.getMessage(), e);
         }
     }
 }

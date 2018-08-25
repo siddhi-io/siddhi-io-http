@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -88,7 +88,8 @@ public class HttpResponseProcessor implements Runnable {
                 try {
                     buf.close();
                 } catch (IOException e) {
-                    logger.error("Error closing byte buffer.", e);
+                    logger.error("Closing the byte buffer used by http sink '" + sinkId + "' failed due to " +
+                            e.getMessage(), e);
                 }
             }
         }
@@ -96,11 +97,8 @@ public class HttpResponseProcessor implements Runnable {
 
     private String writeToTile(HTTPCarbonMessage carbonMessage) {
         File file = new File(filePath);
-        try (
-                InputStream inputStream = new HttpMessageDataStreamer(carbonMessage).getInputStream();
-                OutputStream outputStream = new FileOutputStream(file);
-
-        ) {
+        try (InputStream inputStream = new HttpMessageDataStreamer(carbonMessage).getInputStream();
+             OutputStream outputStream = new FileOutputStream(file)) {
             int read;
             byte[] bytes = new byte[1024];
             while ((read = inputStream.read(bytes)) != -1) {
