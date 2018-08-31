@@ -65,6 +65,7 @@ public class HttpConstants {
 
     //Common util values
     public static final String HTTP_METHOD_POST = "POST"; //method name
+    public static final String HTTP_METHOD_OPTIONS = "OPTIONS";
     public static final String HTTP_METHOD = "HTTP_METHOD";
     public static final String DEFAULT_METHOD = HTTP_METHOD_POST;
     public static final String DEFAULT_HEADER = null;

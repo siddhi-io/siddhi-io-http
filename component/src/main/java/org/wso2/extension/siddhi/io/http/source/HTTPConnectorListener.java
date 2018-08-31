@@ -71,6 +71,9 @@ public class HTTPConnectorListener implements HttpConnectorListener {
                     } else {
                         HttpSourceUtil.handleCallback(carbonMessage, 404);
                     }
+                } else if (HttpConstants.HTTP_METHOD_OPTIONS.equalsIgnoreCase((String)
+                        carbonMessage.getProperty((HttpConstants.HTTP_METHOD)))) {
+                    HttpSourceUtil.handleCORS(carbonMessage);
                 } else {
                     throw new HttpSourceAdaptorRuntimeException(carbonMessage, "Request type is not a type of POST ",
                             400);

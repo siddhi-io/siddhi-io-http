@@ -253,5 +253,13 @@ public class HttpSourceUtil {
         trpPropertyTypes.put(SERVER_BOOTSTRAP_SOCKET_BACKLOG_PARAM, TrpPropertyTypes.INTEGER);
         return trpPropertyTypes;
     }
+
+    /**
+     * This method handles OPTIONS requests received by the http-source
+     * @param requestMessage OPTIONS request which needs to be handled.
+     */
+    public static void handleCORS(HTTPCarbonMessage requestMessage) {
+        HttpIoUtil.handleResponse(requestMessage, HttpIoUtil.createOptionsResponseMessage(requestMessage));
+    }
 }
 
