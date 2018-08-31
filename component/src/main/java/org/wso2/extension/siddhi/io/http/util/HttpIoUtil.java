@@ -53,7 +53,7 @@ public class HttpIoUtil {
      * @param requestMsg  request carbon message.
      * @param responseMsg response carbon message.
      */
-    private static void handleResponse(HTTPCarbonMessage requestMsg, HTTPCarbonMessage responseMsg) {
+    public static void handleResponse(HTTPCarbonMessage requestMsg, HTTPCarbonMessage responseMsg) {
         try {
             requestMsg.respond(responseMsg);
         } catch (org.wso2.transport.http.netty.contract.ServerConnectorException e) {
@@ -109,13 +109,39 @@ public class HttpIoUtil {
                 org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE);
         return response;
     }
+
+    /**
+     * This method generate the appropirate response for the received OPTIONS request.
+     *
+     * @param request Received option request by the source
+     * @return Generated HTTPCarbonMessage as the repsonse of OPTIONS request
+     */
+    public static HTTPCarbonMessage createOptionsResponseMessage(HTTPCarbonMessage request) {
+        HTTPCarbonMessage response = createHttpCarbonMessage();
+        response.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(ByteBuffer.allocate(0))));
+
+        response.setHeader(HttpHeaderNames.CONTENT_LENGTH.toString(), String.valueOf(0));
+        response.setHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(),
+                request.getHeader(HttpHeaderNames.ORIGIN.toString()));
+        response.setHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS.toString(), HttpConstants.HTTP_METHOD_POST);
+        response.setHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS.toString(),
+                String.format("%s,%s,%s,%s,%s", HttpHeaderNames.CONTENT_TYPE.toString(),
+                        HttpHeaderNames.USER_AGENT.toString(), HttpHeaderNames.ORIGIN.toString(),
+                        HttpHeaderNames.REFERER.toString(), HttpHeaderNames.ACCEPT.toString()));
+        response.setProperty(org.wso2.transport.http.netty.common.Constants.HTTP_STATUS_CODE,
+                Integer.parseInt(HttpConstants.DEFAULT_HTTP_SUCCESS_CODE));
+        response.setProperty(org.wso2.carbon.messaging.Constants.DIRECTION,
+                org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE);
+
+        return response;
+    }
     
     /**
      * Create new HTTP carbon messge.
      *
      * @return carbon message.
      */
-    private static HTTPCarbonMessage createHttpCarbonMessage() {
+    public static HTTPCarbonMessage createHttpCarbonMessage() {
         HTTPCarbonMessage httpCarbonMessage;
         httpCarbonMessage = new HTTPCarbonMessage(
                 new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
