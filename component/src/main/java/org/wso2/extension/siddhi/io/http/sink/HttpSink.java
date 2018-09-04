@@ -485,7 +485,7 @@ public class HttpSink extends Sink {
      */
     @Override
     public String[] getSupportedDynamicOptions() {
-        return new String[] {HttpConstants.HEADERS, HttpConstants.METHOD};
+        return new String[] {HttpConstants.HEADERS, HttpConstants.METHOD, HttpConstants.PUBLISHER_URL};
     }
 
     /**
@@ -562,8 +562,8 @@ public class HttpSink extends Sink {
             if (clientConnector != null) {
                 clientConnector.close();
             }
-            initClientConnector(dynamicOptions);
         }
+        initClientConnector(dynamicOptions);
         String headers = httpHeaderOption.getValue(dynamicOptions);
         String httpMethod = EMPTY_STRING.equals(httpMethodOption.getValue(dynamicOptions)) ?
                 HttpConstants.METHOD_DEFAULT : httpMethodOption.getValue(dynamicOptions);

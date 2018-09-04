@@ -76,7 +76,7 @@ public class HttpSinkUtil {
         try {
             URL url = new URL(publisherURL);
             httpStaticProperties = new HashMap<>();
-            httpStaticProperties.put(Constants.TO, url.getPath());
+            httpStaticProperties.put(Constants.TO, url.getFile());
             String protocol = url.getProtocol();
             httpStaticProperties.put(Constants.PROTOCOL, protocol);
             httpStaticProperties.put(Constants.HTTP_HOST, url.getHost());
