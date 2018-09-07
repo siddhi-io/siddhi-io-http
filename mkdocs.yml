@@ -32,6 +32,7 @@ markdown_extensions:
 pages:
 - Welcome: index.md
 - API Docs:
+  - 1.0.37: api/1.0.37.md
   - 1.0.36: api/1.0.36.md
   - 1.0.35: api/1.0.35.md
   - 1.0.34: api/1.0.34.md
