@@ -18,6 +18,9 @@
  */
 package org.wso2.extension.siddhi.io.http.source;
 
+import io.netty.handler.codec.http.HttpContent;
+import io.netty.handler.codec.http.LastHttpContent;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
@@ -25,13 +28,8 @@ import org.wso2.extension.siddhi.io.http.util.HTTPSourceRegistry;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
-import org.wso2.transport.http.netty.message.HttpMessageDataStreamer;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.stream.Collectors;
 
 /**
  * Handles the send data to source listener.
@@ -57,12 +55,10 @@ public class HttpSyncWorkerThread implements Runnable {
 
     @Override
     public void run() {
-        BufferedReader buf = new BufferedReader(
-                new InputStreamReader(
-                        new HttpMessageDataStreamer(carbonMessage).getInputStream(), Charset.defaultCharset()));
-        try {
-            String payload = buf.lines().collect(Collectors.joining("\n"));
-
+        HttpContent content;
+        do {
+            content = carbonMessage.getHttpContent();
+            String payload = content.content().toString(Charset.defaultCharset());
             if (!payload.equals(HttpConstants.EMPTY_STRING)) {
                 HTTPSourceRegistry.getRequestSource(sourceId).registerCallback(carbonMessage, messageId);
                 sourceEventListener.onEvent(payload, trpProperties);
@@ -75,12 +71,6 @@ public class HttpSyncWorkerThread implements Runnable {
                     logger.debug("Empty payload event, hence dropping the event chunk in " + sourceID);
                 }
             }
-        } finally {
-            try {
-                buf.close();
-            } catch (IOException e) {
-                logger.error("Error closing byte buf.", e);
-            }
-        }
+        } while (!(content instanceof LastHttpContent));
     }
 }
