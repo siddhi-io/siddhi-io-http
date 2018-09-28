@@ -682,6 +682,7 @@ public class HttpSink extends Sink {
                     "supported.");
         }
 
+        httpHeaders.set(Constants.HTTP_HOST, cMessage.getProperty(Constants.HTTP_HOST));
         /*
          *set request headers.
          */
