@@ -38,14 +38,17 @@ public class HttpResponseConnectorListener implements HttpConnectorListener {
     private ExecutorService executorService;
     private String siddhiAppName;
     private String[] trpPropertyNames;
+    private boolean shouldAllowStreamingResponses;
 
-    public HttpResponseConnectorListener(int numnerOfThreads, SourceEventListener sourceEventListener, String sinkId,
-                                         String[] trpPropertyNames, String siddhiAppName) {
+    public HttpResponseConnectorListener(int numnerOfThreads, SourceEventListener sourceEventListener,
+                                         boolean shouldAllowStreamingResponses,
+                                         String sinkId, String[] trpPropertyNames, String siddhiAppName) {
         this.sourceEventListener = sourceEventListener;
         this.sinkId = sinkId;
         this.executorService = Executors.newFixedThreadPool(numnerOfThreads);
         this.siddhiAppName = siddhiAppName;
         this.trpPropertyNames = trpPropertyNames.clone();
+        this.shouldAllowStreamingResponses = shouldAllowStreamingResponses;
     }
 
     @Override
@@ -58,7 +61,8 @@ public class HttpResponseConnectorListener implements HttpConnectorListener {
             }
         }
         HttpResponseProcessor workerThread =
-                new HttpResponseProcessor(carbonMessage, sourceEventListener, sinkId, properties);
+                new HttpResponseProcessor(carbonMessage, sourceEventListener, shouldAllowStreamingResponses,
+                        sinkId, properties);
         executorService.execute(workerThread);
     }
 
