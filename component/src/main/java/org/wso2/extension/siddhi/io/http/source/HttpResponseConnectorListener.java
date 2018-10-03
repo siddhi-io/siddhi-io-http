@@ -40,7 +40,7 @@ public class HttpResponseConnectorListener implements HttpConnectorListener {
     private String[] trpPropertyNames;
     private boolean shouldAllowStreamingResponses;
 
-    public HttpResponseConnectorListener(int numnerOfThreads, SourceEventListener sourceEventListener,
+    public HttpResponseConnectorListener(int numberOfThreads, SourceEventListener sourceEventListener,
                                          boolean shouldAllowStreamingResponses,
                                          String sinkId, String[] trpPropertyNames, String siddhiAppName) {
         this.sourceEventListener = sourceEventListener;
