@@ -67,7 +67,7 @@ public class HttpWorkerThread implements Runnable {
             } else {
                 HttpSourceUtil.handleCallback(carbonMessage, 405);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Empty payload event, hence dropping the event chunk at source" + sourceID);
+                    logger.debug("Empty payload event, hence dropping the event chunk at source " + sourceID);
                 }
             }
         } finally {
