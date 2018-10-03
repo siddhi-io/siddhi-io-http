@@ -45,7 +45,7 @@ public class HttpResponseConnectorListener implements HttpConnectorListener {
                                          String sinkId, String[] trpPropertyNames, String siddhiAppName) {
         this.sourceEventListener = sourceEventListener;
         this.sinkId = sinkId;
-        this.executorService = Executors.newFixedThreadPool(numnerOfThreads);
+        this.executorService = Executors.newFixedThreadPool(numberOfThreads);
         this.siddhiAppName = siddhiAppName;
         this.trpPropertyNames = trpPropertyNames.clone();
         this.shouldAllowStreamingResponses = shouldAllowStreamingResponses;
