@@ -61,7 +61,14 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.DEFAULT_WORKE
                                 "Only the responses with matching status codes to the defined value, will be received" +
                                 " by the http-response source.\n" +
                                 "Eg: 'http.status.code = '200', http.status.code = '2\\\\d+''",
-                        type = {DataType.STRING})},
+                        type = {DataType.STRING}),
+                @Parameter(name = "allow.streaming.responses",
+                        description = "If responses can be received multiple times for a single request, " +
+                                "this option should be enabled. If this is not enabled, for every request, response " +
+                                "will be extracted only once.",
+                        type = {DataType.BOOL}
+
+                )},
         examples = {
                 @Example(syntax = "" +
                         "@sink(type='http-request', \n" +
@@ -102,6 +109,7 @@ public class HttpResponseSource extends Source {
     private HttpResponseConnectorListener httpResponseSourceListener;
     private HttpResponseSourceConnectorRegistry httpConnectorRegistry;
     private String httpStatusCode;
+    private boolean shouldAllowStreamingResponses;
 
 
     @Override
@@ -118,6 +126,8 @@ public class HttpResponseSource extends Source {
                 .validateAndGetStaticValue(HttpConstants.WORKER_COUNT, DEFAULT_WORKER_COUNT);
         this.httpStatusCode = optionHolder.validateAndGetStaticValue(HttpConstants.HTTP_STATUS_CODE,
                 HttpConstants.DEFAULT_HTTP_SUCCESS_CODE);
+        this.shouldAllowStreamingResponses = Boolean.parseBoolean(
+                optionHolder.validateAndGetStaticValue(HttpConstants.ALLOW_STREAMING_RESPONSES, HttpConstants.FALSE));
     }
 
     @Override
@@ -128,8 +138,8 @@ public class HttpResponseSource extends Source {
     @Override
     public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
         this.httpResponseSourceListener =
-                new HttpResponseConnectorListener(Integer.parseInt(workerThread), sourceEventListener, sinkId,
-                        requestedTransportPropertyNames, siddhiAppName);
+                new HttpResponseConnectorListener(Integer.parseInt(workerThread), sourceEventListener,
+                        shouldAllowStreamingResponses, sinkId, requestedTransportPropertyNames, siddhiAppName);
         this.httpConnectorRegistry.registerSourceListener(httpResponseSourceListener, sinkId, httpStatusCode);
 
         HTTPSourceRegistry.registerResponseSource(sinkId, httpStatusCode, this);

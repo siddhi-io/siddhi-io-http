@@ -28,13 +28,16 @@ import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 import org.wso2.transport.http.netty.message.HttpMessageDataStreamer;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.stream.Collectors;
 
 /**
  * Handles sending data to source listener.
@@ -45,15 +48,17 @@ public class HttpResponseProcessor implements Runnable {
     private SourceEventListener sourceEventListener;
     private String sinkId;
     private String[] trpProperties;
+    boolean shouldAllowStreamingResponses;
 
     private String filePath;
 
-    HttpResponseProcessor(HTTPCarbonMessage cMessage, SourceEventListener sourceEventListener,
-                          String sinkId, String[] trpProperties) {
+    HttpResponseProcessor(HTTPCarbonMessage cMessage, SourceEventListener sourceEventListener, boolean
+            shouldAllowStreamingResponses, String sinkId, String[] trpProperties) {
         this.carbonMessage = cMessage;
         this.sourceEventListener = sourceEventListener;
         this.sinkId = sinkId;
         this.trpProperties = trpProperties;
+        this.shouldAllowStreamingResponses = shouldAllowStreamingResponses;
     }
     
     @Override
@@ -69,10 +74,12 @@ public class HttpResponseProcessor implements Runnable {
             }
         } else {
             HttpContent content;
-            do {
-                content = carbonMessage.getHttpContent();
-                if (content != null) {
-                    String payload = content.content().toString(Charset.defaultCharset());
+            if (!shouldAllowStreamingResponses) {
+                BufferedReader buf = new BufferedReader(
+                        new InputStreamReader(
+                                new HttpMessageDataStreamer(carbonMessage).getInputStream(), Charset.defaultCharset()));
+                try {
+                    String payload = buf.lines().collect(Collectors.joining("\n"));
                     if (!payload.equals(HttpConstants.EMPTY_STRING)) {
                         sourceEventListener.onEvent(payload, trpProperties);
                         if (logger.isDebugEnabled()) {
@@ -80,12 +87,35 @@ public class HttpResponseProcessor implements Runnable {
                         }
                     } else {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("Empty payload event, hence dropping the event chunk in the source with sink" +
-                                    ".id : " + sinkId);
+                            logger.debug("Empty payload event, hence dropping the event chunk at source " + sinkId);
                         }
                     }
+                } finally {
+                    try {
+                        buf.close();
+                    } catch (IOException e) {
+                        logger.error("Error occurred when closing the byte buffer in source " + sinkId, e);
+                    }
                 }
-            } while (!(content instanceof LastHttpContent));
+            } else {
+                do {
+                    content = carbonMessage.getHttpContent();
+                    if (content != null) {
+                        String payload = content.content().toString(Charset.defaultCharset());
+                        if (!payload.equals(HttpConstants.EMPTY_STRING)) {
+                            sourceEventListener.onEvent(payload, trpProperties);
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Submitted Event :" + payload);
+                            }
+                        } else {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Empty payload event, hence dropping the event chunk in the source " +
+                                        "with sink.id : " + sinkId);
+                            }
+                        }
+                    }
+                } while (!(content instanceof LastHttpContent));
+            }
         }
     }
 

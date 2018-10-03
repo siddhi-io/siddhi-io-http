@@ -41,6 +41,7 @@ public class HttpConstants {
     public static final String MESSAGE_PROCESSOR_ID = "messageProcessorId";
     public static final String MESSAGE_PROCESSOR_ID_VALUE = "Siddhi HTTP-message-processor";
     public static final String LISTENER_PORT = "LISTENER_PORT";
+    public static final String ALLOW_STREAMING_RESPONSES = "allow.streaming.responses";
 
     //Http siddhi sink properties
     public static final String AUTH_USERNAME_PASSWORD_SEPARATOR = ":";
