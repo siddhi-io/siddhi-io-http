@@ -508,7 +508,12 @@ public class HttpSink extends Sink {
         this.streamID = siddhiAppContext.getName() + PORT_HOST_SEPARATOR + outputStreamDefinition.toString();
         this.mapType = outputStreamDefinition.getAnnotations().get(0).getAnnotations().get(0).getElements().get(0)
                 .getValue();
-        this.publisherURLOption = optionHolder.validateAndGetOption(HttpConstants.PUBLISHER_URL);
+        this.publisherURLOption = optionHolder.getOrCreateOption(HttpConstants.PUBLISHER_URL,
+                configReader.readConfig(HttpConstants.PUBLISHER_URL, null));
+        if (publisherURLOption.getValue() == null) {
+            throw new SiddhiAppCreationException("Publisher url is a mandatory parameter. But it has not been " +
+                    "provided in the siddhi app " + siddhiAppContext.getName() + " or in the system parameters.");
+        }
         this.httpHeaderOption = optionHolder.getOrCreateOption(HttpConstants.HEADERS, HttpConstants.DEFAULT_HEADER);
         this.httpMethodOption = optionHolder.getOrCreateOption(HttpConstants.METHOD, HttpConstants.DEFAULT_METHOD);
         this.userName = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_USERNAME, EMPTY_STRING);
