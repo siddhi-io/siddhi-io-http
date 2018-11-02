@@ -101,7 +101,7 @@ import java.util.concurrent.TimeUnit;
                                 "to the event stream in the same order in which they arrive. By increasing this " +
                                 "value " +
                                 "the performance might increase at the cost of loosing event ordering.",
-                        type = {DataType.STRING},
+                        type = {DataType.INT},
                         optional = true,
                         defaultValue = "1"),
                 @Parameter(
@@ -499,7 +499,7 @@ public class HttpRequestSource extends HttpSource {
     public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
         this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration);
         this.httpConnectorRegistry.registerSourceListener(sourceEventListener, listenerUrl,
-                Integer.parseInt(workerThread), isAuth, requestedTransportPropertyNames, sourceId, siddhiAppName);
+                workerThread, isAuth, requestedTransportPropertyNames, sourceId, siddhiAppName);
 
         HTTPSourceRegistry.registerRequestSource(sourceId, this);
     }

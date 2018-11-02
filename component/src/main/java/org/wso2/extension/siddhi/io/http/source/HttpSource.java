@@ -76,7 +76,7 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                                 "to the event stream in the same order in which they arrive. By increasing this " +
                                 "value " +
                                 "the performance might increase at the cost of loosing event ordering.",
-                        type = {DataType.STRING},
+                        type = {DataType.INT},
                         optional = true,
                         defaultValue = "1"),
                 @Parameter(
@@ -396,7 +396,7 @@ public class HttpSource extends Source {
     protected String listenerUrl;
     private HttpConnectorRegistry httpConnectorRegistry;
     protected Boolean isAuth;
-    protected String workerThread;
+    protected int workerThread;
     protected SourceEventListener sourceEventListener;
     protected String[] requestedTransportPropertyNames;
     protected ListenerConfiguration listenerConfiguration;
@@ -463,8 +463,8 @@ public class HttpSource extends Source {
         this.isAuth = Boolean.parseBoolean(optionHolder
                 .validateAndGetStaticValue(HttpConstants.IS_AUTH, HttpConstants.EMPTY_IS_AUTH)
                 .toLowerCase(Locale.ENGLISH));
-        this.workerThread = optionHolder
-                .validateAndGetStaticValue(HttpConstants.WORKER_COUNT, DEFAULT_WORKER_COUNT);
+        this.workerThread = Integer.parseInt(optionHolder
+                .validateAndGetStaticValue(HttpConstants.WORKER_COUNT, DEFAULT_WORKER_COUNT));
         this.sourceEventListener = sourceEventListener;
         this.requestedTransportPropertyNames = requestedTransportPropertyNames.clone();
         int socketIdleTimeout = Integer.parseInt(optionHolder
@@ -527,7 +527,7 @@ public class HttpSource extends Source {
     public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
         this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration);
         this.httpConnectorRegistry.registerSourceListener(sourceEventListener, this.listenerUrl,
-                Integer.parseInt(workerThread), isAuth, requestedTransportPropertyNames, siddhiAppName);
+                workerThread, isAuth, requestedTransportPropertyNames, siddhiAppName);
     }
 
     /**
