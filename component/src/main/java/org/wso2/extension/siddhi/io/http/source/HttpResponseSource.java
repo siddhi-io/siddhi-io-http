@@ -61,7 +61,9 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.DEFAULT_WORKE
                                 "Only the responses with matching status codes to the defined value, will be received" +
                                 " by the http-response source.\n" +
                                 "Eg: 'http.status.code = '200', http.status.code = '2\\\\d+''",
-                        type = {DataType.STRING}),
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "200"),
                 @Parameter(name = "allow.streaming.responses",
                         description = "If responses can be received multiple times for a single request, " +
                                 "this option should be enabled. If this is not enabled, for every request, response " +
