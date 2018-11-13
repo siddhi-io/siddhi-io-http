@@ -68,7 +68,9 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.DEFAULT_WORKE
                         description = "If responses can be received multiple times for a single request, " +
                                 "this option should be enabled. If this is not enabled, for every request, response " +
                                 "will be extracted only once.",
-                        type = {DataType.BOOL}
+                        type = {DataType.BOOL},
+                        optional = true,
+                        defaultValue = "false"
 
                 )},
         examples = {
