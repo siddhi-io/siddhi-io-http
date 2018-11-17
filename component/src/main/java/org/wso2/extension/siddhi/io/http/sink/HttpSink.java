@@ -526,6 +526,8 @@ public class HttpSink extends Sink {
     private AccessTokenCache accessTokenCache = AccessTokenCache.getInstance();
     private String tokenURL;
 
+    private HttpWsConnectorFactory httpConnectorFactory;
+
     /**
      * Returns the list of classes which this sink can consume.
      * Based on the type of the sink, it may be limited to being able to publish specific type of classes.
@@ -924,6 +926,16 @@ public class HttpSink extends Sink {
             clientConnector = null;
             log.info("Server connector for url " + publisherURL + " disconnected.");
         }
+
+        if (httpConnectorFactory != null) {
+            try {
+                httpConnectorFactory.shutdown();
+                httpConnectorFactory = null;
+            } catch (InterruptedException e) {
+                log.info("Failed to shutdown the http connection factory while shutting down the siddhi app " +
+                        siddhiAppContext);
+            }
+        }
     }
 
     /**
@@ -1076,7 +1088,6 @@ public class HttpSink extends Sink {
                     (Unpooled.copiedBuffer(val));
         }
         //if bootstrap configurations are given then pass it if not let take default value of transport
-        HttpWsConnectorFactory httpConnectorFactory;
         if (!EMPTY_STRING.equals(bootstrapBoss) && !EMPTY_STRING.equals(bootstrapWorker)) {
             if (!EMPTY_STRING.equals(bootstrapClient)) {
                 httpConnectorFactory = new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss),
