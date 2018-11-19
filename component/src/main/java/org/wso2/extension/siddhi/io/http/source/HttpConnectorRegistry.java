@@ -147,6 +147,18 @@ class HttpConnectorRegistry {
     }
 
     /**
+     * Shutdown the http connector factory
+     * @param siddhiAppName name of the siddhi app which is using the http connector factory
+     */
+    public void shutdownHttpConnectorFactory(String siddhiAppName) {
+        try {
+            httpConnectorFactory.shutdown();
+        } catch (InterruptedException e) {
+            log.error("Failed to shutdown http connector factory while shutting down the siddhi app " + siddhiAppName);
+        }
+    }
+
+    /**
      * Initialize and start the server connector factory. This should be created at once for siddhi.
      *
      * @param sourceConfigReader the siddhi source config reader.
