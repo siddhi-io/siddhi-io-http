@@ -150,7 +150,7 @@ class HttpConnectorRegistry {
      * Shutdown the http connector factory
      * @param siddhiAppName name of the siddhi app which is using the http connector factory
      */
-    public void shutdownHttpConnectorFactory(String siddhiAppName) {
+    synchronized void shutdownHttpConnectorFactory(String siddhiAppName) {
         try {
             httpConnectorFactory.shutdown();
         } catch (InterruptedException e) {
