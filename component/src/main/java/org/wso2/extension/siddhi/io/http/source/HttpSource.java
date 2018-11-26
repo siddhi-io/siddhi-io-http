@@ -537,7 +537,6 @@ public class HttpSource extends Source {
     public void disconnect() {
         this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl, siddhiAppName);
         this.httpConnectorRegistry.unregisterServerConnector(this.listenerUrl);
-        this.httpConnectorRegistry.shutdownHttpConnectorFactory(siddhiAppName);
     }
 
     /**
