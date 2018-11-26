@@ -546,6 +546,7 @@ public class HttpSink extends Sink {
         bootstrapClient = configReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_CLIENT_GROUP_SIZE,
                 EMPTY_STRING);
 
+        initConnectorFactory();
         if (publisherURLOption.isStatic()) {
             initClientConnector(null);
         }
@@ -724,6 +725,21 @@ public class HttpSink extends Sink {
         }
     }
 
+    void initConnectorFactory() {
+        //if bootstrap configurations are given then pass it if not let take default value of transport
+        if (!EMPTY_STRING.equals(bootstrapBoss) && !EMPTY_STRING.equals(bootstrapWorker)) {
+            if (!EMPTY_STRING.equals(bootstrapClient)) {
+                httpConnectorFactory = new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss),
+                        Integer.parseInt(bootstrapWorker), Integer.parseInt(bootstrapClient));
+            } else {
+                httpConnectorFactory = new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss),
+                        Integer.parseInt(bootstrapWorker), Integer.parseInt(bootstrapWorker));
+            }
+        } else {
+            httpConnectorFactory = new DefaultHttpWsConnectorFactory();
+        }
+    }
+
     void initClientConnector(DynamicOptions dynamicOptions) {
         if (publisherURLOption.isStatic()) {
             publisherURL = publisherURLOption.getValue();
@@ -759,19 +775,6 @@ public class HttpSink extends Sink {
             this.authorizationHeader = HttpConstants.AUTHORIZATION_METHOD + Base64.encode
                     (Unpooled.copiedBuffer(val));
         }
-        //if bootstrap configurations are given then pass it if not let take default value of transport
-        if (!EMPTY_STRING.equals(bootstrapBoss) && !EMPTY_STRING.equals(bootstrapWorker)) {
-            if (!EMPTY_STRING.equals(bootstrapClient)) {
-                httpConnectorFactory = new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss),
-                        Integer.parseInt(bootstrapWorker), Integer.parseInt(bootstrapClient));
-            } else {
-                httpConnectorFactory = new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss),
-                        Integer.parseInt(bootstrapWorker), Integer.parseInt(bootstrapWorker));
-            }
-        } else {
-            httpConnectorFactory = new DefaultHttpWsConnectorFactory();
-        }
-
         //if proxy username and password not equal to null then create proxy configurations
         if (!EMPTY_STRING.equals(proxyHost) && !EMPTY_STRING.equals(proxyPort)) {
             try {
