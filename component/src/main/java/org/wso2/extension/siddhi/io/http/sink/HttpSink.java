@@ -613,7 +613,7 @@ public class HttpSink extends Sink {
                 httpConnectorFactory = null;
             } catch (InterruptedException e) {
                 log.info("Failed to shutdown the http connection factory while shutting down the siddhi app " +
-                        siddhiAppContext);
+                        siddhiAppContext.getName());
             }
         }
     }
