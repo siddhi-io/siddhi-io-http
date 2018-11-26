@@ -1,4 +1,4 @@
-# API Docs - v1.0.42-SNAPSHOT
+# API Docs - v1.0.41
 
 ## Sink
 
@@ -1638,9 +1638,9 @@ define stream FooStream (messageId string, symbol string, price float, volume lo
     <tr>
         <td style="vertical-align: top">http.status.code</td>
         <td style="vertical-align: top; word-wrap: break-word">Acceptable http status code for the responses.<br>This can be a complete string or a regex.<br>Only the responses with matching status codes to the defined value, will be received by the http-response source.<br>Eg: 'http.status.code = '200', http.status.code = '2\\d+''</td>
-        <td style="vertical-align: top">200</td>
+        <td style="vertical-align: top"></td>
         <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
