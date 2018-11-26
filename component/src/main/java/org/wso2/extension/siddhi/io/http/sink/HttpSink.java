@@ -863,10 +863,8 @@ public class HttpSink extends Sink {
     }
 
     private int sendRequest(Object payload, DynamicOptions dynamicOptions, List<Header> headersList) {
-        if (publisherURLOption.isStatic()) {
-            if (clientConnector != null) {
-                clientConnector.close();
-            }
+        if (!publisherURLOption.isStatic()) {
+            initClientConnector(dynamicOptions);
         }
         initClientConnector(dynamicOptions);
         String httpMethod = EMPTY_STRING.equals(httpMethodOption.getValue(dynamicOptions)) ?
