@@ -1,4 +1,4 @@
-# API Docs - v1.1.1
+# API Docs - v1.0.42-SNAPSHOT
 
 ## Sink
 
@@ -8,7 +8,7 @@
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-@sink(type="http", publisher.url="<STRING>", basic.auth.username="<STRING>", basic.auth.password="<STRING>", https.truststore.file="<STRING>", https.truststore.password="<STRING>", headers="<STRING>", method="<STRING>", socket.idle.timeout="<INT>", chunk.disabled="<BOOL>", ssl.protocol="<STRING>", parameters="<STRING>", ciphers="<STRING>", ssl.enabled.protocols="<STRING>", client.enable.session.creation="<STRING>", follow.redirect="<BOOL>", max.redirect.count="<INT>", tls.store.type="<STRING>", proxy.host="<STRING>", proxy.port="<STRING>", proxy.username="<STRING>", proxy.password="<STRING>", client.bootstrap.configuration="<STRING>", client.bootstrap.nodelay="<BOOL>", client.bootstrap.keepalive="<BOOL>", client.bootstrap.sendbuffersize="<INT>", client.bootstrap.recievebuffersize="<INT>", client.bootstrap.connect.timeout="<INT>", client.bootstrap.socket.reuse="<BOOL>", client.bootstrap.socket.timeout="<STRING>", client.threadpool.configurations="<STRING>", client.connection.pool.count="<INT>", client.max.active.connections.per.pool="<INT>", client.min.idle.connections.per.pool="<INT>", client.max.idle.connections.per.pool="<INT>", client.min.eviction.idle.time="<STRING>", sender.thread.count="<STRING>", event.group.executor.thread.size="<STRING>", max.wait.for.client.connection.pool="<STRING>", oauth.username="<STRING>", oauth.password="<STRING>", consumer.key="<STRING>", consumer.secret="<STRING>", refresh.token="<STRING>", token.url="<STRING>", @map(...)))
+@sink(type="http", publisher.url="<STRING>", basic.auth.username="<STRING>", basic.auth.password="<STRING>", https.truststore.file="<STRING>", https.truststore.password="<STRING>", headers="<STRING>", method="<STRING>", socket.idle.timeout="<INT>", chunk.disabled="<BOOL>", ssl.protocol="<STRING>", parameters="<STRING>", ciphers="<STRING>", ssl.enabled.protocols="<STRING>", client.enable.session.creation="<STRING>", follow.redirect="<BOOL>", max.redirect.count="<INT>", tls.store.type="<STRING>", proxy.host="<STRING>", proxy.port="<STRING>", proxy.username="<STRING>", proxy.password="<STRING>", client.bootstrap.configuration="<STRING>", client.bootstrap.nodelay="<BOOL>", client.bootstrap.keepalive="<BOOL>", client.bootstrap.sendbuffersize="<INT>", client.bootstrap.recievebuffersize="<INT>", client.bootstrap.connect.timeout="<INT>", client.bootstrap.socket.reuse="<BOOL>", client.bootstrap.socket.timeout="<STRING>", client.threadpool.configurations="<STRING>", client.connection.pool.count="<INT>", client.max.active.connections.per.pool="<INT>", client.min.idle.connections.per.pool="<INT>", client.max.idle.connections.per.pool="<INT>", client.min.eviction.idle.time="<STRING>", sender.thread.count="<STRING>", event.group.executor.thread.size="<STRING>", max.wait.for.client.connection.pool="<STRING>", @map(...)))
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -325,54 +325,6 @@
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
-    <tr>
-        <td style="vertical-align: top">oauth.username</td>
-        <td style="vertical-align: top; word-wrap: break-word">The username to be included in the authentication header of the oauth authentication enabled events. It is required to specify both username and password to enable oauth authentication. If one of the parameter is not given by user then an error is logged in the CLI. It is only applicable for for Oauth requests </td>
-        <td style="vertical-align: top"> </td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">oauth.password</td>
-        <td style="vertical-align: top; word-wrap: break-word">The password to be included in the authentication header of the oauth authentication enabled events. It is required to specify both username and password to enable oauth authentication. If one of the parameter is not given by user then an error is logged in the CLI. It is only applicable for for Oauth requests </td>
-        <td style="vertical-align: top"> </td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">consumer.key</td>
-        <td style="vertical-align: top; word-wrap: break-word">consumer key for the Http request. It is only applicable for for Oauth requests</td>
-        <td style="vertical-align: top"> </td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">consumer.secret</td>
-        <td style="vertical-align: top; word-wrap: break-word">consumer secret for the Http request. It is only applicable for for Oauth requests</td>
-        <td style="vertical-align: top"> </td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">refresh.token</td>
-        <td style="vertical-align: top; word-wrap: break-word">refresh token for the Http request. It is only applicable for for Oauth requests</td>
-        <td style="vertical-align: top"> </td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">token.url</td>
-        <td style="vertical-align: top; word-wrap: break-word">token url for generate a new access token. It is only applicable for for Oauth requests</td>
-        <td style="vertical-align: top"> </td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
 </table>
 
 <span id="system-parameters" class="md-typeset" style="display: block; font-weight: bold;">System Parameters</span>
@@ -430,7 +382,7 @@ define stream FooStream (payloadBody String, method string, headers string);
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
-@sink(type="http-request", publisher.url="<STRING>", basic.auth.username="<STRING>", basic.auth.password="<STRING>", https.truststore.file="<STRING>", https.truststore.password="<STRING>", headers="<STRING>", method="<STRING>", socket.idle.timeout="<INT>", chunk.disabled="<BOOL>", ssl.protocol="<STRING>", parameters="<STRING>", ciphers="<STRING>", ssl.enabled.protocols="<STRING>", client.enable.session.creation="<STRING>", follow.redirect="<BOOL>", max.redirect.count="<INT>", tls.store.type="<STRING>", proxy.host="<STRING>", proxy.port="<STRING>", proxy.username="<STRING>", proxy.password="<STRING>", client.bootstrap.configuration="<STRING>", client.bootstrap.nodelay="<BOOL>", client.bootstrap.keepalive="<BOOL>", client.bootstrap.sendbuffersize="<INT>", client.bootstrap.recievebuffersize="<INT>", client.bootstrap.connect.timeout="<INT>", client.bootstrap.socket.reuse="<BOOL>", client.bootstrap.socket.timeout="<STRING>", client.threadpool.configurations="<STRING>", client.connection.pool.count="<INT>", client.max.active.connections.per.pool="<INT>", client.min.idle.connections.per.pool="<INT>", client.max.idle.connections.per.pool="<INT>", client.min.eviction.idle.time="<STRING>", sender.thread.count="<STRING>", event.group.executor.thread.size="<STRING>", max.wait.for.client.connection.pool="<STRING>", sink.id="<STRING>", downloading.enabled="<BOOL>", download.path="<STRING>", oauth.username="<STRING>", oauth.password="<STRING>", consumer.key="<STRING>", consumer.secret="<STRING>", refresh.token="<STRING>", @map(...)))
+@sink(type="http-request", publisher.url="<STRING>", basic.auth.username="<STRING>", basic.auth.password="<STRING>", https.truststore.file="<STRING>", https.truststore.password="<STRING>", headers="<STRING>", method="<STRING>", socket.idle.timeout="<INT>", chunk.disabled="<BOOL>", ssl.protocol="<STRING>", parameters="<STRING>", ciphers="<STRING>", ssl.enabled.protocols="<STRING>", client.enable.session.creation="<STRING>", follow.redirect="<BOOL>", max.redirect.count="<INT>", tls.store.type="<STRING>", proxy.host="<STRING>", proxy.port="<STRING>", proxy.username="<STRING>", proxy.password="<STRING>", client.bootstrap.configuration="<STRING>", client.bootstrap.nodelay="<BOOL>", client.bootstrap.keepalive="<BOOL>", client.bootstrap.sendbuffersize="<INT>", client.bootstrap.recievebuffersize="<INT>", client.bootstrap.connect.timeout="<INT>", client.bootstrap.socket.reuse="<BOOL>", client.bootstrap.socket.timeout="<STRING>", client.threadpool.configurations="<STRING>", client.connection.pool.count="<INT>", client.max.active.connections.per.pool="<INT>", client.min.idle.connections.per.pool="<INT>", client.max.idle.connections.per.pool="<INT>", client.min.eviction.idle.time="<STRING>", sender.thread.count="<STRING>", event.group.executor.thread.size="<STRING>", max.wait.for.client.connection.pool="<STRING>", sink.id="<STRING>", downloading.enabled="<BOOL>", download.path="<STRING>", @map(...)))
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -771,46 +723,6 @@ define stream FooStream (payloadBody String, method string, headers string);
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">Yes</td>
     </tr>
-    <tr>
-        <td style="vertical-align: top">oauth.username</td>
-        <td style="vertical-align: top; word-wrap: break-word">The username to be included in the authentication header of the oauth authentication enabled events. It is required to specify both username and password to enable oauth authentication. If one of the parameter is not given by user then an error is logged in the CLI. It is only applicable for for Oauth requests </td>
-        <td style="vertical-align: top"> </td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">oauth.password</td>
-        <td style="vertical-align: top; word-wrap: break-word">The password to be included in the authentication header of the oauth authentication enabled events. It is required to specify both username and password to enable oauth authentication. If one of the parameter is not given by user then an error is logged in the CLI. It is only applicable for for Oauth  requests </td>
-        <td style="vertical-align: top"> </td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">consumer.key</td>
-        <td style="vertical-align: top; word-wrap: break-word">consumer key for the Http request. It is only applicable for for Oauth requests</td>
-        <td style="vertical-align: top"> </td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">consumer.secret</td>
-        <td style="vertical-align: top; word-wrap: break-word">consumer secret for the Http request. It is only applicable for for Oauth requests</td>
-        <td style="vertical-align: top"> </td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">refresh.token</td>
-        <td style="vertical-align: top; word-wrap: break-word">refresh token for the Http request. It is only applicable for for Oauth requests</td>
-        <td style="vertical-align: top"> </td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
 </table>
 
 <span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
@@ -826,7 +738,7 @@ define stream responseStream2xx(fileName string, headers string);
 @map(type='text', regex.A='((.|\n)*)', @attributes(errorMsg='A[1]')))
 define stream responseStream4xx(errorMsg string);
 ```
-<p style="word-wrap: break-word">In above example, the payload body for 'FooStream' will be in following format.<br>{<br>&lt;events&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;event&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;symbol&gt;WSO2&lt;/symbol&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;price&gt;55.6&lt;/price&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;volume&gt;100&lt;/volume&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/event&gt;<br>&lt;/events&gt;,<br>This message will sent as the body of a POST request with the content-type 'application/xml' to the endpoint defined as the 'publisher.url' and in order to process the responses for these requests, there should be a source of type 'http-response' defined with the same sink id 'foo' in the siddhi app.<br>&nbsp;The responses with 2xx status codes will be received by the http-response source which has the http.status.code defined by the regex '2\\d+'.<br>If the response has a 4xx status code, it will be received by the http-response source which has the http.status.code defined by the regex '4\\d+'.<br></p>
+<p style="word-wrap: break-word">In above example, the payload body for 'FooStream' will be in following format.<br>{<br>&lt;events&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;event&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;symbol&gt;WSO2&lt;/symbol&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;price&gt;55.6&lt;/price&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;volume&gt;100&lt;/volume&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/event&gt;<br>&lt;/events&gt;,<br>This message will sent as the body of a POST request with the content-type 'application/xml' to the endpoint defined as the 'publisher.url' and in order to process the responses for these requests, there should be a source of type 'http-response' defined with the same sink id 'foo' in the siddhi app.<br>The responses with 2xx status codes will be received by the http-response source which has the http.status.code defined by the regex '2\\d+'.<br>If the response has a 4xx status code, it will be received by the http-response source which has the http.status.code defined by the regex '4\\d+'.<br></p>
 
 <span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
 ```
@@ -1274,6 +1186,12 @@ define stream FooStream (payloadBody String, messageId string, headers string);
         <td style="vertical-align: top; word-wrap: break-word">The default keystore password.</td>
         <td style="vertical-align: top">wso2carbon</td>
         <td style="vertical-align: top">String of keystore password</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">certPassword</td>
+        <td style="vertical-align: top; word-wrap: break-word">The default cert password.</td>
+        <td style="vertical-align: top">wso2carbon</td>
+        <td style="vertical-align: top">String of cert password</td>
     </tr>
 </table>
 
@@ -1728,9 +1646,9 @@ define stream FooStream (messageId string, symbol string, price float, volume lo
     <tr>
         <td style="vertical-align: top">allow.streaming.responses</td>
         <td style="vertical-align: top; word-wrap: break-word">If responses can be received multiple times for a single request, this option should be enabled. If this is not enabled, for every request, response will be extracted only once.</td>
-        <td style="vertical-align: top">false</td>
+        <td style="vertical-align: top"></td>
         <td style="vertical-align: top">BOOL</td>
-        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
         <td style="vertical-align: top">No</td>
     </tr>
 </table>
