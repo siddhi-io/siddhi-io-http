@@ -561,12 +561,9 @@ public class HttpSink extends Sink {
      */
     @Override
     public void publish(Object payload, DynamicOptions dynamicOptions) {
-        if (publisherURLOption.isStatic()) {
-            if (clientConnector != null) {
-                clientConnector.close();
-            }
+        if (!publisherURLOption.isStatic()) {
+            initClientConnector(dynamicOptions);
         }
-        initClientConnector(dynamicOptions);
         String headers = httpHeaderOption.getValue(dynamicOptions);
         String httpMethod = EMPTY_STRING.equals(httpMethodOption.getValue(dynamicOptions)) ?
                 HttpConstants.METHOD_DEFAULT : httpMethodOption.getValue(dynamicOptions);
