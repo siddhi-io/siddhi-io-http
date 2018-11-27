@@ -239,6 +239,7 @@
                                 </org.ops4j.pax.logging.DefaultServiceLog.level>
                                 <carbon.home>src/test/resources/carbon-home.conf</carbon.home>
                             </systemPropertyVariables>
+                            <argLine>-ea -Xmx1024m</argLine>
                             <suiteXmlFiles>
                                 <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
                             </suiteXmlFiles>
