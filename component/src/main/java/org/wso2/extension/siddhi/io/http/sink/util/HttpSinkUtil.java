@@ -219,7 +219,7 @@ public class HttpSinkUtil {
     public static String getContentType(String mapType, List<Header> headersList) {
         if (headersList != null) {
             for (Header h : headersList) {
-                if (HttpConstants.HTTP_CONTENT_TYPE.equals(h.getName())) {
+                if (HttpConstants.HTTP_CONTENT_TYPE.equalsIgnoreCase(h.getName())) {
                     return h.getValue();
                 }
             }
