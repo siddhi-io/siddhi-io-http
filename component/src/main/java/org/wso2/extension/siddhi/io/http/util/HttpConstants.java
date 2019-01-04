@@ -91,6 +91,9 @@ public class HttpConstants {
     public static final String CREDENTIAL_SEPARATOR = ":";
     public static final String PORT_CONTEXT_SEPARATOR = "/";
     public static final String PORT_CONTEXT_KEY_SEPARATOR = "-";
+    public static final String COMMA_SEPARATOR = ",";
+    public static final String INVERTED_COMMA_SEPARATOR = "\"";
+
 
     //GlobaleConfigurations
     public static final String HTTP_PORT = "defaultHttpPort";
@@ -215,4 +218,37 @@ public class HttpConstants {
     // HTTP Default ports if the port is not present in the given URL
     public static final int DEFAULT_HTTP_PORT = 80;
     public static final int DEFAULT_HTTPS_PORT = 443;
+
+    //getting refreshtoken and new access token
+    public static final String CONSUMER_SECRET = "consumer.secret";
+    public static final String CONSUMER_KEY = "consumer.key";
+    public static final String SUFFIX_REFRESH_TOKEN_URL = "/token";
+    public static final String GRANT_TYPE = "grant_type";
+    public static final String GRANT_PASSWORD = "password";
+    public static final String GRANT_REFRESHTOKEN = "refresh_token";
+    public static final String GRANT_ACCESSTOKEN = "access_token";
+    public static final String GRANT_CLIENTTOKEN = "client_credentials";
+    public static final String USERNAME = "username";
+    public static final String PASSWORD = "password";
+    public static final String SUFFIX_NEW_ACCESS_TOKEN_URL = "/token";
+    public static final String TOKEN = "token";
+    public static final String TOKEN_TYPE_HINT = "token_type_hint";
+    public static final String SUFFIX_REVOKE_URL = "/revoke";
+    public static final int SUCCESS_CODE = 200;
+    public static final int AUTHENTICATION_FAIL_CODE = 401;
+    public static final int PERSISTENT_ACCESS_FAIL_CODE = 400;
+    public static final int INTERNAL_SERVER_FAIL_CODE = 500;
+    public static final String RECEIVER_OAUTH_USERNAME = "oauth.username";
+    public static final String RECEIVER_OAUTH_PASSWORD = "oauth.password";
+    public static final String RECEIVER_REFRESH_TOKEN = "refresh.token";
+    public static final String ACCESS_TOKEN_SPLIT = "{\"access_token\":\"";
+    public static final String REFRESH_TOKEN_SPLIT = "\"refresh_token\":\"";
+    public static final String BASIC_AUTH = "basic.auth";
+    public static final String NO_AUTH = "no.auth";
+    public static final String OAUTH = "oauth";
+    public static final int MAXIMUM_TRY_COUNT = 2;
+    public static final int MINIMUM_TRY_COUNT = 1;
+
+
+
 }

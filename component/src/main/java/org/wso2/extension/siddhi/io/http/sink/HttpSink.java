@@ -18,6 +18,7 @@
  */
 package org.wso2.extension.siddhi.io.http.sink;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.base64.Base64;
 import io.netty.handler.codec.http.DefaultHttpRequest;
@@ -25,9 +26,11 @@ import io.netty.handler.codec.http.DefaultLastHttpContent;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
-
 import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
+import org.wso2.extension.siddhi.io.http.sink.updatetoken.AccessTokenCache;
+import org.wso2.extension.siddhi.io.http.sink.updatetoken.DefaultListener;
+import org.wso2.extension.siddhi.io.http.sink.updatetoken.HttpsClient;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpSinkUtil;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.extension.siddhi.io.http.util.HttpIoUtil;
@@ -37,7 +40,6 @@ import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.SystemParameter;
 import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
 import org.wso2.siddhi.core.stream.output.sink.Sink;
@@ -51,6 +53,7 @@ import org.wso2.transport.http.netty.common.ProxyServerConfiguration;
 import org.wso2.transport.http.netty.config.ChunkConfig;
 import org.wso2.transport.http.netty.config.SenderConfiguration;
 import org.wso2.transport.http.netty.contract.HttpClientConnector;
+import org.wso2.transport.http.netty.contract.HttpResponseFuture;
 import org.wso2.transport.http.netty.contract.HttpWsConnectorFactory;
 import org.wso2.transport.http.netty.contractimpl.DefaultHttpWsConnectorFactory;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
@@ -59,9 +62,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.PORT_HOST_SEPARATOR;
@@ -435,14 +442,16 @@ public class HttpSink extends Sink {
     private String streamID;
     HttpClientConnector clientConnector;
     String mapType;
-    private Map<String, String> httpURLProperties;
+    private static Map<String, String> httpURLProperties;
     Option httpHeaderOption;
     Option httpMethodOption;
+    private String consumerKey;
+    private String consumerSecret;
     private String authorizationHeader;
     private String userName;
     private String userPassword;
     private String publisherURL;
-    Option publisherURLOption;
+    private Option publisherURLOption;
     private String clientStoreFile;
     private String clientStorePass;
     private int socketIdleTimeout;
@@ -463,8 +472,15 @@ public class HttpSink extends Sink {
     private String bootstrapClient;
     private ConfigReader configReader;
     private SiddhiAppContext siddhiAppContext;
+    private String oauthUsername;
+    private String oauthUserPassword;
+    private String accessToken;
+    private Option refreshToken;
+    private String availableRefreshToken;
+    private String authType;
+    private Boolean accesstokenAvalable = false;
+    private AccessTokenCache accessTokenCache = new AccessTokenCache();
 
-    private HttpWsConnectorFactory httpConnectorFactory;
 
     /**
      * Returns the list of classes which this sink can consume.
@@ -476,7 +492,7 @@ public class HttpSink extends Sink {
      */
     @Override
     public Class[] getSupportedInputEventClasses() {
-        return new Class[] {String.class, Map.class};
+        return new Class[]{String.class, Map.class};
     }
 
     /**
@@ -487,7 +503,8 @@ public class HttpSink extends Sink {
      */
     @Override
     public String[] getSupportedDynamicOptions() {
-        return new String[] {HttpConstants.HEADERS, HttpConstants.METHOD, HttpConstants.PUBLISHER_URL};
+        return new String[]{HttpConstants.HEADERS, HttpConstants.METHOD, HttpConstants.PUBLISHER_URL,
+                HttpConstants.RECEIVER_REFRESH_TOKEN};
     }
 
     /**
@@ -513,8 +530,15 @@ public class HttpSink extends Sink {
         this.publisherURLOption = optionHolder.validateAndGetOption(HttpConstants.PUBLISHER_URL);
         this.httpHeaderOption = optionHolder.getOrCreateOption(HttpConstants.HEADERS, HttpConstants.DEFAULT_HEADER);
         this.httpMethodOption = optionHolder.getOrCreateOption(HttpConstants.METHOD, HttpConstants.DEFAULT_METHOD);
+        this.consumerKey = optionHolder.validateAndGetStaticValue(HttpConstants.CONSUMER_KEY, EMPTY_STRING);
+        this.consumerSecret = optionHolder.validateAndGetStaticValue(HttpConstants.CONSUMER_SECRET, EMPTY_STRING);
         this.userName = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_USERNAME, EMPTY_STRING);
         this.userPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_PASSWORD, EMPTY_STRING);
+        this.oauthUsername = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_OAUTH_USERNAME,
+                EMPTY_STRING);
+        this.oauthUserPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_OAUTH_PASSWORD,
+                EMPTY_STRING);
+        this.refreshToken = optionHolder.getOrCreateOption(HttpConstants.RECEIVER_REFRESH_TOKEN, EMPTY_STRING); //todo
         clientStoreFile = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PATH_PARAM,
                 HttpSinkUtil.trustStorePath(configReader));
         clientStorePass = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD_PARAM,
@@ -532,7 +556,7 @@ public class HttpSink extends Sink {
         proxyHost = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_HOST, EMPTY_STRING);
         proxyPort = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_PORT, EMPTY_STRING);
         proxyUsername = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_USERNAME,
-                 EMPTY_STRING);
+                EMPTY_STRING);
         proxyPassword = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_PASSWORD,
                 EMPTY_STRING);
         clientBootstrapConfiguration = optionHolder
@@ -546,9 +570,19 @@ public class HttpSink extends Sink {
         bootstrapClient = configReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_CLIENT_GROUP_SIZE,
                 EMPTY_STRING);
 
-        initConnectorFactory();
         if (publisherURLOption.isStatic()) {
             initClientConnector(null);
+        }
+
+        if (!HttpConstants.EMPTY_STRING.equals(userName) && !HttpConstants.EMPTY_STRING.equals(userPassword)) {
+            authType = HttpConstants.BASIC_AUTH;
+        } else if ((!HttpConstants.EMPTY_STRING.equals(consumerKey)
+                && !HttpConstants.EMPTY_STRING.equals(consumerSecret)) ||
+                (!HttpConstants.EMPTY_STRING.equals(oauthUsername)
+                        && !HttpConstants.EMPTY_STRING.equals(oauthUserPassword))) {
+            authType = HttpConstants.OAUTH;
+        } else {
+            authType = HttpConstants.NO_AUTH;
         }
     }
 
@@ -561,13 +595,189 @@ public class HttpSink extends Sink {
      */
     @Override
     public void publish(Object payload, DynamicOptions dynamicOptions) {
-        if (!publisherURLOption.isStatic()) {
-            initClientConnector(dynamicOptions);
-        }
+        //get the dynamic parameter
         String headers = httpHeaderOption.getValue(dynamicOptions);
+        List<Header> headersList = HttpSinkUtil.getHeaders(headers);
+
+        if (authType.equals(HttpConstants.BASIC_AUTH) || authType.equals(HttpConstants.NO_AUTH)) {
+            sendRequest(payload, dynamicOptions, headersList);
+        } else {
+            sendOauthRequest(payload, dynamicOptions, headersList);
+        }
+        disconnect();
+    }
+
+    private void sendOauthRequest(Object payload, DynamicOptions dynamicOptions, List<Header> headersList) {
+        //generate encoded base64 auth for getting refresh token
+        String consumerKeyValue = consumerKey + ":" + consumerSecret;
+        String encodedRefreshAuth = "Basic " + encodeBase64(consumerKeyValue);
+        //check the availability of access token in the header
+        checkAccessToken(encodedRefreshAuth, dynamicOptions, headersList);
+        //send a request to API and get the response
+        int response = sendRequest(payload, dynamicOptions, headersList);
+        //if authentication fails then get the new access token
+        if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
+            oauthFails(payload, dynamicOptions, headersList, encodedRefreshAuth);
+        } else if (response == HttpConstants.SUCCESS_CODE) {
+            log.info("Request send successfully.");
+        } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
+            log.error(response + ": Internal server connection failure. Please pass the valid parameters. ");
+        } else {
+            log.error(response + ": Can not obtain access token.");
+        }
+    }
+
+    private void oauthFails(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
+                            String encodedRefreshAuth) {
+        Boolean checkFromCache = accessTokenCache.checkAvailableKey(encodedRefreshAuth);
+        if (checkFromCache) {
+            getNewAccessTokenWithCache(payload, dynamicOptions, headersList, encodedRefreshAuth);
+        } else {
+            requestForNewAccessToken(payload, dynamicOptions, headersList, encodedRefreshAuth);
+        }
+    }
+
+    private void getNewAccessTokenWithCache(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
+                                            String encodedRefreshAuth) {
+        accessToken = accessTokenCache.getAccessToken(encodedRefreshAuth);
+        for (Header header : headersList) {
+            if (header.getName().equals(HttpConstants.AUTHORIZATION_HEADER)) {
+                header.setValue(accessToken);
+            }
+        }
+        //send a request to API with a new access token
+        int response = sendRequest(payload, dynamicOptions, headersList);
+        if (response == HttpConstants.SUCCESS_CODE) {
+            log.info("Request send successfully.");
+        } else if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
+            requestForNewAccessToken(payload, dynamicOptions, headersList, encodedRefreshAuth);
+        } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
+            log.error(response + ": Internal server error.");
+        } else {
+            log.error(response + ": Can not obtain access token.");
+        }
+    }
+
+    private void requestForNewAccessToken(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
+                                               String encodedRefreshAuth) {
+        Boolean checkRefreshToken = accessTokenCache.checkRefreshAvailableKey(encodedRefreshAuth);
+        if (checkRefreshToken) {
+            availableRefreshToken = accessTokenCache.getRefreshtoken(encodedRefreshAuth);
+            for (Header header : headersList) {
+                if (header.getName().equals(HttpConstants.RECEIVER_REFRESH_TOKEN)) {
+                    header.setValue(availableRefreshToken);
+                }
+            }
+        }
+        ArrayList<String> newAccessTokenArray = getAccessToken(dynamicOptions, encodedRefreshAuth);
+        int newAccessResponseCode = Integer.parseInt(newAccessTokenArray.get(0));
+        if (newAccessResponseCode == HttpConstants.SUCCESS_CODE) {
+            String newAccessToken = "Bearer " + newAccessTokenArray.get(1);
+            accessTokenCache.setAccessToken(encodedRefreshAuth, newAccessToken);
+            if (!newAccessTokenArray.get(2).equals(HttpConstants.EMPTY_STRING)) {
+                accessTokenCache.setRefreshtoken(encodedRefreshAuth, newAccessTokenArray.get(2));
+            }
+            for (Header header : headersList) {
+                if (header.getName().equals(HttpConstants.AUTHORIZATION_HEADER)) {
+                    header.setValue(newAccessToken);
+                }
+            }
+            //send a request to API with a new access token
+            int response = sendRequest(payload, dynamicOptions, headersList);
+            if (response == HttpConstants.SUCCESS_CODE) {
+                log.info("Request send successfully.");
+            } else if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
+                log.error(response + ": Authentication Failure. Please apply valid authorization.");
+            } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
+                log.error(response + ": Internal server error.");
+            } else {
+                log.error(response + ": Can not obtain new access token.");
+            }
+
+        } else if (newAccessResponseCode == HttpConstants.AUTHENTICATION_FAIL_CODE) {
+            log.error(newAccessResponseCode + ": Authentication Failure. Please apply valid Consumer key, " +
+                    "Consumer secret for generate new access token. ");
+        } else {
+            log.error(newAccessResponseCode + ": Can not obtain new access token.");
+        }
+
+    }
+
+    public ArrayList<String> getAccessToken(DynamicOptions dynamicOptions, String encodedRefreshAuth) {
+        HttpsClient httpsClient = new HttpsClient();
+        ArrayList<String> newAccessTokenArray;
+        if (!HttpConstants.EMPTY_STRING.equals(oauthUsername) &&
+                !HttpConstants.EMPTY_STRING.equals(oauthUserPassword)) {
+            newAccessTokenArray = httpsClient.getPasswordGrandAccessToken(publisherURL, clientStoreFile,
+                    clientStorePass, oauthUsername, oauthUserPassword, encodedRefreshAuth);
+        } else if (!HttpConstants.EMPTY_STRING.equals(refreshToken.getValue(dynamicOptions)) ||
+                !availableRefreshToken.equals(HttpConstants.EMPTY_STRING)) {
+            newAccessTokenArray = httpsClient.getRefreshGrandAccessToken(publisherURL, clientStoreFile,
+                    clientStorePass, encodedRefreshAuth, refreshToken.getValue(dynamicOptions));
+        } else {
+            newAccessTokenArray = httpsClient.getClientGrandAccessToken(publisherURL, clientStoreFile,
+                    clientStorePass, encodedRefreshAuth);
+        }
+        return newAccessTokenArray;
+    }
+
+    public void checkAccessToken(String encodedRefreshAuth, DynamicOptions dynamicOptions,
+                                 List<Header> headersList) {
+        //check the availability of the authorization
+        boolean authAvailability = false;
+        for (Header header : headersList) {
+            if (header.getName().equals(HttpConstants.AUTHORIZATION_HEADER)) {
+                authAvailability = true;
+            }
+        }
+        if (!authAvailability) {
+            //generate encoded base64 auth for getting refresh token
+            if (!accesstokenAvalable) {
+                ArrayList<String> accessTokenArray = getAccessToken(dynamicOptions, encodedRefreshAuth);
+                int responseCode = Integer.parseInt(accessTokenArray.get(0));
+
+                if (responseCode == HttpConstants.SUCCESS_CODE) {
+                    accessToken = "Bearer " + accessTokenArray.get(1);
+                    availableRefreshToken = accessTokenArray.get(2);
+                    accesstokenAvalable = true;
+                    accessTokenCache.setRefreshtoken(encodedRefreshAuth, availableRefreshToken);
+                    accessTokenCache.setAccessToken(encodedRefreshAuth, accessToken);
+                } else if (responseCode == HttpConstants.AUTHENTICATION_FAIL_CODE) {
+                    accessToken = HttpConstants.EMPTY_STRING;
+                    log.error(responseCode + ": Provide valid Consumer key, " +
+                            "Consumer secret for generate new access token.");
+                } else if (responseCode == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
+                    accessToken = HttpConstants.EMPTY_STRING;
+                    log.error(responseCode + ": Internal server Error.");
+                } else {
+                    log.error(responseCode + ": Can not obtain access token.");
+                }
+            }
+            headersList.add(new Header(HttpConstants.AUTHORIZATION_HEADER, accessToken));
+            headersList.add(new Header(HttpConstants.RECEIVER_REFRESH_TOKEN, availableRefreshToken));
+        } else {
+            //check the cache and update new access token into header
+            Boolean checkFromCache = accessTokenCache.checkAvailableKey(encodedRefreshAuth);
+            if (checkFromCache) {
+                accessToken = accessTokenCache.getAccessToken(encodedRefreshAuth);
+                for (Header header : headersList) {
+                    if (header.getName().equals(HttpConstants.AUTHORIZATION_HEADER)) {
+                        header.setValue(accessToken);
+                    }
+                }
+            }
+        }
+    }
+
+    private int sendRequest(Object payload, DynamicOptions dynamicOptions, List<Header> headersList) {
+        if (publisherURLOption.isStatic()) {
+            if (clientConnector != null) {
+                clientConnector.close();
+            }
+        }
+        initClientConnector(dynamicOptions);
         String httpMethod = EMPTY_STRING.equals(httpMethodOption.getValue(dynamicOptions)) ?
                 HttpConstants.METHOD_DEFAULT : httpMethodOption.getValue(dynamicOptions);
-        List<Header> headersList = HttpSinkUtil.getHeaders(headers);
         String contentType = HttpSinkUtil.getContentType(mapType, headersList);
         String messageBody = getMessageBody(payload);
         HttpMethod httpReqMethod = new HttpMethod(httpMethod);
@@ -579,42 +789,43 @@ public class HttpSink extends Sink {
                     .getBytes(Charset.defaultCharset()))));
         }
         cMessage.completeMessage();
-        clientConnector.send(cMessage);
+        CountDownLatch latch = new CountDownLatch(1);
+        DefaultListener listener = new DefaultListener(latch, authType);
+        HttpResponseFuture responseFuture = clientConnector.send(cMessage);
+        responseFuture.setHttpConnectorListener(listener);
+
+        if (HttpConstants.OAUTH.equals(authType)) {
+            try {
+                latch.await(30, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                log.debug("Time out due to getting new access token. " + e);
+                disconnect();
+            }
+        }
+        HTTPCarbonMessage response = listener.getHttpResponseMessage();
+        return response.getNettyHttpResponse().status().code();
     }
 
     /**
      * This method will be called before the processing method.
      * Intention to establish connection to publish event.
-     *
-     * @throws ConnectionUnavailableException if end point is unavailable the ConnectionUnavailableException thrown
-     *                                        such that the  system will take care retrying for connection
+     * such that the  system will take care retrying for connection
      */
     @Override
-    public void connect() throws ConnectionUnavailableException {
+    public void connect() {
         if (publisherURLOption.isStatic()) {
             log.info(streamID + " has successfully connected to " + publisherURL);
         }
     }
 
     /**
-     * Called after all publishing is done, or when {@link ConnectionUnavailableException} is thrown
-     * Implementation of this method should contain the steps needed to disconnect from the sink.
+     * Called after all publishing is done, the steps needed to disconnect from the sink.
      */
     @Override
     public void disconnect() {
         if (clientConnector != null) {
             clientConnector = null;
             log.info("Server connector for url " + publisherURL + " disconnected.");
-        }
-
-        if (httpConnectorFactory != null) {
-            try {
-                httpConnectorFactory.shutdown();
-                httpConnectorFactory = null;
-            } catch (InterruptedException e) {
-                log.info("Failed to shutdown the http connection factory while shutting down the siddhi app " +
-                        siddhiAppContext.getName());
-            }
         }
     }
 
@@ -722,21 +933,6 @@ public class HttpSink extends Sink {
         }
     }
 
-    void initConnectorFactory() {
-        //if bootstrap configurations are given then pass it if not let take default value of transport
-        if (!EMPTY_STRING.equals(bootstrapBoss) && !EMPTY_STRING.equals(bootstrapWorker)) {
-            if (!EMPTY_STRING.equals(bootstrapClient)) {
-                httpConnectorFactory = new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss),
-                        Integer.parseInt(bootstrapWorker), Integer.parseInt(bootstrapClient));
-            } else {
-                httpConnectorFactory = new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss),
-                        Integer.parseInt(bootstrapWorker), Integer.parseInt(bootstrapWorker));
-            }
-        } else {
-            httpConnectorFactory = new DefaultHttpWsConnectorFactory();
-        }
-    }
-
     void initClientConnector(DynamicOptions dynamicOptions) {
         if (publisherURLOption.isStatic()) {
             publisherURL = publisherURLOption.getValue();
@@ -772,6 +968,20 @@ public class HttpSink extends Sink {
             this.authorizationHeader = HttpConstants.AUTHORIZATION_METHOD + Base64.encode
                     (Unpooled.copiedBuffer(val));
         }
+        //if bootstrap configurations are given then pass it if not let take default value of transport
+        HttpWsConnectorFactory httpConnectorFactory;
+        if (!EMPTY_STRING.equals(bootstrapBoss) && !EMPTY_STRING.equals(bootstrapWorker)) {
+            if (!EMPTY_STRING.equals(bootstrapClient)) {
+                httpConnectorFactory = new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss),
+                        Integer.parseInt(bootstrapWorker), Integer.parseInt(bootstrapClient));
+            } else {
+                httpConnectorFactory = new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss),
+                        Integer.parseInt(bootstrapWorker), Integer.parseInt(bootstrapWorker));
+            }
+        } else {
+            httpConnectorFactory = new DefaultHttpWsConnectorFactory();
+        }
+
         //if proxy username and password not equal to null then create proxy configurations
         if (!EMPTY_STRING.equals(proxyHost) && !EMPTY_STRING.equals(proxyPort)) {
             try {
@@ -831,5 +1041,12 @@ public class HttpSink extends Sink {
             throw new SiddhiAppRuntimeException("Execution of Siddhi app " + siddhiAppContext.getName() +
                     " failed due to " + e.getMessage(), e);
         }
+    }
+
+    private String encodeBase64(String consumerKeyValue) {
+
+        ByteBuf byteBuf = Unpooled.wrappedBuffer(consumerKeyValue.getBytes(StandardCharsets.UTF_8));
+        ByteBuf encodedByteBuf = Base64.encode(byteBuf);
+        return encodedByteBuf.toString(StandardCharsets.UTF_8);
     }
 }
