@@ -604,7 +604,6 @@ public class HttpSink extends Sink {
         } else {
             sendOauthRequest(payload, dynamicOptions, headersList);
         }
-        disconnect();
     }
 
     private void sendOauthRequest(Object payload, DynamicOptions dynamicOptions, List<Header> headersList) {
@@ -799,7 +798,6 @@ public class HttpSink extends Sink {
                 latch.await(30, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 log.debug("Time out due to getting new access token. " + e);
-                disconnect();
             }
         }
         HTTPCarbonMessage response = listener.getHttpResponseMessage();

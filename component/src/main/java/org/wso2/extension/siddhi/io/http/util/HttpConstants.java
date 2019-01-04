@@ -94,7 +94,6 @@ public class HttpConstants {
     public static final String COMMA_SEPARATOR = ",";
     public static final String INVERTED_COMMA_SEPARATOR = "\"";
 
-
     //GlobaleConfigurations
     public static final String HTTP_PORT = "defaultHttpPort";
     public static final String HTTP_PORT_VALUE = "8280";
@@ -248,7 +247,4 @@ public class HttpConstants {
     public static final String OAUTH = "oauth";
     public static final int MAXIMUM_TRY_COUNT = 2;
     public static final int MINIMUM_TRY_COUNT = 1;
-
-
-
 }

@@ -525,7 +525,6 @@ public class HttpRequestSink extends HttpSink {
         } else {
             sendOauthRequest(payload, dynamicOptions, headersList);
         }
-        disconnect();
     }
 
     private void sendOauthRequest(Object payload, DynamicOptions dynamicOptions, List<Header> headersList) {
@@ -652,7 +651,6 @@ public class HttpRequestSink extends HttpSink {
                 latch.await(30, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 log.debug("Time out due to getting new access token. " + e);
-                disconnect();
             }
         }
         HTTPCarbonMessage response = httpListener.getHttpResponseMessage();
