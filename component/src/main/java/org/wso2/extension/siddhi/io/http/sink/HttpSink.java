@@ -478,7 +478,7 @@ public class HttpSink extends Sink {
     private String streamID;
     HttpClientConnector clientConnector;
     String mapType;
-    private static Map<String, String> httpURLProperties;
+    private Map<String, String> httpURLProperties;
     Option httpHeaderOption;
     Option httpMethodOption;
     private String consumerKey;
@@ -831,7 +831,10 @@ public class HttpSink extends Sink {
 
         if (HttpConstants.OAUTH.equals(authType)) {
             try {
-                latch.await(30, TimeUnit.SECONDS);
+                boolean latchCount = latch.await(30, TimeUnit.SECONDS);
+                if (!latchCount) {
+                    log.debug("Time out due to getting new access token. ");
+                }
             } catch (InterruptedException e) {
                 log.debug("Time out due to getting new access token. " + e);
             }

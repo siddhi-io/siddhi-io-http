@@ -671,7 +671,10 @@ public class HttpRequestSink extends HttpSink {
         httpResponseFuture.setHttpConnectorListener(httpListener);
         if (HttpConstants.OAUTH.equals(authType)) {
             try {
-                latch.await(30, TimeUnit.SECONDS);
+                boolean latchCount = latch.await(30, TimeUnit.SECONDS);
+                if (!latchCount) {
+                    log.debug("Time out due to getting new access token. ");
+                }
             } catch (InterruptedException e) {
                 log.debug("Time out due to getting new access token. " + e);
             }

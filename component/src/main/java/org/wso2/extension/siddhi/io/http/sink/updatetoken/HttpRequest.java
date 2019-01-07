@@ -34,6 +34,8 @@ import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 import org.wso2.transport.http.netty.message.HttpMessageDataStreamer;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -64,17 +66,24 @@ public class HttpRequest {
         HttpResponseFuture responseFuture = httpClientConnector.send(msg);
         responseFuture.setHttpConnectorListener(listener);
         try {
-            latch.await(30, TimeUnit.SECONDS);
+           boolean latchCount = latch.await(30, TimeUnit.SECONDS);
+           if (!latchCount) {
+               LOG.debug("Time out due to getting new access token. ");
+           }
         } catch (InterruptedException e) {
             LOG.debug("Time out due to getting new access token. " + e);
         }
         HTTPCarbonMessage response = listener.getHttpResponseMessage();
         String statusCode = Integer.toString(response.getNettyHttpResponse().status().code());
         responses.add(statusCode);
-        String responsePayload = new BufferedReader(
-                new InputStreamReader(new HttpMessageDataStreamer(response).getInputStream())).lines()
-                .collect(Collectors.joining("\n"));
-        responses.add(responsePayload);
+        InputStream httpMessageDataStreamer = new HttpMessageDataStreamer(response).getInputStream();
+        InputStreamReader inputStreamReader  = new InputStreamReader(httpMessageDataStreamer, Charset.defaultCharset());
+        try (BufferedReader buffer = new BufferedReader(inputStreamReader)) {
+            String responsePayload = buffer.lines().collect(Collectors.joining("\n"));
+            responses.add(responsePayload);
+        } catch (IOException e) {
+            LOG.debug("There was an error in reading the file" + e);
+        }
         return responses;
     }
 
