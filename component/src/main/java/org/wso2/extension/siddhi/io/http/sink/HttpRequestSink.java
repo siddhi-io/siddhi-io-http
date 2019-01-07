@@ -367,19 +367,42 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
                         optional = true,
                         defaultValue = "null",
                         dynamic = true),
-                //added
                 @Parameter(
-                        name = "client.consumerkey",
-                        description = "The consumer key for getting refresh token.",
+                        name = "oauth.username",
+                        description = "The username to be included in the authentication header of the oauth" +
+                                "authentication enabled events. It is required to specify both username and" +
+                                "password to enable oauth authentication. If one of the parameter is not given" +
+                                "by user then an error is logged in the CLI ",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = "null"),
+                        defaultValue = " "),
                 @Parameter(
-                        name = "client.consumer.secret",
-                        description = "The consumer secret key for getting refresh token.",
+                        name = "oauth.password",
+                        description = "The password to be included in the authentication header of the oauth" +
+                                "authentication enabled events. It is required to specify both username and" +
+                                "password to enable oauth authentication. If one of the parameter is not given" +
+                                "by user then an error is logged in the CLI ",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = "null"),
+                        defaultValue = " "),
+                @Parameter(
+                        name = "consumer.key",
+                        description = "consumer key for the Http request",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = " "),
+                @Parameter(
+                        name = "consumer.secret",
+                        description = "consumer secret for the Http request",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = " "),
+                @Parameter(
+                        name = "refresh.token",
+                        description = "refresh token for the Http request",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = " "),
         },
         examples = {
                 @Example(syntax =

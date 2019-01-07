@@ -351,7 +351,43 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                         description = "Maximum wait for client connection pool.",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = "60000")
+                        defaultValue = "60000"),
+                @Parameter(
+                        name = "oauth.username",
+                        description = "The username to be included in the authentication header of the oauth" +
+                                "authentication enabled events. It is required to specify both username and" +
+                                "password to enable oauth authentication. If one of the parameter is not given" +
+                                "by user then an error is logged in the CLI ",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = " "),
+                @Parameter(
+                        name = "oauth.password",
+                        description = "The password to be included in the authentication header of the oauth" +
+                                "authentication enabled events. It is required to specify both username and" +
+                                "password to enable oauth authentication. If one of the parameter is not given" +
+                                "by user then an error is logged in the CLI ",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = " "),
+                @Parameter(
+                        name = "consumer.key",
+                        description = "consumer key for the Http request",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = " "),
+                @Parameter(
+                        name = "consumer.secret",
+                        description = "consumer secret for the Http request",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = " "),
+                @Parameter(
+                        name = "refresh.token",
+                        description = "refresh token for the Http request",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = " "),
         },
         examples = {
                 @Example(syntax =
