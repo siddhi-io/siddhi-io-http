@@ -42,8 +42,9 @@ import static org.wso2.transport.http.netty.common.Constants.HTTPS_SCHEME;
  */
 public class HttpsClient {
     private static final Logger LOG = LoggerFactory.getLogger(HttpsClient.class);
+    private AccessTokenCache accessTokenCache = AccessTokenCache.getInstance();
 
-    public ArrayList<String> getPasswordGrandAccessToken(String url, String trustStorePath, String trustStorePassword,
+    public void getPasswordGrantAccessToken(String url, String trustStorePath, String trustStorePassword,
                                                       String username, String password, String encodedAuth) {
         ArrayList<String> serverInfo = getServerInfo(url);
         HttpWsConnectorFactory factory = new DefaultHttpWsConnectorFactory();
@@ -56,36 +57,33 @@ public class HttpsClient {
         refreshTokenBody.put(HttpConstants.PASSWORD, password);
         String payload = getPayload(refreshTokenBody);
         Map<String, String> headers = setHeaders(encodedAuth);
-        ArrayList<String> tokenResponse = new ArrayList<>();
         ArrayList<String> response = HttpRequest.sendPostRequest(httpClientConnector, Constants.HTTPS_SCHEME,
                 serverInfo.get(1), Integer.parseInt(serverInfo.get(0)), HttpConstants.SUFFIX_REFRESH_TOKEN_URL, payload,
                 headers);
         String[] responseArray = response.get(1).split(HttpConstants.COMMA_SEPARATOR);
         int statusCode = Integer.parseInt(response.get(0));
         if (statusCode == HttpConstants.SUCCESS_CODE) {
-            String accessToken = responseArray[0].replace(HttpConstants.ACCESS_TOKEN_SPLIT, HttpConstants.EMPTY_STRING)
+            String accessToken = "Bearer " + responseArray[0].replace(HttpConstants.ACCESS_TOKEN_SPLIT,
+                    HttpConstants.EMPTY_STRING)
                     .replace(HttpConstants.INVERTED_COMMA_SEPARATOR, HttpConstants.EMPTY_STRING);
             String refreshToken = responseArray[1].replace(HttpConstants.REFRESH_TOKEN_SPLIT,
                     HttpConstants.EMPTY_STRING).replace(HttpConstants.INVERTED_COMMA_SEPARATOR,
                     HttpConstants.EMPTY_STRING);
-            tokenResponse.add(response.get(0));
-            tokenResponse.add(accessToken);
-            tokenResponse.add(refreshToken);
+            accessTokenCache.setAccessToken(encodedAuth, accessToken);
+            accessTokenCache.setRefreshtoken(encodedAuth, refreshToken);
+            accessTokenCache.setResponseCode(encodedAuth, statusCode);
         } else {
-            tokenResponse.add(response.get(0));
+            accessTokenCache.setResponseCode(encodedAuth, statusCode);
         }
-        return tokenResponse;
-
     }
 
-    public ArrayList<String> getRefreshGrandAccessToken(String url, String trustStorePath, String trustStorePassword,
+    public void getRefreshGrantAccessToken(String url, String trustStorePath, String trustStorePassword,
                                                      String encodedAuth, String refreshToken) {
         ArrayList<String> serverInfo = getServerInfo(url);
         HttpWsConnectorFactory factory = new DefaultHttpWsConnectorFactory();
         HttpClientConnector httpClientConnector = factory
                 .createHttpClientConnector(new HashMap<>(), getSenderConfigurationForHttp(trustStorePath,
                         trustStorePassword));
-        ArrayList<String> tokenResponse = new ArrayList<>();
         final Map<String, String> refreshTokenBody = new HashMap<>();
         Map<String, String> headers = setHeaders(encodedAuth);
         refreshTokenBody.put(HttpConstants.GRANT_TYPE, HttpConstants.GRANT_REFRESHTOKEN);
@@ -97,25 +95,24 @@ public class HttpsClient {
         String[] responseArray = response.get(1).split(HttpConstants.COMMA_SEPARATOR);
         int statusCode = Integer.parseInt(response.get(0));
         if (statusCode == HttpConstants.SUCCESS_CODE) {
-            String token = responseArray[0].replace(HttpConstants.ACCESS_TOKEN_SPLIT, HttpConstants.EMPTY_STRING)
+            String token = "Bearer " + responseArray[0].replace(HttpConstants.ACCESS_TOKEN_SPLIT,
+                    HttpConstants.EMPTY_STRING)
                     .replace(HttpConstants.INVERTED_COMMA_SEPARATOR, HttpConstants.EMPTY_STRING);
             String newRefreshToken = responseArray[1].replace(HttpConstants.REFRESH_TOKEN_SPLIT,
                     HttpConstants.EMPTY_STRING).replace(HttpConstants.INVERTED_COMMA_SEPARATOR,
                     HttpConstants.EMPTY_STRING);
-            tokenResponse.add(response.get(0));
-            tokenResponse.add(token);
-            tokenResponse.add(newRefreshToken);
-            return tokenResponse;
+            accessTokenCache.setAccessToken(encodedAuth, token);
+            accessTokenCache.setRefreshtoken(encodedAuth, newRefreshToken);
+            accessTokenCache.setResponseCode(encodedAuth, statusCode);
         } else if (statusCode == HttpConstants.AUTHENTICATION_FAIL_CODE
                 || statusCode == HttpConstants.PERSISTENT_ACCESS_FAIL_CODE) {
-            return getClientGrandAccessToken(url, trustStorePath, trustStorePassword, encodedAuth);
+             getClientGrantAccessToken(url, trustStorePath, trustStorePassword, encodedAuth);
         } else {
-            tokenResponse.add(response.get(0));
-            return tokenResponse;
+            accessTokenCache.setResponseCode(encodedAuth, statusCode);
         }
     }
 
-    public ArrayList<String> getClientGrandAccessToken(String url, String trustStorePath, String trustStorePassword,
+    public void getClientGrantAccessToken(String url, String trustStorePath, String trustStorePassword,
                                                     String encodedAuth) {
         String token;
         ArrayList<String> serverInfo = getServerInfo(url);
@@ -123,7 +120,6 @@ public class HttpsClient {
         HttpClientConnector httpClientConnector = factory
                 .createHttpClientConnector(new HashMap<>(), getSenderConfigurationForHttp(trustStorePath,
                         trustStorePassword));
-        ArrayList<String> tokenResponse = new ArrayList<>();
         final Map<String, String> refreshTokenBody = new HashMap<>();
         refreshTokenBody.put(HttpConstants.GRANT_TYPE, HttpConstants.GRANT_CLIENTTOKEN);
         String payload = getPayload(refreshTokenBody);
@@ -134,15 +130,13 @@ public class HttpsClient {
         String[] responseArray = response.get(1).split(HttpConstants.COMMA_SEPARATOR);
         int statusCode = Integer.parseInt(response.get(0));
         if (statusCode == HttpConstants.SUCCESS_CODE) {
-            token = responseArray[0].replace(HttpConstants.ACCESS_TOKEN_SPLIT, HttpConstants.EMPTY_STRING)
+            token = "Bearer " + responseArray[0].replace(HttpConstants.ACCESS_TOKEN_SPLIT, HttpConstants.EMPTY_STRING)
                     .replace(HttpConstants.INVERTED_COMMA_SEPARATOR, HttpConstants.EMPTY_STRING);
-            tokenResponse.add(response.get(0));
-            tokenResponse.add(token);
-            tokenResponse.add(HttpConstants.EMPTY_STRING);
+            accessTokenCache.setAccessToken(encodedAuth, token);
+            accessTokenCache.setResponseCode(encodedAuth, statusCode);
         } else {
-            tokenResponse.add(response.get(0));
+            accessTokenCache.setResponseCode(encodedAuth, statusCode);
         }
-        return tokenResponse;
     }
 
     private static SenderConfiguration getSenderConfigurationForHttp(String trustStorePath, String trustStorePassword) {
@@ -158,8 +152,8 @@ public class HttpsClient {
         try {
             return URLEncoder.encode((String) s, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            LOG.error("Unable to encode the message: " + e);
-            return "Unable to encode the message: " + e;
+            LOG.error("Unable to encode the message while generating new access token: " + e);
+            return HttpConstants.EMPTY_STRING;
         }
     }
 

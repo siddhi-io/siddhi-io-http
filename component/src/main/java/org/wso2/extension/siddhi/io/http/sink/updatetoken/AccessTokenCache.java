@@ -24,18 +24,25 @@ import java.util.Map;
  * {@code AccessTokenCache} Handle the access token caching.
  */
 public class AccessTokenCache {
-    private Map<String , String> accessToken;
-    private Map<String , String> refreshToken;
+    private static Map<String , String> accessToken;
+    private static Map<String , String> refreshToken;
+    private static Map<String , Integer> responseCode;
 
-    private static AccessTokenCache sc = new AccessTokenCache();
+    private static AccessTokenCache accessTokenCache;
 
-    public static AccessTokenCache getInstance() {
-        return sc;
+    private AccessTokenCache() {
     }
 
-    public AccessTokenCache() {
-        accessToken = new HashMap<String, String>();
-        refreshToken = new HashMap<String, String>();
+    public static synchronized AccessTokenCache getInstance() {
+        if (accessTokenCache == null) {
+            accessTokenCache = new AccessTokenCache();
+            accessToken = new HashMap<>();
+            refreshToken = new HashMap<>();
+            responseCode = new HashMap<>();
+            return accessTokenCache;
+        } else {
+            return accessTokenCache;
+        }
     }
 
     public void setAccessToken(String key, String value) {
@@ -44,6 +51,14 @@ public class AccessTokenCache {
 
     public void setRefreshtoken(String key, String value) {
         refreshToken.put(key, value);
+    }
+
+    public void setResponseCode(String key, int value) {
+        responseCode.put(key, value);
+    }
+
+    public int getResponseCode(String key) {
+        return responseCode.get(key);
     }
 
     public String getAccessToken(String key) {
@@ -59,6 +74,6 @@ public class AccessTokenCache {
     }
 
     public boolean checkRefreshAvailableKey(String value) {
-        return refreshToken.containsKey(value);
+            return refreshToken.containsKey(value);
     }
 }

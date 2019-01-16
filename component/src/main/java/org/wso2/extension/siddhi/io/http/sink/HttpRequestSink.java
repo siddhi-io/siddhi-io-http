@@ -27,6 +27,7 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
 import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
+import org.wso2.extension.siddhi.io.http.sink.exception.HttpSinkAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.sink.updatetoken.AccessTokenCache;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpSinkUtil;
 import org.wso2.extension.siddhi.io.http.source.HttpResponseMessageListener;
@@ -49,7 +50,6 @@ import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -369,37 +369,41 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
                         dynamic = true),
                 @Parameter(
                         name = "oauth.username",
-                        description = "The username to be included in the authentication header of the oauth" +
+                        description = "The username to be included in the authentication header of the oauth " +
                                 "authentication enabled events. It is required to specify both username and" +
                                 "password to enable oauth authentication. If one of the parameter is not given" +
-                                "by user then an error is logged in the CLI ",
+                                "by user then an error is logged in the CLI. It is only applicable for for Oauth" +
+                                " requests ",
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = " "),
                 @Parameter(
                         name = "oauth.password",
-                        description = "The password to be included in the authentication header of the oauth" +
+                        description = "The password to be included in the authentication header of the oauth " +
                                 "authentication enabled events. It is required to specify both username and" +
                                 "password to enable oauth authentication. If one of the parameter is not given" +
-                                "by user then an error is logged in the CLI ",
+                                "by user then an error is logged in the CLI. It is only applicable for for Oauth" +
+                                " requests ",
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = " "),
                 @Parameter(
                         name = "consumer.key",
-                        description = "consumer key for the Http request",
+                        description = "consumer key for the Http request. It is only applicable for for Oauth requests",
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = " "),
                 @Parameter(
                         name = "consumer.secret",
-                        description = "consumer secret for the Http request",
+                        description = "consumer secret for the Http request. It is only applicable for for " +
+                                "Oauth requests",
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = " "),
                 @Parameter(
                         name = "refresh.token",
-                        description = "refresh token for the Http request",
+                        description = "refresh token for the Http request. It is only applicable for for" +
+                                " Oauth requests",
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = " "),
@@ -490,15 +494,14 @@ public class HttpRequestSink extends HttpSink {
     private String consumerKey;
     private String consumerSecret;
     private String authType;
-    private String availableRefreshToken;
-    private String accessToken;
-    private AccessTokenCache accessTokenCache = new AccessTokenCache();
+    private AccessTokenCache accessTokenCache = AccessTokenCache.getInstance();
+    private String publisherURL;
 
     @Override
     protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
                         ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
         super.init(outputStreamDefinition, optionHolder, configReader, siddhiAppContext);
-
+        this.outputStreamDefinition = outputStreamDefinition;
         this.sinkId = optionHolder.validateAndGetStaticValue(HttpConstants.SINK_ID);
         this.isDownloadEnabled = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants
                 .DOWNLOAD_ENABLED, HttpConstants.DEFAULT_DOWNLOAD_ENABLED_VALUE));
@@ -506,10 +509,9 @@ public class HttpRequestSink extends HttpSink {
             this.downloadPath = optionHolder.validateAndGetOption(HttpConstants.DOWNLOAD_PATH);
         }
         String userName = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_USERNAME, EMPTY_STRING);
-        String userPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_PASSWORD, EMPTY_STRING);
+        String password = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_PASSWORD, EMPTY_STRING);
         this.consumerKey = optionHolder.validateAndGetStaticValue(HttpConstants.CONSUMER_KEY, EMPTY_STRING);
         this.consumerSecret = optionHolder.validateAndGetStaticValue(HttpConstants.CONSUMER_SECRET, EMPTY_STRING);
-        this.outputStreamDefinition = outputStreamDefinition;
         String oauthUsername = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_OAUTH_USERNAME,
                 EMPTY_STRING);
         this.publisherURLOption = optionHolder.validateAndGetOption(HttpConstants.PUBLISHER_URL);
@@ -517,7 +519,7 @@ public class HttpRequestSink extends HttpSink {
                 EMPTY_STRING);
 
 
-        if (!HttpConstants.EMPTY_STRING.equals(userName) && !HttpConstants.EMPTY_STRING.equals(userPassword)) {
+        if (!HttpConstants.EMPTY_STRING.equals(userName) && !HttpConstants.EMPTY_STRING.equals(password)) {
             authType = HttpConstants.BASIC_AUTH;
         } else if ((!HttpConstants.EMPTY_STRING.equals(consumerKey)
                 && !HttpConstants.EMPTY_STRING.equals(consumerSecret)) ||
@@ -542,6 +544,11 @@ public class HttpRequestSink extends HttpSink {
 //get the dynamic parameter
         String headers = httpHeaderOption.getValue(dynamicOptions);
         List<Header> headersList = HttpSinkUtil.getHeaders(headers);
+        if (publisherURLOption.isStatic()) {
+            publisherURL = publisherURLOption.getValue();
+        } else {
+            publisherURL = publisherURLOption.getValue(dynamicOptions);
+        }
 
         if (authType.equals(HttpConstants.BASIC_AUTH) || authType.equals(HttpConstants.NO_AUTH)) {
             sendRequest(payload, dynamicOptions, headersList, HttpConstants.MAXIMUM_TRY_COUNT);
@@ -553,96 +560,124 @@ public class HttpRequestSink extends HttpSink {
     private void sendOauthRequest(Object payload, DynamicOptions dynamicOptions, List<Header> headersList) {
         //generate encoded base64 auth for getting refresh token
         String consumerKeyValue = consumerKey + ":" + consumerSecret;
-        String encodedRefreshAuth = "Basic " + encodeBase64(consumerKeyValue);
+        String encodedAuth = "Basic " + encodeBase64(consumerKeyValue);
         //check the availability of access token in the header
-        checkAccessToken(encodedRefreshAuth, dynamicOptions, headersList);
+        setAccessToken(encodedAuth, dynamicOptions, headersList);
         //send a request to API and get the response
         int response = sendRequest(payload, dynamicOptions, headersList, HttpConstants.MINIMUM_TRY_COUNT);
         //if authentication fails then get the new access token
         if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
-            oauthFails(payload, dynamicOptions, headersList, encodedRefreshAuth);
+            oauthFails(payload, dynamicOptions, headersList, encodedAuth);
         } else if (response == HttpConstants.SUCCESS_CODE) {
-            log.info("Request send successfully.");
+            log.info("Request sent successfully to " + publisherURL);
         } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
-            log.error(response + ": Internal server error.");
+            log.error("Error at getting connection with API endpoint " + publisherURL + "', and response code: " +
+                    response + "- Internal server connection failure.");
+            throw new HttpSinkAdaptorRuntimeException("Error getting connection with API endpoint " +
+                    publisherURL + "', and response code: " + response + "- Internal server connection failure.");
         } else {
-            log.error(response + ": Can not obtain access token.");
+            log.error("Error at getting connection with API endpoint " +
+                    publisherURL + "', and response code: " + response + "-  Can not obtain access token.");
+            throw new HttpSinkAdaptorRuntimeException("Error at getting connection with API endpoint " +
+                    publisherURL + "', and response code: " + response + "-  Can not obtain access token.");
         }
     }
 
     private void oauthFails(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
-                            String encodedRefreshAuth) {
+                            String encodedAuth) {
 
-        Boolean checkFromCache = accessTokenCache.checkAvailableKey(encodedRefreshAuth);
+        Boolean checkFromCache = accessTokenCache.checkAvailableKey(encodedAuth);
         if (checkFromCache) {
-            getNewAccessTokenWithCache(payload, dynamicOptions, headersList, encodedRefreshAuth);
+            getNewAccessTokenWithCache(payload, dynamicOptions, headersList, encodedAuth);
         } else {
-            requestForNewAccessToken(payload, dynamicOptions, headersList, encodedRefreshAuth);
+            requestForNewAccessToken(payload, dynamicOptions, headersList, encodedAuth);
         }
     }
 
     private void getNewAccessTokenWithCache(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
-                                            String encodedRefreshAuth) {
-        accessToken = accessTokenCache.getAccessToken(encodedRefreshAuth);
+                                            String encodedAuth) {
+        String accessToken = accessTokenCache.getAccessToken(encodedAuth);
         for (Header header : headersList) {
             if (header.getName().equals(HttpConstants.AUTHORIZATION_HEADER)) {
                 header.setValue(accessToken);
+                break;
             }
         }
         //send a request to API with a new access token
         int response = sendRequest(payload, dynamicOptions, headersList, HttpConstants.MINIMUM_TRY_COUNT);
         if (response == HttpConstants.SUCCESS_CODE) {
-            log.info("Request send successfully.");
+            log.info("Request sent successfully to " + publisherURL);
         } else if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
-            requestForNewAccessToken(payload, dynamicOptions, headersList, encodedRefreshAuth);
+            requestForNewAccessToken(payload, dynamicOptions, headersList, encodedAuth);
         } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
-            log.error(response + ": Internal server error.");
+            log.error("Error at getting connection with API endpoint " + publisherURL + "', and response code: " +
+                    response + "- Internal server connection failure.");
+            throw new HttpSinkAdaptorRuntimeException("Error at getting connection with API endpoint " +
+                    publisherURL + "', and response code: " + response + "- Internal server connection failure.");
         } else {
-            log.error(response + ": Can not obtain access token.");
+            log.error("Error at getting connection with API endpoint " + publisherURL + "', and response code: " +
+                    response + "- Can not obtain access token.");
+            throw new HttpSinkAdaptorRuntimeException("Error at getting connection with API endpoint " + publisherURL +
+                    "', and response code: " + response + "- Can not obtain access token.");
         }
     }
 
     private void requestForNewAccessToken(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
-                                               String encodedRefreshAuth) {
-        Boolean checkRefreshToken = accessTokenCache.checkRefreshAvailableKey(encodedRefreshAuth);
+                                          String encodedAuth) {
+        Boolean checkRefreshToken = accessTokenCache.checkRefreshAvailableKey(encodedAuth);
         if (checkRefreshToken) {
-            availableRefreshToken = accessTokenCache.getRefreshtoken(encodedRefreshAuth);
             for (Header header : headersList) {
                 if (header.getName().equals(HttpConstants.RECEIVER_REFRESH_TOKEN)) {
-                    header.setValue(availableRefreshToken);
+                    header.setValue(accessTokenCache.getRefreshtoken(encodedAuth));
+                    break;
                 }
             }
         }
-        ArrayList<String> newAccessTokenArray = getAccessToken(dynamicOptions, encodedRefreshAuth);
-        int newAccessResponseCode = Integer.parseInt(newAccessTokenArray.get(0));
-        if (newAccessResponseCode == HttpConstants.SUCCESS_CODE) {
-            String newAccessToken = "Bearer " + newAccessTokenArray.get(1);
-            accessTokenCache.setAccessToken(encodedRefreshAuth, newAccessToken);
-            if (!newAccessTokenArray.get(2).equals(HttpConstants.EMPTY_STRING)) {
-                accessTokenCache.setRefreshtoken(encodedRefreshAuth, newAccessTokenArray.get(2));
+        getAccessToken(dynamicOptions, encodedAuth);
+        if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.SUCCESS_CODE) {
+            String newAccessToken = accessTokenCache.getAccessToken(encodedAuth);
+            accessTokenCache.setAccessToken(encodedAuth, newAccessToken);
+            if (!accessTokenCache.getRefreshtoken(encodedAuth).equals(HttpConstants.EMPTY_STRING)) {
+                accessTokenCache.setRefreshtoken(encodedAuth, accessTokenCache.getRefreshtoken(encodedAuth));
             }
             for (Header header : headersList) {
                 if (header.getName().equals(HttpConstants.AUTHORIZATION_HEADER)) {
                     header.setValue(newAccessToken);
+                    break;
                 }
             }
             //send a request to API with a new access token
             int response = sendRequest(payload, dynamicOptions, headersList, HttpConstants.MAXIMUM_TRY_COUNT);
             if (response == HttpConstants.SUCCESS_CODE) {
-                log.info("Request send successfully.");
+                log.info("Request sent successfully to " + publisherURL);
             } else if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
-                log.error(response + ": Authentication Failure. Please apply valid authorization.");
+                log.error("Error at getting connection with API endpoint " + publisherURL + "', and response code: " +
+                        response + "- Authentication Failure. " +
+                        "Please provide a valid Consumer key and a Consumer secret.");
             } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
-                log.error(response + ": Internal server error.");
+                log.error("Error at getting connection with API endpoint " + publisherURL + "', and response code: " +
+                        response + "- Internal server connection failure.");
+                throw new HttpSinkAdaptorRuntimeException("Error at getting connection with API endpoint " +
+                        publisherURL + "', and response code:" + response + "- Internal server connection failure.");
             } else {
-                log.error(response + ": Can not obtain access token.");
+                log.error("Error at getting connection with API endpoint " + publisherURL + "', and response code: " +
+                        response + ": Can not obtain access token.");
+                throw new HttpSinkAdaptorRuntimeException("Error at getting connection with API endpoint " +
+                        publisherURL + "', response code: " + response + ":  Can not obtain access token.");
             }
 
-        } else if (newAccessResponseCode == HttpConstants.AUTHENTICATION_FAIL_CODE) {
-            log.error(newAccessResponseCode + ": Authentication Failure. Please apply valid Consumer key, " +
-                    "Consumer secret for generate new access token. ");
+        } else if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.AUTHENTICATION_FAIL_CODE) {
+            log.error("Failed to generate new access token for the expired access token to " + publisherURL + "', " +
+                    accessTokenCache.getResponseCode(encodedAuth) + ": Authentication Failure. Please provide a valid" +
+                    " Consumer key and a Consumer secret.");
+            throw new HttpSinkAdaptorRuntimeException("Failed to generate new access token for the expired access " +
+                    "token to " + publisherURL + "', " + accessTokenCache.getResponseCode(encodedAuth) +
+                    ": Authentication Failure. Please provide a valid Consumer key and a Consumer secret.");
         } else {
-            log.error(newAccessResponseCode + ": Can not obtain new access token.");
+            log.error("Failed to generate new access token for the expired access token. Error code: " +
+                    accessTokenCache.getResponseCode(encodedAuth));
+            throw new HttpSinkAdaptorRuntimeException("Failed to generate new access token for the expired" +
+                    " access token. Error code: " + accessTokenCache.getResponseCode(encodedAuth));
         }
     }
 
@@ -673,10 +708,14 @@ public class HttpRequestSink extends HttpSink {
             try {
                 boolean latchCount = latch.await(30, TimeUnit.SECONDS);
                 if (!latchCount) {
-                    log.debug("Time out due to getting new access token. ");
+                    log.debug("Time out due to getting getting response from " + publisherURL);
+                    throw new HttpSinkAdaptorRuntimeException("Time out due to getting getting response from "
+                            + publisherURL);
                 }
             } catch (InterruptedException e) {
-                log.debug("Time out due to getting new access token. " + e);
+                log.debug("Time out due to getting getting response from " + publisherURL + e);
+                throw new HttpSinkAdaptorRuntimeException("Time out due to getting getting response from " +
+                        publisherURL + ", " + e);
             }
         }
         HTTPCarbonMessage response = httpListener.getHttpResponseMessage();

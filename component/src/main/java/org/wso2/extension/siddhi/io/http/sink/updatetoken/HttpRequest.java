@@ -82,7 +82,7 @@ public class HttpRequest {
             String responsePayload = buffer.lines().collect(Collectors.joining("\n"));
             responses.add(responsePayload);
         } catch (IOException e) {
-            LOG.debug("There was an error in reading the file" + e);
+            LOG.debug("There was an error in reading the file while generating new access token. " + e);
         }
         return responses;
     }
