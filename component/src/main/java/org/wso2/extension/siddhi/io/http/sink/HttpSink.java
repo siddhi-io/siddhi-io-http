@@ -652,23 +652,23 @@ public class HttpSink extends Sink {
         int response = sendRequest(payload, dynamicOptions, headersList);
         //if authentication fails then get the new access token
         if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
-            oauthFails(payload, dynamicOptions, headersList, encodedAuth);
+            handleOAuthFailure(payload, dynamicOptions, headersList, encodedAuth);
         } else if (response == HttpConstants.SUCCESS_CODE) {
             log.info("Request sent successfully to " + publisherURL);
         } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
-            log.error("Error at getting connection with API endpoint " + publisherURL + "', and response code: " +
-                    response + "- Internal server connection failure.");
-            throw new HttpSinkAdaptorRuntimeException("Error getting connection with API endpoint " +
-                    publisherURL + "', and response code: " + response + "- Internal server connection failure.");
+            log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+                    response + "- Internal server error.");
+            throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint, " +
+                    publisherURL + "', with response code: " + response + "- Internal server error.");
         } else {
-            log.error("Error at getting connection with API endpoint " +
-                    publisherURL + "', and response code: " + response + "-  Can not obtain access token.");
-            throw new HttpSinkAdaptorRuntimeException("Error at getting connection with API endpoint " +
-                    publisherURL + "', and response code: " + response + "-  Can not obtain access token.");
+            log.error("Error at sending oauth request to API endpoint " +
+                    publisherURL + "', with response code: " + response);
+            throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " +
+                    publisherURL + "', and response code: " + response);
         }
     }
 
-    private void oauthFails(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
+    private void handleOAuthFailure(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
                             String encodedAuth) {
         Boolean checkFromCache = accessTokenCache.checkAvailableKey(encodedAuth);
         if (checkFromCache) {
@@ -694,15 +694,15 @@ public class HttpSink extends Sink {
         } else if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
             requestForNewAccessToken(payload, dynamicOptions, headersList, encodedAuth);
         } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
-            log.error("Error at getting connection with API endpoint " + publisherURL + "', and response code: " +
-                    response + "- Internal server connection failure.");
-            throw new HttpSinkAdaptorRuntimeException("Error at getting connection with API endpoint " +
-                    publisherURL + "', and response code: " + response + "- Internal server connection failure.");
+            log.error("Error at sending oauth request to API endpoint, " + publisherURL + "', with response code: " +
+                    response + "- Internal server error.");
+            throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint, " +
+                    publisherURL + "', with response code: " + response + "- Internal server error.");
         } else {
-            log.error("Error at getting connection with API endpoint " + publisherURL + "', and response code: " +
-                    response + "- Can not obtain access token.");
-            throw new HttpSinkAdaptorRuntimeException("Error at getting connection with API endpoint " + publisherURL +
-                    "', and response code: " + response + "- Can not obtain access token.");
+            log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+                    response);
+            throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " + publisherURL +
+                    "', with response code: " + response);
         }
     }
 
@@ -710,10 +710,8 @@ public class HttpSink extends Sink {
                                                String encodedAuth) {
         Boolean checkRefreshToken = accessTokenCache.checkRefreshAvailableKey(encodedAuth);
         if (checkRefreshToken) {
-           // responseTokens.setRefreshToken(accessTokenCache.getRefreshtoken(encodedAuth));
             for (Header header : headersList) {
                 if (header.getName().equals(HttpConstants.RECEIVER_REFRESH_TOKEN)) {
-                  //  header.setValue(responseTokens.getRefreshToken());
                     header.setValue(accessTokenCache.getRefreshtoken(encodedAuth));
                     break;
                 }
@@ -737,19 +735,22 @@ public class HttpSink extends Sink {
             if (response == HttpConstants.SUCCESS_CODE) {
                 log.info("Request sent successfully to " + publisherURL);
             } else if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
-                log.error("Error at getting connection with API endpoint " + publisherURL + "', and response code: " +
+                log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
                         response + "- Authentication Failure. " +
                         "Please provide a valid Consumer key and a Consumer secret.");
+                throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " +
+                        publisherURL + "', with response code: " + response + "- Authentication Failure. " +
+                        "Please provide a valid Consumer key and a Consumer secret.");
             } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
-                log.error("Error at getting connection with API endpoint " + publisherURL + "', and response code: " +
-                        response + "- Internal server connection failure.");
-                throw new HttpSinkAdaptorRuntimeException("Error at getting connection with API endpoint " +
-                        publisherURL + "', and response code:" + response + "- Internal server connection failure.");
+                log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+                        response + "- Internal server error.");
+                throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint "
+                        + publisherURL + "', with response code: " + response + "- Internal server error.");
             } else {
-                log.error("Error at getting connection with API endpoint " + publisherURL + "', and response code: " +
-                        response + ": Can not obtain access token.");
-                throw new HttpSinkAdaptorRuntimeException("Error at getting connection with API endpoint " +
-                        publisherURL + "', response code: " + response + ":  Can not obtain access token.");
+                log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+                        response);
+                throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " +
+                        publisherURL + "', with response code: " + response);
             }
         } else if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.AUTHENTICATION_FAIL_CODE) {
             log.error("Failed to generate new access token for the expired access token to " + publisherURL + "', " +
@@ -804,15 +805,19 @@ public class HttpSink extends Sink {
                             accessTokenCache.getRefreshtoken(encodedAuth)));
                 } else if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.AUTHENTICATION_FAIL_CODE) {
                     log.error("Failed to generate new access token for the expired access token to " + publisherURL +
-                            "', and response code: " + accessTokenCache.getResponseCode(encodedAuth) +
+                            "', with response code: " + accessTokenCache.getResponseCode(encodedAuth) +
                             "- Authentication Failure. Please provide a valid Consumer key and a Consumer secret.");
+                    throw new HttpSinkAdaptorRuntimeException("Failed to generate new access token for the expired" +
+                            " access token to " + publisherURL + "', with response code: " +
+                            accessTokenCache.getResponseCode(encodedAuth) + "- Authentication Failure. " +
+                            "Please provide a valid Consumer key and a Consumer secret.");
                 } else if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
                     log.error("Failed to generate new access token for the expired access token to " + publisherURL +
-                            "', and response code: " + accessTokenCache.getResponseCode(encodedAuth) +
-                            "- Internal server connection failure.");
+                            "', with response code: " + accessTokenCache.getResponseCode(encodedAuth) +
+                            "- Internal server error.");
                     throw new HttpSinkAdaptorRuntimeException("Failed to generate new access token for the expired" +
-                            " access token to " + publisherURL + "', and response code: " +
-                            accessTokenCache.getResponseCode(encodedAuth) + "- Internal server connection failure.");
+                            " access token to " + publisherURL + "', with response code: " +
+                            accessTokenCache.getResponseCode(encodedAuth) + "- Internal server error.");
                 } else {
                     log.error("Failed to generate new access token for the expired access token. Error code: " +
                             accessTokenCache.getResponseCode(encodedAuth));
@@ -868,10 +873,9 @@ public class HttpSink extends Sink {
 
                 }
             } catch (InterruptedException e) {
-                log.debug("Time out due to getting getting response from " + publisherURL + e);
-                throw new HttpSinkAdaptorRuntimeException("Time out due to getting getting response from " +
+                log.debug("Failed to get a response from " + publisherURL + "," + e);
+                throw new HttpSinkAdaptorRuntimeException("Failed to get a response from " +
                         publisherURL + ", " + e);
-
             }
         }
         HTTPCarbonMessage response = listener.getHttpResponseMessage();

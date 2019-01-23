@@ -517,8 +517,6 @@ public class HttpRequestSink extends HttpSink {
         this.publisherURLOption = optionHolder.validateAndGetOption(HttpConstants.PUBLISHER_URL);
         String oauthUserPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_OAUTH_PASSWORD,
                 EMPTY_STRING);
-
-
         if (!HttpConstants.EMPTY_STRING.equals(userName) && !HttpConstants.EMPTY_STRING.equals(password)) {
             authType = HttpConstants.BASIC_AUTH;
         } else if ((!HttpConstants.EMPTY_STRING.equals(consumerKey)
@@ -529,9 +527,7 @@ public class HttpRequestSink extends HttpSink {
         } else {
             authType = HttpConstants.NO_AUTH;
         }
-
     }
-
 
     /**
      * This method will be called when events need to be published via this sink
@@ -567,23 +563,23 @@ public class HttpRequestSink extends HttpSink {
         int response = sendRequest(payload, dynamicOptions, headersList, HttpConstants.MINIMUM_TRY_COUNT);
         //if authentication fails then get the new access token
         if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
-            oauthFails(payload, dynamicOptions, headersList, encodedAuth);
+            handleOAuthFailure(payload, dynamicOptions, headersList, encodedAuth);
         } else if (response == HttpConstants.SUCCESS_CODE) {
             log.info("Request sent successfully to " + publisherURL);
         } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
-            log.error("Error at getting connection with API endpoint " + publisherURL + "', and response code: " +
-                    response + "- Internal server connection failure.");
-            throw new HttpSinkAdaptorRuntimeException("Error getting connection with API endpoint " +
-                    publisherURL + "', and response code: " + response + "- Internal server connection failure.");
+            log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+                    response + "- Internal server error.");
+            throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint: " +
+                    publisherURL + "', with response code: " + response + "- Internal server error.");
         } else {
-            log.error("Error at getting connection with API endpoint " +
-                    publisherURL + "', and response code: " + response + "-  Can not obtain access token.");
-            throw new HttpSinkAdaptorRuntimeException("Error at getting connection with API endpoint " +
-                    publisherURL + "', and response code: " + response + "-  Can not obtain access token.");
+            log.error("Error at sending oauth request to API endpoint: " +
+                    publisherURL + "', with response code: " + response);
+            throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint: " +
+                    publisherURL + "', with response code: " + response);
         }
     }
 
-    private void oauthFails(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
+    private void handleOAuthFailure(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
                             String encodedAuth) {
 
         Boolean checkFromCache = accessTokenCache.checkAvailableKey(encodedAuth);
@@ -610,15 +606,15 @@ public class HttpRequestSink extends HttpSink {
         } else if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
             requestForNewAccessToken(payload, dynamicOptions, headersList, encodedAuth);
         } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
-            log.error("Error at getting connection with API endpoint " + publisherURL + "', and response code: " +
-                    response + "- Internal server connection failure.");
-            throw new HttpSinkAdaptorRuntimeException("Error at getting connection with API endpoint " +
-                    publisherURL + "', and response code: " + response + "- Internal server connection failure.");
+            log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+                    response + "- Internal server error.");
+            throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " +
+                    publisherURL + "', with response code: " + response + "- Internal server error.");
         } else {
-            log.error("Error at getting connection with API endpoint " + publisherURL + "', and response code: " +
-                    response + "- Can not obtain access token.");
-            throw new HttpSinkAdaptorRuntimeException("Error at getting connection with API endpoint " + publisherURL +
-                    "', and response code: " + response + "- Can not obtain access token.");
+            log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+                    response);
+            throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " +
+                    publisherURL + "', with response code: " + response);
         }
     }
 
@@ -651,19 +647,22 @@ public class HttpRequestSink extends HttpSink {
             if (response == HttpConstants.SUCCESS_CODE) {
                 log.info("Request sent successfully to " + publisherURL);
             } else if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
-                log.error("Error at getting connection with API endpoint " + publisherURL + "', and response code: " +
+                log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
                         response + "- Authentication Failure. " +
                         "Please provide a valid Consumer key and a Consumer secret.");
+                throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " +
+                        publisherURL + "', with response code: " + response + "- Authentication Failure. " +
+                        "Please provide a valid Consumer key and a Consumer secret.");
             } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
-                log.error("Error at getting connection with API endpoint " + publisherURL + "', and response code: " +
-                        response + "- Internal server connection failure.");
-                throw new HttpSinkAdaptorRuntimeException("Error at getting connection with API endpoint " +
-                        publisherURL + "', and response code:" + response + "- Internal server connection failure.");
+                log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+                        response + "- Internal server error.");
+                throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " +
+                        publisherURL + "', with response code:" + response + "- Internal server error.");
             } else {
-                log.error("Error at getting connection with API endpoint " + publisherURL + "', and response code: " +
-                        response + ": Can not obtain access token.");
-                throw new HttpSinkAdaptorRuntimeException("Error at getting connection with API endpoint " +
-                        publisherURL + "', response code: " + response + ":  Can not obtain access token.");
+                log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+                        response);
+                throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint  " +
+                        publisherURL + "', with response code: " + response);
             }
 
         } else if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.AUTHENTICATION_FAIL_CODE) {
@@ -713,8 +712,8 @@ public class HttpRequestSink extends HttpSink {
                             + publisherURL);
                 }
             } catch (InterruptedException e) {
-                log.debug("Time out due to getting getting response from " + publisherURL + e);
-                throw new HttpSinkAdaptorRuntimeException("Time out due to getting getting response from " +
+                log.debug("Failed to get a response from " + publisherURL + "," + e);
+                throw new HttpSinkAdaptorRuntimeException("Failed to get a response from " +
                         publisherURL + ", " + e);
             }
         }
@@ -743,7 +742,6 @@ public class HttpRequestSink extends HttpSink {
     }
 
     private String encodeBase64(String consumerKeyValue) {
-
         ByteBuf byteBuf = Unpooled.wrappedBuffer(consumerKeyValue.getBytes(StandardCharsets.UTF_8));
         ByteBuf encodedByteBuf = Base64.encode(byteBuf);
         return encodedByteBuf.toString(StandardCharsets.UTF_8);
