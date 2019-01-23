@@ -355,8 +355,8 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                 @Parameter(
                         name = "oauth.username",
                         description = "The username to be included in the authentication header of the oauth " +
-                                "authentication enabled events. It is required to specify both username and" +
-                                "password to enable oauth authentication. If one of the parameter is not given" +
+                                "authentication enabled events. It is required to specify both username and " +
+                                "password to enable oauth authentication. If one of the parameter is not given " +
                                 "by user then an error is logged in the CLI. It is only applicable for for Oauth" +
                                 " requests ",
                         type = {DataType.STRING},
@@ -365,8 +365,8 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                 @Parameter(
                         name = "oauth.password",
                         description = "The password to be included in the authentication header of the oauth " +
-                                "authentication enabled events. It is required to specify both username and" +
-                                "password to enable oauth authentication. If one of the parameter is not given" +
+                                "authentication enabled events. It is required to specify both username and " +
+                                "password to enable oauth authentication. If one of the parameter is not given " +
                                 "by user then an error is logged in the CLI. It is only applicable for for Oauth" +
                                 " requests ",
                         type = {DataType.STRING},
@@ -657,14 +657,14 @@ public class HttpSink extends Sink {
             log.info("Request sent successfully to " + publisherURL);
         } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
             log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
-                    response + "- Internal server error.");
+                    response + "- Internal server error. Message dropped");
             throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint, " +
-                    publisherURL + "', with response code: " + response + "- Internal server error.");
+                    publisherURL + "', with response code: " + response + "- Internal server error. Message dropped.");
         } else {
             log.error("Error at sending oauth request to API endpoint " +
-                    publisherURL + "', with response code: " + response);
+                    publisherURL + "', with response code: " + response + ". Message dropped.");
             throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " +
-                    publisherURL + "', and response code: " + response);
+                    publisherURL + "', and response code: " + response + ". Message dropped.");
         }
     }
 
@@ -695,14 +695,14 @@ public class HttpSink extends Sink {
             requestForNewAccessToken(payload, dynamicOptions, headersList, encodedAuth);
         } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
             log.error("Error at sending oauth request to API endpoint, " + publisherURL + "', with response code: " +
-                    response + "- Internal server error.");
+                    response + "- Internal server error. Message dropped");
             throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint, " +
-                    publisherURL + "', with response code: " + response + "- Internal server error.");
+                    publisherURL + "', with response code: " + response + "- Internal server error. Message dropped");
         } else {
             log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
-                    response);
+                    response + ". Message dropped.");
             throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " + publisherURL +
-                    "', with response code: " + response);
+                    "', with response code: " + response + ". Message dropped.");
         }
     }
 
@@ -737,33 +737,36 @@ public class HttpSink extends Sink {
             } else if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
                 log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
                         response + "- Authentication Failure. " +
-                        "Please provide a valid Consumer key and a Consumer secret.");
+                        "Please provide a valid Consumer key and a Consumer secret. Message dropped");
                 throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " +
                         publisherURL + "', with response code: " + response + "- Authentication Failure. " +
-                        "Please provide a valid Consumer key and a Consumer secret.");
+                        "Please provide a valid Consumer key and a Consumer secret. Message dropped");
             } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
                 log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
-                        response + "- Internal server error.");
+                        response + "- Internal server error. Message dropped");
                 throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint "
-                        + publisherURL + "', with response code: " + response + "- Internal server error.");
+                        + publisherURL + "', with response code: " + response +
+                        "- Internal server error. Message dropped");
             } else {
                 log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
-                        response);
+                        response + ". Message dropped.");
                 throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " +
-                        publisherURL + "', with response code: " + response);
+                        publisherURL + "', with response code: " + response + ". Message dropped.");
             }
         } else if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.AUTHENTICATION_FAIL_CODE) {
             log.error("Failed to generate new access token for the expired access token to " + publisherURL + "', " +
                     accessTokenCache.getResponseCode(encodedAuth) + ": Authentication Failure. Please provide a valid" +
-                    " Consumer key and a Consumer secret.");
+                    " Consumer key and a Consumer secret. Message dropped");
             throw new HttpSinkAdaptorRuntimeException("Failed to generate new access token for the expired access " +
                     "token to " + publisherURL + "', " + accessTokenCache.getResponseCode(encodedAuth) +
-                    ": Authentication Failure. Please provide a valid Consumer key and a Consumer secret.");
+                    ": Authentication Failure. Please provide a valid Consumer key and a Consumer secret. " +
+                    "Message dropped");
         } else {
             log.error("Failed to generate new access token for the expired access token. Error code: " +
-                    accessTokenCache.getResponseCode(encodedAuth));
+                    accessTokenCache.getResponseCode(encodedAuth) + ". Message dropped.");
             throw new HttpSinkAdaptorRuntimeException("Failed to generate new access token for the expired" +
-                    " access token. Error code: " + accessTokenCache.getResponseCode(encodedAuth));
+                    " access token. Error code: " + accessTokenCache.getResponseCode(encodedAuth)
+                    + ". Message dropped.");
         }
     }
 
@@ -806,23 +809,25 @@ public class HttpSink extends Sink {
                 } else if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.AUTHENTICATION_FAIL_CODE) {
                     log.error("Failed to generate new access token for the expired access token to " + publisherURL +
                             "', with response code: " + accessTokenCache.getResponseCode(encodedAuth) +
-                            "- Authentication Failure. Please provide a valid Consumer key and a Consumer secret.");
+                            "- Authentication Failure. Please provide a valid Consumer key and a Consumer secret." +
+                            " Message dropped");
                     throw new HttpSinkAdaptorRuntimeException("Failed to generate new access token for the expired" +
                             " access token to " + publisherURL + "', with response code: " +
                             accessTokenCache.getResponseCode(encodedAuth) + "- Authentication Failure. " +
-                            "Please provide a valid Consumer key and a Consumer secret.");
+                            "Please provide a valid Consumer key and a Consumer secret. Message dropped");
                 } else if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
                     log.error("Failed to generate new access token for the expired access token to " + publisherURL +
                             "', with response code: " + accessTokenCache.getResponseCode(encodedAuth) +
-                            "- Internal server error.");
+                            "- Internal server error. Message dropped");
                     throw new HttpSinkAdaptorRuntimeException("Failed to generate new access token for the expired" +
                             " access token to " + publisherURL + "', with response code: " +
-                            accessTokenCache.getResponseCode(encodedAuth) + "- Internal server error.");
+                            accessTokenCache.getResponseCode(encodedAuth) + "- Internal server error. Message dropped");
                 } else {
                     log.error("Failed to generate new access token for the expired access token. Error code: " +
-                            accessTokenCache.getResponseCode(encodedAuth));
+                            accessTokenCache.getResponseCode(encodedAuth) + ". Message dropped.");
                     throw new HttpSinkAdaptorRuntimeException("Failed to generate new access token for the expired" +
-                            " access token. Error code: " + accessTokenCache.getResponseCode(encodedAuth));
+                            " access token. Error code: " + accessTokenCache.getResponseCode(encodedAuth) +
+                            ". Message dropped.");
                 }
         } else {
             //check the cache and update new access token into header
@@ -867,15 +872,15 @@ public class HttpSink extends Sink {
             try {
                 boolean latchCount = latch.await(30, TimeUnit.SECONDS);
                 if (!latchCount) {
-                    log.debug("Time out due to getting getting response from " + publisherURL);
+                    log.debug("Time out due to getting getting response from " + publisherURL + ". Message dropped.");
                     throw new HttpSinkAdaptorRuntimeException("Time out due to getting getting response from "
-                            + publisherURL);
+                            + publisherURL + ". Message dropped.");
 
                 }
             } catch (InterruptedException e) {
-                log.debug("Failed to get a response from " + publisherURL + "," + e);
+                log.debug("Failed to get a response from " + publisherURL + "," + e + ". Message dropped.");
                 throw new HttpSinkAdaptorRuntimeException("Failed to get a response from " +
-                        publisherURL + ", " + e);
+                        publisherURL + ", " + e + ". Message dropped.");
             }
         }
         HTTPCarbonMessage response = listener.getHttpResponseMessage();
