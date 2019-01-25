@@ -18,14 +18,17 @@
  */
 package org.wso2.extension.siddhi.io.http.sink;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.base64.Base64;
 import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.DefaultLastHttpContent;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
-
 import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
+import org.wso2.extension.siddhi.io.http.sink.exception.HttpSinkAdaptorRuntimeException;
+import org.wso2.extension.siddhi.io.http.sink.updatetoken.AccessTokenCache;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpSinkUtil;
 import org.wso2.extension.siddhi.io.http.source.HttpResponseMessageListener;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
@@ -46,9 +49,12 @@ import org.wso2.transport.http.netty.contract.HttpResponseFuture;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
 
@@ -140,6 +146,7 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "POST"),
+
                 @Parameter(
                         name = "socket.idle.timeout",
                         description = "Socket timeout value in millisecond",
@@ -360,10 +367,50 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
                         optional = true,
                         defaultValue = "null",
                         dynamic = true),
+                @Parameter(
+                        name = "oauth.username",
+                        description = "The username to be included in the authentication header of the oauth " +
+                                "authentication enabled events. It is required to specify both username and " +
+                                "password to enable oauth authentication. If one of the parameter is not given " +
+                                "by user then an error is logged in the CLI. It is only applicable for for Oauth" +
+                                " requests ",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = " "),
+                @Parameter(
+                        name = "oauth.password",
+                        description = "The password to be included in the authentication header of the oauth " +
+                                "authentication enabled events. It is required to specify both username and " +
+                                "password to enable oauth authentication. If one of the parameter is not given " +
+                                "by user then an error is logged in the CLI. It is only applicable for for Oauth " +
+                                " requests ",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = " "),
+                @Parameter(
+                        name = "consumer.key",
+                        description = "consumer key for the Http request. It is only applicable for for Oauth requests",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = " "),
+                @Parameter(
+                        name = "consumer.secret",
+                        description = "consumer secret for the Http request. It is only applicable for for " +
+                                "Oauth requests",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = " "),
+                @Parameter(
+                        name = "refresh.token",
+                        description = "refresh token for the Http request. It is only applicable for for" +
+                                " Oauth requests",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = " "),
         },
         examples = {
                 @Example(syntax =
-                                "@sink(type='http-request', sink.id='foo', " +
+                        "@sink(type='http-request', sink.id='foo', " +
                                 "publisher.url='http://localhost:8009/foo', " +
                                 "@map(type='xml', @payload('{{payloadBody}}')))\n" +
                                 "define stream FooStream (payloadBody String, method string, headers string);\n" +
@@ -379,61 +426,61 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
                                 "define stream responseStream4xx(errorMsg string);",
                         description =
                                 "In above example, the payload body for 'FooStream' will be in following " +
-                                "format.\n" +
-                                "{\n" +
-                                "<events>\n" +
-                                "    <event>\n" +
-                                "        <symbol>WSO2</symbol>\n" +
-                                "        <price>55.6</price>\n" +
-                                "        <volume>100</volume>\n" +
-                                "    </event>\n" +
-                                "</events>,\n" +
-                                "This message will sent as the body of a POST request with the content-type " +
-                                "'application/xml' to the endpoint defined as the 'publisher.url' and in order to " +
-                                "process the responses for these requests, there should be a source of type " +
-                                "'http-response' defined with the same sink id 'foo' in the siddhi app.\n" +
-                                "The responses with 2xx status codes will be received by the " +
-                                "http-response source which has the http.status.code defined by the regex " +
-                                "'2\\\\d+'.\n" +
-                                "If the response has a 4xx status code, it will be received by the " +
-                                "http-response source which has the http.status.code defined by the regex " +
-                                "'4\\\\d+'.\n"),
+                                        "format.\n" +
+                                        "{\n" +
+                                        "<events>\n" +
+                                        "    <event>\n" +
+                                        "        <symbol>WSO2</symbol>\n" +
+                                        "        <price>55.6</price>\n" +
+                                        "        <volume>100</volume>\n" +
+                                        "    </event>\n" +
+                                        "</events>,\n" +
+                                        "This message will sent as the body of a POST request with the content-type " +
+                                        "'application/xml' to the endpoint defined as the 'publisher.url' and in " +
+                                        "order to process the responses for these requests, there should be a source " +
+                                        "of type 'http-response' defined with the same sink id 'foo' in the siddhi " +
+                                        "app.\n The responses with 2xx status codes will be received by the " +
+                                        "http-response source which has the http.status.code defined by the regex " +
+                                        "'2\\\\d+'.\n" +
+                                        "If the response has a 4xx status code, it will be received by the " +
+                                        "http-response source which has the http.status.code defined by the regex " +
+                                        "'4\\\\d+'.\n"),
 
                 @Example(syntax = "" +
-                                "define stream FooStream (name String, id int, headers String, downloadPath string);" +
-                                "\n" +
-                                "@sink(type='http-request', \n" +
-                                "downloading.enabled='true',\n" +
-                                "download.path='{{downloadPath}}'," +
-                                "publisher.url='http://localhost:8005/files',\n" +
-                                "method='GET', " +
-                                "headers='{{headers}}',sink.id='download-sink',\n" +
-                                "@map(type='json')) \n" +
-                                "define stream BarStream (name String, id int, headers String, downloadPath string);" +
-                                "\n\n" +
-                                "@source(type='http-response', sink.id='download-sink', " +
-                                "http.status.code='2\\\\d+', \n" +
-                                "@map(type='text', regex.A='((.|\\n)*)', " +
-                                "@attributes(headers='trp:headers', fileName='A[1]')))\n" +
-                                "define stream responseStream2xx(fileName string, headers string);\n\n" +
-                                "" +
-                                "@source(type='http-response', sink.id='download-sink', " +
-                                "http.status.code='4\\\\d+', \n" +
-                                "@map(type='text', regex.A='((.|\\n)*)', @attributes(errorMsg='A[1]')))\n" +
-                                "define stream responseStream4xx(errorMsg string);",
+                        "define stream FooStream (name String, id int, headers String, downloadPath string);" +
+                        "\n" +
+                        "@sink(type='http-request', \n" +
+                        "downloading.enabled='true',\n" +
+                        "download.path='{{downloadPath}}'," +
+                        "publisher.url='http://localhost:8005/files',\n" +
+                        "method='GET', " +
+                        "headers='{{headers}}',sink.id='download-sink',\n" +
+                        "@map(type='json')) \n" +
+                        "define stream BarStream (name String, id int, headers String, downloadPath string);" +
+                        "\n\n" +
+                        "@source(type='http-response', sink.id='download-sink', " +
+                        "http.status.code='2\\\\d+', \n" +
+                        "@map(type='text', regex.A='((.|\\n)*)', " +
+                        "@attributes(headers='trp:headers', fileName='A[1]')))\n" +
+                        "define stream responseStream2xx(fileName string, headers string);\n\n" +
+                        "" +
+                        "@source(type='http-response', sink.id='download-sink', " +
+                        "http.status.code='4\\\\d+', \n" +
+                        "@map(type='text', regex.A='((.|\\n)*)', @attributes(errorMsg='A[1]')))\n" +
+                        "define stream responseStream4xx(errorMsg string);",
                         description =
                                 "In above example, http-request sink will send a GET request to the publisher url and" +
-                                " the requested file will be received as the response by a corresponding " +
-                                "http-response source.\n" +
-                                "If the http status code of the response is a successful one (2xx), it will " +
-                                "be received by the http-response source which has the http.status.code " +
-                                "'2\\\\d+' and downloaded as a local file. Then the event received to the " +
-                                "responseStream2xx will have the headers included in the request and " +
-                                "the downloaded file name.\n" +
-                                "If the http status code of the response is a 4xx code, it will be received " +
-                                "by the http-response source which has the http.status.code '4\\\\d+'. Then " +
-                                "the event received to the responseStream4xx will have the response message " +
-                                "body in text format."
+                                        " the requested file will be received as the response by a corresponding " +
+                                        "http-response source.\n" +
+                                        "If the http status code of the response is a successful one (2xx), it will " +
+                                        "be received by the http-response source which has the http.status.code " +
+                                        "'2\\\\d+' and downloaded as a local file. Then the event received to the " +
+                                        "responseStream2xx will have the headers included in the request and " +
+                                        "the downloaded file name.\n" +
+                                        "If the http status code of the response is a 4xx code, it will be received " +
+                                        "by the http-response source which has the http.status.code '4\\\\d+'. Then " +
+                                        "the event received to the responseStream4xx will have the response message " +
+                                        "body in text format."
                 )}
 )
 public class HttpRequestSink extends HttpSink {
@@ -443,20 +490,46 @@ public class HttpRequestSink extends HttpSink {
     private boolean isDownloadEnabled;
     private StreamDefinition outputStreamDefinition;
     private Option downloadPath;
+    private Option publisherURLOption;
+    private String consumerKey;
+    private String consumerSecret;
+    private String authType;
+    private AccessTokenCache accessTokenCache = AccessTokenCache.getInstance();
+    private String publisherURL;
+    private String tokenURL;
 
     @Override
     protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
                         ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
         super.init(outputStreamDefinition, optionHolder, configReader, siddhiAppContext);
+        this.outputStreamDefinition = outputStreamDefinition;
         this.sinkId = optionHolder.validateAndGetStaticValue(HttpConstants.SINK_ID);
         this.isDownloadEnabled = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants
                 .DOWNLOAD_ENABLED, HttpConstants.DEFAULT_DOWNLOAD_ENABLED_VALUE));
         if (isDownloadEnabled) {
             this.downloadPath = optionHolder.validateAndGetOption(HttpConstants.DOWNLOAD_PATH);
         }
-        this.outputStreamDefinition = outputStreamDefinition;
+        this.tokenURL = optionHolder.validateAndGetStaticValue(HttpConstants.TOKEN_URL, EMPTY_STRING);
+        String userName = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_USERNAME, EMPTY_STRING);
+        String password = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_PASSWORD, EMPTY_STRING);
+        this.consumerKey = optionHolder.validateAndGetStaticValue(HttpConstants.CONSUMER_KEY, EMPTY_STRING);
+        this.consumerSecret = optionHolder.validateAndGetStaticValue(HttpConstants.CONSUMER_SECRET, EMPTY_STRING);
+        String oauthUsername = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_OAUTH_USERNAME,
+                EMPTY_STRING);
+        this.publisherURLOption = optionHolder.validateAndGetOption(HttpConstants.PUBLISHER_URL);
+        String oauthUserPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_OAUTH_PASSWORD,
+                EMPTY_STRING);
+        if (!HttpConstants.EMPTY_STRING.equals(userName) && !HttpConstants.EMPTY_STRING.equals(password)) {
+            authType = HttpConstants.BASIC_AUTH;
+        } else if ((!HttpConstants.EMPTY_STRING.equals(consumerKey)
+                && !HttpConstants.EMPTY_STRING.equals(consumerSecret)) ||
+                (!HttpConstants.EMPTY_STRING.equals(oauthUsername)
+                        && !HttpConstants.EMPTY_STRING.equals(oauthUserPassword))) {
+            authType = HttpConstants.OAUTH;
+        } else {
+            authType = HttpConstants.NO_AUTH;
+        }
     }
-
 
     /**
      * This method will be called when events need to be published via this sink
@@ -466,13 +539,158 @@ public class HttpRequestSink extends HttpSink {
      */
     @Override
     public void publish(Object payload, DynamicOptions dynamicOptions) {
+//get the dynamic parameter
+        String headers = httpHeaderOption.getValue(dynamicOptions);
+        List<Header> headersList = HttpSinkUtil.getHeaders(headers);
+        if (publisherURLOption.isStatic()) {
+            publisherURL = publisherURLOption.getValue();
+        } else {
+            publisherURL = publisherURLOption.getValue(dynamicOptions);
+        }
+
+        if (authType.equals(HttpConstants.BASIC_AUTH) || authType.equals(HttpConstants.NO_AUTH)) {
+            sendRequest(payload, dynamicOptions, headersList, HttpConstants.MAXIMUM_TRY_COUNT);
+        } else {
+            sendOauthRequest(payload, dynamicOptions, headersList);
+        }
+    }
+
+    private void sendOauthRequest(Object payload, DynamicOptions dynamicOptions, List<Header> headersList) {
+        //generate encoded base64 auth for getting refresh token
+        String consumerKeyValue = consumerKey + ":" + consumerSecret;
+        String encodedAuth = "Basic " + encodeBase64(consumerKeyValue);
+        //check the availability of access token in the header
+        setAccessToken(encodedAuth, dynamicOptions, headersList);
+        //send a request to API and get the response
+        int response = sendRequest(payload, dynamicOptions, headersList, HttpConstants.MINIMUM_TRY_COUNT);
+        //if authentication fails then get the new access token
+        if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
+            handleOAuthFailure(payload, dynamicOptions, headersList, encodedAuth);
+        } else if (response == HttpConstants.SUCCESS_CODE) {
+            log.info("Request sent successfully to " + publisherURL);
+        } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
+            log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+                    response + "- Internal server error. Message dropped.");
+            throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint: " +
+                    publisherURL + "', with response code: " + response + "- Internal server error. Message dropped.");
+        } else {
+            log.error("Error at sending oauth request to API endpoint: " +
+                    publisherURL + "', with response code: " + response + ". Message dropped. Message dropped.");
+            throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint: " +
+                    publisherURL + "', with response code: " + response + ". Message dropped. Message dropped.");
+        }
+    }
+
+    private void handleOAuthFailure(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
+                            String encodedAuth) {
+
+        Boolean checkFromCache = accessTokenCache.checkAvailableKey(encodedAuth);
+        if (checkFromCache) {
+            getNewAccessTokenWithCache(payload, dynamicOptions, headersList, encodedAuth);
+        } else {
+            requestForNewAccessToken(payload, dynamicOptions, headersList, encodedAuth);
+        }
+    }
+
+    private void getNewAccessTokenWithCache(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
+                                            String encodedAuth) {
+        String accessToken = accessTokenCache.getAccessToken(encodedAuth);
+        for (Header header : headersList) {
+            if (header.getName().equals(HttpConstants.AUTHORIZATION_HEADER)) {
+                header.setValue(accessToken);
+                break;
+            }
+        }
+        //send a request to API with a new access token
+        int response = sendRequest(payload, dynamicOptions, headersList, HttpConstants.MINIMUM_TRY_COUNT);
+        if (response == HttpConstants.SUCCESS_CODE) {
+            log.info("Request sent successfully to " + publisherURL);
+        } else if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
+            requestForNewAccessToken(payload, dynamicOptions, headersList, encodedAuth);
+        } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
+            log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+                    response + "- Internal server error. Message dropped.");
+            throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " +
+                    publisherURL + "', with response code: " + response + "- Internal server error. Message dropped.");
+        } else {
+            log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+                    response + ". Message dropped. ");
+            throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " +
+                    publisherURL + "', with response code: " + response + ". Message dropped.");
+        }
+    }
+
+    private void requestForNewAccessToken(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
+                                          String encodedAuth) {
+        Boolean checkRefreshToken = accessTokenCache.checkRefreshAvailableKey(encodedAuth);
+        if (checkRefreshToken) {
+            for (Header header : headersList) {
+                if (header.getName().equals(HttpConstants.RECEIVER_REFRESH_TOKEN)) {
+                    header.setValue(accessTokenCache.getRefreshtoken(encodedAuth));
+                    break;
+                }
+            }
+        }
+        getAccessToken(dynamicOptions, encodedAuth, tokenURL);
+        if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.SUCCESS_CODE) {
+            String newAccessToken = accessTokenCache.getAccessToken(encodedAuth);
+            accessTokenCache.setAccessToken(encodedAuth, newAccessToken);
+            if (!accessTokenCache.getRefreshtoken(encodedAuth).equals(HttpConstants.EMPTY_STRING)) {
+                accessTokenCache.setRefreshtoken(encodedAuth, accessTokenCache.getRefreshtoken(encodedAuth));
+            }
+            for (Header header : headersList) {
+                if (header.getName().equals(HttpConstants.AUTHORIZATION_HEADER)) {
+                    header.setValue(newAccessToken);
+                    break;
+                }
+            }
+            //send a request to API with a new access token
+            int response = sendRequest(payload, dynamicOptions, headersList, HttpConstants.MAXIMUM_TRY_COUNT);
+            if (response == HttpConstants.SUCCESS_CODE) {
+                log.info("Request sent successfully to " + publisherURL);
+            } else if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
+                log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+                        response + "- Authentication Failure. Please provide a valid Consumer key, Consumer secret" +
+                        " and token endpoint URL . Message dropped");
+                throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " +
+                        publisherURL + "', with response code: " + response + "- Authentication Failure. Please" +
+                        " provide a valid Consumer key, Consumer secret and token endpoint URL . Message dropped");
+            } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
+                log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+                        response + "- Internal server error. Message dropped.");
+                throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " +
+                        publisherURL + "', with response code:" + response +
+                        "- Internal server error. Message dropped.");
+            } else {
+                log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+                        response + ". Message dropped.");
+                throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint  " +
+                        publisherURL + "', with response code: " + response + ". Message dropped.");
+            }
+
+        } else if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.AUTHENTICATION_FAIL_CODE) {
+            log.error("Failed to generate new access token for the expired access token to " + publisherURL + "', " +
+                    accessTokenCache.getResponseCode(encodedAuth) + ": Authentication Failure. Please provide" +
+                    " a valid Consumer key, Consumer secret and token endpoint URL . Message dropped");
+            throw new HttpSinkAdaptorRuntimeException("Failed to generate new access token for the expired access " +
+                    "token to " + publisherURL + "', " + accessTokenCache.getResponseCode(encodedAuth) +
+                    ": Authentication Failure.Please provide a valid Consumer key, Consumer secret" +
+                    " and token endpoint URL . Message dropped");
+        } else {
+            log.error("Failed to generate new access token for the expired access token. Error code: " +
+                    accessTokenCache.getResponseCode(encodedAuth) + ". Message dropped.");
+            throw new HttpSinkAdaptorRuntimeException("Failed to generate new access token for the expired" +
+                    " access token. Error code: " + accessTokenCache.getResponseCode(encodedAuth) +
+                    ". Message dropped.");
+        }
+    }
+
+    private int sendRequest(Object payload, DynamicOptions dynamicOptions, List<Header> headersList, int tryCount) {
         if (!publisherURLOption.isStatic()) {
             super.initClientConnector(dynamicOptions);
         }
-        String headers = httpHeaderOption.getValue(dynamicOptions);
         String httpMethod = EMPTY_STRING.equals(httpMethodOption.getValue(dynamicOptions)) ?
                 HttpConstants.METHOD_DEFAULT : httpMethodOption.getValue(dynamicOptions);
-        List<Header> headersList = HttpSinkUtil.getHeaders(headers);
         String contentType = HttpSinkUtil.getContentType(mapType, headersList);
         String messageBody = getMessageBody(payload);
         HttpMethod httpReqMethod = new HttpMethod(httpMethod);
@@ -485,15 +703,34 @@ public class HttpRequestSink extends HttpSink {
         }
         cMessage.completeMessage();
         HttpResponseFuture httpResponseFuture = clientConnector.send(cMessage);
+        CountDownLatch latch = new CountDownLatch(1);
         HttpResponseMessageListener httpListener =
-                new HttpResponseMessageListener(getTrpProperties(dynamicOptions), sinkId, isDownloadEnabled);
+                new HttpResponseMessageListener(getTrpProperties(dynamicOptions), sinkId, isDownloadEnabled, latch,
+                        tryCount, authType);
         httpResponseFuture.setHttpConnectorListener(httpListener);
+        if (HttpConstants.OAUTH.equals(authType)) {
+            try {
+                boolean latchCount = latch.await(30, TimeUnit.SECONDS);
+                if (!latchCount) {
+                    log.debug("Time out due to getting getting response from " + publisherURL + ". Message dropped.");
+                    throw new HttpSinkAdaptorRuntimeException("Time out due to getting getting response from "
+                            + publisherURL + ". Message dropped.");
+
+                }
+            } catch (InterruptedException e) {
+                log.debug("Failed to get a response from " + publisherURL + "," + e + ". Message dropped.");
+                throw new HttpSinkAdaptorRuntimeException("Failed to get a response from " +
+                        publisherURL + ", " + e + ". Message dropped.");
+            }
+        }
+        HTTPCarbonMessage response = httpListener.getHttpResponseMessage();
+        return response.getNettyHttpResponse().status().code();
     }
 
     @Override
     public String[] getSupportedDynamicOptions() {
-        return new String[] {HttpConstants.HEADERS, HttpConstants.METHOD,
-                HttpConstants.DOWNLOAD_PATH, HttpConstants.PUBLISHER_URL};
+        return new String[]{HttpConstants.HEADERS, HttpConstants.METHOD, HttpConstants.PUBLISHER_URL,
+                HttpConstants.DOWNLOAD_PATH, HttpConstants.PUBLISHER_URL, HttpConstants.RECEIVER_REFRESH_TOKEN};
     }
 
     private Map<String, Object> getTrpProperties(DynamicOptions dynamicOptions) {
@@ -508,5 +745,11 @@ public class HttpRequestSink extends HttpSink {
             trpProperties.put(HttpConstants.DOWNLOAD_PATH, downloadPath.getValue(dynamicOptions));
         }
         return trpProperties;
+    }
+
+    private String encodeBase64(String consumerKeyValue) {
+        ByteBuf byteBuf = Unpooled.wrappedBuffer(consumerKeyValue.getBytes(StandardCharsets.UTF_8));
+        ByteBuf encodedByteBuf = Base64.encode(byteBuf);
+        return encodedByteBuf.toString(StandardCharsets.UTF_8);
     }
 }

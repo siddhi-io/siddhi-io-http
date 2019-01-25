@@ -28,6 +28,7 @@ import org.wso2.transport.http.netty.contract.HttpConnectorListener;
 import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Connector Listener for HttpResponseSource.
@@ -41,26 +42,40 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
     private Map<String, Object> trpProperties;
     private boolean isDownloadEnabled;
     private String sinkId;
+    private HTTPCarbonMessage carbonMessages;
+    private CountDownLatch latch;
+    private int tryCount;
+    private String authType;
 
-    public HttpResponseMessageListener(Map<String, Object> trpProperties, String sinkId, boolean isDownloadEnabled) {
+    public HttpResponseMessageListener(Map<String, Object> trpProperties, String sinkId, boolean isDownloadEnabled,
+                                       CountDownLatch latch, int tryCount, String authType) {
         this.trpProperties = trpProperties;
         this.isDownloadEnabled = isDownloadEnabled;
         this.sinkId = sinkId;
+        this.latch = latch;
+        this.tryCount = tryCount;
+        this.authType = authType;
     }
 
     @Override
     public void onMessage(HTTPCarbonMessage carbonMessage) {
         trpProperties.forEach((k, v) -> { carbonMessage.setProperty(k, v); });
         carbonMessage.setProperty(HttpConstants.IS_DOWNLOADABLE_CONTENT, isDownloadEnabled);
-
+        this.carbonMessages = carbonMessage;
         String statusCode = Integer.toString(carbonMessage.getNettyHttpResponse().status().code());
-        HttpResponseSource responseSource = findAndGetResponseSource(statusCode);
-        if (responseSource != null) {
-            responseConnectorListener = responseSource.getConnectorListener();
-            responseConnectorListener.onMessage(carbonMessage);
-        } else {
-            log.error("No source of type 'http-response' that matches with the status code '" + statusCode + "' has " +
-                    "been defined. Hence dropping the response message.");
+        if (carbonMessage.getNettyHttpResponse().status().code() == (HttpConstants.SUCCESS_CODE) ||
+                HttpConstants.MAXIMUM_TRY_COUNT == tryCount) {
+            HttpResponseSource responseSource = findAndGetResponseSource(statusCode);
+            if (responseSource != null) {
+                responseConnectorListener = responseSource.getConnectorListener();
+                responseConnectorListener.onMessage(carbonMessage);
+            } else {
+                log.error("No source of type 'http-response' that matches with the status code '" + statusCode +
+                        "' has been defined. Hence dropping the response message.");
+            }
+        }
+        if (HttpConstants.OAUTH.equals(authType)) {
+        latch.countDown();
         }
     }
 
@@ -99,6 +114,10 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
             }
         }
         return null;
+    }
+
+    public HTTPCarbonMessage getHttpResponseMessage() {
+        return carbonMessages;
     }
 
 }
