@@ -496,6 +496,7 @@ public class HttpRequestSink extends HttpSink {
     private String authType;
     private AccessTokenCache accessTokenCache = AccessTokenCache.getInstance();
     private String publisherURL;
+    private String tokenURL;
 
     @Override
     protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
@@ -508,6 +509,7 @@ public class HttpRequestSink extends HttpSink {
         if (isDownloadEnabled) {
             this.downloadPath = optionHolder.validateAndGetOption(HttpConstants.DOWNLOAD_PATH);
         }
+        this.tokenURL = optionHolder.validateAndGetStaticValue(HttpConstants.TOKEN_URL, EMPTY_STRING);
         String userName = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_USERNAME, EMPTY_STRING);
         String password = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_PASSWORD, EMPTY_STRING);
         this.consumerKey = optionHolder.validateAndGetStaticValue(HttpConstants.CONSUMER_KEY, EMPTY_STRING);
@@ -629,7 +631,7 @@ public class HttpRequestSink extends HttpSink {
                 }
             }
         }
-        getAccessToken(dynamicOptions, encodedAuth);
+        getAccessToken(dynamicOptions, encodedAuth, tokenURL);
         if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.SUCCESS_CODE) {
             String newAccessToken = accessTokenCache.getAccessToken(encodedAuth);
             accessTokenCache.setAccessToken(encodedAuth, newAccessToken);
@@ -648,11 +650,11 @@ public class HttpRequestSink extends HttpSink {
                 log.info("Request sent successfully to " + publisherURL);
             } else if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
                 log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
-                        response + "- Authentication Failure. " +
-                        "Please provide a valid Consumer key and a Consumer secret. Message dropped.");
+                        response + "- Authentication Failure. Please provide a valid Consumer key, Consumer secret" +
+                        " and token endpoint URL . Message dropped");
                 throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " +
-                        publisherURL + "', with response code: " + response + "- Authentication Failure. " +
-                        "Please provide a valid Consumer key and a Consumer secret. Message dropped.");
+                        publisherURL + "', with response code: " + response + "- Authentication Failure. Please" +
+                        " provide a valid Consumer key, Consumer secret and token endpoint URL . Message dropped");
             } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
                 log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
                         response + "- Internal server error. Message dropped.");
@@ -668,12 +670,12 @@ public class HttpRequestSink extends HttpSink {
 
         } else if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.AUTHENTICATION_FAIL_CODE) {
             log.error("Failed to generate new access token for the expired access token to " + publisherURL + "', " +
-                    accessTokenCache.getResponseCode(encodedAuth) + ": Authentication Failure. Please provide a valid" +
-                    " Consumer key and a Consumer secret. Message dropped.");
+                    accessTokenCache.getResponseCode(encodedAuth) + ": Authentication Failure. Please provide" +
+                    " a valid Consumer key, Consumer secret and token endpoint URL . Message dropped");
             throw new HttpSinkAdaptorRuntimeException("Failed to generate new access token for the expired access " +
                     "token to " + publisherURL + "', " + accessTokenCache.getResponseCode(encodedAuth) +
-                    ": Authentication Failure. Please provide a valid Consumer key and a Consumer secret." +
-                    " Message dropped.");
+                    ": Authentication Failure.Please provide a valid Consumer key, Consumer secret" +
+                    " and token endpoint URL . Message dropped");
         } else {
             log.error("Failed to generate new access token for the expired access token. Error code: " +
                     accessTokenCache.getResponseCode(encodedAuth) + ". Message dropped.");

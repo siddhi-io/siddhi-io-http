@@ -19,8 +19,10 @@
 package org.wso2.extension.siddhi.io.http.sink.updatetoken;
 
 import io.netty.handler.codec.http.HttpHeaderValues;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.extension.siddhi.io.http.sink.util.HttpSinkUtil;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.transport.http.netty.common.Constants;
 import org.wso2.transport.http.netty.config.SenderConfiguration;
@@ -43,10 +45,11 @@ import static org.wso2.transport.http.netty.common.Constants.HTTPS_SCHEME;
 public class HttpsClient {
     private static final Logger LOG = LoggerFactory.getLogger(HttpsClient.class);
     private AccessTokenCache accessTokenCache = AccessTokenCache.getInstance();
+    private Map<String, String> tokenURLProperties;
 
-    public void getPasswordGrantAccessToken(String url, String trustStorePath, String trustStorePassword,
-                                                      String username, String password, String encodedAuth) {
-        ArrayList<String> serverInfo = getServerInfo(url);
+    public void getPasswordGrantAccessToken(String tokenUrl, String trustStorePath, String trustStorePassword,
+                                            String username, String password, String encodedAuth) {
+        tokenURLProperties = HttpSinkUtil.getURLProperties(tokenUrl);
         HttpWsConnectorFactory factory = new DefaultHttpWsConnectorFactory();
         HttpClientConnector httpClientConnector = factory
                 .createHttpClientConnector(new HashMap<>(), getSenderConfigurationForHttp(trustStorePath,
@@ -57,20 +60,18 @@ public class HttpsClient {
         refreshTokenBody.put(HttpConstants.PASSWORD, password);
         String payload = getPayload(refreshTokenBody);
         Map<String, String> headers = setHeaders(encodedAuth);
-        ArrayList<String> response = HttpRequest.sendPostRequest(httpClientConnector, Constants.HTTPS_SCHEME,
-                serverInfo.get(1), Integer.parseInt(serverInfo.get(0)), HttpConstants.SUFFIX_REFRESH_TOKEN_URL, payload,
+        ArrayList<String> response = HttpRequest.sendPostRequest(httpClientConnector,
+                tokenURLProperties.get(HttpConstants.PROTOCOL), tokenURLProperties.get(Constants.HTTP_HOST),
+                Integer.parseInt(tokenURLProperties.get(Constants.HTTP_PORT)),
+                tokenURLProperties.get(HttpConstants.PATH), payload,
                 headers);
-        String[] responseArray = response.get(1).split(HttpConstants.COMMA_SEPARATOR);
+        JSONObject jsonObject = new JSONObject(response.get(1));
         int statusCode = Integer.parseInt(response.get(0));
         if (statusCode == HttpConstants.SUCCESS_CODE) {
-            String accessToken = "Bearer " + responseArray[0].replace(HttpConstants.ACCESS_TOKEN_SPLIT,
-                    HttpConstants.EMPTY_STRING)
-                    .replace(HttpConstants.INVERTED_COMMA_SEPARATOR, HttpConstants.EMPTY_STRING);
-            String refreshToken = responseArray[1].replace(HttpConstants.REFRESH_TOKEN_SPLIT,
-                    HttpConstants.EMPTY_STRING).replace(HttpConstants.INVERTED_COMMA_SEPARATOR,
-                    HttpConstants.EMPTY_STRING);
+            String accessToken = jsonObject.getString("access_token");
+            String newRefreshToken = jsonObject.getString("refresh_token");
             accessTokenCache.setAccessToken(encodedAuth, accessToken);
-            accessTokenCache.setRefreshtoken(encodedAuth, refreshToken);
+            accessTokenCache.setRefreshtoken(encodedAuth, newRefreshToken);
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         } else {
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
@@ -78,8 +79,8 @@ public class HttpsClient {
     }
 
     public void getRefreshGrantAccessToken(String url, String trustStorePath, String trustStorePassword,
-                                                     String encodedAuth, String refreshToken) {
-        ArrayList<String> serverInfo = getServerInfo(url);
+                                           String encodedAuth, String refreshToken) {
+        tokenURLProperties = HttpSinkUtil.getURLProperties(url);
         HttpWsConnectorFactory factory = new DefaultHttpWsConnectorFactory();
         HttpClientConnector httpClientConnector = factory
                 .createHttpClientConnector(new HashMap<>(), getSenderConfigurationForHttp(trustStorePath,
@@ -89,33 +90,29 @@ public class HttpsClient {
         refreshTokenBody.put(HttpConstants.GRANT_TYPE, HttpConstants.GRANT_REFRESHTOKEN);
         refreshTokenBody.put(HttpConstants.GRANT_REFRESHTOKEN, refreshToken);
         String payload = getPayload(refreshTokenBody);
-        ArrayList<String> response = HttpRequest.sendPostRequest(httpClientConnector, Constants.HTTP_SCHEME,
-                serverInfo.get(1), Integer.parseInt(serverInfo.get(0)), HttpConstants.SUFFIX_NEW_ACCESS_TOKEN_URL,
-                payload, headers);
-        String[] responseArray = response.get(1).split(HttpConstants.COMMA_SEPARATOR);
+        ArrayList<String> response = HttpRequest.sendPostRequest(httpClientConnector,
+                tokenURLProperties.get(HttpConstants.PROTOCOL), tokenURLProperties.get(Constants.HTTP_HOST),
+                Integer.parseInt(tokenURLProperties.get(Constants.HTTP_PORT)),
+                tokenURLProperties.get(HttpConstants.PATH), payload, headers);
         int statusCode = Integer.parseInt(response.get(0));
+        JSONObject jsonObject = new JSONObject(response.get(1));
         if (statusCode == HttpConstants.SUCCESS_CODE) {
-            String token = "Bearer " + responseArray[0].replace(HttpConstants.ACCESS_TOKEN_SPLIT,
-                    HttpConstants.EMPTY_STRING)
-                    .replace(HttpConstants.INVERTED_COMMA_SEPARATOR, HttpConstants.EMPTY_STRING);
-            String newRefreshToken = responseArray[1].replace(HttpConstants.REFRESH_TOKEN_SPLIT,
-                    HttpConstants.EMPTY_STRING).replace(HttpConstants.INVERTED_COMMA_SEPARATOR,
-                    HttpConstants.EMPTY_STRING);
-            accessTokenCache.setAccessToken(encodedAuth, token);
+            String accessToken = jsonObject.getString("access_token");
+            String newRefreshToken = jsonObject.getString("refresh_token");
+            accessTokenCache.setAccessToken(encodedAuth, accessToken);
             accessTokenCache.setRefreshtoken(encodedAuth, newRefreshToken);
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         } else if (statusCode == HttpConstants.AUTHENTICATION_FAIL_CODE
                 || statusCode == HttpConstants.PERSISTENT_ACCESS_FAIL_CODE) {
-             getClientGrantAccessToken(url, trustStorePath, trustStorePassword, encodedAuth);
+            getClientGrantAccessToken(url, trustStorePath, trustStorePassword, encodedAuth);
         } else {
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         }
     }
 
     public void getClientGrantAccessToken(String url, String trustStorePath, String trustStorePassword,
-                                                    String encodedAuth) {
-        String token;
-        ArrayList<String> serverInfo = getServerInfo(url);
+                                          String encodedAuth) {
+        tokenURLProperties = HttpSinkUtil.getURLProperties(url);
         HttpWsConnectorFactory factory = new DefaultHttpWsConnectorFactory();
         HttpClientConnector httpClientConnector = factory
                 .createHttpClientConnector(new HashMap<>(), getSenderConfigurationForHttp(trustStorePath,
@@ -124,15 +121,15 @@ public class HttpsClient {
         refreshTokenBody.put(HttpConstants.GRANT_TYPE, HttpConstants.GRANT_CLIENTTOKEN);
         String payload = getPayload(refreshTokenBody);
         Map<String, String> headers = setHeaders(encodedAuth);
-        ArrayList<String> response = HttpRequest.sendPostRequest(httpClientConnector, Constants.HTTP_SCHEME,
-                serverInfo.get(1), Integer.parseInt(serverInfo.get(0)), HttpConstants.SUFFIX_NEW_ACCESS_TOKEN_URL,
-                payload, headers);
-        String[] responseArray = response.get(1).split(HttpConstants.COMMA_SEPARATOR);
+        ArrayList<String> response = HttpRequest.sendPostRequest(httpClientConnector,
+                tokenURLProperties.get(HttpConstants.PROTOCOL), tokenURLProperties.get(Constants.HTTP_HOST),
+                Integer.parseInt(tokenURLProperties.get(Constants.HTTP_PORT)),
+                tokenURLProperties.get(HttpConstants.PATH), payload, headers);
+        JSONObject jsonObject = new JSONObject(response.get(1));
         int statusCode = Integer.parseInt(response.get(0));
         if (statusCode == HttpConstants.SUCCESS_CODE) {
-            token = "Bearer " + responseArray[0].replace(HttpConstants.ACCESS_TOKEN_SPLIT, HttpConstants.EMPTY_STRING)
-                    .replace(HttpConstants.INVERTED_COMMA_SEPARATOR, HttpConstants.EMPTY_STRING);
-            accessTokenCache.setAccessToken(encodedAuth, token);
+            String accessToken = jsonObject.getString("access_token");
+            accessTokenCache.setAccessToken(encodedAuth, accessToken);
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         } else {
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
@@ -161,16 +158,6 @@ public class HttpsClient {
         return refreshTokenBody.entrySet().stream()
                 .map(p -> encodeMessage(p.getKey()) + "=" + encodeMessage(p.getValue()))
                 .reduce("", (p1, p2) -> p1 + "&" + p2);
-    }
-
-    private static ArrayList<String> getServerInfo(String url) {
-        ArrayList<String> serverInfo = new ArrayList<>();
-        String splitUrl[] = url.split(HttpConstants.PROTOCOL_HOST_SEPARATOR);
-        String splitByColon[] = splitUrl[1].split(HttpConstants.PORT_HOST_SEPARATOR);
-        String serverPorts[] = splitByColon[1].split(HttpConstants.PORT_CONTEXT_SEPARATOR);
-        serverInfo.add(Integer.valueOf(serverPorts[0]).toString());
-        serverInfo.add(splitByColon[0]);
-        return serverInfo;
     }
 
     private static HashMap<String, String> setHeaders(String encodedAuth) {

@@ -78,8 +78,10 @@ public class HttpSinkUtil {
             httpStaticProperties = new HashMap<>();
             httpStaticProperties.put(Constants.TO, url.getFile());
             String protocol = url.getProtocol();
+            String path = url.getPath();
             httpStaticProperties.put(Constants.PROTOCOL, protocol);
             httpStaticProperties.put(Constants.HTTP_HOST, url.getHost());
+            httpStaticProperties.put(HttpConstants.PATH, path);
             int port;
             if (Constants.HTTPS_SCHEME.equalsIgnoreCase(protocol)) {
                 port = url.getPort() != -1 ? url.getPort() : HttpConstants.DEFAULT_HTTPS_PORT;
