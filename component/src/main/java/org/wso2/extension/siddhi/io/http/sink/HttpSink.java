@@ -1034,8 +1034,9 @@ public class HttpSink extends Sink {
         }
         if (authType.equals(HttpConstants.OAUTH)) {
             if (EMPTY_STRING.equals(consumerSecret) || EMPTY_STRING.equals(consumerKey)) {
-                throw new SiddhiAppCreationException(HttpConstants.CONSUMER_KEY + " and " + HttpConstants.CONSUMER_SECRET
-                        + " found empty but it is Mandatory field in " + HttpConstants.HTTP_SINK_ID + " in " + streamID);
+                throw new SiddhiAppCreationException(HttpConstants.CONSUMER_KEY + " and " +
+                        HttpConstants.CONSUMER_SECRET + " found empty but it is Mandatory field in " +
+                        HttpConstants.HTTP_SINK_ID + " in " + streamID);
             }
             if (EMPTY_STRING.equals(tokenURL)) {
                 throw new SiddhiAppCreationException(HttpConstants.TOKEN_URL + " found empty but it is Mandatory " +
