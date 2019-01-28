@@ -643,7 +643,7 @@ public class HttpSink extends Sink {
         List<Header> headersList = HttpSinkUtil.getHeaders(headers);
 
         if (authType.equals(HttpConstants.BASIC_AUTH) || authType.equals(HttpConstants.NO_AUTH)) {
-             sendRequest(payload, dynamicOptions, headersList);
+            sendRequest(payload, dynamicOptions, headersList);
         } else {
             sendOauthRequest(payload, dynamicOptions, headersList);
         }
@@ -876,11 +876,12 @@ public class HttpSink extends Sink {
                     .getBytes(Charset.defaultCharset()))));
         }
         cMessage.completeMessage();
+        CountDownLatch latch = new CountDownLatch(1);
+        DefaultListener listener = new DefaultListener(latch, authType);
+        HttpResponseFuture responseFuture = clientConnector.send(cMessage);
+        responseFuture.setHttpConnectorListener(listener);
+
         if (HttpConstants.OAUTH.equals(authType)) {
-            CountDownLatch latch = new CountDownLatch(1);
-            DefaultListener listener = new DefaultListener(latch, authType);
-            HttpResponseFuture responseFuture = clientConnector.send(cMessage);
-            responseFuture.setHttpConnectorListener(listener);
             try {
                 boolean latchCount = latch.await(30, TimeUnit.SECONDS);
                 if (!latchCount) {
@@ -893,12 +894,9 @@ public class HttpSink extends Sink {
                 throw new HttpSinkAdaptorRuntimeException("Failed to get a response from " +
                         publisherURL + ", " + e + ". Message dropped.");
             }
-            HTTPCarbonMessage response = listener.getHttpResponseMessage();
-            return response.getNettyHttpResponse().status().code();
-        } else {
-            clientConnector.send(cMessage);
-            return HttpConstants.SUCCESS_CODE;
         }
+        HTTPCarbonMessage response = listener.getHttpResponseMessage();
+        return response.getNettyHttpResponse().status().code();
     }
 
     /**
