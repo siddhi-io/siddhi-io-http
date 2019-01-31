@@ -720,7 +720,9 @@ public class HttpSink extends Sink {
         if (checkRefreshToken) {
             for (Header header : headersList) {
                 if (header.getName().equals(HttpConstants.RECEIVER_REFRESH_TOKEN)) {
-                    header.setValue(accessTokenCache.getRefreshtoken(encodedAuth));
+                    if (accessTokenCache.getRefreshtoken(encodedAuth) != null) {
+                        header.setValue(accessTokenCache.getRefreshtoken(encodedAuth));
+                    }
                     break;
                 }
             }
@@ -729,7 +731,7 @@ public class HttpSink extends Sink {
         if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.SUCCESS_CODE) {
             String newAccessToken = accessTokenCache.getAccessToken(encodedAuth);
             accessTokenCache.setAccessToken(encodedAuth, newAccessToken);
-            if (!accessTokenCache.getRefreshtoken(encodedAuth).equals(HttpConstants.EMPTY_STRING)) {
+            if (accessTokenCache.getRefreshtoken(encodedAuth) != null) {
                 accessTokenCache.setRefreshtoken(encodedAuth, accessTokenCache.getRefreshtoken(encodedAuth));
             }
             for (Header header : headersList) {
@@ -787,7 +789,7 @@ public class HttpSink extends Sink {
             httpsClient.getPasswordGrantAccessToken(tokenURL, clientStoreFile,
                     clientStorePass, oauthUsername, oauthUserPassword, encodedAuth);
         } else if (!HttpConstants.EMPTY_STRING.equals(refreshToken.getValue(dynamicOptions)) ||
-                !accessTokenCache.getRefreshtoken(encodedAuth).equals(HttpConstants.EMPTY_STRING)) {
+                accessTokenCache.getRefreshtoken(encodedAuth) != null) {
             httpsClient.getRefreshGrantAccessToken(tokenURL, clientStoreFile,
                     clientStorePass, encodedAuth, refreshToken.getValue(dynamicOptions));
         } else {
@@ -812,9 +814,9 @@ public class HttpSink extends Sink {
             //generate encoded base64 auth for getting refresh token
             getAccessToken(dynamicOptions, encodedAuth, tokenURL);
             if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.SUCCESS_CODE) {
-                    headersList.add(new Header(HttpConstants.AUTHORIZATION_HEADER,
-                            accessTokenCache.getAccessToken(encodedAuth)));
-                if (!(accessTokenCache.getRefreshtoken(encodedAuth) == null)) {
+                headersList.add(new Header(HttpConstants.AUTHORIZATION_HEADER,
+                        accessTokenCache.getAccessToken(encodedAuth)));
+                if (accessTokenCache.getRefreshtoken(encodedAuth) != null) {
                     headersList.add(new Header(HttpConstants.RECEIVER_REFRESH_TOKEN,
                             accessTokenCache.getRefreshtoken(encodedAuth)));
                 }
@@ -899,7 +901,6 @@ public class HttpSink extends Sink {
             clientConnector.send(cMessage);
             return HttpConstants.SUCCESS_CODE;
         }
-
     }
 
     /**
