@@ -239,4 +239,7 @@ public class HttpConstants {
     public static final int MAXIMUM_TRY_COUNT = 2;
     public static final int MINIMUM_TRY_COUNT = 1;
     public static final String NEW_LINE = "\n";
+    public static final String BEARER = "Bearer ";
+    public static final String ACCESS_TOKEN = "access_token";
+    public static final String REFRESH_TOKEN = "refresh_token";
 }

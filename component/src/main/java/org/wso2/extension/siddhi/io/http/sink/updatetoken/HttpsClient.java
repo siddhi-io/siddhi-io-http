@@ -68,9 +68,9 @@ public class HttpsClient {
         JSONObject jsonObject = new JSONObject(response.get(1));
         int statusCode = Integer.parseInt(response.get(0));
         if (statusCode == HttpConstants.SUCCESS_CODE) {
-            String accessToken = jsonObject.getString("access_token");
-            String newRefreshToken = jsonObject.getString("refresh_token");
-            accessTokenCache.setAccessToken(encodedAuth, accessToken);
+            String accessToken = jsonObject.getString(HttpConstants.ACCESS_TOKEN);
+            String newRefreshToken = jsonObject.getString(HttpConstants.REFRESH_TOKEN);
+            accessTokenCache.setAccessToken(encodedAuth,  HttpConstants.BEARER  + accessToken);
             accessTokenCache.setRefreshtoken(encodedAuth, newRefreshToken);
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         } else {
@@ -97,9 +97,9 @@ public class HttpsClient {
         int statusCode = Integer.parseInt(response.get(0));
         JSONObject jsonObject = new JSONObject(response.get(1));
         if (statusCode == HttpConstants.SUCCESS_CODE) {
-            String accessToken = jsonObject.getString("access_token");
-            String newRefreshToken = jsonObject.getString("refresh_token");
-            accessTokenCache.setAccessToken(encodedAuth, accessToken);
+            String accessToken = jsonObject.getString(HttpConstants.ACCESS_TOKEN);
+            String newRefreshToken = jsonObject.getString(HttpConstants.REFRESH_TOKEN);
+            accessTokenCache.setAccessToken(encodedAuth,  HttpConstants.BEARER  + accessToken);
             accessTokenCache.setRefreshtoken(encodedAuth, newRefreshToken);
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         } else if (statusCode == HttpConstants.AUTHENTICATION_FAIL_CODE
@@ -128,8 +128,8 @@ public class HttpsClient {
         JSONObject jsonObject = new JSONObject(response.get(1));
         int statusCode = Integer.parseInt(response.get(0));
         if (statusCode == HttpConstants.SUCCESS_CODE) {
-            String accessToken = jsonObject.getString("access_token");
-            accessTokenCache.setAccessToken(encodedAuth, accessToken);
+            String accessToken = jsonObject.getString(HttpConstants.ACCESS_TOKEN);
+            accessTokenCache.setAccessToken(encodedAuth, HttpConstants.BEARER + accessToken);
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         } else {
             accessTokenCache.setResponseCode(encodedAuth, statusCode);

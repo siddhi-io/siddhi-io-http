@@ -582,7 +582,7 @@ public class HttpRequestSink extends HttpSink {
     }
 
     private void handleOAuthFailure(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
-                            String encodedAuth) {
+                                    String encodedAuth) {
 
         Boolean checkFromCache = accessTokenCache.checkAvailableKey(encodedAuth);
         if (checkFromCache) {
@@ -626,7 +626,9 @@ public class HttpRequestSink extends HttpSink {
         if (checkRefreshToken) {
             for (Header header : headersList) {
                 if (header.getName().equals(HttpConstants.RECEIVER_REFRESH_TOKEN)) {
-                    header.setValue(accessTokenCache.getRefreshtoken(encodedAuth));
+                    if (accessTokenCache.getRefreshtoken(encodedAuth) != null) {
+                        header.setValue(accessTokenCache.getRefreshtoken(encodedAuth));
+                    }
                     break;
                 }
             }
@@ -635,7 +637,7 @@ public class HttpRequestSink extends HttpSink {
         if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.SUCCESS_CODE) {
             String newAccessToken = accessTokenCache.getAccessToken(encodedAuth);
             accessTokenCache.setAccessToken(encodedAuth, newAccessToken);
-            if (!accessTokenCache.getRefreshtoken(encodedAuth).equals(HttpConstants.EMPTY_STRING)) {
+            if (accessTokenCache.getRefreshtoken(encodedAuth) != null) {
                 accessTokenCache.setRefreshtoken(encodedAuth, accessTokenCache.getRefreshtoken(encodedAuth));
             }
             for (Header header : headersList) {
@@ -722,9 +724,11 @@ public class HttpRequestSink extends HttpSink {
                 throw new HttpSinkAdaptorRuntimeException("Failed to get a response from " +
                         publisherURL + ", " + e + ". Message dropped.");
             }
+            HTTPCarbonMessage response = httpListener.getHttpResponseMessage();
+            return response.getNettyHttpResponse().status().code();
+        } else {
+            return HttpConstants.SUCCESS_CODE;
         }
-        HTTPCarbonMessage response = httpListener.getHttpResponseMessage();
-        return response.getNettyHttpResponse().status().code();
     }
 
     @Override
