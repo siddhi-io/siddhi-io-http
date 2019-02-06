@@ -55,7 +55,7 @@ public class HttpOAuthFailTestCase {
      * @throws Exception Interrupted exception
      */
     @Test
-    public void testHTTPTextOAuthTrue() throws Exception {
+    public void testHTTPOAuthTrue() throws Exception {
         setCarbonHome();
         log.info("Creating test for publishing events with valid access token.");
         SiddhiManager siddhiManager = new SiddhiManager();

@@ -46,16 +46,16 @@ public class HttpOAuthListenerHandler implements Runnable {
     private HttpOAuthEndpointListener httpOAuthEndpointListener;
 
     private HttpsServer tokenEndPointServer;
-    private HttpsServer authorizationEndPointServer;
+    private HttpsServer oauthEndPointServer;
     private int tokenEndpointPort;
-    private int authorizationEndPointPort;
+    private int oauthEndPointPort;
     private KeyStore keyStore;
 
-    public HttpOAuthListenerHandler(int tokenEndpointPort, int authorizationEndPointPort) throws KeyStoreException {
+    public HttpOAuthListenerHandler(int tokenEndpointPort, int oauthEndPointPort) throws KeyStoreException {
         this.httpOAuthTokenEndpointListener = new HttpOAuthTokenEndpointListener();
         this.httpOAuthEndpointListener = new HttpOAuthEndpointListener();
         this.tokenEndpointPort = tokenEndpointPort;
-        this.authorizationEndPointPort = authorizationEndPointPort;
+        this.oauthEndPointPort = oauthEndPointPort;
         keyStore = KeyStore.getInstance("JKS");
     }
 
@@ -77,7 +77,7 @@ public class HttpOAuthListenerHandler implements Runnable {
             ssl.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
             tokenEndPointServer = HttpsServer.create(new InetSocketAddress(tokenEndpointPort), 5);
-            authorizationEndPointServer = HttpsServer.create(new InetSocketAddress(authorizationEndPointPort), 5);
+            oauthEndPointServer = HttpsServer.create(new InetSocketAddress(oauthEndPointPort), 5);
 
             tokenEndPointServer.setHttpsConfigurator(new HttpsConfigurator(ssl) {
                 public void configure(HttpsParameters params) {
@@ -85,7 +85,7 @@ public class HttpOAuthListenerHandler implements Runnable {
                     params.setSSLParameters(sslParameters);
                 }
             });
-            authorizationEndPointServer.setHttpsConfigurator(new HttpsConfigurator(ssl) {
+            oauthEndPointServer.setHttpsConfigurator(new HttpsConfigurator(ssl) {
                 public void configure(HttpsParameters params) {
                     SSLParameters sslParameters = getSSLContext().getDefaultSSLParameters();
                     params.setSSLParameters(sslParameters);
@@ -93,8 +93,8 @@ public class HttpOAuthListenerHandler implements Runnable {
             });
             tokenEndPointServer.createContext("/token", httpOAuthTokenEndpointListener);
             tokenEndPointServer.start();
-            authorizationEndPointServer.createContext("/abc", httpOAuthEndpointListener);
-            authorizationEndPointServer.start();
+            oauthEndPointServer.createContext("/abc", httpOAuthEndpointListener);
+            oauthEndPointServer.start();
         } catch (NoSuchAlgorithmException e) {
             logger.error("No such algorithm in  while trying to up test https server.", e);
         } catch (CertificateException e) {
@@ -112,12 +112,12 @@ public class HttpOAuthListenerHandler implements Runnable {
 
     public void shutdown() {
         if (tokenEndPointServer != null) {
-            logger.info("Shutting down server 1");
+            logger.info("Shutting down token endpoint server");
             tokenEndPointServer.stop(1);
         }
-        if (authorizationEndPointServer != null) {
-            logger.info("Shutting down server 2");
-            authorizationEndPointServer.stop(1);
+        if (oauthEndPointServer != null) {
+            logger.info("Shutting down OAuth endpoint server");
+            oauthEndPointServer.stop(1);
         }
     }
     public HttpOAuthEndpointListener getHttpOAuthTokenEndpointListener() {
