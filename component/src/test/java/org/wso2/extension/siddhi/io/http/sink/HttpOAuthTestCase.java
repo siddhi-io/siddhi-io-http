@@ -34,7 +34,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class HttpOAuthFailTestCase {
+public class HttpOAuthTestCase {
     private static final Logger log = Logger.getLogger(HttpAuthTestCase.class);
     public static final String CARBON_HOME = "carbon.home";
     private AtomicInteger eventCount = new AtomicInteger(0);
@@ -162,7 +162,7 @@ public class HttpOAuthFailTestCase {
      * @throws Exception Interrupted exception
      */
     @Test
-    public void testHTTPOAuthWithExpiredAccessTokenClientCredentialGrant() throws Exception {
+    public void testHTTPOAuthClientCredentialGrant() throws Exception {
         setCarbonHome();
         log.info(" Creating test for publishing events with expired access token and generate new access token " +
                 "using client credential grant");
@@ -217,7 +217,7 @@ public class HttpOAuthFailTestCase {
      * @throws Exception Interrupted exception
      */
     @Test
-    public void testHTTPOAuthWithExpiredAccessTokenPasswordGrant() throws Exception {
+    public void testHTTPOAuthPasswordGrant() throws Exception {
         log.info(" Creating test for publishing events with expired access token and generate new access token " +
                 "using Password grant");
         setCarbonHome();
@@ -273,7 +273,7 @@ public class HttpOAuthFailTestCase {
      * @throws Exception Interrupted exception
      */
     @Test
-    public void testHTTPOAuthWithExpiredAccessTokenRefreshGrant() throws Exception {
+    public void testHTTPOAuthRefreshGrant() throws Exception {
         log.info(" Creating test for publishing events with expired access token and generate new access token " +
                 "using Refresh grant");
         setCarbonHome();
@@ -330,7 +330,7 @@ public class HttpOAuthFailTestCase {
      * @throws Exception Interrupted exception
      */
     @Test
-    public void testHTTPOAuthWithExpiredAccessTokenAndExpiredRefreshToken() throws Exception {
+    public void testHTTPOAuthWithExpiredTokens() throws Exception {
         log.info(" Creating test for publishing events with expired access token, refresh token and generate " +
                 "new access token using client credential grant");
         setCarbonHome();
@@ -386,7 +386,7 @@ public class HttpOAuthFailTestCase {
      * @throws Exception Interrupted exception
      */
     @Test
-    public void testHTTPRequestResponseWithExpiredAccessToken() throws Exception {
+    public void testHTTPRequestResponse() throws Exception {
         log.info(" Creating test for send a request and get a response with expired access token and generate" +
                 " new access token using client credential grant");
         setCarbonHome();
