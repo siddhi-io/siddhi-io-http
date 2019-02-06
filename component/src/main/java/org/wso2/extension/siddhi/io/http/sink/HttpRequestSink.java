@@ -724,9 +724,11 @@ public class HttpRequestSink extends HttpSink {
                 throw new HttpSinkAdaptorRuntimeException("Failed to get a response from " +
                         publisherURL + ", " + e + ". Message dropped.");
             }
+            HTTPCarbonMessage response = httpListener.getHttpResponseMessage();
+            return response.getNettyHttpResponse().status().code();
+        } else {
+            return HttpConstants.SUCCESS_CODE;
         }
-        HTTPCarbonMessage response = httpListener.getHttpResponseMessage();
-        return response.getNettyHttpResponse().status().code();
     }
 
     @Override

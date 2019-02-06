@@ -33,7 +33,6 @@ public class DefaultListener implements HttpConnectorListener {
     private CountDownLatch latch;
     private String authType;
 
-
     public DefaultListener(CountDownLatch latch, String authType) {
         this.latch = latch;
         this.authType = authType;

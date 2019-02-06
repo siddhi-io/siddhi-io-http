@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -74,8 +74,8 @@ public class HttpOAuthFailTestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition + query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
-        HttpOAuthListenerHandler lst = new HttpOAuthListenerHandler(8005, 8015);
-        lst.run();
+        HttpOAuthListenerHandler httpOAuthListenerHandler = new HttpOAuthListenerHandler(8005, 8015);
+        httpOAuthListenerHandler.run();
         String payload = "<events>"
                 + "<event>"
                 + "<symbol>WSO2</symbol>"
@@ -85,10 +85,10 @@ public class HttpOAuthFailTestCase {
                 + "</events>";
         fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23','Country:USA'," +
                 "'Authorization: Bearer yyyyy'"});
-        while (!lst.getHttpOAuthListener().isMessageArrive()) {
+        while (!httpOAuthListenerHandler.getHttpOAuthTokenEndpointListener().isMessageArrive()) {
             Thread.sleep(10);
         }
-        String eventData = lst.getHttpOAuthListener().getData();
+        String eventData = httpOAuthListenerHandler.getHttpOAuthTokenEndpointListener().getData();
         String expected = "<events>"
                 + "<event>"
                 + "<symbol>WSO2</symbol>"
@@ -98,7 +98,7 @@ public class HttpOAuthFailTestCase {
                 + "</events>\n";
         Assert.assertEquals(eventData, expected);
         siddhiAppRuntime.shutdown();
-        lst.shutdown();
+        httpOAuthListenerHandler.shutdown();
     }
 
     /**
@@ -108,7 +108,7 @@ public class HttpOAuthFailTestCase {
      * @throws Exception Interrupted exception
      */
     @Test
-    public void testHTTPTextOAuthTrueWithoutAccessToken() throws Exception {
+    public void testHTTPOAuthTrueWithoutAccessToken() throws Exception {
         setCarbonHome();
         log.info(" Creating test for publishing events with OAuth without access token.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -127,8 +127,8 @@ public class HttpOAuthFailTestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition + query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
-        HttpOAuthListenerHandler lst = new HttpOAuthListenerHandler(8005, 8015);
-        lst.run();
+        HttpOAuthListenerHandler httpOAuthListenerHandler = new HttpOAuthListenerHandler(8005, 8015);
+        httpOAuthListenerHandler.run();
         String payload = "<events>"
                 + "<event>"
                 + "<symbol>WSO2</symbol>"
@@ -137,10 +137,10 @@ public class HttpOAuthFailTestCase {
                 + "</event>"
                 + "</events>";
         fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23','Country:USA'"});
-        while (!lst.getHttpOAuthListener().isMessageArrive()) {
+        while (!httpOAuthListenerHandler.getHttpOAuthTokenEndpointListener().isMessageArrive()) {
             Thread.sleep(10);
         }
-        String eventData = lst.getHttpOAuthListener().getData();
+        String eventData = httpOAuthListenerHandler.getHttpOAuthTokenEndpointListener().getData();
 
         String expected = "<events>"
                 + "<event>"
@@ -151,7 +151,7 @@ public class HttpOAuthFailTestCase {
                 + "</events>\n";
         Assert.assertEquals(eventData, expected);
         siddhiAppRuntime.shutdown();
-        lst.shutdown();
+        httpOAuthListenerHandler.shutdown();
     }
 
     /**
@@ -162,7 +162,7 @@ public class HttpOAuthFailTestCase {
      * @throws Exception Interrupted exception
      */
     @Test
-    public void testHTTPTextOAuthFailWithExpiredAccessTokenClientCredentialGrant() throws Exception {
+    public void testHTTPOAuthWithExpiredAccessTokenClientCredentialGrant() throws Exception {
         setCarbonHome();
         log.info(" Creating test for publishing events with expired access token and generate new access token " +
                 "using client credential grant");
@@ -182,8 +182,8 @@ public class HttpOAuthFailTestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition + query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
-        HttpOAuthListenerHandler lst = new HttpOAuthListenerHandler(8005, 8015);
-        lst.run();
+        HttpOAuthListenerHandler httpOAuthListenerHandler = new HttpOAuthListenerHandler(8005, 8015);
+        httpOAuthListenerHandler.run();
         String payload = "<events>"
                 + "<event>"
                 + "<symbol>WSO2</symbol>"
@@ -193,10 +193,10 @@ public class HttpOAuthFailTestCase {
                 + "</events>";
         fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23','Country:USA'," +
                 "'Authorization:  Bearer xxxxx'"});
-        while (!lst.getHttpOAuthListener().isMessageArrive()) {
+        while (!httpOAuthListenerHandler.getHttpOAuthTokenEndpointListener().isMessageArrive()) {
             Thread.sleep(10);
         }
-        String eventData = lst.getHttpOAuthListener().getData();
+        String eventData = httpOAuthListenerHandler.getHttpOAuthTokenEndpointListener().getData();
         String expected = "<events>"
                 + "<event>"
                 + "<symbol>WSO2</symbol>"
@@ -206,7 +206,7 @@ public class HttpOAuthFailTestCase {
                 + "</events>\n";
         Assert.assertEquals(eventData, expected);
         siddhiAppRuntime.shutdown();
-        lst.shutdown();
+        httpOAuthListenerHandler.shutdown();
     }
 
     /**
@@ -217,7 +217,7 @@ public class HttpOAuthFailTestCase {
      * @throws Exception Interrupted exception
      */
     @Test
-    public void testHTTPTextOAuthFailWithExpiredAccessTokenPasswordGrant() throws Exception {
+    public void testHTTPOAuthWithExpiredAccessTokenPasswordGrant() throws Exception {
         log.info(" Creating test for publishing events with expired access token and generate new access token " +
                 "using Password grant");
         setCarbonHome();
@@ -238,8 +238,8 @@ public class HttpOAuthFailTestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition + query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
-        HttpOAuthListenerHandler lst = new HttpOAuthListenerHandler(8005, 8015);
-        lst.run();
+        HttpOAuthListenerHandler httpOAuthListenerHandler = new HttpOAuthListenerHandler(8005, 8015);
+        httpOAuthListenerHandler.run();
         String payload = "<events>"
                 + "<event>"
                 + "<symbol>WSO2</symbol>"
@@ -249,10 +249,10 @@ public class HttpOAuthFailTestCase {
                 + "</events>";
         fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23','Country:USA'," +
                 "'Authorization:  Bearer xxxxx'"});
-        while (!lst.getHttpOAuthListener().isMessageArrive()) {
+        while (!httpOAuthListenerHandler.getHttpOAuthTokenEndpointListener().isMessageArrive()) {
             Thread.sleep(10);
         }
-        String eventData = lst.getHttpOAuthListener().getData();
+        String eventData = httpOAuthListenerHandler.getHttpOAuthTokenEndpointListener().getData();
         String expected = "<events>"
                 + "<event>"
                 + "<symbol>WSO2</symbol>"
@@ -262,7 +262,7 @@ public class HttpOAuthFailTestCase {
                 + "</events>\n";
         Assert.assertEquals(eventData, expected);
         siddhiAppRuntime.shutdown();
-        lst.shutdown();
+        httpOAuthListenerHandler.shutdown();
     }
 
     /**
@@ -273,7 +273,7 @@ public class HttpOAuthFailTestCase {
      * @throws Exception Interrupted exception
      */
     @Test
-    public void testHTTPTextOAuthFailWithExpiredAccessTokenRefreshGrant() throws Exception {
+    public void testHTTPOAuthWithExpiredAccessTokenRefreshGrant() throws Exception {
         log.info(" Creating test for publishing events with expired access token and generate new access token " +
                 "using Refresh grant");
         setCarbonHome();
@@ -295,8 +295,8 @@ public class HttpOAuthFailTestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition + query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
-        HttpOAuthListenerHandler lst = new HttpOAuthListenerHandler(8005, 8015);
-        lst.run();
+        HttpOAuthListenerHandler httpOAuthListenerHandler = new HttpOAuthListenerHandler(8005, 8015);
+        httpOAuthListenerHandler.run();
         String payload = "<events>"
                 + "<event>"
                 + "<symbol>WSO2</symbol>"
@@ -306,10 +306,10 @@ public class HttpOAuthFailTestCase {
                 + "</events>";
         fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23','Country:USA'" +
                 "'Authorization:  Bearer xxxxx'", "refreshToken: ppppp"});
-        while (!lst.getHttpOAuthListener().isMessageArrive()) {
+        while (!httpOAuthListenerHandler.getHttpOAuthTokenEndpointListener().isMessageArrive()) {
             Thread.sleep(10);
         }
-        String eventData = lst.getHttpOAuthListener().getData();
+        String eventData = httpOAuthListenerHandler.getHttpOAuthTokenEndpointListener().getData();
         String expected = "<events>"
                 + "<event>"
                 + "<symbol>WSO2</symbol>"
@@ -319,7 +319,7 @@ public class HttpOAuthFailTestCase {
                 + "</events>\n";
         Assert.assertEquals(eventData, expected);
         siddhiAppRuntime.shutdown();
-        lst.shutdown();
+        httpOAuthListenerHandler.shutdown();
     }
 
     /**
@@ -330,7 +330,7 @@ public class HttpOAuthFailTestCase {
      * @throws Exception Interrupted exception
      */
     @Test
-    public void testHTTPTextOAuthFailWithExpiredAccessTokenWithExpiredRefreshGrant() throws Exception {
+    public void testHTTPOAuthWithExpiredAccessTokenAndExpiredRefreshToken() throws Exception {
         log.info(" Creating test for publishing events with expired access token, refresh token and generate " +
                 "new access token using client credential grant");
         setCarbonHome();
@@ -352,8 +352,8 @@ public class HttpOAuthFailTestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition + query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
-        HttpOAuthListenerHandler lst = new HttpOAuthListenerHandler(8005, 8015);
-        lst.run();
+        HttpOAuthListenerHandler httpOAuthListenerHandler = new HttpOAuthListenerHandler(8005, 8015);
+        httpOAuthListenerHandler.run();
         String payload = "<events>"
                 + "<event>"
                 + "<symbol>WSO2</symbol>"
@@ -363,10 +363,10 @@ public class HttpOAuthFailTestCase {
                 + "</events>";
         fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23','Country:USA'," +
                 "'Authorization:  Bearer xxxxx'", "refreshToken: zzzzz"});
-        while (!lst.getHttpOAuthListener().isMessageArrive()) {
+        while (!httpOAuthListenerHandler.getHttpOAuthTokenEndpointListener().isMessageArrive()) {
             Thread.sleep(10);
         }
-        String eventData = lst.getHttpOAuthListener().getData();
+        String eventData = httpOAuthListenerHandler.getHttpOAuthTokenEndpointListener().getData();
         String expected = "<events>"
                 + "<event>"
                 + "<symbol>WSO2</symbol>"
@@ -376,7 +376,7 @@ public class HttpOAuthFailTestCase {
                 + "</events>\n";
         Assert.assertEquals(eventData, expected);
         siddhiAppRuntime.shutdown();
-        lst.shutdown();
+        httpOAuthListenerHandler.shutdown();
     }
 
     /**
@@ -386,7 +386,7 @@ public class HttpOAuthFailTestCase {
      * @throws Exception Interrupted exception
      */
     @Test
-    public void testHTTPRequestResponseWithInvalidAccessToken() throws Exception {
+    public void testHTTPRequestResponseWithExpiredAccessToken() throws Exception {
         log.info(" Creating test for send a request and get a response with expired access token and generate" +
                 " new access token using client credential grant");
         setCarbonHome();
@@ -429,8 +429,8 @@ public class HttpOAuthFailTestCase {
             }
         };
         siddhiAppRuntime.addCallback("responseStream", streamCallback);
-        HttpOAuthListenerHandler lst = new HttpOAuthListenerHandler(8005, 8015);
-        lst.run();
+        HttpOAuthListenerHandler httpOAuthListenerHandler = new HttpOAuthListenerHandler(8005, 8015);
+        httpOAuthListenerHandler.run();
         siddhiAppRuntime.start();
 
         fooStream.send(new Object[]{payload, headers});
@@ -439,7 +439,7 @@ public class HttpOAuthFailTestCase {
 
         Assert.assertEquals(eventCount.get(), 1);
         siddhiAppRuntime.shutdown();
-        lst.shutdown();
+        httpOAuthListenerHandler.shutdown();
     }
 
 }

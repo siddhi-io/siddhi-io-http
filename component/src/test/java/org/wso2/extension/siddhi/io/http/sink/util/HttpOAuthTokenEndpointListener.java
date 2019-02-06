@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2019 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
@@ -29,19 +29,19 @@ import java.net.HttpURLConnection;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Test Server Listener Manger.
+ * Test Server Listener Manger for TokenEndPoint.
  */
-public class HttpOAuthListener implements HttpHandler {
+public class HttpOAuthTokenEndpointListener implements HttpHandler {
     private AtomicBoolean isEventArrived = new AtomicBoolean(false);
 
-    public HttpOAuthListener() {
+    public HttpOAuthTokenEndpointListener() {
     }
 
     @Override
     public void handle(HttpExchange event) throws IOException {
         int responseCode;
         responseCode = HttpURLConnection.HTTP_OK;
-        StringBuilder gettingGrantType = new StringBuilder();;
+        StringBuilder gettingGrantType = new StringBuilder();
         String outputStream;
         String line;
         InputStream grantInputStream = event.getRequestBody();
@@ -50,16 +50,18 @@ public class HttpOAuthListener implements HttpHandler {
             gettingGrantType = gettingGrantType.append(line).append("\n");
         }
         if (gettingGrantType.toString().contains("password")) {
-            outputStream = "{\"access_token\":\"yyyyy\",\"refresh_token\":\"ppppp\"}";
+            outputStream = "{\"scope\":\"default\",\"token_type\":\"Bearer\",\"expires_in\":3600," +
+                    "\"access_token\":\"yyyyy\",\"refresh_token\":\"ppppp\"}";
         } else if (gettingGrantType.toString().contains("refresh_token")) {
             if ("ppppp".contains(gettingGrantType.toString())) {
-                outputStream = "{\"access_token\":\"yyyyy\",\"refresh_token\":\"ppppp\"}";
+                outputStream = "{\"scope\":\"default\",\"token_type\":\"Bearer\",\"expires_in\":3600," +
+                        "\"access_token\":\"yyyyy\",\"refresh_token\":\"ppppp\"}";
             } else {
                 responseCode = HttpURLConnection.HTTP_UNAUTHORIZED;
                 outputStream = "{\"access_token\":\"\",\"refresh_token\":\"\"}";
             }
         } else {
-            outputStream = "{\"access_token\":\"yyyyy\"}";
+            outputStream = "{\"token_type\":\"Bearer\",\"expires_in\":3600,\"access_token\":\"yyyyy\"}";
         }
 
         InputStream responseInputStream = new ByteArrayInputStream(outputStream.getBytes());
@@ -68,7 +70,6 @@ public class HttpOAuthListener implements HttpHandler {
         while ((line = responseBufferedReader.readLine()) != null) {
             responseString = responseString.append(line);
         }
-
         byte[] response = responseString.toString().getBytes();
         event.sendResponseHeaders(responseCode, response.length);
         event.getResponseBody().write(response);
