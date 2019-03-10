@@ -218,7 +218,7 @@
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.secvault.feature</id>
-                                    <version>${carbon.secvault.version}</version>
+                                    <version>${carbon.securevault.version}</version>
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.utils.feature</id>
@@ -321,7 +321,7 @@
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.secvault.feature</id>
-                                    <version>${carbon.secvault.version}</version>
+                                    <version>${carbon.securevault.version}</version>
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.utils.feature</id>

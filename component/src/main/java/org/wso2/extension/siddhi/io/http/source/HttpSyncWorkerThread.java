@@ -24,7 +24,7 @@ import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.extension.siddhi.io.http.util.HTTPSourceRegistry;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
+import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 import org.wso2.transport.http.netty.message.HttpMessageDataStreamer;
 
 import java.io.BufferedReader;
@@ -38,15 +38,15 @@ import java.util.stream.Collectors;
  */
 public class HttpSyncWorkerThread implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(HttpWorkerThread.class);
-    private HTTPCarbonMessage carbonMessage;
+    private HttpCarbonMessage carbonMessage;
     private SourceEventListener sourceEventListener;
     private String sourceID;
     private String[] trpProperties;
     private String sourceId;
     private String messageId;
 
-    HttpSyncWorkerThread(HTTPCarbonMessage cMessage, SourceEventListener sourceEventListener,
-                     String sourceID, String[] trpProperties, String sourceId, String messageId) {
+    HttpSyncWorkerThread(HttpCarbonMessage cMessage, SourceEventListener sourceEventListener,
+                         String sourceID, String[] trpProperties, String sourceId, String messageId) {
         this.carbonMessage = cMessage;
         this.sourceEventListener = sourceEventListener;
         this.sourceID = sourceID;

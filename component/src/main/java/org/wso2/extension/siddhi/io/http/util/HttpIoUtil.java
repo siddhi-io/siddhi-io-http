@@ -27,8 +27,8 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
-import org.wso2.transport.http.netty.config.Parameter;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
+import org.wso2.transport.http.netty.contract.config.Parameter;
+import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -38,29 +38,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE;
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.PARAMETER_SEPARATOR;
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.VALUE_SEPARATOR;
+import static org.wso2.transport.http.netty.contract.Constants.DIRECTION;
+import static org.wso2.transport.http.netty.contract.Constants.HTTP_STATUS_CODE;
 
 /**
  * Util class which is use for handle HTTP util function.
  */
 public class HttpIoUtil {
     private static final Logger log = Logger.getLogger(HttpIoUtil.class);
-    
+
     /**
      * Handle response from http message.
      *
      * @param requestMsg  request carbon message.
      * @param responseMsg response carbon message.
      */
-    public static void handleResponse(HTTPCarbonMessage requestMsg, HTTPCarbonMessage responseMsg) {
+    public static void handleResponse(HttpCarbonMessage requestMsg, HttpCarbonMessage responseMsg) {
         try {
             requestMsg.respond(responseMsg);
         } catch (org.wso2.transport.http.netty.contract.ServerConnectorException e) {
             throw new HttpSourceAdaptorRuntimeException("Error occurred during response", e);
         }
     }
-    
+
     /**
      * Handle failure.
      *
@@ -69,7 +72,7 @@ public class HttpIoUtil {
      * @param code           error code.
      * @param payload        response payload.
      */
-    public static void handleFailure(HTTPCarbonMessage requestMessage, HttpSourceAdaptorRuntimeException ex, Integer
+    public static void handleFailure(HttpCarbonMessage requestMessage, HttpSourceAdaptorRuntimeException ex, Integer
             code, String payload) {
         int statusCode = (code == null) ? 500 : code;
         String responsePayload = (payload != null) ? payload : HttpConstants.EMPTY_STRING;
@@ -81,16 +84,16 @@ public class HttpIoUtil {
         }
         handleResponse(requestMessage, createErrorMessage(responsePayload, statusCode));
     }
-    
+
     /**
      * Create new HTTP carbon message.
      *
      * @param statusCode error code
      * @return HTTP Response
      */
-    private static HTTPCarbonMessage createErrorMessage(String responseValue, int statusCode) {
-        
-        HTTPCarbonMessage response = createHttpCarbonMessage();
+    private static HttpCarbonMessage createErrorMessage(String responseValue, int statusCode) {
+
+        HttpCarbonMessage response = createHttpCarbonMessage();
         if (responseValue != null) {
             byte[] array;
             try {
@@ -104,9 +107,8 @@ public class HttpIoUtil {
             byteBuffer.flip();
             response.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(byteBuffer)));
         }
-        response.setProperty(org.wso2.transport.http.netty.common.Constants.HTTP_STATUS_CODE, statusCode);
-        response.setProperty(org.wso2.carbon.messaging.Constants.DIRECTION,
-                org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE);
+        response.setProperty(HTTP_STATUS_CODE, statusCode);
+        response.setProperty(DIRECTION, DIRECTION_RESPONSE);
         return response;
     }
 
@@ -116,8 +118,8 @@ public class HttpIoUtil {
      * @param request Received option request by the source
      * @return Generated HTTPCarbonMessage as the repsonse of OPTIONS request
      */
-    public static HTTPCarbonMessage createOptionsResponseMessage(HTTPCarbonMessage request) {
-        HTTPCarbonMessage response = createHttpCarbonMessage();
+    public static HttpCarbonMessage createOptionsResponseMessage(HttpCarbonMessage request) {
+        HttpCarbonMessage response = createHttpCarbonMessage();
         response.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(ByteBuffer.allocate(0))));
 
         response.setHeader(HttpHeaderNames.CONTENT_LENGTH.toString(), String.valueOf(0));
@@ -128,38 +130,36 @@ public class HttpIoUtil {
                 String.format("%s,%s,%s,%s,%s", HttpHeaderNames.CONTENT_TYPE.toString(),
                         HttpHeaderNames.USER_AGENT.toString(), HttpHeaderNames.ORIGIN.toString(),
                         HttpHeaderNames.REFERER.toString(), HttpHeaderNames.ACCEPT.toString()));
-        response.setProperty(org.wso2.transport.http.netty.common.Constants.HTTP_STATUS_CODE,
-                Integer.parseInt(HttpConstants.DEFAULT_HTTP_SUCCESS_CODE));
-        response.setProperty(org.wso2.carbon.messaging.Constants.DIRECTION,
-                org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE);
+        response.setProperty(HTTP_STATUS_CODE, Integer.parseInt(HttpConstants.DEFAULT_HTTP_SUCCESS_CODE));
+        response.setProperty(DIRECTION, DIRECTION_RESPONSE);
 
         return response;
     }
-    
+
     /**
      * Create new HTTP carbon messge.
      *
      * @return carbon message.
      */
-    public static HTTPCarbonMessage createHttpCarbonMessage() {
-        HTTPCarbonMessage httpCarbonMessage;
-        httpCarbonMessage = new HTTPCarbonMessage(
+    public static HttpCarbonMessage createHttpCarbonMessage() {
+        HttpCarbonMessage httpCarbonMessage;
+        httpCarbonMessage = new HttpCarbonMessage(
                 new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
         return httpCarbonMessage;
     }
-    
+
     /**
      * @param parameterList transport property list in format of 'key1:val1','key2:val2',....
      * @return transport property list
      */
     public static List<Parameter> populateParameters(String parameterList) {
-        List<org.wso2.transport.http.netty.config.Parameter> parameters = new ArrayList<>();
+        List<Parameter> parameters = new ArrayList<>();
         if (!HttpConstants.EMPTY_STRING.equals(parameterList.trim())) {
             String[] valueList = parameterList.trim().substring(1, parameterList.length() - 1)
                     .split(PARAMETER_SEPARATOR);
             Arrays.stream(valueList).forEach(valueEntry ->
                     {
-                        org.wso2.transport.http.netty.config.Parameter parameter = new Parameter();
+                        Parameter parameter = new Parameter();
                         String[] entry = valueEntry.split(VALUE_SEPARATOR);
                         if (entry.length == 2) {
                             parameter.setName(entry[0]);
@@ -171,11 +171,11 @@ public class HttpIoUtil {
                         }
                     }
             );
-            
+
         }
         return parameters;
     }
-    
+
     /**
      * @param valueList transport property list in format of 'key1:val1','key2:val2',....
      * @return transport property list

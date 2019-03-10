@@ -25,9 +25,9 @@ import org.wso2.extension.siddhi.io.http.util.HttpIoUtil;
 import org.wso2.extension.siddhi.io.http.util.TrpPropertyTypes;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.transport.http.netty.config.ListenerConfiguration;
-import org.wso2.transport.http.netty.config.TransportProperty;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
+import org.wso2.transport.http.netty.contract.config.ListenerConfiguration;
+import org.wso2.transport.http.netty.contract.config.TransportProperty;
+import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -66,10 +66,10 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SERVER_BOOTST
  */
 public class HttpSourceUtil {
     private static final Logger log = Logger.getLogger(HttpSourceUtil.class);
-    
+
     private HttpSourceUtil() {
     }
-    
+
     /**
      * Populate transport properties.
      *
@@ -83,7 +83,7 @@ public class HttpSourceUtil {
                 transportProperties.add(getTransportProperty(key, value)));
         return transportProperties;
     }
-    
+
     /**
      * Create single transport property based on it's type.
      *
@@ -114,7 +114,7 @@ public class HttpSourceUtil {
         }
         return trpProperty;
     }
-    
+
     /**
      * Method is responsible for set transportation configuration values.
      * @param serverBootstrapConfigurationList  server bootstrap configuration list
@@ -128,8 +128,8 @@ public class HttpSourceUtil {
                 transportProperties.add(getTransportProperty(key, value)));
         return transportProperties;
     }
-    
-    
+
+
     /**
      * Key value generated for Source Listener using host and port.
      *
@@ -145,7 +145,7 @@ public class HttpSourceUtil {
         }
         return String.valueOf(aURL.getPort()) + HttpConstants.PORT_CONTEXT_KEY_SEPARATOR + aURL.getPath();
     }
-    
+
     /**
      * Get port from listenerUrl.
      *
@@ -161,7 +161,7 @@ public class HttpSourceUtil {
         }
         return String.valueOf(aURL.getPort());
     }
-    
+
     /**
      * Set Listener Configuration from given url.
      *
@@ -196,8 +196,6 @@ public class HttpSourceUtil {
                             .readConfig(HttpConstants.KEYSTORE_FILE, HttpConstants.KEYSTORE_FILE_VALUE));
                     listenerConfig.setKeyStorePass(sourceConfigReader
                             .readConfig(HttpConstants.KEYSTORE_PASSWORD, HttpConstants.KEYSTORE_PASSWORD_VALUE));
-                    listenerConfig.setCertPass(sourceConfigReader
-                            .readConfig(HttpConstants.CERT_PASSWORD, HttpConstants.CERT_PASSWORD_VALUE));
                     listenerConfig.setMessageProcessorId(sourceConfigReader
                             .readConfig(HttpConstants.MESSAGE_PROCESSOR_ID, HttpConstants.MESSAGE_PROCESSOR_ID_VALUE));
                     break;
@@ -209,17 +207,17 @@ public class HttpSourceUtil {
         }
         return listenerConfig;
     }
-    
+
     /**
      * This method handle the response including the status of request.
      *
      * @param carbonMessage the carbon callback that should send the status.
      * @param code          the http status code.
      */
-    public static void handleCallback(HTTPCarbonMessage carbonMessage, int code) {
+    public static void handleCallback(HttpCarbonMessage carbonMessage, int code) {
         HttpIoUtil.handleFailure(carbonMessage, null, code, null);
     }
-    
+
     /**
      * This map contains the properties other than String
      *
@@ -258,7 +256,7 @@ public class HttpSourceUtil {
      * This method handles OPTIONS requests received by the http-source
      * @param requestMessage OPTIONS request which needs to be handled.
      */
-    public static void handleCORS(HTTPCarbonMessage requestMessage) {
+    public static void handleCORS(HttpCarbonMessage requestMessage) {
         HttpIoUtil.handleResponse(requestMessage, HttpIoUtil.createOptionsResponseMessage(requestMessage));
     }
 }

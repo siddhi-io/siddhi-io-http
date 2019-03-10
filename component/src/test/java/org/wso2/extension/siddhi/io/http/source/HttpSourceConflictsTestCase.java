@@ -128,7 +128,7 @@ public class HttpSourceConflictsTestCase {
             HttpTestUtil.httpsPublishEvent(event2);
             SiddhiTestHelper.waitForEvents(waitTime, 2, eventCountA, timeout);
             Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
-        } catch (Throwable t) {
+        } catch (InterruptedException t) {
             logger.error(t.getMessage(), t);
         } finally {
             siddhiAppRuntime.shutdown();

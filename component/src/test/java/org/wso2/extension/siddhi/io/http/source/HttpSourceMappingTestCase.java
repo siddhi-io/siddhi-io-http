@@ -294,7 +294,7 @@ public class HttpSourceMappingTestCase {
             HttpTestUtil.httpPublishEvent(event2, baseURI, "/endpoints/RecPro",
                     "POST");
             SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
-        } catch (Throwable t) {
+        } catch (InterruptedException t) {
             logger.error(t.getMessage(), t);
         } finally {
             siddhiAppRuntime.shutdown();

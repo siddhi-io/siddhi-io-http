@@ -44,7 +44,7 @@ import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.transport.OptionHolder;
 import org.wso2.transport.http.netty.contract.ServerConnectorException;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
+import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.nio.charset.Charset;
 import java.util.List;
@@ -52,6 +52,10 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+
+import static org.wso2.carbon.messaging.Constants.DIRECTION;
+import static org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE;
+import static org.wso2.transport.http.netty.contract.Constants.HTTP_STATUS_CODE;
 
 /**
  * Http source for receive the http and https request.
@@ -423,7 +427,7 @@ public class HttpRequestSource extends HttpSource {
     private String sourceId;
     private long connectionTimeout;
 
-    private Map<String, HTTPCarbonMessage> requestContainerMap = new ConcurrentHashMap<>();
+    private Map<String, HttpCarbonMessage> requestContainerMap = new ConcurrentHashMap<>();
 
     private HashedWheelTimer timer;
     private WeakHashMap<String, Timeout> schedularMap = new WeakHashMap<>();
@@ -513,7 +517,7 @@ public class HttpRequestSource extends HttpSource {
         this.httpConnectorRegistry.unregisterServerConnector(this.listenerUrl);
 
         HTTPSourceRegistry.removeRequestSource(sourceId);
-        for (Map.Entry<String, HTTPCarbonMessage> entry : requestContainerMap.entrySet()) {
+        for (Map.Entry<String, HttpCarbonMessage> entry : requestContainerMap.entrySet()) {
             cancelRequest(entry.getKey(), entry.getValue());
         }
     }
@@ -550,7 +554,7 @@ public class HttpRequestSource extends HttpSource {
         }
     }
 
-    public void registerCallback(HTTPCarbonMessage carbonMessage, String messageId) {
+    public void registerCallback(HttpCarbonMessage carbonMessage, String messageId) {
 
         // Add timeout handler to the timer.
         addTimeout(messageId);
@@ -560,7 +564,7 @@ public class HttpRequestSource extends HttpSource {
 
     public void handleCallback(String messageId, String payload, List<Header> headersList, String contentType) {
 
-        HTTPCarbonMessage carbonMessage = requestContainerMap.get(messageId);
+        HttpCarbonMessage carbonMessage = requestContainerMap.get(messageId);
         if (carbonMessage != null) {
             // Remove the message from the map as we are going to reply to the message.
             requestContainerMap.remove(messageId);
@@ -585,7 +589,7 @@ public class HttpRequestSource extends HttpSource {
         schedularMap.get(messageId).cancel();
     }
 
-    private void handleResponse(HTTPCarbonMessage requestMsg, HTTPCarbonMessage responseMsg) {
+    private void handleResponse(HttpCarbonMessage requestMsg, HttpCarbonMessage responseMsg) {
 
         try {
             requestMsg.respond(responseMsg);
@@ -594,7 +598,7 @@ public class HttpRequestSource extends HttpSource {
         }
     }
 
-    private void handleResponse(HTTPCarbonMessage requestMessage, Integer code, String payload, List<Header>
+    private void handleResponse(HttpCarbonMessage requestMessage, Integer code, String payload, List<Header>
             headers, String contentType) {
 
         int statusCode = (code == null) ? 500 : code;
@@ -602,26 +606,25 @@ public class HttpRequestSource extends HttpSource {
         handleResponse(requestMessage, createResponseMessage(responsePayload, statusCode, headers, contentType));
     }
 
-    private void cancelRequest(String messageId, HTTPCarbonMessage carbonMessage) {
+    private void cancelRequest(String messageId, HttpCarbonMessage carbonMessage) {
 
         requestContainerMap.remove(messageId);
         schedularMap.remove(messageId);
         handleResponse(carbonMessage, 504, null, null, null);
     }
 
-    private HTTPCarbonMessage createResponseMessage(String payload, int statusCode, List<Header> headers,
+    private HttpCarbonMessage createResponseMessage(String payload, int statusCode, List<Header> headers,
                                                     String contentType) {
 
-        HTTPCarbonMessage response = new HTTPCarbonMessage(
+        HttpCarbonMessage response = new HttpCarbonMessage(
                 new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
         response.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(payload
                 .getBytes(Charset.defaultCharset()))));
 
         HttpHeaders httpHeaders = response.getHeaders();
 
-        response.setProperty(org.wso2.transport.http.netty.common.Constants.HTTP_STATUS_CODE, statusCode);
-        response.setProperty(org.wso2.carbon.messaging.Constants.DIRECTION,
-                org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE);
+        response.setProperty(HTTP_STATUS_CODE, statusCode);
+        response.setProperty(DIRECTION, DIRECTION_RESPONSE);
 
         // Set the Content-Type header as the system generated value. If the user has defined a specific Content-Type
         // header this will be overridden.
@@ -650,7 +653,7 @@ public class HttpRequestSource extends HttpSource {
         @Override
         public void run(Timeout timeout) {
 
-            HTTPCarbonMessage carbonMessage = requestContainerMap.get(messageId);
+            HttpCarbonMessage carbonMessage = requestContainerMap.get(messageId);
             cancelRequest(messageId, carbonMessage);
         }
     }

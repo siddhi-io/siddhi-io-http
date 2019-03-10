@@ -44,9 +44,9 @@ import org.wso2.siddhi.core.util.transport.Option;
 import org.wso2.siddhi.core.util.transport.OptionHolder;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
-import org.wso2.transport.http.netty.common.Constants;
+import org.wso2.transport.http.netty.contract.Constants;
 import org.wso2.transport.http.netty.contract.HttpResponseFuture;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
+import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -696,7 +696,7 @@ public class HttpRequestSink extends HttpSink {
         String contentType = HttpSinkUtil.getContentType(mapType, headersList);
         String messageBody = getMessageBody(payload);
         HttpMethod httpReqMethod = new HttpMethod(httpMethod);
-        HTTPCarbonMessage cMessage = new HTTPCarbonMessage(
+        HttpCarbonMessage cMessage = new HttpCarbonMessage(
                 new DefaultHttpRequest(HttpVersion.HTTP_1_1, httpReqMethod, EMPTY_STRING));
         cMessage = generateCarbonMessage(headersList, contentType, httpMethod, cMessage);
         if (!Constants.HTTP_GET_METHOD.equals(httpMethod)) {
@@ -724,7 +724,7 @@ public class HttpRequestSink extends HttpSink {
                 throw new HttpSinkAdaptorRuntimeException("Failed to get a response from " +
                         publisherURL + ", " + e + ". Message dropped.");
             }
-            HTTPCarbonMessage response = httpListener.getHttpResponseMessage();
+            HttpCarbonMessage response = httpListener.getHttpResponseMessage();
             return response.getNettyHttpResponse().status().code();
         } else {
             return HttpConstants.SUCCESS_CODE;

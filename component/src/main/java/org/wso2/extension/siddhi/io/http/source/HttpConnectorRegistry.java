@@ -25,16 +25,16 @@ import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.transport.http.netty.config.ListenerConfiguration;
-import org.wso2.transport.http.netty.config.RequestSizeValidationConfig;
-import org.wso2.transport.http.netty.config.TransportProperty;
-import org.wso2.transport.http.netty.config.TransportsConfiguration;
 import org.wso2.transport.http.netty.contract.HttpWsConnectorFactory;
 import org.wso2.transport.http.netty.contract.ServerConnector;
 import org.wso2.transport.http.netty.contract.ServerConnectorFuture;
+import org.wso2.transport.http.netty.contract.config.ListenerConfiguration;
+import org.wso2.transport.http.netty.contract.config.RequestSizeValidationConfig;
+import org.wso2.transport.http.netty.contract.config.ServerBootstrapConfiguration;
+import org.wso2.transport.http.netty.contract.config.TransportProperty;
+import org.wso2.transport.http.netty.contract.config.TransportsConfiguration;
 import org.wso2.transport.http.netty.contractimpl.DefaultHttpWsConnectorFactory;
-import org.wso2.transport.http.netty.listener.ServerBootstrapConfiguration;
-import org.wso2.transport.http.netty.message.HTTPConnectorUtil;
+import org.wso2.transport.http.netty.message.HttpConnectorUtil;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -209,7 +209,7 @@ class HttpConnectorRegistry {
                 httpServerConnectorContext.incrementReferenceCount();
                 return;
             }
-            ServerBootstrapConfiguration serverBootstrapConfiguration = HTTPConnectorUtil
+            ServerBootstrapConfiguration serverBootstrapConfiguration = HttpConnectorUtil
                     .getServerBootstrapConfiguration(trpConfig.getTransportProperties());
             ServerConnector serverConnector =
                     httpConnectorFactory.createServerConnector(serverBootstrapConfiguration, listenerConfig);
@@ -320,8 +320,7 @@ class HttpConnectorRegistry {
             ListenerConfiguration config = context.getListenerConfiguration();
             if (config.getScheme().equalsIgnoreCase("https")) {
                 if (!listenerConfiguration.getKeyStoreFile().equals(config.getKeyStoreFile())
-                        || !listenerConfiguration.getKeyStorePass().equals(config.getKeyStorePass())
-                        || !listenerConfiguration.getCertPass().equals(config.getCertPass())) {
+                        || !listenerConfiguration.getKeyStorePass().equals(config.getKeyStorePass())) {
                     log.info("There is already registered https server connector for same host:port which has " +
                             " conflicting configurations.");
                     return true;

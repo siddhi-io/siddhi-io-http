@@ -28,22 +28,22 @@ import java.util.concurrent.CountDownLatch;
  * @since 0.94
  */
 public class ConnectorStartupSynchronizer {
-    
+
     private Map<String, Exception> exceptions = new HashMap<>();
     private CountDownLatch countDownLatch;
-    
+
     public ConnectorStartupSynchronizer(CountDownLatch countDownLatch) {
         this.countDownLatch = countDownLatch;
     }
-    
+
     public void addException(String connectorId, Exception ex) {
         exceptions.put(connectorId, ex);
     }
-    
+
     public Map<String, Exception> getExceptions() {
         return exceptions;
     }
-    
+
     public CountDownLatch getCountDownLatch() {
         return countDownLatch;
     }

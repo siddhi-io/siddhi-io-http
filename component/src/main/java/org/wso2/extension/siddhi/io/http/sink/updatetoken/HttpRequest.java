@@ -19,7 +19,6 @@
 package org.wso2.extension.siddhi.io.http.sink.updatetoken;
 
 import io.netty.buffer.Unpooled;
-
 import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.DefaultLastHttpContent;
 import io.netty.handler.codec.http.HttpMethod;
@@ -27,10 +26,10 @@ import io.netty.handler.codec.http.HttpVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
-import org.wso2.transport.http.netty.common.Constants;
+import org.wso2.transport.http.netty.contract.Constants;
 import org.wso2.transport.http.netty.contract.HttpClientConnector;
 import org.wso2.transport.http.netty.contract.HttpResponseFuture;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
+import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 import org.wso2.transport.http.netty.message.HttpMessageDataStreamer;
 
 import java.io.BufferedReader;
@@ -57,7 +56,7 @@ public class HttpRequest {
                                                     String payload, Map<String, String> headers) {
         ArrayList<String> responses = new ArrayList<>();
 
-        HTTPCarbonMessage msg = createHttpPostReq(serverScheme, serverHost, serverPort, serverPath, payload);
+        HttpCarbonMessage msg = createHttpPostReq(serverScheme, serverHost, serverPort, serverPath, payload);
         for (Map.Entry<String, String> entry : headers.entrySet()) {
             msg.setHeader(entry.getKey(), entry.getValue());
         }
@@ -73,11 +72,11 @@ public class HttpRequest {
         } catch (InterruptedException e) {
             LOG.debug("Time out due to getting new access token. " + e);
         }
-        HTTPCarbonMessage response = listener.getHttpResponseMessage();
+        HttpCarbonMessage response = listener.getHttpResponseMessage();
         String statusCode = Integer.toString(response.getNettyHttpResponse().status().code());
         responses.add(statusCode);
         InputStream httpMessageDataStreamer = new HttpMessageDataStreamer(response).getInputStream();
-        InputStreamReader inputStreamReader  = new InputStreamReader(httpMessageDataStreamer, Charset.defaultCharset());
+        InputStreamReader inputStreamReader = new InputStreamReader(httpMessageDataStreamer, Charset.defaultCharset());
         try (BufferedReader buffer = new BufferedReader(inputStreamReader)) {
             String responsePayload = buffer.lines().collect(Collectors.joining("\n"));
             responses.add(responsePayload);
@@ -87,9 +86,9 @@ public class HttpRequest {
         return responses;
     }
 
-    private static HTTPCarbonMessage createHttpPostReq(String serverScheme, String serverHost, int serverPort,
+    private static HttpCarbonMessage createHttpPostReq(String serverScheme, String serverHost, int serverPort,
                                                        String serverPath, String payload) {
-        HTTPCarbonMessage httpPostRequest = new HTTPCarbonMessage(
+        HttpCarbonMessage httpPostRequest = new HttpCarbonMessage(
                 new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, serverPath));
         httpPostRequest.setProperty(Constants.PROTOCOL, serverScheme);
         httpPostRequest.setProperty(Constants.HTTP_HOST, serverHost);

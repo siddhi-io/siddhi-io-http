@@ -28,7 +28,7 @@ import org.wso2.carbon.analytics.idp.client.core.exception.IdPClientException;
 import org.wso2.carbon.analytics.idp.client.core.utils.IdPClientConstants;
 import org.wso2.extension.siddhi.io.http.source.internal.HttpIODataHolder;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
+import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -42,8 +42,8 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
  */
 public class HttpAuthenticator {
     private static final Logger logger = LoggerFactory.getLogger(HttpAuthenticator.class);
-    
-    public static boolean authenticate(HTTPCarbonMessage httpCarbonMessage) {
+
+    public static boolean authenticate(HttpCarbonMessage httpCarbonMessage) {
         if (HttpIODataHolder.getInstance().getBundleContext() == null) {
             //this will handle the events at non osgi mode.
             return true;
@@ -86,5 +86,5 @@ public class HttpAuthenticator {
             }
         }
     }
-    
+
 }

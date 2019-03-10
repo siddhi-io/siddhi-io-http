@@ -279,14 +279,14 @@ public class HttpBasicTestCase {
                 }
                 SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
                 Assert.assertEquals(logMessages.contains("Error on '" + siddhiAppRuntime2.getName() +
-                                "'. Listener URL http://localhost:8008/endpoints/abc already connected" +
+                                "'. Listener URL http://localhost:8008/endpoints/abc already connected " +
                                 "Error while connecting at Source 'http' at 'inputStream2'.")
                         , true);
                 Assert.assertEquals(Collections.frequency(logMessages, "Error on '" + siddhiAppRuntime2.getName() +
-                        "'. Listener URL http://localhost:8008/endpoints/abc already connected" +
+                        "'. Listener URL http://localhost:8008/endpoints/abc already connected " +
                         "Error while connecting at Source 'http' at 'inputStream2'."), 1);
-            } catch (Throwable t) {
-                logger.error(t.getMessage(), t);
+            } catch (InterruptedException e) {
+                logger.info("Test case interrupted ");
             } finally {
                 siddhiAppRuntime2.shutdown();
             }
@@ -364,12 +364,12 @@ public class HttpBasicTestCase {
             }
             SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
             Assert.assertEquals(logMessages.contains("Error on '" + siddhiAppRuntime.getName() + "'. Listener URL " +
-                    "http://localhost:8006/endpoints/RecPro already connectedError while " +
+                    "http://localhost:8006/endpoints/RecPro already connected Error while " +
                     "connecting at Source 'http' at 'inputStreamA'."), true);
             Assert.assertEquals(Collections.frequency(logMessages, "Error on '" + siddhiAppRuntime.getName() +
-                    "'. Listener URL http://localhost:8006/endpoints/RecPro already connectedError while " +
+                    "'. Listener URL http://localhost:8006/endpoints/RecPro already connected Error while " +
                     "connecting at Source 'http' at 'inputStreamA'."), 1);
-        } catch (Throwable t) {
+        } catch (InterruptedException t) {
             logger.error(t.getMessage(), t);
         } finally {
             siddhiAppRuntime.shutdown();
