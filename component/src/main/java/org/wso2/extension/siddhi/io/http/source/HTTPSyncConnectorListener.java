@@ -20,7 +20,7 @@ package org.wso2.extension.siddhi.io.http.source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
+import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 /**
  * HTTP connector listener for Siddhi.
@@ -29,7 +29,7 @@ public class HTTPSyncConnectorListener extends HTTPConnectorListener {
 
     private static final Logger log = LoggerFactory.getLogger(HTTPSyncConnectorListener.class);
 
-    protected boolean isValidRequest(HTTPCarbonMessage carbonMessage) {
+    protected boolean isValidRequest(HttpCarbonMessage carbonMessage) {
 
         return HttpConstants.PROTOCOL_ID.equals(carbonMessage.getProperty(HttpConstants.PROTOCOL)) &&
                 HttpSyncConnectorRegistry.getInstance().getServerConnectorPool().containsKey(getInterface

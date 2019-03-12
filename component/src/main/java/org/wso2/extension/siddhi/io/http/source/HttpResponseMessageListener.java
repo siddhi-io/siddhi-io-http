@@ -25,7 +25,7 @@ import org.wso2.extension.siddhi.io.http.util.HTTPSourceRegistry;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.extension.siddhi.io.http.util.ResponseSourceId;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
+import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -42,7 +42,7 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
     private Map<String, Object> trpProperties;
     private boolean isDownloadEnabled;
     private String sinkId;
-    private HTTPCarbonMessage carbonMessages;
+    private HttpCarbonMessage carbonMessages;
     private CountDownLatch latch;
     private int tryCount;
     private String authType;
@@ -58,8 +58,10 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
     }
 
     @Override
-    public void onMessage(HTTPCarbonMessage carbonMessage) {
-        trpProperties.forEach((k, v) -> { carbonMessage.setProperty(k, v); });
+    public void onMessage(HttpCarbonMessage carbonMessage) {
+        trpProperties.forEach((k, v) -> {
+            carbonMessage.setProperty(k, v);
+        });
         carbonMessage.setProperty(HttpConstants.IS_DOWNLOADABLE_CONTENT, isDownloadEnabled);
         this.carbonMessages = carbonMessage;
         String statusCode = Integer.toString(carbonMessage.getNettyHttpResponse().status().code());
@@ -75,7 +77,7 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
             }
         }
         if (HttpConstants.OAUTH.equals(authType)) {
-        latch.countDown();
+            latch.countDown();
         }
     }
 
@@ -116,7 +118,7 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
         return null;
     }
 
-    public HTTPCarbonMessage getHttpResponseMessage() {
+    public HttpCarbonMessage getHttpResponseMessage() {
         return carbonMessages;
     }
 

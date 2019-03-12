@@ -49,15 +49,15 @@ import org.wso2.siddhi.core.util.transport.DynamicOptions;
 import org.wso2.siddhi.core.util.transport.Option;
 import org.wso2.siddhi.core.util.transport.OptionHolder;
 import org.wso2.siddhi.query.api.definition.StreamDefinition;
-import org.wso2.transport.http.netty.common.Constants;
-import org.wso2.transport.http.netty.common.ProxyServerConfiguration;
-import org.wso2.transport.http.netty.config.ChunkConfig;
-import org.wso2.transport.http.netty.config.SenderConfiguration;
+import org.wso2.transport.http.netty.contract.Constants;
 import org.wso2.transport.http.netty.contract.HttpClientConnector;
 import org.wso2.transport.http.netty.contract.HttpResponseFuture;
 import org.wso2.transport.http.netty.contract.HttpWsConnectorFactory;
+import org.wso2.transport.http.netty.contract.config.ChunkConfig;
+import org.wso2.transport.http.netty.contract.config.ProxyServerConfiguration;
+import org.wso2.transport.http.netty.contract.config.SenderConfiguration;
 import org.wso2.transport.http.netty.contractimpl.DefaultHttpWsConnectorFactory;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
+import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -870,7 +870,7 @@ public class HttpSink extends Sink {
         String contentType = HttpSinkUtil.getContentType(mapType, headersList);
         String messageBody = getMessageBody(payload);
         HttpMethod httpReqMethod = new HttpMethod(httpMethod);
-        HTTPCarbonMessage cMessage = new HTTPCarbonMessage(
+        HttpCarbonMessage cMessage = new HttpCarbonMessage(
                 new DefaultHttpRequest(HttpVersion.HTTP_1_1, httpReqMethod, EMPTY_STRING));
         cMessage = generateCarbonMessage(headersList, contentType, httpMethod, cMessage);
         if (!Constants.HTTP_GET_METHOD.equals(httpMethod)) {
@@ -895,7 +895,7 @@ public class HttpSink extends Sink {
                 throw new HttpSinkAdaptorRuntimeException("Failed to get a response from " +
                         publisherURL + ", " + e + ". Message dropped.");
             }
-            HTTPCarbonMessage response = listener.getHttpResponseMessage();
+            HttpCarbonMessage response = listener.getHttpResponseMessage();
             return response.getNettyHttpResponse().status().code();
         } else {
             clientConnector.send(cMessage);
@@ -972,8 +972,8 @@ public class HttpSink extends Sink {
      * @param cMessage    carbon message to be send to the endpoint.
      * @return generated carbon message.
      */
-    HTTPCarbonMessage generateCarbonMessage(List<Header> headers, String contentType,
-                                            String httpMethod, HTTPCarbonMessage cMessage) {
+    HttpCarbonMessage generateCarbonMessage(List<Header> headers, String contentType,
+                                            String httpMethod, HttpCarbonMessage cMessage) {
         /*
          * set carbon message properties which is to be used in carbon transport.
          */
@@ -1124,12 +1124,14 @@ public class HttpSink extends Sink {
                 }
             }
         }
-        if (!EMPTY_STRING.equals(followRedirect)) {
+        // TODO: 27/02/19 Add redirection support
+       /* if (!EMPTY_STRING.equals(followRedirect)) {
             senderConfig.setFollowRedirect(Boolean.parseBoolean(followRedirect));
         }
         if (!EMPTY_STRING.equals(maxRedirectCount)) {
             senderConfig.setMaxRedirectCount(Integer.parseInt(maxRedirectCount));
         }
+        */
         if (!EMPTY_STRING.equals(parametersList)) {
             senderConfig.setParameters(HttpIoUtil.populateParameters(parametersList));
         }

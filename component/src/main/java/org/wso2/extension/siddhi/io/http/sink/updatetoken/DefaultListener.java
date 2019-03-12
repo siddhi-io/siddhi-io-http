@@ -20,8 +20,8 @@ package org.wso2.extension.siddhi.io.http.sink.updatetoken;
 
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 import org.wso2.transport.http.netty.message.Http2PushPromise;
+import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -29,7 +29,7 @@ import java.util.concurrent.CountDownLatch;
  * {@code DefaultListner} Handle the HTTP listner.
  */
 public class DefaultListener implements HttpConnectorListener {
-    private HTTPCarbonMessage httpMessage;
+    private HttpCarbonMessage httpMessage;
     private CountDownLatch latch;
     private String authType;
 
@@ -39,7 +39,7 @@ public class DefaultListener implements HttpConnectorListener {
     }
 
     @Override
-    public void onMessage(HTTPCarbonMessage httpMessage) {
+    public void onMessage(HttpCarbonMessage httpMessage) {
         this.httpMessage = httpMessage;
         if (HttpConstants.OAUTH.equals(authType)) {
             latch.countDown();
@@ -56,7 +56,7 @@ public class DefaultListener implements HttpConnectorListener {
 
     }
 
-    public HTTPCarbonMessage getHttpResponseMessage() {
+    public HttpCarbonMessage getHttpResponseMessage() {
         return httpMessage;
     }
 

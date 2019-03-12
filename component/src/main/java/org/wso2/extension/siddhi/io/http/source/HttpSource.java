@@ -33,7 +33,7 @@ import org.wso2.siddhi.core.stream.input.source.Source;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.core.util.transport.OptionHolder;
-import org.wso2.transport.http.netty.config.ListenerConfiguration;
+import org.wso2.transport.http.netty.contract.config.ListenerConfiguration;
 
 import java.util.Locale;
 import java.util.Map;
@@ -382,12 +382,6 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
                         description = "The default keystore password.",
                         defaultValue = "wso2carbon",
                         possibleParameters = "String of keystore password"
-                ),
-                @SystemParameter(
-                        name = "certPassword",
-                        description = "The default cert password.",
-                        defaultValue = "wso2carbon",
-                        possibleParameters = "String of cert password"
                 )
         }
 )

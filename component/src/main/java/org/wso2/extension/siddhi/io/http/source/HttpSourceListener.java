@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
+import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -68,7 +68,7 @@ public class HttpSourceListener {
      *
      * @param carbonMessage the carbon message received from carbon transport.
      */
-    protected void send(HTTPCarbonMessage carbonMessage) {
+    protected void send(HttpCarbonMessage carbonMessage) {
         if (paused) {
             lock.lock();
             try {
@@ -93,10 +93,10 @@ public class HttpSourceListener {
         populateTransportProperties(carbonMessage, trpProperties);
         executorService.execute(new HttpWorkerThread(carbonMessage,
                 sourceEventListener, sourceEventListener.getStreamDefinition().toString(), trpProperties));
-        
+
     }
-    
-    protected void populateTransportHeaders(HTTPCarbonMessage carbonMessage, String[] properties) {
+
+    protected void populateTransportHeaders(HttpCarbonMessage carbonMessage, String[] properties) {
         if (requestedTransportPropertyNames.length > 0) {      //cannot be null according to siddhi impl
             int i = 0;
             for (String property : requestedTransportPropertyNames) {
@@ -106,7 +106,7 @@ public class HttpSourceListener {
         }
     }
 
-    protected void populateTransportProperties(HTTPCarbonMessage carbonMessage, String[] properties) {
+    protected void populateTransportProperties(HttpCarbonMessage carbonMessage, String[] properties) {
         if (requestedTransportPropertyNames.length > 0) {      //cannot be null according to siddhi impl
             int i = 0;
             for (String property : requestedTransportPropertyNames) {
@@ -115,7 +115,7 @@ public class HttpSourceListener {
             }
         }
     }
-    
+
     /**
      * State that current Source Listener is paused or not.
      *
@@ -124,7 +124,7 @@ public class HttpSourceListener {
     boolean isRunning() {
         return !paused;
     }
-    
+
     /**
      * State that current Source Listener is running or not.
      *
@@ -133,7 +133,7 @@ public class HttpSourceListener {
     boolean isPaused() {
         return paused;
     }
-    
+
     /**
      * Pause the execution.
      */
@@ -146,7 +146,7 @@ public class HttpSourceListener {
             lock.unlock();
         }
     }
-    
+
     /**
      * Resume pool execution.
      */
@@ -160,7 +160,7 @@ public class HttpSourceListener {
             lock.unlock();
         }
     }
-    
+
     /**
      * Disconnect pool execution.
      */

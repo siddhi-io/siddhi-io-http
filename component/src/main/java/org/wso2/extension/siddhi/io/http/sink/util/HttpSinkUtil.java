@@ -25,8 +25,8 @@ import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.extension.siddhi.io.http.util.TrpPropertyTypes;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.transport.http.netty.common.Constants;
-import org.wso2.transport.http.netty.config.SenderConfiguration;
+import org.wso2.transport.http.netty.contract.Constants;
+import org.wso2.transport.http.netty.contract.config.SenderConfiguration;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -61,10 +61,10 @@ import static org.wso2.extension.siddhi.io.http.util.HttpIoUtil.populateParamete
  */
 public class HttpSinkUtil {
     private static final Logger log = Logger.getLogger(HttpSinkUtil.class);
-    
+
     private HttpSinkUtil() {
     }
-    
+
     /**
      * Method is responsible for separate publisher url to host,port and context.
      *
@@ -95,7 +95,7 @@ public class HttpSinkUtil {
         }
         return httpStaticProperties;
     }
-    
+
     /**
      * Method is responsible of to convert string of headers to list of headers.
      * Example header format : 'name1:value1','name2:value2'
@@ -125,7 +125,7 @@ public class HttpSinkUtil {
             return null;
         }
     }
-    
+
     /**
      * user can give custom truststore file if user did not give then custom then system read
      * the default values which is in the deployment yaml.
@@ -138,7 +138,7 @@ public class HttpSinkUtil {
         return sinkConfigReader.readConfig(HttpConstants.CLIENT_TRUSTSTORE_PATH,
                 HttpConstants.CLIENT_TRUSTSTORE_PATH_VALUE);
     }
-    
+
     /**
      * user can give custom truststore password if user did not give then custom then system read
      * the default values which is in the deployment yaml.
@@ -151,7 +151,7 @@ public class HttpSinkUtil {
         return sinkConfigReader.readConfig(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD,
                 HttpConstants.CLIENT_TRUSTSTORE_PASSWORD_VALUE);
     }
-    
+
     /**
      * Method is responsible for set sender configuration values .
      *
@@ -178,11 +178,11 @@ public class HttpSinkUtil {
         }
         return httpSender;
     }
-    
+
     private static boolean isHTTPTraceLoggerEnabled(ConfigReader configReader) {
         return Boolean.parseBoolean(configReader.readConfig(HTTP_TRACE_LOG_ENABLED, LOG_TRACE_ENABLE_DEFAULT_VALUE));
     }
-    
+
     /**
      * Method is responsible for set transportation configuration values.
      *
@@ -210,7 +210,7 @@ public class HttpSinkUtil {
         }
         return properties;
     }
-    
+
     /**
      * Responsible of get the content type of payload.
      *
@@ -229,13 +229,13 @@ public class HttpSinkUtil {
         switch (mapType) {
             case HttpConstants.MAP_TEXT:
                 return HttpConstants.TEXT_PLAIN;
-            
+
             case HttpConstants.MAP_XML:
                 return HttpConstants.APPLICATION_XML;
-            
+
             case HttpConstants.MAP_JSON:
                 return HttpConstants.APPLICATION_JSON;
-            
+
             default: {
                 log.info("Invalid payload map type. System support only text," +
                         "Json and XML type hence proceed with default text mapping");
@@ -243,7 +243,7 @@ public class HttpSinkUtil {
             }
         }
     }
-    
+
     /**
      * Get port from listenerUrl.
      *
@@ -259,7 +259,7 @@ public class HttpSinkUtil {
         }
         return aURL.getProtocol();
     }
-    
+
     private static Map<String, Object> populateClientConnectionConfiguration(
             Map<String, String> clientConnectionConfigurationList) {
         Map<String, Object> properties = new HashMap<>();
@@ -285,7 +285,7 @@ public class HttpSinkUtil {
         });
         return properties;
     }
-    
+
     /**
      * This map contains the properties other than String
      *

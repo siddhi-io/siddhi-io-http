@@ -22,31 +22,31 @@ import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
-import org.wso2.transport.http.netty.common.Constants;
-import org.wso2.transport.http.netty.config.TransportsConfiguration;
+import org.wso2.transport.http.netty.contract.Constants;
 import org.wso2.transport.http.netty.contract.HttpClientConnector;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
 import org.wso2.transport.http.netty.contract.ServerConnectorException;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
+import org.wso2.transport.http.netty.contract.config.TransportsConfiguration;
+import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 /**
  * HTTP connector listener for Siddhi.
  */
 public class HTTPConnectorListener implements HttpConnectorListener {
-    
+
     private static final Logger log = LoggerFactory.getLogger(HTTPConnectorListener.class);
     private TransportsConfiguration configuration;
     private HttpClientConnector clientConnector;
-    
+
     public HTTPConnectorListener(TransportsConfiguration configuration) {
         this.configuration = configuration;
     }
-    
+
     public HTTPConnectorListener() {
     }
-    
+
     @Override
-    public void onMessage(HTTPCarbonMessage carbonMessage) {
+    public void onMessage(HttpCarbonMessage carbonMessage) {
         if (isValidRequest(carbonMessage)) {
             //Check the message is a response or direct message
             if (carbonMessage.getProperty(org.wso2.carbon.messaging.Constants.DIRECTION) != null &&
@@ -89,7 +89,7 @@ public class HTTPConnectorListener implements HttpConnectorListener {
         }
     }
 
-    protected boolean isValidRequest(HTTPCarbonMessage carbonMessage) {
+    protected boolean isValidRequest(HttpCarbonMessage carbonMessage) {
 
         return HttpConstants.PROTOCOL_ID.equals(carbonMessage.getProperty(HttpConstants.PROTOCOL)) &&
                 HttpConnectorRegistry.getInstance().getServerConnectorPool().containsKey(getInterface(carbonMessage));
@@ -100,7 +100,7 @@ public class HTTPConnectorListener implements HttpConnectorListener {
         return HttpConnectorRegistry.getInstance().getSourceListenersMap().get(sourceListenerKey.toString());
     }
 
-    protected String getInterface(HTTPCarbonMessage cMsg) {
+    protected String getInterface(HttpCarbonMessage cMsg) {
         String interfaceId = (String) cMsg.getProperty(Constants.LISTENER_INTERFACE_ID);
         if (interfaceId == null) {
             if (log.isDebugEnabled()) {
@@ -108,10 +108,10 @@ public class HTTPConnectorListener implements HttpConnectorListener {
             }
             interfaceId = HttpConstants.DEFAULT_INTERFACE;
         }
-        
+
         return interfaceId;
     }
-    
+
     @Override
     public void onError(Throwable throwable) {
         log.error("Error in http server connector", throwable);

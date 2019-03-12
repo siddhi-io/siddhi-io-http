@@ -192,7 +192,7 @@ public class HttpsSSLSourceTestCase {
             logMessages.add(logEvent.getLevel());
         }
         Assert.assertEquals(logMessages.contains(Level.ERROR), true);
-        Assert.assertEquals(Collections.frequency(logMessages, Level.ERROR), 2);
+        Assert.assertEquals(Collections.frequency(logMessages, Level.ERROR), 4);
         SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
@@ -269,9 +269,9 @@ public class HttpsSSLSourceTestCase {
                 logMessages.add(logEvent.getLevel());
             }
             Assert.assertEquals(logMessages.contains(Level.ERROR), true);
-            Assert.assertEquals(Collections.frequency(logMessages, Level.ERROR), 2);
+            Assert.assertEquals(Collections.frequency(logMessages, Level.ERROR), 4);
             SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
-        } catch (Throwable t) {
+        } catch (InterruptedException t) {
             logger.error(t.getMessage(), t);
         } finally {
             siddhiAppRuntime.shutdown();
@@ -284,7 +284,7 @@ public class HttpsSSLSourceTestCase {
      *
      * @throws Exception Interrupted exception
      */
-    @Test(dependsOnMethods = "testHTTPSInputTransportInvalidKeyStorePass")
+    @Test(enabled = false, dependsOnMethods = "testHTTPSInputTransportInvalidKeyStorePass")
     public void testHTTPSInputTransportInvalidCertPassword() throws Exception {
         final TestAppender appender = new TestAppender();
         final Logger logger = Logger.getRootLogger();

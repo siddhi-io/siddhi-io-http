@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
+import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,7 +52,7 @@ public class HttpResponseConnectorListener implements HttpConnectorListener {
     }
 
     @Override
-    public void onMessage(HTTPCarbonMessage carbonMessage) {
+    public void onMessage(HttpCarbonMessage carbonMessage) {
         String[] properties = new String[trpPropertyNames.length];
         for (int i = 0; i < trpPropertyNames.length; i++) {
             Object property = carbonMessage.getProperty(trpPropertyNames[i]);

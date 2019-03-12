@@ -19,7 +19,7 @@
 package org.wso2.extension.siddhi.io.http.source.exception;
 
 import org.wso2.extension.siddhi.io.http.util.HttpIoUtil;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
+import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 /**
  * HTTP source adaptor specific exception.
@@ -34,7 +34,7 @@ public class HttpSourceAdaptorRuntimeException extends RuntimeException {
         super(message);
     }
 
-    public HttpSourceAdaptorRuntimeException(HTTPCarbonMessage carbonMessage, String message, int code) {
+    public HttpSourceAdaptorRuntimeException(HttpCarbonMessage carbonMessage, String message, int code) {
         super(message);
         HttpIoUtil.handleFailure(carbonMessage, this, code, message);
     }

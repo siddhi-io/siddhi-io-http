@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
-import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
+import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 import org.wso2.transport.http.netty.message.HttpMessageDataStreamer;
 
 import java.io.BufferedReader;
@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
  */
 public class HttpResponseProcessor implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(HttpResponseProcessor.class);
-    private HTTPCarbonMessage carbonMessage;
+    private HttpCarbonMessage carbonMessage;
     private SourceEventListener sourceEventListener;
     private String sinkId;
     private String[] trpProperties;
@@ -52,7 +52,7 @@ public class HttpResponseProcessor implements Runnable {
 
     private String filePath;
 
-    HttpResponseProcessor(HTTPCarbonMessage cMessage, SourceEventListener sourceEventListener, boolean
+    HttpResponseProcessor(HttpCarbonMessage cMessage, SourceEventListener sourceEventListener, boolean
             shouldAllowStreamingResponses, String sinkId, String[] trpProperties) {
         this.carbonMessage = cMessage;
         this.sourceEventListener = sourceEventListener;
@@ -60,7 +60,7 @@ public class HttpResponseProcessor implements Runnable {
         this.trpProperties = trpProperties;
         this.shouldAllowStreamingResponses = shouldAllowStreamingResponses;
     }
-    
+
     @Override
     public void run() {
         int code = carbonMessage.getNettyHttpResponse().status().code() / 100;
@@ -119,7 +119,7 @@ public class HttpResponseProcessor implements Runnable {
         }
     }
 
-    private String writeToTile(HTTPCarbonMessage carbonMessage) {
+    private String writeToTile(HttpCarbonMessage carbonMessage) {
         File file = new File(filePath);
         try (InputStream inputStream = new HttpMessageDataStreamer(carbonMessage).getInputStream();
              OutputStream outputStream = new FileOutputStream(file)) {
