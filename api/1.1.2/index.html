@@ -13,7 +13,7 @@
         <meta name="description" content="Siddhi IO HTTP Extension">
       
       
-        <link rel="canonical" href="https://wso2-extensions.github.io/siddhi-io-http/api/1.0.44/">
+        <link rel="canonical" href="https://wso2-extensions.github.io/siddhi-io-http/api/1.1.2/">
       
       
         <meta name="author" content="WSO2">
@@ -42,7 +42,7 @@
     
     
       
-        <title>1.0.44 - Siddhi IO HTTP</title>
+        <title>1.1.2 - Siddhi IO HTTP</title>
       
     
     
@@ -106,7 +106,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#api-docs-v1044" tabindex="1" class="md-skip">
+      <a href="#api-docs-v112" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -132,7 +132,7 @@
                 Siddhi IO HTTP
               </span>
               <span class="md-header-nav__topic">
-                1.0.44
+                1.1.2
               </span>
             
           
@@ -280,54 +280,6 @@
           
           
 
-
-  <li class="md-nav__item">
-    <a href="../1.1.2/" title="1.1.2" class="md-nav__link">
-      1.1.2
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../1.1.1/" title="1.1.1" class="md-nav__link">
-      1.1.1
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../1.1.0/" title="1.1.0" class="md-nav__link">
-      1.1.0
-    </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../1.0.45/" title="1.0.45" class="md-nav__link">
-      1.0.45
-    </a>
-  </li>
-
-        
-          
-          
-          
-
   
 
 
@@ -339,11 +291,11 @@
     
     
       <label class="md-nav__link md-nav__link--active" for="__toc">
-        1.0.44
+        1.1.2
       </label>
     
-    <a href="./" title="1.0.44" class="md-nav__link md-nav__link--active">
-      1.0.44
+    <a href="./" title="1.1.2" class="md-nav__link md-nav__link--active">
+      1.1.2
     </a>
     
       
@@ -432,6 +384,54 @@
   
 </nav>
     
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../1.1.1/" title="1.1.1" class="md-nav__link">
+      1.1.1
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../1.1.0/" title="1.1.0" class="md-nav__link">
+      1.1.0
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../1.0.45/" title="1.0.45" class="md-nav__link">
+      1.0.45
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../1.0.44/" title="1.0.44" class="md-nav__link">
+      1.0.44
+    </a>
   </li>
 
         
@@ -964,10 +964,10 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/wso2-extensions/siddhi-io-http/edit/master/docs/api/1.0.44.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/wso2-extensions/siddhi-io-http/edit/master/docs/api/1.1.2.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="api-docs-v1044">API Docs - v1.0.44<a class="headerlink" href="#api-docs-v1044" title="Permanent link">&para;</a></h1>
+                <h1 id="api-docs-v112">API Docs - v1.1.2<a class="headerlink" href="#api-docs-v112" title="Permanent link">&para;</a></h1>
 <h2 id="sink">Sink<a class="headerlink" href="#sink" title="Permanent link">&para;</a></h2>
 <h3 id="http-sink">http <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink">(Sink)</a></em><a class="headerlink" href="#http-sink" title="Permanent link">&para;</a></h3>
 <p style="word-wrap: break-word">This extension publish the HTTP events in any HTTP method  POST, GET, PUT, DELETE  via HTTP or https protocols. As the additional features this component can provide basic authentication as well as user can publish events using custom client truststore files when publishing events via https protocol. And also user can add any number of headers including HTTP_METHOD header for each event dynamically.<br>Following content types will be set by default according to the type of sink mapper used.<br>You can override them by setting the new content types in headers.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- TEXT : text/plain<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- XML : application/xml<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- JSON : application/json<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- KEYVALUE : application/x-www-form-urlencoded</p>
@@ -2234,12 +2234,6 @@ define stream FooStream (payloadBody String, messageId string, headers string);
         <td style="vertical-align: top">wso2carbon</td>
         <td style="vertical-align: top">String of keystore password</td>
     </tr>
-    <tr>
-        <td style="vertical-align: top">certPassword</td>
-        <td style="vertical-align: top; word-wrap: break-word">The default cert password.</td>
-        <td style="vertical-align: top">wso2carbon</td>
-        <td style="vertical-align: top">String of cert password</td>
-    </tr>
 </table></p>
 <p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
@@ -2732,7 +2726,7 @@ define stream responseStream4xx(message string);
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../1.0.45/" title="1.0.45" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../.." title="Welcome" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -2741,19 +2735,19 @@ define stream responseStream4xx(message string);
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                1.0.45
+                Welcome
               </span>
             </div>
           </a>
         
         
-          <a href="../1.0.43/" title="1.0.43" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../1.1.1/" title="1.1.1" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                1.0.43
+                1.1.1
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
