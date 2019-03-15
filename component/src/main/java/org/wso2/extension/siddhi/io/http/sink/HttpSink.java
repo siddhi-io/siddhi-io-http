@@ -866,7 +866,6 @@ public class HttpSink extends Sink {
         if (!publisherURLOption.isStatic()) {
             initClientConnector(dynamicOptions);
         }
-        initClientConnector(dynamicOptions);
         String httpMethod = EMPTY_STRING.equals(httpMethodOption.getValue(dynamicOptions)) ?
                 HttpConstants.METHOD_DEFAULT : httpMethodOption.getValue(dynamicOptions);
         String contentType = HttpSinkUtil.getContentType(mapType, headersList);
