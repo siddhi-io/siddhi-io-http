@@ -18,20 +18,20 @@
  */
 package org.wso2.extension.siddhi.io.http.source;
 
+import io.siddhi.core.SiddhiAppRuntime;
+import io.siddhi.core.SiddhiManager;
+import io.siddhi.core.event.Event;
+import io.siddhi.core.query.output.callback.QueryCallback;
+import io.siddhi.core.util.EventPrinter;
+import io.siddhi.core.util.SiddhiTestHelper;
+import io.siddhi.core.util.persistence.InMemoryPersistenceStore;
+import io.siddhi.core.util.persistence.PersistenceStore;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.source.util.HttpTestUtil;
 import org.wso2.extension.siddhi.map.xml.sourcemapper.XmlSourceMapper;
-import org.wso2.siddhi.core.SiddhiAppRuntime;
-import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.query.output.callback.QueryCallback;
-import org.wso2.siddhi.core.util.EventPrinter;
-import org.wso2.siddhi.core.util.SiddhiTestHelper;
-import org.wso2.siddhi.core.util.persistence.InMemoryPersistenceStore;
-import org.wso2.siddhi.core.util.persistence.PersistenceStore;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -46,12 +46,12 @@ public class HttpSourceBasicAuthTestCase {
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;
-    
+
     @BeforeMethod
     public void init() {
         eventCount.set(0);
     }
-    
+
     /**
      * Creating test for publishing events with basic auth false.
      *
@@ -77,7 +77,7 @@ public class HttpSourceBasicAuthTestCase {
         );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-        
+
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -115,7 +115,7 @@ public class HttpSourceBasicAuthTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-    
+
     /**
      * Creating test for publishing events with basic auth false.
      *
@@ -141,7 +141,7 @@ public class HttpSourceBasicAuthTestCase {
         );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-        
+
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -179,7 +179,7 @@ public class HttpSourceBasicAuthTestCase {
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
     }
-    
+
     /**
      * Creating test for publishing events with basic auth is not provided.
      *
@@ -205,7 +205,7 @@ public class HttpSourceBasicAuthTestCase {
         );
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager
                 .createSiddhiAppRuntime(inStreamDefinition + query);
-        
+
         siddhiAppRuntime.addCallback("query", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {

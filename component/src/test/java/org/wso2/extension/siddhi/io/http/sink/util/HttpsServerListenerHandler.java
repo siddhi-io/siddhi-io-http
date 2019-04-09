@@ -46,17 +46,17 @@ public class HttpsServerListenerHandler implements Runnable {
     private int port;
     private KeyStore keyStore;
     private HttpsServer server;
-    
+
     public HttpsServerListenerHandler(int port) throws KeyStoreException {
         this.serverListener = new HttpServerListener();
         this.port = port;
         keyStore = KeyStore.getInstance("JKS");
     }
-    
+
     public HttpServerListener getServerListener() {
         return serverListener;
     }
-    
+
     @Override
     public void run() {
         try {
@@ -95,11 +95,11 @@ public class HttpsServerListenerHandler implements Runnable {
             logger.error("KeyManagementException while trying to up test https server.", e);
         }
     }
-    
+
     public void shutdown() {
         if (server != null) {
             server.stop(1);
         }
-        
+
     }
 }

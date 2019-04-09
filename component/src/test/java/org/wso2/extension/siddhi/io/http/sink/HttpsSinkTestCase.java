@@ -18,15 +18,15 @@
  */
 package org.wso2.extension.siddhi.io.http.sink;
 
+import io.siddhi.core.SiddhiAppRuntime;
+import io.siddhi.core.SiddhiManager;
+import io.siddhi.core.stream.input.InputHandler;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpsServerListenerHandler;
 import org.wso2.extension.siddhi.map.xml.sinkmapper.XMLSinkMapper;
-import org.wso2.siddhi.core.SiddhiAppRuntime;
-import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.stream.input.InputHandler;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,29 +35,29 @@ import java.nio.file.Paths;
  * Https protocol function tests.
  */
 public class HttpsSinkTestCase {
-    private static final Logger logger = Logger.getLogger(HttpsSinkTestCase.class);
     public static final String CARBON_HOME = "carbon.home";
+    private static final Logger logger = Logger.getLogger(HttpsSinkTestCase.class);
     private String payload;
     private String expected;
-    
+
     @BeforeTest
     public void init() {
         payload = "<events>"
-                    + "<event>"
-                        + "<symbol>WSO2</symbol>"
-                        + "<price>55.645</price>"
-                        + "<volume>100</volume>"
-                    + "</event>"
+                + "<event>"
+                + "<symbol>WSO2</symbol>"
+                + "<price>55.645</price>"
+                + "<volume>100</volume>"
+                + "</event>"
                 + "</events>";
         expected = "<events>"
-                    + "<event>"
-                        + "<symbol>WSO2</symbol>"
-                        + "<price>55.645</price>"
-                        + "<volume>100</volume>"
-                    + "</event>"
+                + "<event>"
+                + "<symbol>WSO2</symbol>"
+                + "<price>55.645</price>"
+                + "<volume>100</volume>"
+                + "</event>"
                 + "</events>\n";
     }
-    
+
     /**
      * Test case for HTTP output publisher.
      */
@@ -66,9 +66,9 @@ public class HttpsSinkTestCase {
         carbonHome = Paths.get(carbonHome.toString(), "src", "test");
         System.setProperty(CARBON_HOME, carbonHome.toString());
         logger.info("Carbon Home Absolute path set to: " + carbonHome.toAbsolutePath());
-        
+
     }
-    
+
     /**
      * Test case for HTTPS output publisher.
      */
@@ -96,7 +96,7 @@ public class HttpsSinkTestCase {
         siddhiAppRuntime.start();
         HttpsServerListenerHandler lst = new HttpsServerListenerHandler(8009);
         lst.run();
-        fooStream.send(new Object[] {payload, "POST", "'Name:John','Age:23'"});
+        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -105,7 +105,7 @@ public class HttpsSinkTestCase {
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
-    
+
     /**
      * Test case for HTTPS output publisher.
      */
@@ -134,7 +134,7 @@ public class HttpsSinkTestCase {
         siddhiAppRuntime.start();
         HttpsServerListenerHandler lst = new HttpsServerListenerHandler(8009);
         lst.run();
-        fooStream.send(new Object[] {payload, "POST", "'Name:John','Age:23'"});
+        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -143,6 +143,6 @@ public class HttpsSinkTestCase {
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
-    
+
 }
 

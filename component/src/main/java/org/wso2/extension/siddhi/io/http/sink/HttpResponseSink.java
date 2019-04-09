@@ -18,26 +18,28 @@
  */
 package org.wso2.extension.siddhi.io.http.sink;
 
+import io.siddhi.annotation.Example;
+import io.siddhi.annotation.Extension;
+import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.util.DataType;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.stream.ServiceDeploymentInfo;
+import io.siddhi.core.stream.output.sink.Sink;
+import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.core.util.transport.DynamicOptions;
+import io.siddhi.core.util.transport.Option;
+import io.siddhi.core.util.transport.OptionHolder;
+import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpSinkUtil;
 import org.wso2.extension.siddhi.io.http.util.HTTPSourceRegistry;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
-import org.wso2.siddhi.annotation.Example;
-import org.wso2.siddhi.annotation.Extension;
-import org.wso2.siddhi.annotation.Parameter;
-import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
-import org.wso2.siddhi.core.stream.output.sink.Sink;
-import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.core.util.transport.DynamicOptions;
-import org.wso2.siddhi.core.util.transport.Option;
-import org.wso2.siddhi.core.util.transport.OptionHolder;
-import org.wso2.siddhi.query.api.definition.StreamDefinition;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * {@code HttpResponseSink} Handle the HTTP publishing tasks.
@@ -129,6 +131,16 @@ public class HttpResponseSink extends Sink {
     }
 
     /**
+     * Give information to the deployment about the service exposed by the sink.
+     *
+     * @return ServiceDeploymentInfo  Service related information to the deployment
+     */
+    @Override
+    protected ServiceDeploymentInfo exposedServiceDeploymentInfo() {
+        return null;
+    }
+
+    /**
      * Returns a list of supported dynamic options (that means for each event value of the option can change) by
      * the transport
      *
@@ -150,32 +162,24 @@ public class HttpResponseSink extends Sink {
      * @param optionHolder           Option holder containing static and dynamic configuration related
      *                               to the {@link Sink}
      * @param configReader           to read the sink related system configuration.
-     * @param siddhiAppContext       the context of the {@link org.wso2.siddhi.query.api.SiddhiApp} used to
+     * @param siddhiAppContext       the context of the {@link io.siddhi.query.api.SiddhiApp} used to
      *                               get siddhi related utilty functions.
      */
     @Override
-    protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
-                        ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
+    protected StateFactory init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
+                                ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
         //read configurations
         this.messageIdOption = optionHolder.validateAndGetOption(HttpConstants.MESSAGE_ID);
         this.sourceId = optionHolder.validateAndGetStaticValue(HttpConstants.SOURCE_ID);
         this.httpHeaderOption = optionHolder.getOrCreateOption(HttpConstants.HEADERS, HttpConstants.DEFAULT_HEADER);
         this.mapType = outputStreamDefinition.getAnnotations().get(0).getAnnotations().get(0).getElements().get(0)
                 .getValue();
+        return null;
     }
 
-
-    /**
-     * This method will be called when events need to be published via this sink
-     *
-     * @param payload        payload of the event based on the supported event class exported by the extensions
-     * @param dynamicOptions holds the dynamic options of this sink and Use this object to obtain dynamic options.
-     * @throws ConnectionUnavailableException if end point is unavailable the ConnectionUnavailableException thrown
-     *                                        such that the  system will take care retrying for connection
-     */
     @Override
-    public void publish(Object payload, DynamicOptions dynamicOptions) throws ConnectionUnavailableException {
-
+    public void publish(Object payload, DynamicOptions dynamicOptions, State state)
+            throws ConnectionUnavailableException {
         String headers = httpHeaderOption.getValue(dynamicOptions);
         List<Header> headersList = HttpSinkUtil.getHeaders(headers);
         String messageId = messageIdOption.getValue(dynamicOptions);
@@ -212,30 +216,5 @@ public class HttpResponseSink extends Sink {
     @Override
     public void destroy() {
 
-    }
-
-    /**
-     * Used to collect the serializable state of the processing element, that need to be
-     * persisted for reconstructing the element to the same state on a different point of time
-     * This is also used to identify the internal states and debuging
-     *
-     * @return all internal states should be return as an map with meaning full keys
-     */
-    @Override
-    public Map<String, Object> currentState() {
-        //no current state.
-        return null;
-    }
-
-    /**
-     * Used to restore serialized state of the processing element, for reconstructing
-     * the element to the same state as if was on a previous point of time.
-     *
-     * @param state the stateful objects of the processing element as a map.
-     *              This map will have the  same keys that is created upon calling currentState() method.
-     */
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        //no need to maintain.
     }
 }

@@ -14,7 +14,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>siddhi-io-http-parent</artifactId>
         <groupId>org.wso2.extension.siddhi.io.http</groupId>
@@ -26,7 +27,7 @@
     <artifactId>siddhi-io-http</artifactId>
     <dependencies>
         <dependency>
-            <groupId>org.wso2.siddhi</groupId>
+            <groupId>io.siddhi</groupId>
             <artifactId>siddhi-core</artifactId>
         </dependency>
         <dependency>
@@ -38,15 +39,15 @@
             <artifactId>org.wso2.transport.http.netty</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.siddhi</groupId>
+            <groupId>io.siddhi</groupId>
             <artifactId>siddhi-query-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.siddhi</groupId>
+            <groupId>io.siddhi</groupId>
             <artifactId>siddhi-annotations</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.siddhi</groupId>
+            <groupId>io.siddhi</groupId>
             <artifactId>siddhi-query-compiler</artifactId>
         </dependency>
         <dependency>
@@ -106,7 +107,7 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.wso2.siddhi</groupId>
+                        <groupId>io.siddhi</groupId>
                         <artifactId>siddhi-doc-gen</artifactId>
                         <version>${siddhi.version}</version>
                         <executions>
@@ -136,9 +137,9 @@
                             org.wso2.extension.siddhi.io.http.*
                         </Export-Package>
                         <Import-Package>
-                            org.wso2.siddhi.core.*;version="${siddhi.version.range}",
-                            org.wso2.siddhi.annotation.*;version="${siddhi.version.range}",
-                            org.wso2.siddhi.query.api.*;version="${siddhi.version.range}",
+                            io.siddhi.core.*;version="${siddhi.version.range}",
+                            io.siddhi.annotation.*;version="${siddhi.version.range}",
+                            io.siddhi.query.api.*;version="${siddhi.version.range}",
                             *;resolution:=optional
                         </Import-Package>
                         <Include-Resource>
@@ -197,7 +198,7 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.wso2.siddhi</groupId>
+                <groupId>io.siddhi</groupId>
                 <artifactId>siddhi-doc-gen</artifactId>
                 <version>${siddhi.version}</version>
                 <executions>

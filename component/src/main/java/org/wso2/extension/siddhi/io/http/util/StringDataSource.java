@@ -34,7 +34,7 @@ import java.util.Map;
 public class StringDataSource implements MessageDataSource, Cloneable {
     private String value;
     private OutputStream outputStream;
-    
+
     /**
      * Create a String datasource with a string.
      *
@@ -44,7 +44,7 @@ public class StringDataSource implements MessageDataSource, Cloneable {
         this.value = value;
         this.outputStream = null;
     }
-    
+
     /**
      * Create a String datasource with a string and a target output stream.
      *
@@ -55,45 +55,45 @@ public class StringDataSource implements MessageDataSource, Cloneable {
         this.value = value;
         this.outputStream = outputStream;
     }
-    
+
     public String getValue() {
         return value;
     }
-    
+
     public void setValue(String value) {
         this.value = value;
     }
-    
+
     @Override
     public String getValueAsString(String s) {
         return null;
     }
-    
+
     @Override
     public String getValueAsString(String s, Map<String, String> map) {
         return null;
     }
-    
+
     @Override
     public Object getValue(String s) {
         return null;
     }
-    
+
     @Override
     public Object getDataObject() {
         return null;
     }
-    
+
     @Override
     public String getContentType() {
         return null;
     }
-    
+
     @Override
     public void setContentType(String s) {
-    
+
     }
-    
+
     @Override
     public void serializeData() {
         try {
@@ -104,17 +104,17 @@ public class StringDataSource implements MessageDataSource, Cloneable {
                     " to the output stream", e);
         }
     }
-    
-    
+
+
     public void setOutputStream(OutputStream outputStream) {
         this.outputStream = outputStream;
     }
-    
+
     @Override
     public String getMessageAsString() {
         return this.value;
     }
-    
+
     @Override
     public MessageDataSource clone() throws CloneNotSupportedException {
         super.clone();
