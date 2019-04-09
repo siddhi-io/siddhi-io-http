@@ -441,14 +441,16 @@ public class HttpSource extends Source {
                 .DEFAULT_SOURCE_SCHEME_VALUE);
         //generate default URL
         String defaultURL;
-        int port = Integer.parseInt(configReader.readConfig(HttpConstants.HTTPS_PORT, HttpConstants.HTTPS_PORT_VALUE));
+        int port;
         if (HttpConstants.SCHEME_HTTPS.equals(scheme)) {
+            port = Integer.parseInt(configReader.readConfig(HttpConstants.HTTPS_PORT, HttpConstants.HTTPS_PORT_VALUE));
             defaultURL = HttpConstants.SCHEME_HTTPS + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
                     readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
                     HttpConstants.PORT_HOST_SEPARATOR + port + HttpConstants.
                     PORT_CONTEXT_SEPARATOR + siddhiAppContext.getName()
                     + HttpConstants.PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
         } else {
+            port = Integer.parseInt(configReader.readConfig(HttpConstants.HTTP_PORT, HttpConstants.HTTP_PORT_VALUE));
             defaultURL = HttpConstants.SCHEME_HTTP + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
                     readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
                     HttpConstants.PORT_HOST_SEPARATOR + port + HttpConstants.
