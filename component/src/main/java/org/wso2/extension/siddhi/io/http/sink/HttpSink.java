@@ -26,6 +26,24 @@ import io.netty.handler.codec.http.DefaultLastHttpContent;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
+import io.siddhi.annotation.Example;
+import io.siddhi.annotation.Extension;
+import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.SystemParameter;
+import io.siddhi.annotation.util.DataType;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.exception.SiddhiAppRuntimeException;
+import io.siddhi.core.stream.ServiceDeploymentInfo;
+import io.siddhi.core.stream.output.sink.Sink;
+import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.core.util.transport.DynamicOptions;
+import io.siddhi.core.util.transport.Option;
+import io.siddhi.core.util.transport.OptionHolder;
+import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.extension.siddhi.io.http.sink.exception.HttpSinkAdaptorRuntimeException;
@@ -35,20 +53,6 @@ import org.wso2.extension.siddhi.io.http.sink.updatetoken.HttpsClient;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpSinkUtil;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.extension.siddhi.io.http.util.HttpIoUtil;
-import org.wso2.siddhi.annotation.Example;
-import org.wso2.siddhi.annotation.Extension;
-import org.wso2.siddhi.annotation.Parameter;
-import org.wso2.siddhi.annotation.SystemParameter;
-import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.exception.SiddhiAppRuntimeException;
-import org.wso2.siddhi.core.stream.output.sink.Sink;
-import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.core.util.transport.DynamicOptions;
-import org.wso2.siddhi.core.util.transport.Option;
-import org.wso2.siddhi.core.util.transport.OptionHolder;
-import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.transport.http.netty.contract.Constants;
 import org.wso2.transport.http.netty.contract.HttpClientConnector;
 import org.wso2.transport.http.netty.contract.HttpResponseFuture;
@@ -486,12 +490,12 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
 )
 public class HttpSink extends Sink {
     private static final Logger log = Logger.getLogger(HttpSink.class);
-    private String streamID;
     HttpClientConnector clientConnector;
     String mapType;
-    private Map<String, String> httpURLProperties;
     Option httpHeaderOption;
     Option httpMethodOption;
+    private String streamID;
+    private Map<String, String> httpURLProperties;
     private String consumerKey;
     private String consumerSecret;
     private String authorizationHeader;
@@ -561,12 +565,12 @@ public class HttpSink extends Sink {
      * @param optionHolder           Option holder containing static and dynamic configuration related
      *                               to the {@link Sink}
      * @param configReader           to read the sink related system configuration.
-     * @param siddhiAppContext       the context of the {@link org.wso2.siddhi.query.api.SiddhiApp} used to
+     * @param siddhiAppContext       the context of the {@link io.siddhi.query.api.SiddhiApp} used to
      *                               get siddhi related utilty functions.
      */
     @Override
-    protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
-                        ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
+    protected StateFactory init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
+                                ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
         //read configurations
         this.configReader = configReader;
         this.siddhiAppContext = siddhiAppContext;
@@ -631,17 +635,25 @@ public class HttpSink extends Sink {
         if (publisherURLOption.isStatic()) {
             initClientConnector(null);
         }
+        return null;
     }
 
+    @Override
+    protected ServiceDeploymentInfo exposedServiceDeploymentInfo() {
+        return null;
+    }
 
     /**
-     * This method will be called when events need to be published via this sink
+     * Sending events via output transport
      *
-     * @param payload        payload of the event based on the supported event class exported by the extensions
-     * @param dynamicOptions holds the dynamic options of this sink and Use this object to obtain dynamic options.
+     * @param payload        payload of the event
+     * @param dynamicOptions one of the event constructing the payload
+     * @param state          current state of the sink
+     * @throws ConnectionUnavailableException throw when connections are unavailable.
      */
     @Override
-    public void publish(Object payload, DynamicOptions dynamicOptions) {
+    public void publish(Object payload, DynamicOptions dynamicOptions, State state)
+            throws ConnectionUnavailableException {
         //get the dynamic parameter
         String headers = httpHeaderOption.getValue(dynamicOptions);
         List<Header> headersList = HttpSinkUtil.getHeaders(headers);
@@ -947,31 +959,6 @@ public class HttpSink extends Sink {
             clientConnector = null;
             log.info("Server connector for url " + publisherURL + " disconnected.");
         }
-    }
-
-    /**
-     * Used to collect the serializable state of the processing element, that need to be
-     * persisted for reconstructing the element to the same state on a different point of time
-     * This is also used to identify the internal states and debuging
-     *
-     * @return all internal states should be return as an map with meaning full keys
-     */
-    @Override
-    public Map<String, Object> currentState() {
-        //no current state.
-        return null;
-    }
-
-    /**
-     * Used to restore serialized state of the processing element, for reconstructing
-     * the element to the same state as if was on a previous point of time.
-     *
-     * @param state the stateful objects of the processing element as a map.
-     *              This map will have the  same keys that is created upon calling currentState() method.
-     */
-    @Override
-    public void restoreState(Map<String, Object> state) {
-        //no need to maintain.
     }
 
     /**

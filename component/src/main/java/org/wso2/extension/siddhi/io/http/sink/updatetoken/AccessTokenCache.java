@@ -20,13 +20,14 @@ package org.wso2.extension.siddhi.io.http.sink.updatetoken;
 
 import java.util.HashMap;
 import java.util.Map;
+
 /**
  * {@code AccessTokenCache} Handle the access token caching.
  */
 public class AccessTokenCache {
-    private static Map<String , String> accessToken;
-    private static Map<String , String> refreshToken;
-    private static Map<String , Integer> responseCode;
+    private static Map<String, String> accessToken;
+    private static Map<String, String> refreshToken;
+    private static Map<String, Integer> responseCode;
 
     private static AccessTokenCache accessTokenCache;
 
@@ -74,6 +75,6 @@ public class AccessTokenCache {
     }
 
     public boolean checkRefreshAvailableKey(String value) {
-            return refreshToken.containsKey(value);
+        return refreshToken.containsKey(value);
     }
 }

@@ -18,13 +18,13 @@
  */
 package org.wso2.extension.siddhi.io.http.source;
 
+import io.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.core.util.config.ConfigReader;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
-import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.transport.http.netty.contract.HttpWsConnectorFactory;
 import org.wso2.transport.http.netty.contract.ServerConnector;
 import org.wso2.transport.http.netty.contract.ServerConnectorFuture;
@@ -51,14 +51,33 @@ import static org.wso2.extension.siddhi.io.http.util.HttpIoUtil.populateParamete
  * {@code HttpConnectorRegistry} The code is responsible for maintaining the all active server connectors.
  */
 class HttpConnectorRegistry {
-    private final Logger log = Logger.getLogger(HttpConnectorRegistry.class);
     private static HttpConnectorRegistry instance = new HttpConnectorRegistry();
-    private Map<String, HttpServerConnectorContext> serverConnectorPool = new ConcurrentHashMap<>();
-    private Map<String, HttpSourceListener> sourceListenersMap = new ConcurrentHashMap<>();
+    private final Logger log = Logger.getLogger(HttpConnectorRegistry.class);
     protected TransportsConfiguration trpConfig;
     protected HttpWsConnectorFactory httpConnectorFactory;
+    private Map<String, HttpServerConnectorContext> serverConnectorPool = new ConcurrentHashMap<>();
+    private Map<String, HttpSourceListener> sourceListenersMap = new ConcurrentHashMap<>();
 
     protected HttpConnectorRegistry() {
+    }
+
+    /**
+     * Get HttpConnectorRegistry instance.
+     *
+     * @return HttpConnectorRegistry instance
+     */
+    static HttpConnectorRegistry getInstance() {
+        return instance;
+    }
+
+    private static String getSeverConnectorKey(String listenerUrl) {
+        URL aURL;
+        try {
+            aURL = new URL(listenerUrl);
+        } catch (MalformedURLException e) {
+            throw new SiddhiAppCreationException("Server connector is not in a proper format ", e);
+        }
+        return aURL.getHost() + ":" + String.valueOf(aURL.getPort());
     }
 
     RequestSizeValidationConfig populateRequestSizeValidationConfiguration() {
@@ -91,16 +110,6 @@ class HttpConnectorRegistry {
     }
 
     /**
-     * Get HttpConnectorRegistry instance.
-     *
-     * @return HttpConnectorRegistry instance
-     */
-    static HttpConnectorRegistry getInstance() {
-        return instance;
-    }
-
-
-    /**
      * Get the source listener map.
      *
      * @return the source listener map
@@ -108,7 +117,6 @@ class HttpConnectorRegistry {
     Map<String, HttpSourceListener> getSourceListenersMap() {
         return this.sourceListenersMap;
     }
-
 
     /**
      * Register new source listener.
@@ -268,41 +276,6 @@ class HttpConnectorRegistry {
     }
 
     /**
-     * The server connector context.
-     */
-    private static class HttpServerConnectorContext {
-        private ServerConnector serverConnector;
-        private ListenerConfiguration listenerConfiguration;
-        private int referenceCount = 0;
-
-        public HttpServerConnectorContext(ServerConnector
-                                                  serverConnector, ListenerConfiguration listenerConfiguration) {
-            this.serverConnector = serverConnector;
-            this.listenerConfiguration = listenerConfiguration;
-        }
-
-        public void incrementReferenceCount() {
-            this.referenceCount++;
-        }
-
-        public void decrementReferenceCount() {
-            this.referenceCount--;
-        }
-
-        public ServerConnector getServerConnector() {
-            return this.serverConnector;
-        }
-
-        public ListenerConfiguration getListenerConfiguration() {
-            return this.listenerConfiguration;
-        }
-
-        public int getReferenceCount() {
-            return this.referenceCount;
-        }
-    }
-
-    /**
      * This method wil check that if there is already registered server connectors which may be http but if it have
      * jks security setup then it can be use as https transport as well
      * listener configuration
@@ -355,13 +328,38 @@ class HttpConnectorRegistry {
         }
     }
 
-    private static String getSeverConnectorKey(String listenerUrl) {
-        URL aURL;
-        try {
-            aURL = new URL(listenerUrl);
-        } catch (MalformedURLException e) {
-            throw new SiddhiAppCreationException("Server connector is not in a proper format ", e);
+    /**
+     * The server connector context.
+     */
+    private static class HttpServerConnectorContext {
+        private ServerConnector serverConnector;
+        private ListenerConfiguration listenerConfiguration;
+        private int referenceCount = 0;
+
+        public HttpServerConnectorContext(ServerConnector
+                                                  serverConnector, ListenerConfiguration listenerConfiguration) {
+            this.serverConnector = serverConnector;
+            this.listenerConfiguration = listenerConfiguration;
         }
-        return aURL.getHost() + ":" + String.valueOf(aURL.getPort());
+
+        public void incrementReferenceCount() {
+            this.referenceCount++;
+        }
+
+        public void decrementReferenceCount() {
+            this.referenceCount--;
+        }
+
+        public ServerConnector getServerConnector() {
+            return this.serverConnector;
+        }
+
+        public ListenerConfiguration getListenerConfiguration() {
+            return this.listenerConfiguration;
+        }
+
+        public int getReferenceCount() {
+            return this.referenceCount;
+        }
     }
 }

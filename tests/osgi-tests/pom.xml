@@ -54,7 +54,7 @@
             <artifactId>org.wso2.carbon.caching</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.siddhi</groupId>
+            <groupId>io.siddhi</groupId>
             <artifactId>siddhi-core</artifactId>
         </dependency>
         <dependency>
@@ -312,26 +312,27 @@
                                 <configuration>
                                     <target xmlns:jacoco="antlib:org.jacoco.ant">
                                         <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
-                                            <classpath path="${project.build.directory}" />
+                                            <classpath path="${project.build.directory}"/>
                                         </taskdef>
                                         <!--Report merge is done so as to fix build when tests are skipped -->
-                                        <jacoco:merge destfile="${project.build.directory}/coverage-reports/jacoco.exec">
-                                            <fileset dir="${project.build.directory}" includes="*.exec" />
+                                        <jacoco:merge
+                                                destfile="${project.build.directory}/coverage-reports/jacoco.exec">
+                                            <fileset dir="${project.build.directory}" includes="*.exec"/>
                                         </jacoco:merge>
                                         <!-- OSGi Test coverage only enabled for org.wso2.carbon.stream.core module-->
                                         <jacoco:report>
                                             <executiondata>
-                                                <file file="${project.build.directory}/coverage-reports/jacoco.exec" />
+                                                <file file="${project.build.directory}/coverage-reports/jacoco.exec"/>
                                             </executiondata>
                                             <structure name="HTTP io OSGi Tests">
                                                 <classfiles>
-                                                    <fileset dir="../../component/target/classes" />
+                                                    <fileset dir="../../component/target/classes"/>
                                                 </classfiles>
                                                 <sourcefiles encoding="UTF-8">
-                                                    <fileset dir="../../component/src" />
+                                                    <fileset dir="../../component/src"/>
                                                 </sourcefiles>
                                             </structure>
-                                            <html destdir="${project.build.directory}/coverage-reports" />
+                                            <html destdir="${project.build.directory}/coverage-reports"/>
                                         </jacoco:report>
                                     </target>
                                 </configuration>

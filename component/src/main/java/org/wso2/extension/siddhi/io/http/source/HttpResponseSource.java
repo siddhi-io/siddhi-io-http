@@ -18,21 +18,22 @@
  */
 package org.wso2.extension.siddhi.io.http.source;
 
+import io.siddhi.annotation.Example;
+import io.siddhi.annotation.Extension;
+import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.util.DataType;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.stream.ServiceDeploymentInfo;
+import io.siddhi.core.stream.input.source.Source;
+import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.core.util.transport.OptionHolder;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.http.util.HTTPSourceRegistry;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
-import org.wso2.siddhi.annotation.Example;
-import org.wso2.siddhi.annotation.Extension;
-import org.wso2.siddhi.annotation.Parameter;
-import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
-import org.wso2.siddhi.core.stream.input.source.Source;
-import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
-import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.core.util.transport.OptionHolder;
-
-import java.util.Map;
 
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.DEFAULT_WORKER_COUNT;
 
@@ -100,7 +101,7 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.DEFAULT_WORKE
                                 "as the http.response.code will receive all the responses with 4xx status codes.\n. " +
                                 "Then the body of the response message will be extracted using text mapper and " +
                                 "converted into siddhi events.\n.")}
-        )
+)
 
 public class HttpResponseSource extends Source {
 
@@ -117,9 +118,14 @@ public class HttpResponseSource extends Source {
 
 
     @Override
-    public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
-                     String[] requestedTransportPropertyNames, ConfigReader configReader,
-                     SiddhiAppContext siddhiAppContext) {
+    protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
+        return null;
+    }
+
+    @Override
+    public StateFactory init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
+                             String[] requestedTransportPropertyNames, ConfigReader configReader,
+                             SiddhiAppContext siddhiAppContext) {
 
         this.sourceEventListener = sourceEventListener;
         this.requestedTransportPropertyNames = requestedTransportPropertyNames.clone();
@@ -132,6 +138,7 @@ public class HttpResponseSource extends Source {
                 HttpConstants.DEFAULT_HTTP_SUCCESS_CODE);
         this.shouldAllowStreamingResponses = Boolean.parseBoolean(
                 optionHolder.validateAndGetStaticValue(HttpConstants.ALLOW_STREAMING_RESPONSES, HttpConstants.FALSE));
+        return null;
     }
 
     @Override
@@ -139,8 +146,16 @@ public class HttpResponseSource extends Source {
         return new Class[0];
     }
 
+    /**
+     * Called to connect to the source backend for receiving events
+     *
+     * @param connectionCallback Callback to pass the ConnectionUnavailableException for connection failure after
+     *                           initial successful connection
+     * @param state              current state of the source
+     * @throws ConnectionUnavailableException if it cannot connect to the source backend
+     */
     @Override
-    public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
+    public void connect(ConnectionCallback connectionCallback, State state) throws ConnectionUnavailableException {
         this.httpResponseSourceListener =
                 new HttpResponseConnectorListener(Integer.parseInt(workerThread), sourceEventListener,
                         shouldAllowStreamingResponses, sinkId, requestedTransportPropertyNames, siddhiAppName);
@@ -166,16 +181,6 @@ public class HttpResponseSource extends Source {
 
     @Override
     public void resume() {
-
-    }
-
-    @Override
-    public Map<String, Object> currentState() {
-        return null;
-    }
-
-    @Override
-    public void restoreState(Map<String, Object> map) {
 
     }
 

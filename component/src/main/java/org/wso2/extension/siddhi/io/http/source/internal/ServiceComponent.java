@@ -38,9 +38,11 @@ import org.wso2.carbon.analytics.idp.client.core.api.IdPClient;
 )
 public class ServiceComponent {
     private static final Logger log = Logger.getLogger(ServiceComponent.class);
+
     /**
      * This is the activation method of Http io declarative service. This will be called when its references are
      * satisfied.
+     *
      * @param bundleContext the bundle context instance of this bundle.
      * @throws Exception this will be thrown if an issue occurs while executing the activate method
      */

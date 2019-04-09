@@ -14,7 +14,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>siddhi-io-http-tests</artifactId>
         <groupId>org.wso2.extension.siddhi.io.http</groupId>
@@ -106,7 +107,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.analytics</groupId>
-            <artifactId>org.wso2.siddhi.feature</artifactId>
+            <artifactId>io.siddhi.feature</artifactId>
             <type>zip</type>
         </dependency>
         <dependency>
@@ -265,7 +266,7 @@
                                     <version>${carbon.datasources.version}</version>
                                 </feature>
                                 <feature>
-                                    <id>org.wso2.siddhi.feature</id>
+                                    <id>io.siddhi.feature</id>
                                     <version>${carbon.analytc.version}</version>
                                 </feature>
                                 <feature>
@@ -348,7 +349,7 @@
                                     <version>${carbon.kernel.version}</version>
                                 </feature>
                                 <feature>
-                                    <id>org.wso2.siddhi.feature</id>
+                                    <id>io.siddhi.feature</id>
                                     <version>${carbon.analytc.version}</version>
                                 </feature>
                                 <feature>
@@ -368,8 +369,9 @@
                         <phase>package</phase>
                         <configuration>
                             <tasks>
-                                <replace dir="target/wso2siddhi-io-http-${project.version}/wso2" token="false" value="true">
-                                    <include name="**/bundles.info" />
+                                <replace dir="target/wso2siddhi-io-http-${project.version}/wso2" token="false"
+                                         value="true">
+                                    <include name="**/bundles.info"/>
                                 </replace>
                             </tasks>
                         </configuration>
@@ -382,13 +384,13 @@
                         <phase>install</phase>
                         <configuration>
                             <target>
-                                <delete dir="target/archive-tmp" />
-                                <delete dir="target/dependency-maven-plugin-markers" />
-                                <delete dir="target/org.eclipse.equinox.executable-3.5.0.v20110530-7P7NFUFFLWUl76mart" />
-                                <delete dir="target/p2-repo" />
-                                <delete file="target/tmp" />
-                                <delete dir="target/wso2siddhi-io-http-${project.version}" />
-                                <delete dir="target/antrun" />
+                                <delete dir="target/archive-tmp"/>
+                                <delete dir="target/dependency-maven-plugin-markers"/>
+                                <delete dir="target/org.eclipse.equinox.executable-3.5.0.v20110530-7P7NFUFFLWUl76mart"/>
+                                <delete dir="target/p2-repo"/>
+                                <delete file="target/tmp"/>
+                                <delete dir="target/wso2siddhi-io-http-${project.version}"/>
+                                <delete dir="target/antrun"/>
                             </target>
                         </configuration>
                         <goals>
