@@ -171,11 +171,6 @@
             <groupId>org.wso2.extension.siddhi.map.text</groupId>
             <artifactId>siddhi-map-text</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.exam</groupId>
-            <artifactId>pax-exam-spi</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
     <profiles>
         <profile>

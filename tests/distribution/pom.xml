@@ -105,8 +105,8 @@
             <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>io.siddhi.distribution</groupId>
-            <artifactId>io.siddhi.distribution.siddhi.feature</artifactId>
+            <groupId>io.siddhi</groupId>
+            <artifactId>io.siddhi.feature</artifactId>
             <type>zip</type>
         </dependency>
         <dependency>
@@ -265,8 +265,8 @@
                                     <version>${carbon.datasources.version}</version>
                                 </feature>
                                 <feature>
-                                    <id>io.siddhi.distribution.siddhi.feature</id>
-                                    <version>${siddhi.distribution.version}</version>
+                                    <id>io.siddhi.feature</id>
+                                    <version>${siddhi.version}</version>
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.analytics.idp.client.feature</id>
@@ -348,8 +348,8 @@
                                     <version>${carbon.kernel.version}</version>
                                 </feature>
                                 <feature>
-                                    <id>io.siddhi.distribution.siddhi.feature</id>
-                                    <version>${siddhi.distribution.version}</version>
+                                    <id>io.siddhi.feature</id>
+                                    <version>${siddhi.version}</version>
                                 </feature>
                                 <feature>
                                     <id>org.wso2.carbon.analytics.idp.client.feature</id>
