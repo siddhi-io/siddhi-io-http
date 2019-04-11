@@ -440,7 +440,6 @@ public class HttpSource extends Source {
         siddhiAppName = siddhiAppContext.getName();
         String scheme = configReader.readConfig(HttpConstants.DEFAULT_SOURCE_SCHEME, HttpConstants
                 .DEFAULT_SOURCE_SCHEME_VALUE);
-        isSecured = (scheme.equalsIgnoreCase(HttpConstants.SCHEME_HTTPS));
         //generate default URL
         String defaultURL;
         int port;
@@ -502,6 +501,8 @@ public class HttpSource extends Source {
             this.listenerConfiguration.setRequestSizeValidationConfig(HttpConnectorRegistry.getInstance()
                     .populateRequestSizeValidationConfiguration());
         }
+        isSecured = (scheme.equalsIgnoreCase(HttpConstants.SCHEME_HTTPS));
+        port = listenerConfiguration.getPort();
         listenerConfiguration.setParameters(HttpIoUtil.populateParameters(parameterList));
         serviceDeploymentInfo = new ServiceDeploymentInfo(port, isSecured);
     }
