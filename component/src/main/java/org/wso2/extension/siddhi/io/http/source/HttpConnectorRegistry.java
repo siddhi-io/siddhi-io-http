@@ -25,7 +25,6 @@ import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.transport.http.netty.contract.HttpWsConnectorFactory;
 import org.wso2.transport.http.netty.contract.ServerConnector;
 import org.wso2.transport.http.netty.contract.ServerConnectorFuture;
 import org.wso2.transport.http.netty.contract.config.ListenerConfiguration;
@@ -56,7 +55,7 @@ class HttpConnectorRegistry {
     private Map<String, HttpServerConnectorContext> serverConnectorPool = new ConcurrentHashMap<>();
     private Map<String, HttpSourceListener> sourceListenersMap = new ConcurrentHashMap<>();
     protected TransportsConfiguration trpConfig;
-    protected HttpWsConnectorFactory httpConnectorFactory;
+    protected DefaultHttpWsConnectorFactory httpConnectorFactory;
 
     protected HttpConnectorRegistry() {
     }
@@ -181,11 +180,7 @@ class HttpConnectorRegistry {
     protected void clearBootstrapConfigIfLast() {
         synchronized (this) {
             if ((this.sourceListenersMap.isEmpty()) && (httpConnectorFactory != null)) {
-                try {
-                    httpConnectorFactory.shutdown();
-                } catch (InterruptedException e) {
-                    log.error("Failed to shutdown http connector factory when removing last HTTP source.");
-                }
+                httpConnectorFactory.shutdownNow();
                 this.httpConnectorFactory = null;
             }
         }
