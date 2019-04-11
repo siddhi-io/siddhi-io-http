@@ -501,7 +501,7 @@ public class HttpSource extends Source {
             this.listenerConfiguration.setRequestSizeValidationConfig(HttpConnectorRegistry.getInstance()
                     .populateRequestSizeValidationConfiguration());
         }
-        isSecured = (scheme.equalsIgnoreCase(HttpConstants.SCHEME_HTTPS));
+        isSecured = (listenerConfiguration.getScheme().equalsIgnoreCase(HttpConstants.SCHEME_HTTPS));
         port = listenerConfiguration.getPort();
         listenerConfiguration.setParameters(HttpIoUtil.populateParameters(parameterList));
         serviceDeploymentInfo = new ServiceDeploymentInfo(port, isSecured);
