@@ -33,10 +33,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Test Server Listener Manger.
  */
 public class HttpServerListener implements HttpHandler {
+    private static final Logger logger = Logger.getLogger(HttpServerListener.class);
     private AtomicBoolean isEventArrived = new AtomicBoolean(false);
     private StringBuilder stringBuilder;
     private Headers headers;
-    private static final Logger logger = Logger.getLogger(HttpServerListener.class);
 
     public HttpServerListener() {
     }
@@ -59,7 +59,7 @@ public class HttpServerListener implements HttpHandler {
             logger.info("Event Arrived: " + stringBuilder.toString());
             isEventArrived.set(true);
         } catch (IOException e) {
-           logger.error("Error reading payload from http io test server." , e);
+            logger.error("Error reading payload from http io test server.", e);
         } finally {
             try {
                 if (in != null) {

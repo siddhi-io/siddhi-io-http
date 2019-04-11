@@ -68,7 +68,7 @@ public class HttpOAuthListenerHandler implements Runnable {
         try {
             char[] passphrase = "wso2carbon".toCharArray();
             keyStore.load(new FileInputStream(System.getProperty("carbon.home") +
-                            "/resources/security/wso2carbon.jks"), passphrase);
+                    "/resources/security/wso2carbon.jks"), passphrase);
             KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
             kmf.init(keyStore, passphrase);
             TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
@@ -120,6 +120,7 @@ public class HttpOAuthListenerHandler implements Runnable {
             oauthEndPointServer.stop(1);
         }
     }
+
     public HttpOAuthEndpointListener getHttpOAuthTokenEndpointListener() {
         return httpOAuthEndpointListener;
     }

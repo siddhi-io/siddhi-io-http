@@ -27,22 +27,24 @@ import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
+import io.siddhi.annotation.Example;
+import io.siddhi.annotation.Extension;
+import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.SystemParameter;
+import io.siddhi.annotation.util.DataType;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.core.util.transport.OptionHolder;
 import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.extension.siddhi.io.http.util.HTTPSourceRegistry;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
-import org.wso2.siddhi.annotation.Example;
-import org.wso2.siddhi.annotation.Extension;
-import org.wso2.siddhi.annotation.Parameter;
-import org.wso2.siddhi.annotation.SystemParameter;
-import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
-import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
-import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.core.util.transport.OptionHolder;
 import org.wso2.transport.http.netty.contract.ServerConnectorException;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
@@ -434,26 +436,27 @@ public class HttpRequestSource extends HttpSource {
     private String siddhiAppName;
 
     /**
-     * The initialization method for {@link org.wso2.siddhi.core.stream.input.source.Source}, which will be called
+     * The initialization method for {@link io.siddhi.core.stream.input.source.Source}, which will be called
      * before other methods and validate the all listenerConfiguration and getting the intial values.
      *
      * @param sourceEventListener After receiving events, the source should trigger onEvent() of this listener.
      *                            Listener will then pass on the events to the appropriate mappers for processing .
      * @param optionHolder        Option holder containing static listenerConfiguration related to the
-     *                            {@link org.wso2.siddhi.core.stream.input.source.Source}
-     * @param configReader        to read the {@link org.wso2.siddhi.core.stream.input.source.Source} related system
+     *                            {@link io.siddhi.core.stream.input.source.Source}
+     * @param configReader        to read the {@link io.siddhi.core.stream.input.source.Source} related system
      *                            listenerConfiguration.
-     * @param siddhiAppContext    the context of the {@link org.wso2.siddhi.query.api.SiddhiApp} used to get siddhi
+     * @param siddhiAppContext    the context of the {@link io.siddhi.query.api.SiddhiApp} used to get siddhi
      *                            related utilty functions.
      */
     @Override
-    public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
-                     String[] requestedTransportPropertyNames, ConfigReader configReader,
-                     SiddhiAppContext siddhiAppContext) {
+    public StateFactory init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
+                             String[] requestedTransportPropertyNames, ConfigReader configReader,
+                             SiddhiAppContext siddhiAppContext) {
 
         initSource(sourceEventListener, optionHolder, requestedTransportPropertyNames, configReader, siddhiAppContext);
         initConnectorRegistry(optionHolder, configReader);
         timer = new HashedWheelTimer();
+        return null;
     }
 
     protected void initSource(SourceEventListener sourceEventListener, OptionHolder optionHolder,
@@ -492,15 +495,15 @@ public class HttpRequestSource extends HttpSource {
     }
 
     /**
-     * Initially Called to connect to the end point for start retrieving the messages asynchronisly .
+     * Called to connect to the source backend for receiving events
      *
-     * @param connectionCallback Callback to pass the ConnectionUnavailableException in case of connection failure
-     *                           after initial successful connection(can be used when events are receving
-     *                           asynchronasily)
-     * @throws ConnectionUnavailableException if it cannot connect to the source backend immediately.
+     * @param connectionCallback Callback to pass the ConnectionUnavailableException for connection failure after
+     *                           initial successful connection
+     * @param state              current state of the source
+     * @throws ConnectionUnavailableException if it cannot connect to the source backend
      */
     @Override
-    public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
+    public void connect(ConnectionCallback connectionCallback, State state) throws ConnectionUnavailableException {
         this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration);
         this.httpConnectorRegistry.registerSourceListener(sourceEventListener, listenerUrl,
                 workerThread, isAuth, requestedTransportPropertyNames, sourceId, siddhiAppName);
@@ -524,7 +527,7 @@ public class HttpRequestSource extends HttpSource {
 
     /**
      * Called at the end to clean all the resources consumed by the
-     * {@link org.wso2.siddhi.core.stream.input.source.Source}
+     * {@link io.siddhi.core.stream.input.source.Source}
      */
     @Override
     public void destroy() {

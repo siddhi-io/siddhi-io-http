@@ -18,15 +18,15 @@
  */
 package org.wso2.extension.siddhi.io.http.sink;
 
+import io.siddhi.core.SiddhiAppRuntime;
+import io.siddhi.core.SiddhiManager;
+import io.siddhi.core.stream.input.InputHandler;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpServerListenerHandler;
 import org.wso2.extension.siddhi.map.xml.sinkmapper.XMLSinkMapper;
-import org.wso2.siddhi.core.SiddhiAppRuntime;
-import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.stream.input.InputHandler;
 
 
 /**
@@ -36,7 +36,7 @@ public class HttpSinkMethodTypeTestCase {
     private static final Logger log = Logger.getLogger(HttpSinkMethodTypeTestCase.class);
     private String payload;
     private String expected;
-    
+
     @BeforeTest
     public void init() {
         payload = "<events>"
@@ -54,7 +54,7 @@ public class HttpSinkMethodTypeTestCase {
                 + "</event>"
                 + "</events>\n";
     }
-    
+
     /**
      * Creating test for publishing events from GET method.
      *
@@ -82,7 +82,7 @@ public class HttpSinkMethodTypeTestCase {
         siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[] {payload, "GET", "Name:John,Age:23"});
+        fooStream.send(new Object[]{payload, "GET", "Name:John,Age:23"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -91,7 +91,7 @@ public class HttpSinkMethodTypeTestCase {
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
-    
+
     /**
      * Creating test for publishing events from POST method.
      *
@@ -119,7 +119,7 @@ public class HttpSinkMethodTypeTestCase {
         siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[] {payload, "POST", "Name:John,Age:23"});
+        fooStream.send(new Object[]{payload, "POST", "Name:John,Age:23"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -128,7 +128,7 @@ public class HttpSinkMethodTypeTestCase {
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
-    
+
     /**
      * Creating test for publishing events from PUT method.
      *
@@ -156,7 +156,7 @@ public class HttpSinkMethodTypeTestCase {
         siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[] {payload, "PUT", "Name:John,Age:23"});
+        fooStream.send(new Object[]{payload, "PUT", "Name:John,Age:23"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -165,7 +165,7 @@ public class HttpSinkMethodTypeTestCase {
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
-    
+
     /**
      * Creating test for publishing events from DELETE method.
      *
@@ -176,7 +176,7 @@ public class HttpSinkMethodTypeTestCase {
         log.info("Creating test for publishing events from DELETE method.");
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
-        
+
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
                 + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
                 + "headers='{{headers}}',"
@@ -194,7 +194,7 @@ public class HttpSinkMethodTypeTestCase {
         siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[] {payload, "DELETE", "'Name:John','Age:23'"});
+        fooStream.send(new Object[]{payload, "DELETE", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -203,5 +203,5 @@ public class HttpSinkMethodTypeTestCase {
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
-    
+
 }

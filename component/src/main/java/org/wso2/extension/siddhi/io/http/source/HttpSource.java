@@ -18,25 +18,27 @@
  */
 package org.wso2.extension.siddhi.io.http.source;
 
+import io.siddhi.annotation.Example;
+import io.siddhi.annotation.Extension;
+import io.siddhi.annotation.Parameter;
+import io.siddhi.annotation.SystemParameter;
+import io.siddhi.annotation.util.DataType;
+import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.stream.ServiceDeploymentInfo;
+import io.siddhi.core.stream.input.source.Source;
+import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.snapshot.state.State;
+import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.core.util.transport.OptionHolder;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.extension.siddhi.io.http.util.HttpIoUtil;
-import org.wso2.siddhi.annotation.Example;
-import org.wso2.siddhi.annotation.Extension;
-import org.wso2.siddhi.annotation.Parameter;
-import org.wso2.siddhi.annotation.SystemParameter;
-import org.wso2.siddhi.annotation.util.DataType;
-import org.wso2.siddhi.core.config.SiddhiAppContext;
-import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
-import org.wso2.siddhi.core.stream.input.source.Source;
-import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
-import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.core.util.transport.OptionHolder;
 import org.wso2.transport.http.netty.contract.config.ListenerConfiguration;
 
 import java.util.Locale;
-import java.util.Map;
 
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.DEFAULT_WORKER_COUNT;
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_TIMEOUT_VALUE;
@@ -388,13 +390,15 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_
 public class HttpSource extends Source {
     private static final Logger log = Logger.getLogger(HttpSource.class);
     protected String listenerUrl;
-    private HttpConnectorRegistry httpConnectorRegistry;
     protected Boolean isAuth;
     protected int workerThread;
     protected SourceEventListener sourceEventListener;
     protected String[] requestedTransportPropertyNames;
     protected ListenerConfiguration listenerConfiguration;
+    private HttpConnectorRegistry httpConnectorRegistry;
     private String siddhiAppName;
+    private ServiceDeploymentInfo serviceDeploymentInfo;
+    private boolean isSecured;
 
     /**
      * The initialization method for {@link Source}, which will be called before other methods and validate
@@ -404,16 +408,17 @@ public class HttpSource extends Source {
      *                            Listener will then pass on the events to the appropriate mappers for processing .
      * @param optionHolder        Option holder containing static listenerConfiguration related to the {@link Source}
      * @param configReader        to read the {@link Source} related system listenerConfiguration.
-     * @param siddhiAppContext    the context of the {@link org.wso2.siddhi.query.api.SiddhiApp} used to get siddhi
+     * @param siddhiAppContext    the context of the {@link io.siddhi.query.api.SiddhiApp} used to get siddhi
      *                            related utilty functions.
      */
     @Override
-    public void init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
-                     String[] requestedTransportPropertyNames, ConfigReader configReader,
-                     SiddhiAppContext siddhiAppContext) {
+    public StateFactory init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
+                             String[] requestedTransportPropertyNames, ConfigReader configReader,
+                             SiddhiAppContext siddhiAppContext) {
 
         initSource(sourceEventListener, optionHolder, requestedTransportPropertyNames, configReader, siddhiAppContext);
         initConnectorRegistry(optionHolder, configReader);
+        return null;
     }
 
     protected void initConnectorRegistry(OptionHolder optionHolder, ConfigReader configReader) {
@@ -437,18 +442,19 @@ public class HttpSource extends Source {
                 .DEFAULT_SOURCE_SCHEME_VALUE);
         //generate default URL
         String defaultURL;
+        int port;
         if (HttpConstants.SCHEME_HTTPS.equals(scheme)) {
+            port = Integer.parseInt(configReader.readConfig(HttpConstants.HTTPS_PORT, HttpConstants.HTTPS_PORT_VALUE));
             defaultURL = HttpConstants.SCHEME_HTTPS + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
                     readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
-                    HttpConstants.PORT_HOST_SEPARATOR + configReader.readConfig(HttpConstants.
-                    HTTPS_PORT, HttpConstants.HTTPS_PORT_VALUE) + HttpConstants.
+                    HttpConstants.PORT_HOST_SEPARATOR + port + HttpConstants.
                     PORT_CONTEXT_SEPARATOR + siddhiAppContext.getName()
                     + HttpConstants.PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
         } else {
+            port = Integer.parseInt(configReader.readConfig(HttpConstants.HTTP_PORT, HttpConstants.HTTP_PORT_VALUE));
             defaultURL = HttpConstants.SCHEME_HTTP + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
                     readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
-                    HttpConstants.PORT_HOST_SEPARATOR + configReader.readConfig(HttpConstants.
-                    HTTP_PORT, HttpConstants.HTTP_PORT_VALUE) + HttpConstants.
+                    HttpConstants.PORT_HOST_SEPARATOR + port + HttpConstants.
                     PORT_CONTEXT_SEPARATOR + siddhiAppContext.getName()
                     + HttpConstants.PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
         }
@@ -495,7 +501,15 @@ public class HttpSource extends Source {
             this.listenerConfiguration.setRequestSizeValidationConfig(HttpConnectorRegistry.getInstance()
                     .populateRequestSizeValidationConfiguration());
         }
+        isSecured = (listenerConfiguration.getScheme().equalsIgnoreCase(HttpConstants.SCHEME_HTTPS));
+        port = listenerConfiguration.getPort();
         listenerConfiguration.setParameters(HttpIoUtil.populateParameters(parameterList));
+        serviceDeploymentInfo = new ServiceDeploymentInfo(port, isSecured);
+    }
+
+    @Override
+    protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
+        return serviceDeploymentInfo;
     }
 
     /**
@@ -510,15 +524,15 @@ public class HttpSource extends Source {
     }
 
     /**
-     * Intialy Called to connect to the end point for start  retriving the messages asynchronisly .
+     * Called to connect to the source backend for receiving events
      *
-     * @param connectionCallback Callback to pass the ConnectionUnavailableException in case of connection failure
-     *                           after initial successful connection(can be used when events are receving
-     *                           asynchronasily)
-     * @throws ConnectionUnavailableException if it cannot connect to the source backend immediately.
+     * @param connectionCallback Callback to pass the ConnectionUnavailableException for connection failure after
+     *                           initial successful connection
+     * @param state              current state of the source
+     * @throws ConnectionUnavailableException if it cannot connect to the source backend
      */
     @Override
-    public void connect(ConnectionCallback connectionCallback) throws ConnectionUnavailableException {
+    public void connect(ConnectionCallback connectionCallback, State state) throws ConnectionUnavailableException {
         this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration);
         this.httpConnectorRegistry.registerSourceListener(sourceEventListener, this.listenerUrl,
                 workerThread, isAuth, requestedTransportPropertyNames, siddhiAppName);
@@ -565,26 +579,4 @@ public class HttpSource extends Source {
         }
     }
 
-    /**
-     * Used to collect the serializable state of the processing element, that need to be
-     * persisted for the reconstructing the element to the same state on a different point of time
-     *
-     * @return stateful objects of the processing element as a map
-     */
-    @Override
-    public Map<String, Object> currentState() {
-        //no current state
-        return null;
-    }
-
-    /**
-     * Used to restore serialized state of the processing element, for reconstructing
-     *
-     * @param map stateful objects of the element as a map.
-     *            This is the same map that is created upon calling currentState() method.
-     */
-    @Override
-    public void restoreState(Map<String, Object> map) {
-        // no state to restore
-    }
 }
