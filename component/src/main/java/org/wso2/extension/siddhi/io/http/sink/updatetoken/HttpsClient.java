@@ -47,38 +47,6 @@ public class HttpsClient {
     private AccessTokenCache accessTokenCache = AccessTokenCache.getInstance();
     private Map<String, String> tokenURLProperties;
 
-    private static SenderConfiguration getSenderConfigurationForHttp(String trustStorePath, String trustStorePassword) {
-        SenderConfiguration senderConfiguration = new SenderConfiguration();
-        senderConfiguration.setTrustStoreFile(trustStorePath);
-        senderConfiguration.setTrustStorePass(trustStorePassword);
-        senderConfiguration.setScheme(HTTPS_SCHEME);
-        senderConfiguration.setHostNameVerificationEnabled(false);
-        return senderConfiguration;
-    }
-
-    private static String encodeMessage(Object s) {
-        try {
-            return URLEncoder.encode((String) s, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            LOG.error("Unable to encode the message while generating new access token: " + e);
-            return HttpConstants.EMPTY_STRING;
-        }
-    }
-
-    private static String getPayload(Map<String, String> refreshTokenBody) {
-        return refreshTokenBody.entrySet().stream()
-                .map(p -> encodeMessage(p.getKey()) + "=" + encodeMessage(p.getValue()))
-                .reduce("", (p1, p2) -> p1 + "&" + p2);
-    }
-
-    private static HashMap<String, String> setHeaders(String encodedAuth) {
-        HashMap<String, String> headers = new HashMap<>();
-        headers.put(HttpConstants.AUTHORIZATION_HEADER, encodedAuth);
-        headers.put(HttpConstants.HTTP_CONTENT_TYPE,
-                String.valueOf(HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED));
-        return headers;
-    }
-
     public void getPasswordGrantAccessToken(String tokenUrl, String trustStorePath, String trustStorePassword,
                                             String username, String password, String encodedAuth) {
         tokenURLProperties = HttpSinkUtil.getURLProperties(tokenUrl);
@@ -102,7 +70,7 @@ public class HttpsClient {
         if (statusCode == HttpConstants.SUCCESS_CODE) {
             String accessToken = jsonObject.getString(HttpConstants.ACCESS_TOKEN);
             String newRefreshToken = jsonObject.getString(HttpConstants.REFRESH_TOKEN);
-            accessTokenCache.setAccessToken(encodedAuth, HttpConstants.BEARER + accessToken);
+            accessTokenCache.setAccessToken(encodedAuth,  HttpConstants.BEARER  + accessToken);
             accessTokenCache.setRefreshtoken(encodedAuth, newRefreshToken);
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         } else {
@@ -131,7 +99,7 @@ public class HttpsClient {
         if (statusCode == HttpConstants.SUCCESS_CODE) {
             String accessToken = jsonObject.getString(HttpConstants.ACCESS_TOKEN);
             String newRefreshToken = jsonObject.getString(HttpConstants.REFRESH_TOKEN);
-            accessTokenCache.setAccessToken(encodedAuth, HttpConstants.BEARER + accessToken);
+            accessTokenCache.setAccessToken(encodedAuth,  HttpConstants.BEARER  + accessToken);
             accessTokenCache.setRefreshtoken(encodedAuth, newRefreshToken);
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         } else if (statusCode == HttpConstants.AUTHENTICATION_FAIL_CODE
@@ -166,5 +134,37 @@ public class HttpsClient {
         } else {
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         }
+    }
+
+    private static SenderConfiguration getSenderConfigurationForHttp(String trustStorePath, String trustStorePassword) {
+        SenderConfiguration senderConfiguration = new SenderConfiguration();
+        senderConfiguration.setTrustStoreFile(trustStorePath);
+        senderConfiguration.setTrustStorePass(trustStorePassword);
+        senderConfiguration.setScheme(HTTPS_SCHEME);
+        senderConfiguration.setHostNameVerificationEnabled(false);
+        return senderConfiguration;
+    }
+
+    private static String encodeMessage(Object s) {
+        try {
+            return URLEncoder.encode((String) s, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            LOG.error("Unable to encode the message while generating new access token: " + e);
+            return HttpConstants.EMPTY_STRING;
+        }
+    }
+
+    private static String getPayload(Map<String, String> refreshTokenBody) {
+        return refreshTokenBody.entrySet().stream()
+                .map(p -> encodeMessage(p.getKey()) + "=" + encodeMessage(p.getValue()))
+                .reduce("", (p1, p2) -> p1 + "&" + p2);
+    }
+
+    private static HashMap<String, String> setHeaders(String encodedAuth) {
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put(HttpConstants.AUTHORIZATION_HEADER, encodedAuth);
+        headers.put(HttpConstants.HTTP_CONTENT_TYPE,
+                String.valueOf(HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED));
+        return headers;
     }
 }

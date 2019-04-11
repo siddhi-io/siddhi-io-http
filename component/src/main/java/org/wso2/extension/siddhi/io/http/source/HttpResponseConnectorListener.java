@@ -19,9 +19,9 @@
 
 package org.wso2.extension.siddhi.io.http.source;
 
-import io.siddhi.core.stream.input.source.SourceEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
@@ -74,7 +74,6 @@ public class HttpResponseConnectorListener implements HttpConnectorListener {
 
     /**
      * Returns the siddhi app name
-     *
      * @return siddhi app name
      */
     String getSiddhiAppName() {

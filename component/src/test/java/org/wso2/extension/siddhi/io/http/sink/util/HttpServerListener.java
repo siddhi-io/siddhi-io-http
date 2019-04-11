@@ -34,14 +34,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Test Server Listener Manger.
  */
 public class HttpServerListener implements HttpHandler {
-    private static final Logger logger = Logger.getLogger(HttpServerListener.class);
     private AtomicBoolean isEventArrived = new AtomicBoolean(false);
     private StringBuilder stringBuilder;
     private Headers headers;
-
+    private static final Logger logger = Logger.getLogger(HttpServerListener.class);
+    
     public HttpServerListener() {
     }
-
+    
     @Override
     public void handle(HttpExchange event) throws IOException {
         // Get the paramString form the request
@@ -62,19 +62,19 @@ public class HttpServerListener implements HttpHandler {
         event.close();
         isEventArrived.set(true);
     }
-
+    
     public String getData() {
         String data = stringBuilder.toString();
         isEventArrived = new AtomicBoolean(false);
         return data;
     }
-
+    
     public Headers getHeaders() {
         return headers;
     }
-
+    
     public boolean isMessageArrive() {
         return isEventArrived.get();
     }
-
+    
 }

@@ -18,19 +18,19 @@
  */
 package org.wso2.extension.siddhi.io.http.sink;
 
-import io.siddhi.core.SiddhiAppRuntime;
-import io.siddhi.core.SiddhiManager;
-import io.siddhi.core.event.Event;
-import io.siddhi.core.stream.input.InputHandler;
-import io.siddhi.core.stream.output.StreamCallback;
-import io.siddhi.core.util.EventPrinter;
-import io.siddhi.core.util.SiddhiTestHelper;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpFileServerListenerHandler;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpServerListenerHandler;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
+import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.stream.output.StreamCallback;
+import org.wso2.siddhi.core.util.EventPrinter;
+import org.wso2.siddhi.core.util.SiddhiTestHelper;
 
 import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -72,7 +72,7 @@ public class HttpRequestResponseTestCase {
                         + "insert into BarStream;"
         );
 
-        String payload = "{\"name\":\"wso2\", \"id\":\"1234\"}";
+        String payload =  "{\"name\":\"wso2\", \"id\":\"1234\"}";
         String headers = "'comapny:wso2', country:sl'";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition + query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
@@ -223,7 +223,7 @@ public class HttpRequestResponseTestCase {
 
         SiddhiTestHelper.waitForEvents(1000, 1, eventCount, 1000);
 
-        File file = new File(downloadPath);
+        File file = new File (downloadPath);
         Assert.assertTrue(file != null);
         Assert.assertTrue(file.isFile());
         Assert.assertEquals(file.getName(), "downloadedFile.txt");
@@ -300,7 +300,7 @@ public class HttpRequestResponseTestCase {
 
         SiddhiTestHelper.waitForEvents(1000, 1, eventCount, 1000);
 
-        File file = new File(downloadPath);
+        File file = new File (downloadPath);
         Assert.assertTrue(file != null);
         Assert.assertTrue(file.isFile());
         Assert.assertEquals(file.getName(), "downloadedFile.txt");

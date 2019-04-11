@@ -20,10 +20,11 @@ package org.wso2.extension.siddhi.io.http.source;
 
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.LastHttpContent;
-import io.siddhi.core.stream.input.source.SourceEventListener;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
+import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 import org.wso2.transport.http.netty.message.HttpMessageDataStreamer;
 
@@ -43,11 +44,12 @@ import java.util.stream.Collectors;
  */
 public class HttpResponseProcessor implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(HttpResponseProcessor.class);
-    boolean shouldAllowStreamingResponses;
     private HttpCarbonMessage carbonMessage;
     private SourceEventListener sourceEventListener;
     private String sinkId;
     private String[] trpProperties;
+    boolean shouldAllowStreamingResponses;
+
     private String filePath;
 
     HttpResponseProcessor(HttpCarbonMessage cMessage, SourceEventListener sourceEventListener, boolean

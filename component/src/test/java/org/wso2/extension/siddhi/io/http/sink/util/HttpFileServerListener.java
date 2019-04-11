@@ -21,6 +21,7 @@ package org.wso2.extension.siddhi.io.http.sink.util;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
@@ -35,9 +36,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Test handler for file downloading feature.
  */
 public class HttpFileServerListener implements HttpHandler {
-    private static final Logger logger = Logger.getLogger(HttpFileServerListener.class);
     private AtomicBoolean isEventArrived = new AtomicBoolean(false);
     private Headers headers;
+    private static final Logger logger = Logger.getLogger(HttpFileServerListener.class);
     private String filePath;
     private int expectedStatusCode = 2;
 
@@ -49,7 +50,7 @@ public class HttpFileServerListener implements HttpHandler {
     public HttpFileServerListener(int expectedStatusCode) {
         this.expectedStatusCode = expectedStatusCode;
     }
-
+    
     @Override
     public void handle(HttpExchange event) throws IOException {
         // Get the paramString form the request

@@ -19,15 +19,16 @@
 package org.wso2.extension.siddhi.io.http.sink;
 
 import com.sun.net.httpserver.Headers;
-import io.siddhi.core.SiddhiAppRuntime;
-import io.siddhi.core.SiddhiManager;
-import io.siddhi.core.stream.input.InputHandler;
+
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpServerListenerHandler;
 import org.wso2.extension.siddhi.map.xml.sinkmapper.XMLSinkMapper;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
+import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.core.stream.input.InputHandler;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -41,7 +42,7 @@ public class HttpSinkTestCase {
     private String payload;
     private String expected;
     private AtomicInteger eventCount = new AtomicInteger(0);
-
+    
     @BeforeTest
     public void init() {
         payload = "<events>"
@@ -61,7 +62,7 @@ public class HttpSinkTestCase {
 
         eventCount.set(0);
     }
-
+    
     /**
      * Creating test for publishing events without Content-Type header include.
      *
@@ -89,7 +90,7 @@ public class HttpSinkTestCase {
         siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
+        fooStream.send(new Object[] {payload, "POST", "'Name:John','Age:23'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }
@@ -108,7 +109,7 @@ public class HttpSinkTestCase {
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
-
+    
     /**
      * Creating test for publishing events including Content-Type header at header list.
      *
@@ -135,7 +136,7 @@ public class HttpSinkTestCase {
         siddhiAppRuntime.start();
         HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
         lst.run();
-        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23','Content-Type:text'"});
+        fooStream.send(new Object[] {payload, "POST", "'Name:John','Age:23','Content-Type:text'"});
         while (!lst.getServerListener().isMessageArrive()) {
             Thread.sleep(10);
         }

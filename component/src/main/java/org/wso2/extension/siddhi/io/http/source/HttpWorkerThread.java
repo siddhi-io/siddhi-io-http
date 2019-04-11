@@ -18,11 +18,11 @@
  */
 package org.wso2.extension.siddhi.io.http.source;
 
-import io.siddhi.core.stream.input.source.SourceEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.io.http.source.util.HttpSourceUtil;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
+import org.wso2.siddhi.core.stream.input.source.SourceEventListener;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 import org.wso2.transport.http.netty.message.HttpMessageDataStreamer;
 

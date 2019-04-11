@@ -18,7 +18,7 @@
  */
 package org.wso2.extension.siddhi.io.http.source;
 
-import io.siddhi.core.exception.SiddhiAppCreationException;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,8 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * http-response source.
  */
 class HttpResponseSourceConnectorRegistry {
-    private static HttpResponseSourceConnectorRegistry instance = new HttpResponseSourceConnectorRegistry();
     private Map<String, HttpResponseConnectorListener> sourceListenersMap = new ConcurrentHashMap<>();
+    private static HttpResponseSourceConnectorRegistry instance = new HttpResponseSourceConnectorRegistry();
 
     private HttpResponseSourceConnectorRegistry() {
 
@@ -58,7 +58,7 @@ class HttpResponseSourceConnectorRegistry {
     /**
      * Register new source listener.
      *
-     * @param sinkId the sink id for the source
+     *  @param sinkId   the sink id for the source
      */
     void registerSourceListener(HttpResponseConnectorListener httpResponseSourceListener, String sinkId,
                                 String statusCode) {
@@ -66,14 +66,14 @@ class HttpResponseSourceConnectorRegistry {
                 this.sourceListenersMap.putIfAbsent((sinkId + statusCode), httpResponseSourceListener);
         if (sourceListener != null) {
             throw new SiddhiAppCreationException("There is a connection already established for the source with " +
-                    "sink.id : '" + sinkId + "' and http.status.code : '" + statusCode + "'.");
+                    "sink.id : '" +  sinkId + "' and http.status.code : '" + statusCode + "'.");
         }
     }
 
     /**
      * Unregister the source listener.
      *
-     * @param sinkId        the sink id of the source
+     * @param sinkId   the sink id of the source
      * @param siddhiAppName name of the siddhi app
      */
     void unregisterSourceListener(String sinkId, String statusCode, String siddhiAppName) {

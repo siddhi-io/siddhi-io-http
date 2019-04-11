@@ -25,21 +25,6 @@ import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.DefaultLastHttpContent;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
-import io.siddhi.annotation.Example;
-import io.siddhi.annotation.Extension;
-import io.siddhi.annotation.Parameter;
-import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
-import io.siddhi.core.event.Event;
-import io.siddhi.core.exception.ConnectionUnavailableException;
-import io.siddhi.core.util.config.ConfigReader;
-import io.siddhi.core.util.snapshot.state.State;
-import io.siddhi.core.util.snapshot.state.StateFactory;
-import io.siddhi.core.util.transport.DynamicOptions;
-import io.siddhi.core.util.transport.Option;
-import io.siddhi.core.util.transport.OptionHolder;
-import io.siddhi.query.api.definition.Attribute;
-import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.extension.siddhi.io.http.sink.exception.HttpSinkAdaptorRuntimeException;
@@ -47,6 +32,18 @@ import org.wso2.extension.siddhi.io.http.sink.updatetoken.AccessTokenCache;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpSinkUtil;
 import org.wso2.extension.siddhi.io.http.source.HttpResponseMessageListener;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
+import org.wso2.siddhi.annotation.Example;
+import org.wso2.siddhi.annotation.Extension;
+import org.wso2.siddhi.annotation.Parameter;
+import org.wso2.siddhi.annotation.util.DataType;
+import org.wso2.siddhi.core.config.SiddhiAppContext;
+import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.util.config.ConfigReader;
+import org.wso2.siddhi.core.util.transport.DynamicOptions;
+import org.wso2.siddhi.core.util.transport.Option;
+import org.wso2.siddhi.core.util.transport.OptionHolder;
+import org.wso2.siddhi.query.api.definition.Attribute;
+import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.transport.http.netty.contract.Constants;
 import org.wso2.transport.http.netty.contract.HttpResponseFuture;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
@@ -502,9 +499,9 @@ public class HttpRequestSink extends HttpSink {
     private String tokenURL;
 
     @Override
-    protected StateFactory init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
-                                ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
-        StateFactory stateFactory = super.init(outputStreamDefinition, optionHolder, configReader, siddhiAppContext);
+    protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
+                        ConfigReader configReader, SiddhiAppContext siddhiAppContext) {
+        super.init(outputStreamDefinition, optionHolder, configReader, siddhiAppContext);
         this.outputStreamDefinition = outputStreamDefinition;
         this.sinkId = optionHolder.validateAndGetStaticValue(HttpConstants.SINK_ID);
         this.isDownloadEnabled = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants
@@ -532,7 +529,6 @@ public class HttpRequestSink extends HttpSink {
         } else {
             authType = HttpConstants.NO_AUTH;
         }
-        return stateFactory;
     }
 
     /**
@@ -540,13 +536,10 @@ public class HttpRequestSink extends HttpSink {
      *
      * @param payload        payload of the event based on the supported event class exported by the extensions
      * @param dynamicOptions holds the dynamic options of this sink and Use this object to obtain dynamic options.
-     * @param state          current state of the sink
-     * @throws ConnectionUnavailableException throw when connections are unavailable.
      */
     @Override
-    public void publish(Object payload, DynamicOptions dynamicOptions, State state)
-            throws ConnectionUnavailableException {
-        //get the dynamic parameter
+    public void publish(Object payload, DynamicOptions dynamicOptions) {
+//get the dynamic parameter
         String headers = httpHeaderOption.getValue(dynamicOptions);
         List<Header> headersList = HttpSinkUtil.getHeaders(headers);
         if (publisherURLOption.isStatic()) {

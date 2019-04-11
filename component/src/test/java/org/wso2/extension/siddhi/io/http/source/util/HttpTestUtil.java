@@ -49,14 +49,14 @@ import javax.net.ssl.TrustManagerFactory;
 public class HttpTestUtil {
     private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(HttpTestUtil.class);
     private static final String CARBON_HOME = "carbon.home";
-
+    
     public static void setCarbonHome() {
         Path carbonHome = Paths.get("");
         carbonHome = Paths.get(carbonHome.toString(), "src", "test");
         System.setProperty(CARBON_HOME, carbonHome.toString());
         logger.info("Carbon Home Absolute path set to: " + carbonHome.toAbsolutePath());
     }
-
+    
     public static void httpPublishEvent(String event, URI baseURI, String path,
                                         String methodType) {
         try {
@@ -75,7 +75,7 @@ public class HttpTestUtil {
             HttpServerUtil.handleException(e);
         }
     }
-
+    
     public static void httpPublishEmptyPayload(URI baseURI) {
         try {
             HttpURLConnection urlConn = null;
@@ -94,7 +94,7 @@ public class HttpTestUtil {
             HttpServerUtil.handleException(e);
         }
     }
-
+    
     public static void httpPublishEventDefault(String event, URI baseURI) {
         try {
             HttpURLConnection urlConn = null;
@@ -163,7 +163,7 @@ public class HttpTestUtil {
         }
         return null;
     }
-
+    
     public static void httpsPublishEvent(String event)
             throws KeyManagementException {
         try {

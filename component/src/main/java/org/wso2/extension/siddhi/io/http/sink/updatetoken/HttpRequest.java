@@ -65,10 +65,10 @@ public class HttpRequest {
         HttpResponseFuture responseFuture = httpClientConnector.send(msg);
         responseFuture.setHttpConnectorListener(listener);
         try {
-            boolean latchCount = latch.await(30, TimeUnit.SECONDS);
-            if (!latchCount) {
-                LOG.debug("Time out due to getting new access token. ");
-            }
+           boolean latchCount = latch.await(30, TimeUnit.SECONDS);
+           if (!latchCount) {
+               LOG.debug("Time out due to getting new access token. ");
+           }
         } catch (InterruptedException e) {
             LOG.debug("Time out due to getting new access token. " + e);
         }

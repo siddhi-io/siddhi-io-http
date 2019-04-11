@@ -36,7 +36,7 @@
     </modules>
     <groupId>org.wso2.extension.siddhi.io.http</groupId>
     <artifactId>siddhi-io-http-parent</artifactId>
-    <version>2.0.3-SNAPSHOT</version>
+    <version>1.1.6-SNAPSHOT</version>
     <name>WSO2 Siddhi IO Extension - HTTP IO Aggregator Pom</name>
     <url>http://wso2.org</url>
     <profiles>
@@ -56,22 +56,22 @@
         <dependencies>
             <!--Siddhi Dependencies-->
             <dependency>
-                <groupId>io.siddhi</groupId>
+                <groupId>org.wso2.siddhi</groupId>
                 <artifactId>siddhi-query-api</artifactId>
                 <version>${siddhi.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.siddhi</groupId>
+                <groupId>org.wso2.siddhi</groupId>
                 <artifactId>siddhi-annotations</artifactId>
                 <version>${siddhi.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.siddhi</groupId>
+                <groupId>org.wso2.siddhi</groupId>
                 <artifactId>siddhi-core</artifactId>
                 <version>${siddhi.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.siddhi</groupId>
+                <groupId>org.wso2.siddhi</groupId>
                 <artifactId>siddhi-query-compiler</artifactId>
                 <version>${siddhi.version}</version>
             </dependency>
@@ -96,13 +96,13 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>${commons.lang3.version}</version>
+                <version>3.7</version>
             </dependency>
             <!--Carbon Analytic Dependencies-->
             <dependency>
-                <groupId>io.siddhi</groupId>
-                <artifactId>io.siddhi.feature</artifactId>
-                <version>${siddhi.version}</version>
+                <groupId>org.wso2.carbon.analytics</groupId>
+                <artifactId>org.wso2.siddhi.feature</artifactId>
+                <version>${carbon.analytc.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
@@ -170,9 +170,9 @@
                 <type>zip</type>
             </dependency>
             <!--<dependency>-->
-            <!--<groupId>org.wso2.carbon</groupId>-->
-            <!--<artifactId>org.wso2.carbon.logging</artifactId>-->
-            <!--<version>${carbon.logging.version}</version>-->
+                <!--<groupId>org.wso2.carbon</groupId>-->
+                <!--<artifactId>org.wso2.carbon.logging</artifactId>-->
+                <!--<version>${carbon.logging.version}</version>-->
             <!--</dependency>-->
             <dependency>
                 <groupId>org.wso2.carbon</groupId>
@@ -395,17 +395,17 @@
         <msf4j.version>2.7.0</msf4j.version>
         <org.json.wso2.version>3.0.0.wso2v1</org.json.wso2.version>
         <javax.servlet.version>3.1.0</javax.servlet.version>
-        <siddhi.mapper.json.version>5.0.1</siddhi.mapper.json.version>
-        <siddhi.mapper.text.version>2.0.0</siddhi.mapper.text.version>
-        <siddhi.mapper.xml.version>5.0.0</siddhi.mapper.xml.version>
-        <siddhi.version>5.0.0-m12</siddhi.version>
-        <siddhi.version.range>[5.0.0,6.0.0)</siddhi.version.range>
-        <siddhi.distribution.version>1.0.0-m3</siddhi.distribution.version>
+        <siddhi.mapper.json.version>4.0.31</siddhi.mapper.json.version>
+        <siddhi.mapper.text.version>1.0.22</siddhi.mapper.text.version>
+        <siddhi.mapper.xml.version>4.0.18</siddhi.mapper.xml.version>
+        <siddhi.version>4.4.8</siddhi.version>
+        <siddhi.version.range>[4.0.0,5.0.0)</siddhi.version.range>
         <pax.exam.spi.version>4.10.0</pax.exam.spi.version>
         <carbon.analytics.common.version>6.0.66</carbon.analytics.common.version>
         <commons.collections.version>3.1</commons.collections.version>
         <org.eclipse.osgi.services.version>3.5.100.v20160504-1419</org.eclipse.osgi.services.version>
         <org.ops4j.pax.tipi.version>1.3.0.1</org.ops4j.pax.tipi.version>
+        <carbon.analytc.version>2.0.404</carbon.analytc.version>
         <osgi.test.util.version>5.1.1</osgi.test.util.version>
         <commons.io.version>2.5</commons.io.version>
         <org.apache.commons.version>1.3.2</org.apache.commons.version>
@@ -427,7 +427,6 @@
         <org.wso2.transport.http.version>6.0.288</org.wso2.transport.http.version>
         <org.wso2.transport.http.version.range>[6.0.0,7.0.0)</org.wso2.transport.http.version.range>
         <commons-io.version>2.4.0.wso2v1</commons-io.version>
-        <commons.lang3.version>3.7</commons.lang3.version>
         <json.smart.version>2.1.0.wso2v1</json.smart.version>
         <carbon.touchpoint.version>1.1.0</carbon.touchpoint.version>
         <carbon.securevault.version>5.0.12</carbon.securevault.version>
@@ -437,7 +436,7 @@
         <carbon.kernel.version.range>[5.0.0,6.0.0)</carbon.kernel.version.range>
         <carbon.config.version>2.1.5</carbon.config.version>
         <carbon.config.package.import.version.range>[2.0.0, 3.0.0)</carbon.config.package.import.version.range>
-        <carbon.metrics.version>2.3.2</carbon.metrics.version>
+ 	    <carbon.metrics.version>2.3.2</carbon.metrics.version>
         <carbon.metrics.version.range>[2.0,3)</carbon.metrics.version.range>
         <carbon.deployment.version>5.1.9</carbon.deployment.version>
         <carbon.deployment.version.range>[5.0.0,6.0.0)</carbon.deployment.version.range>

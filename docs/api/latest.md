@@ -1,8 +1,8 @@
-# API Docs - v2.0.2
+# API Docs - v1.1.5
 
 ## Sink
 
-### http *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#sink">(Sink)</a>*
+### http *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink">(Sink)</a>*
 
 <p style="word-wrap: break-word">This extension publish the HTTP events in any HTTP method  POST, GET, PUT, DELETE  via HTTP or https protocols. As the additional features this component can provide basic authentication as well as user can publish events using custom client truststore files when publishing events via https protocol. And also user can add any number of headers including HTTP_METHOD header for each event dynamically.<br>Following content types will be set by default according to the type of sink mapper used.<br>You can override them by setting the new content types in headers.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- TEXT : text/plain<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- XML : application/xml<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- JSON : application/json<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- KEYVALUE : application/x-www-form-urlencoded</p>
 
@@ -424,7 +424,7 @@ define stream FooStream (payloadBody String, method string, headers string);
 ```
 <p style="word-wrap: break-word">If it is xml mapping expected input should be in following format for FooStream:<br>{<br>&lt;events&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;event&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;symbol&gt;WSO2&lt;/symbol&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;price&gt;55.6&lt;/price&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;volume&gt;100&lt;/volume&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/event&gt;<br>&lt;/events&gt;,<br>POST,<br>Content-Length:24#Content-Location:USA#Retry-After:120<br>}<br><br>Above event will generate output as below.<br>~Output http event payload<br>&lt;events&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;event&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;symbol&gt;WSO2&lt;/symbol&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;price&gt;55.6&lt;/price&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;volume&gt;100&lt;/volume&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/event&gt;<br>&lt;/events&gt;<br><br>~Output http event headers<br>Content-Length:24,<br>Content-Location:'USA',<br>Retry-After:120,<br>Content-Type:'application/xml',<br>HTTP_METHOD:'POST',<br><br>~Output http event properties<br>HTTP_METHOD:'POST',<br>HOST:'localhost',<br>PORT:8009,<br>PROTOCOL:'http',<br>TO:'/foo'</p>
 
-### http-request *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#sink">(Sink)</a>*
+### http-request *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink">(Sink)</a>*
 
 <p style="word-wrap: break-word">This extension publish the HTTP events in any HTTP method  POST, GET, PUT, DELETE  via HTTP or https protocols. As the additional features this component can provide basic authentication as well as user can publish events using custom client truststore files when publishing events via https protocol. And also user can add any number of headers including HTTP_METHOD header for each event dynamically.<br>Following content types will be set by default according to the type of sink mapper used.<br>You can override them by setting the new content types in headers.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- TEXT : text/plain<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- XML : application/xml<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- JSON : application/json<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- KEYVALUE : application/x-www-form-urlencoded<br><br>HTTP request sink is correlated with the The HTTP reponse source, through a unique <code>sink.id</code>.It sends the request to the defined url and the response is received by the response source which has the same 'sink.id'.</p>
 
@@ -848,7 +848,7 @@ define stream responseStream4xx(errorMsg string);
 ```
 <p style="word-wrap: break-word">In above example, http-request sink will send a GET request to the publisher url and the requested file will be received as the response by a corresponding http-response source.<br>If the http status code of the response is a successful one (2xx), it will be received by the http-response source which has the http.status.code '2\\d+' and downloaded as a local file. Then the event received to the responseStream2xx will have the headers included in the request and the downloaded file name.<br>If the http status code of the response is a 4xx code, it will be received by the http-response source which has the http.status.code '4\\d+'. Then the event received to the responseStream4xx will have the response message body in text format.</p>
 
-### http-response *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#sink">(Sink)</a>*
+### http-response *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#sink">(Sink)</a>*
 
 <p style="word-wrap: break-word">HTTP response sink is correlated with the The HTTP request source, through a unique <code>source.id</code>, and it send a response to the HTTP request source having the same <code>source.id</code>. The response message can be formatted in <code>text</code>, <code>XML</code> or <code>JSON</code> and can be sent with appropriate headers.</p>
 
@@ -904,7 +904,7 @@ define stream FooStream (payloadBody String, messageId string, headers string);
 
 ## Source
 
-### http *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#source">(Source)</a>*
+### http *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a>*
 
 <p style="word-wrap: break-word">The HTTP source receives POST requests via HTTP or HTTPS in format such as <code>text</code>, <code>XML</code> and <code>JSON</code>. In WSO2 SP, if required, you can enable basic authentication to ensure that events are received only from users who are authorized to access the service.</p>
 
@@ -1286,7 +1286,7 @@ define stream FooStream (symbol string, price float, volume long);
 ```
 <p style="word-wrap: break-word">Above source listenerConfiguration performs a default XML input mapping. The expected input is as follows:<br>&lt;events&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;event&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;symbol&gt;WSO2&lt;/symbol&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;price&gt;55.6&lt;/price&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;volume&gt;100&lt;/volume&gt;<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/event&gt;<br>&lt;/events&gt;<br>If basic authentication is enabled via the <code>basic.auth.enabled='true</code> setting, each input event is also expected to contain the <code>Authorization:'Basic encodeBase64(username:Password)'</code> header.</p>
 
-### http-request *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#source">(Source)</a>*
+### http-request *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a>*
 
 <p style="word-wrap: break-word">The HTTP request is correlated with the HTTP response sink, through a unique <code>source.id</code>, and for each POST requests it receives via HTTP or HTTPS in format such as <code>text</code>, <code>XML</code> and <code>JSON</code> it sends the response via the HTTP response sink. The individual request and response messages are correlated at the sink using the <code>message.id</code> of the events. If required, you can enable basic authentication at the source to ensure that events are received only from users who are authorized to access the service.</p>
 
@@ -1690,7 +1690,7 @@ define stream FooStream (messageId string, symbol string, price float, volume lo
 ```
 <p style="word-wrap: break-word">The expected input is as follows:<br>{"events":<br>&nbsp;&nbsp;&nbsp;&nbsp;{"event":<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"symbol":WSO2,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"price":55.6,<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"volume":100,<br>&nbsp;&nbsp;&nbsp;&nbsp;}<br>}<br>If basic authentication is enabled via the <code>basic.auth.enabled='true</code> setting, each input event is also expected to contain the <code>Authorization:'Basic encodeBase64(username:Password)'</code> header.</p>
 
-### http-response *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#source">(Source)</a>*
+### http-response *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#source">(Source)</a>*
 
 <p style="word-wrap: break-word">The http-response source co-relates with http-request sink  with the parameter 'sink.id'.<br>This receives responses for the requests sent by the http-request sink which has the same sink id.<br>Response messages can be in formats such as TEXT, JSON and XML.<br>In order to handle the responses with different http status codes, user is allowed to defined the acceptable response source code using the parameter 'http.status.code'<br></p>
 

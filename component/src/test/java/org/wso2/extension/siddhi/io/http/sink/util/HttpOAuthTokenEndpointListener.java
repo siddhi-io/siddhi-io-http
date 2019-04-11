@@ -20,7 +20,6 @@ package org.wso2.extension.siddhi.io.http.sink.util;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

@@ -18,13 +18,13 @@
  */
 package org.wso2.extension.siddhi.io.http.sink.util;
 
-import io.siddhi.core.exception.SiddhiAppCreationException;
-import io.siddhi.core.util.config.ConfigReader;
 import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.extension.siddhi.io.http.sink.exception.HttpSinkAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.extension.siddhi.io.http.util.TrpPropertyTypes;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
+import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.transport.http.netty.contract.Constants;
 import org.wso2.transport.http.netty.contract.config.SenderConfiguration;
 
@@ -130,7 +130,8 @@ public class HttpSinkUtil {
      * user can give custom truststore file if user did not give then custom then system read
      * the default values which is in the deployment yaml.
      *
-     * @param sinkConfigReader configuration reader for sink.
+     * @param sinkConfigReader      configuration reader for sink.
+     *
      * @return default trust store file path.
      */
     public static String trustStorePath(ConfigReader sinkConfigReader) {
@@ -142,7 +143,8 @@ public class HttpSinkUtil {
      * user can give custom truststore password if user did not give then custom then system read
      * the default values which is in the deployment yaml.
      *
-     * @param sinkConfigReader configuration reader for sink.
+     * @param sinkConfigReader      configuration reader for sink.
+     *
      * @return default trust password.
      */
     public static String trustStorePassword(ConfigReader sinkConfigReader) {
@@ -153,10 +155,10 @@ public class HttpSinkUtil {
     /**
      * Method is responsible for set sender configuration values .
      *
-     * @param httpStaticProperties the map that url details.
-     * @param clientStoreFile      the client trust store file path.
-     * @param clientStorePass      the client trust store pass path.
-     * @param configReader         configuration reader.
+     * @param httpStaticProperties  the map that url details.
+     * @param clientStoreFile       the client trust store file path.
+     * @param clientStorePass       the client trust store pass path.
+     * @param configReader          configuration reader.
      * @return set of sender configurations.
      */
     public static SenderConfiguration getSenderConfigurations(Map<String, String> httpStaticProperties, String
@@ -184,8 +186,9 @@ public class HttpSinkUtil {
     /**
      * Method is responsible for set transportation configuration values.
      *
-     * @param clientBootstrapConfigurationList client bootstrap configuration list.
-     * @param clientConnectionConfiguration    client connection configuration.
+     * @param clientBootstrapConfigurationList  client bootstrap configuration list.
+     * @param clientConnectionConfiguration     client connection configuration.
+     *
      * @return return the set of config transportation configuration.
      */
     public static Map<String, Object> populateTransportConfiguration(String clientBootstrapConfigurationList, String

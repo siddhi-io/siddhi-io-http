@@ -25,17 +25,17 @@ public class ResponseSourceId {
     private String sinkId;
     private String httpCode;
 
-    public ResponseSourceId(String sinkId, String httpCode) {
-        this.sinkId = sinkId;
-        this.httpCode = httpCode;
-    }
-
     public String getSinkId() {
         return sinkId;
     }
 
     public String getHttpCode() {
         return httpCode;
+    }
+
+    public ResponseSourceId(String sinkId, String httpCode) {
+        this.sinkId = sinkId;
+        this.httpCode = httpCode;
     }
 
     @Override

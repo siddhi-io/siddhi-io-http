@@ -18,13 +18,13 @@
  */
 package org.wso2.extension.siddhi.io.http.source.util;
 
-import io.siddhi.core.exception.SiddhiAppCreationException;
-import io.siddhi.core.util.config.ConfigReader;
 import org.apache.log4j.Logger;
 import org.wso2.extension.siddhi.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.extension.siddhi.io.http.util.HttpIoUtil;
 import org.wso2.extension.siddhi.io.http.util.TrpPropertyTypes;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
+import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.transport.http.netty.contract.config.ListenerConfiguration;
 import org.wso2.transport.http.netty.contract.config.TransportProperty;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
@@ -117,9 +117,9 @@ public class HttpSourceUtil {
 
     /**
      * Method is responsible for set transportation configuration values.
+     * @param serverBootstrapConfigurationList  server bootstrap configuration list
+     * @param transportProperties               transport properties set
      *
-     * @param serverBootstrapConfigurationList server bootstrap configuration list
-     * @param transportProperties              transport properties set
      * @return return the set of config transportation configuration.
      */
     public static Set<TransportProperty> populateBootstrapConfigurations(
@@ -254,7 +254,6 @@ public class HttpSourceUtil {
 
     /**
      * This method handles OPTIONS requests received by the http-source
-     *
      * @param requestMessage OPTIONS request which needs to be handled.
      */
     public static void handleCORS(HttpCarbonMessage requestMessage) {

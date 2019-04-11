@@ -19,6 +19,7 @@
 package org.wso2.extension.siddhi.io.http.sink.util;
 
 import com.sun.net.httpserver.HttpServer;
+
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -42,7 +43,7 @@ public class HttpFileServerListenerHandler implements Runnable {
         this.fileServerListener = new HttpFileServerListener(expectedStatusCode / 100);
         this.port = port;
     }
-
+    
     @Override
     public void run() {
         try {
@@ -53,14 +54,14 @@ public class HttpFileServerListenerHandler implements Runnable {
             logger.error("Error in creating test server.", e);
         }
     }
-
+    
     public void shutdown() {
         if (server != null) {
             logger.info("Shutting down");
             server.stop(1);
         }
     }
-
+    
     public HttpFileServerListener getFileServerListener() {
         return fileServerListener;
     }

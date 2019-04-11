@@ -18,9 +18,6 @@
  */
 package org.wso2.extension.siddhi.io.http.sink;
 
-import io.siddhi.core.SiddhiAppRuntime;
-import io.siddhi.core.SiddhiManager;
-import io.siddhi.core.stream.input.InputHandler;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
@@ -29,6 +26,9 @@ import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpServerListener;
 import org.wso2.extension.siddhi.io.http.sink.util.HttpServerListenerHandler;
 import org.wso2.extension.siddhi.map.xml.sinkmapper.XMLSinkMapper;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
+import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.core.stream.input.InputHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +38,7 @@ import java.util.List;
  */
 public class HttpMultipleEventSinkTestCase {
     private static final Logger logger = Logger.getLogger(HttpMultipleEventSinkTestCase.class);
-
+    
     /**
      * Test cases for multiple event sink synchronously.
      *
@@ -52,7 +52,7 @@ public class HttpMultipleEventSinkTestCase {
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
-
+        
         String inStreamDefinition1 = "Define stream FooStreamA (message String,method String,headers String);"
                 + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}'," +
                 "headers='{{headers}}',"
@@ -64,7 +64,7 @@ public class HttpMultipleEventSinkTestCase {
                 + "select message,method,headers "
                 + "insert into BarStreamA;"
         );
-
+        
         String inStreamDefinition2 = "Define stream FooStreamB (message String,method String,headers String);"
                 + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}'," +
                 "headers='{{headers}}',"
@@ -97,8 +97,8 @@ public class HttpMultipleEventSinkTestCase {
                 + "<volume>100</volume>"
                 + "</event>"
                 + "</events>";
-        fooStream.send(new Object[]{event1, "POST", "'Name:John','Age:23'"});
-        fooStream2.send(new Object[]{event2, "POST", "'Name:John','Age:23'"});
+        fooStream.send(new Object[] {event1, "POST", "'Name:John','Age:23'"});
+        fooStream2.send(new Object[] {event2, "POST", "'Name:John','Age:23'"});
         Thread.sleep(1000);
         final List<LoggingEvent> log = appender.getLog();
         List<String> logMessages = new ArrayList<>();
@@ -111,25 +111,25 @@ public class HttpMultipleEventSinkTestCase {
         siddhiAppRuntime.shutdown();
         lst.shutdown();
     }
-
+    
     private static class TestAppender extends AppenderSkeleton {
-
+        
         private final List<LoggingEvent> log = new ArrayList<>();
-
+        
         @Override
         public boolean requiresLayout() {
             return false;
         }
-
+        
         @Override
         protected void append(final LoggingEvent loggingEvent) {
             log.add(loggingEvent);
         }
-
+        
         @Override
         public void close() {
         }
-
+        
         List<LoggingEvent> getLog() {
             return new ArrayList<>(log);
         }

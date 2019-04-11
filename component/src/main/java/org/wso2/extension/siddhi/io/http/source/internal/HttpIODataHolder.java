@@ -25,9 +25,9 @@ import org.wso2.carbon.analytics.idp.client.core.api.IdPClient;
  * Data holder class for http IO class.
  */
 public class HttpIODataHolder {
-    private static HttpIODataHolder instance = new HttpIODataHolder();
     private IdPClient client;
     private BundleContext bundleContext;
+    private static HttpIODataHolder instance = new HttpIODataHolder();
 
     private HttpIODataHolder() {
     }
