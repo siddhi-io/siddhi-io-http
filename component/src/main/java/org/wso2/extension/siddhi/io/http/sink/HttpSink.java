@@ -52,7 +52,6 @@ import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.transport.http.netty.contract.Constants;
 import org.wso2.transport.http.netty.contract.HttpClientConnector;
 import org.wso2.transport.http.netty.contract.HttpResponseFuture;
-import org.wso2.transport.http.netty.contract.HttpWsConnectorFactory;
 import org.wso2.transport.http.netty.contract.config.ChunkConfig;
 import org.wso2.transport.http.netty.contract.config.ProxyServerConfiguration;
 import org.wso2.transport.http.netty.contract.config.SenderConfiguration;
@@ -526,7 +525,7 @@ public class HttpSink extends Sink {
     private AccessTokenCache accessTokenCache = AccessTokenCache.getInstance();
     private String tokenURL;
 
-    private HttpWsConnectorFactory httpConnectorFactory;
+    private DefaultHttpWsConnectorFactory httpConnectorFactory;
 
     /**
      * Returns the list of classes which this sink can consume.
@@ -927,13 +926,8 @@ public class HttpSink extends Sink {
         }
 
         if (httpConnectorFactory != null) {
-            try {
-                httpConnectorFactory.shutdown();
-                httpConnectorFactory = null;
-            } catch (InterruptedException e) {
-                log.info("Failed to shutdown the http connection factory while shutting down the siddhi app " +
-                        siddhiAppContext.getName());
-            }
+            httpConnectorFactory.shutdownNow();
+            httpConnectorFactory = null;
         }
     }
 
