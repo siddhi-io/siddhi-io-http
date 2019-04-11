@@ -398,6 +398,7 @@ public class HttpSource extends Source {
     private HttpConnectorRegistry httpConnectorRegistry;
     private String siddhiAppName;
     private ServiceDeploymentInfo serviceDeploymentInfo;
+    private boolean isSecured;
 
     /**
      * The initialization method for {@link Source}, which will be called before other methods and validate
@@ -439,6 +440,7 @@ public class HttpSource extends Source {
         siddhiAppName = siddhiAppContext.getName();
         String scheme = configReader.readConfig(HttpConstants.DEFAULT_SOURCE_SCHEME, HttpConstants
                 .DEFAULT_SOURCE_SCHEME_VALUE);
+        isSecured = (scheme.equalsIgnoreCase(HttpConstants.SCHEME_HTTPS));
         //generate default URL
         String defaultURL;
         int port;
@@ -501,7 +503,7 @@ public class HttpSource extends Source {
                     .populateRequestSizeValidationConfiguration());
         }
         listenerConfiguration.setParameters(HttpIoUtil.populateParameters(parameterList));
-        serviceDeploymentInfo = new ServiceDeploymentInfo(port, isAuth);
+        serviceDeploymentInfo = new ServiceDeploymentInfo(port, isSecured);
     }
 
     @Override
