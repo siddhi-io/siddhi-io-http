@@ -100,9 +100,9 @@
             </dependency>
             <!--Carbon Analytic Dependencies-->
             <dependency>
-                <groupId>io.siddhi.distribution</groupId>
-                <artifactId>io.siddhi.distribution.siddhi.feature</artifactId>
-                <version>${siddhi.distribution.version}</version>
+                <groupId>io.siddhi</groupId>
+                <artifactId>io.siddhi.feature</artifactId>
+                <version>${siddhi.version}</version>
                 <type>zip</type>
             </dependency>
             <dependency>
@@ -398,7 +398,7 @@
         <siddhi.mapper.json.version>5.0.1</siddhi.mapper.json.version>
         <siddhi.mapper.text.version>2.0.0</siddhi.mapper.text.version>
         <siddhi.mapper.xml.version>5.0.0</siddhi.mapper.xml.version>
-        <siddhi.version>5.0.0-m11</siddhi.version>
+        <siddhi.version>5.0.0-m12</siddhi.version>
         <siddhi.version.range>[5.0.0,6.0.0)</siddhi.version.range>
         <siddhi.distribution.version>1.0.0-m3</siddhi.distribution.version>
         <pax.exam.spi.version>4.10.0</pax.exam.spi.version>
