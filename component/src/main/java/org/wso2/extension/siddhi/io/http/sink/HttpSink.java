@@ -639,7 +639,7 @@ public class HttpSink extends Sink {
     }
 
     @Override
-    protected ServiceDeploymentInfo exposedServiceDeploymentInfo() {
+    protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
         return null;
     }
 
