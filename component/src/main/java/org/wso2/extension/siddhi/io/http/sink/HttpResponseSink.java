@@ -136,7 +136,7 @@ public class HttpResponseSink extends Sink {
      * @return ServiceDeploymentInfo  Service related information to the deployment
      */
     @Override
-    protected ServiceDeploymentInfo exposedServiceDeploymentInfo() {
+    protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
         return null;
     }
 
