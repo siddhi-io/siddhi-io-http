@@ -413,8 +413,7 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
                 @Parameter(
                         name = "wait.for.response",
                         description = "If this is set to 'true', after sending a request, http-request sink waits " +
-                                "until the it receives the response for that request, " +
-                                "before sending any other request.",
+                                "until it receives the response for that request, before sending any other request.",
                         type = {DataType.BOOL},
                         optional = true,
                         defaultValue = "false"),
