@@ -190,18 +190,13 @@ public class HttpConstants {
     public static final String CLIENT_BOOTSTRAP_CONNECT_TIMEOUT = "client.bootstrap.connect.timeout";
     public static final String CLIENT_BOOTSTRAP_SOCKET_REUSE = "client.bootstrap.socket.reuse";
     public static final String CLIENT_BOOTSTRAP_SOCKET_TIMEOUT = "client.bootstrap.socket.timeout";
-
     public static final String HTTP_TRACE_LOG_ENABLED = "httpTraceLogEnabled";
     public static final String LOG_TRACE_ENABLE_DEFAULT_VALUE = "false";
-
     public static final String DEFAULT_ENCODE_PAYLOAD_VALUE = "false";
-
     public static final String PARAMETER_SEPARATOR = "','";
     public static final String VALUE_SEPARATOR = ":";
-
     public static final String TRUE = "true";
     public static final String FALSE = "false";
-
     public static final String FILE_URL = "file.url";
     public static final String DOWNLOAD_PATH = "download.path";
     public static final String IS_DOWNLOADABLE_CONTENT = "__is_downloadable_content";
@@ -242,4 +237,5 @@ public class HttpConstants {
     public static final String BEARER = "Bearer ";
     public static final String ACCESS_TOKEN = "access_token";
     public static final String REFRESH_TOKEN = "refresh_token";
+    public static final String WAIT_FOR_RESPONSE = "wait.for.response";
 }

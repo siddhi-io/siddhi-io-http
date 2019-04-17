@@ -407,6 +407,14 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = " "),
+                @Parameter(
+                        name = "wait.for.response",
+                        description = "If this is set to 'true', after sending a request, http-request sink waits " +
+                                "until the it receives the response for that request, " +
+                                "before sending any other request.",
+                        type = {DataType.BOOL},
+                        optional = true,
+                        defaultValue = "false"),
         },
         examples = {
                 @Example(syntax =
@@ -497,6 +505,8 @@ public class HttpRequestSink extends HttpSink {
     private AccessTokenCache accessTokenCache = AccessTokenCache.getInstance();
     private String publisherURL;
     private String tokenURL;
+    private boolean waitForResponse;
+    private CountDownLatch responseLatch;
 
     @Override
     protected void init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
@@ -529,6 +539,11 @@ public class HttpRequestSink extends HttpSink {
         } else {
             authType = HttpConstants.NO_AUTH;
         }
+        waitForResponse = Boolean.parseBoolean(
+                optionHolder.validateAndGetStaticValue(HttpConstants.WAIT_FOR_RESPONSE, HttpConstants.FALSE));
+        if (waitForResponse) {
+            responseLatch = new CountDownLatch(1);
+        }
     }
 
     /**
@@ -539,7 +554,7 @@ public class HttpRequestSink extends HttpSink {
      */
     @Override
     public void publish(Object payload, DynamicOptions dynamicOptions) {
-//get the dynamic parameter
+        //get the dynamic parameter
         String headers = httpHeaderOption.getValue(dynamicOptions);
         List<Header> headersList = HttpSinkUtil.getHeaders(headers);
         if (publisherURLOption.isStatic()) {
@@ -705,12 +720,13 @@ public class HttpRequestSink extends HttpSink {
         }
         cMessage.completeMessage();
         HttpResponseFuture httpResponseFuture = clientConnector.send(cMessage);
-        CountDownLatch latch = new CountDownLatch(1);
-        HttpResponseMessageListener httpListener =
-                new HttpResponseMessageListener(getTrpProperties(dynamicOptions), sinkId, isDownloadEnabled, latch,
-                        tryCount, authType);
+        HttpResponseMessageListener httpListener;
+        CountDownLatch latch = waitForResponse ? responseLatch : new CountDownLatch(1);
+        httpListener = new HttpResponseMessageListener(getTrpProperties(dynamicOptions), sinkId,
+                isDownloadEnabled, latch, tryCount, authType, waitForResponse);
         httpResponseFuture.setHttpConnectorListener(httpListener);
-        if (HttpConstants.OAUTH.equals(authType)) {
+
+        if (waitForResponse || HttpConstants.OAUTH.equals(authType)) {
             try {
                 boolean latchCount = latch.await(30, TimeUnit.SECONDS);
                 if (!latchCount) {
@@ -723,6 +739,10 @@ public class HttpRequestSink extends HttpSink {
                 log.debug("Failed to get a response from " + publisherURL + "," + e + ". Message dropped.");
                 throw new HttpSinkAdaptorRuntimeException("Failed to get a response from " +
                         publisherURL + ", " + e + ". Message dropped.");
+            }
+            if (waitForResponse) {
+                responseLatch = new CountDownLatch(1);
+                return HttpConstants.SUCCESS_CODE;
             }
             HttpCarbonMessage response = httpListener.getHttpResponseMessage();
             return response.getNettyHttpResponse().status().code();
