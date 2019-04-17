@@ -410,6 +410,13 @@ import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = " "),
+                @Parameter(
+                        name = "blocking.io",
+                        description = "If this is set to 'true', after sending a request, http-request sink waits " +
+                                "until it receives the response for that request, before sending any other request.",
+                        type = {DataType.BOOL},
+                        optional = true,
+                        defaultValue = "false"),
         },
         examples = {
                 @Example(syntax =
@@ -500,6 +507,8 @@ public class HttpRequestSink extends HttpSink {
     private AccessTokenCache accessTokenCache = AccessTokenCache.getInstance();
     private String publisherURL;
     private String tokenURL;
+    private boolean isBlockingIO;
+    private CountDownLatch responseLatch;
 
     @Override
     protected StateFactory init(StreamDefinition outputStreamDefinition, OptionHolder optionHolder,
@@ -531,6 +540,11 @@ public class HttpRequestSink extends HttpSink {
             authType = HttpConstants.OAUTH;
         } else {
             authType = HttpConstants.NO_AUTH;
+        }
+        isBlockingIO = Boolean.parseBoolean(
+                optionHolder.validateAndGetStaticValue(HttpConstants.BLOCKING_IO, HttpConstants.FALSE));
+        if (isBlockingIO) {
+            responseLatch = new CountDownLatch(1);
         }
         return stateFactory;
     }
@@ -712,12 +726,13 @@ public class HttpRequestSink extends HttpSink {
         }
         cMessage.completeMessage();
         HttpResponseFuture httpResponseFuture = clientConnector.send(cMessage);
-        CountDownLatch latch = new CountDownLatch(1);
-        HttpResponseMessageListener httpListener =
-                new HttpResponseMessageListener(getTrpProperties(dynamicOptions), sinkId, isDownloadEnabled, latch,
-                        tryCount, authType);
+        HttpResponseMessageListener httpListener;
+        CountDownLatch latch = isBlockingIO ? responseLatch : new CountDownLatch(1);
+        httpListener = new HttpResponseMessageListener(getTrpProperties(dynamicOptions), sinkId,
+                isDownloadEnabled, latch, tryCount, authType, isBlockingIO);
         httpResponseFuture.setHttpConnectorListener(httpListener);
-        if (HttpConstants.OAUTH.equals(authType)) {
+
+        if (isBlockingIO || HttpConstants.OAUTH.equals(authType)) {
             try {
                 boolean latchCount = latch.await(30, TimeUnit.SECONDS);
                 if (!latchCount) {
@@ -730,6 +745,10 @@ public class HttpRequestSink extends HttpSink {
                 log.debug("Failed to get a response from " + publisherURL + "," + e + ". Message dropped.");
                 throw new HttpSinkAdaptorRuntimeException("Failed to get a response from " +
                         publisherURL + ", " + e + ". Message dropped.");
+            }
+            if (isBlockingIO) {
+                responseLatch = new CountDownLatch(1);
+                return HttpConstants.SUCCESS_CODE;
             }
             HttpCarbonMessage response = httpListener.getHttpResponseMessage();
             return response.getNettyHttpResponse().status().code();
