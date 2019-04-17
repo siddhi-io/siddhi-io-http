@@ -46,17 +46,17 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
     private CountDownLatch latch;
     private int tryCount;
     private String authType;
-    private boolean waitForResponse;
+    private boolean isBlockingIO;
 
     public HttpResponseMessageListener(Map<String, Object> trpProperties, String sinkId, boolean isDownloadEnabled,
-                                       CountDownLatch latch, int tryCount, String authType, boolean waitForResponse) {
+                                       CountDownLatch latch, int tryCount, String authType, boolean isBlockingIO) {
         this.trpProperties = trpProperties;
         this.isDownloadEnabled = isDownloadEnabled;
         this.sinkId = sinkId;
         this.latch = latch;
         this.tryCount = tryCount;
         this.authType = authType;
-        this.waitForResponse = waitForResponse;
+        this.isBlockingIO = isBlockingIO;
     }
 
     @Override
@@ -78,7 +78,7 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
                         "' has been defined. Hence dropping the response message.");
             }
         }
-        if (waitForResponse || HttpConstants.OAUTH.equals(authType)) {
+        if (isBlockingIO || HttpConstants.OAUTH.equals(authType)) {
             latch.countDown();
         }
     }
