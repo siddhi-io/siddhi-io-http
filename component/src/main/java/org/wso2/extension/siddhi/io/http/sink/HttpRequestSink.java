@@ -546,6 +546,7 @@ public class HttpRequestSink extends HttpSink {
         if (isBlockingIO) {
             responseLatch = new CountDownLatch(1);
         }
+        return stateFactory;
     }
 
     /**
