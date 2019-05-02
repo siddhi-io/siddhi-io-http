@@ -71,7 +71,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.EMPTY_STRING;
-import static org.wso2.extension.siddhi.io.http.util.HttpConstants.PORT_HOST_SEPARATOR;
 import static org.wso2.extension.siddhi.io.http.util.HttpConstants.SOCKET_IDEAL_TIMEOUT_VALUE;
 
 /**
@@ -570,7 +569,7 @@ public class HttpSink extends Sink {
         //read configurations
         this.configReader = configReader;
         this.siddhiAppContext = siddhiAppContext;
-        this.streamID = siddhiAppContext.getName() + PORT_HOST_SEPARATOR + outputStreamDefinition.toString();
+        this.streamID = siddhiAppContext.getName() + ":" + outputStreamDefinition.getId();
         this.mapType = outputStreamDefinition.getAnnotations().get(0).getAnnotations().get(0).getElements().get(0)
                 .getValue();
         this.publisherURLOption = optionHolder.validateAndGetOption(HttpConstants.PUBLISHER_URL);
@@ -906,8 +905,6 @@ public class HttpSink extends Sink {
 
     /**
      * This method will be called before the processing method.
-     * Intention to establish connection to publish event.
-     * such that the  system will take care retrying for connection
      */
     @Override
     public void connect() {
