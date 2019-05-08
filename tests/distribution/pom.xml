@@ -17,7 +17,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>siddhi-io-http-tests</artifactId>
-        <groupId>org.wso2.extension.siddhi.io.http</groupId>
+        <groupId>io.siddhi.extension.io.http</groupId>
         <version>2.0.6-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -157,19 +157,19 @@
                             <artifactItems>
                                 <!--Execution Extensions-->
                                 <artifactItem>
-                                    <groupId>org.wso2.extension.siddhi.io.http</groupId>
+                                    <groupId>io.siddhi.extension.io.http</groupId>
                                     <artifactId>siddhi-io-http</artifactId>
                                     <version>${project.version}</version>
                                     <type>jar</type>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.wso2.extension.siddhi.map.xml</groupId>
+                                    <groupId>io.siddhi.extension.map.xml</groupId>
                                     <artifactId>siddhi-map-xml</artifactId>
                                     <version>${siddhi.mapper.xml.version}</version>
                                     <type>jar</type>
                                 </artifactItem>
                                 <artifactItem>
-                                    <groupId>org.wso2.extension.siddhi.map.text</groupId>
+                                    <groupId>io.siddhi.extension.map.text</groupId>
                                     <artifactId>siddhi-map-text</artifactId>
                                     <version>${siddhi.mapper.text.version}</version>
                                     <type>jar</type>

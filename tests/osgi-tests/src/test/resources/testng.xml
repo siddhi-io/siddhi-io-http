@@ -17,8 +17,8 @@ limitations under the License.
 <suite name="Siddhi-io-http-Test-Suite">
     <test name="Siddhi-io-http-tests" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2.extension.siddhi.io.http.test.osgi.HttpSourceTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.test.osgi.HttpSinkTestCase"/>
+            <class name="io.siddhi.extension.io.http.test.osgi.HttpSourceTestCase"/>
+            <class name="io.siddhi.extension.io.http.test.osgi.HttpSinkTestCase"/>
         </classes>
     </test>
 </suite>

@@ -17,24 +17,24 @@ limitations under the License.
 <suite name="Siddhi-io-http-Test-Suite">
     <test name="Siddhi-io-http-tests" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2.extension.siddhi.io.http.source.HttpBasicTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.source.HttpCustomThreadPoolConfigTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.source.HttpMultipleFormatSourcesTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.source.HttpOrderlyProcessTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.source.HttpSourceBasicAuthTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.source.HttpSourceMappingTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.source.HttpsSSLSourceTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.source.HttpCustomConfigTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.source.HttpSourceConflictsTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.source.HttpSyncRequestResponseTestCase"/>
+            <class name="io.siddhi.extension.io.http.source.HttpBasicTestCase"/>
+            <class name="io.siddhi.extension.io.http.source.HttpCustomThreadPoolConfigTestCase"/>
+            <class name="io.siddhi.extension.io.http.source.HttpMultipleFormatSourcesTestCase"/>
+            <class name="io.siddhi.extension.io.http.source.HttpOrderlyProcessTestCase"/>
+            <class name="io.siddhi.extension.io.http.source.HttpSourceBasicAuthTestCase"/>
+            <class name="io.siddhi.extension.io.http.source.HttpSourceMappingTestCase"/>
+            <class name="io.siddhi.extension.io.http.source.HttpsSSLSourceTestCase"/>
+            <class name="io.siddhi.extension.io.http.source.HttpCustomConfigTestCase"/>
+            <class name="io.siddhi.extension.io.http.source.HttpSourceConflictsTestCase"/>
+            <class name="io.siddhi.extension.io.http.source.HttpSyncRequestResponseTestCase"/>
 
-            <class name="org.wso2.extension.siddhi.io.http.sink.HttpAuthTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.sink.HttpSinkMappingTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.sink.HttpSinkMethodTypeTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.sink.HttpMultipleEventSinkTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.sink.HttpSinkTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.sink.HttpsSinkTestCase"/>
-            <class name="org.wso2.extension.siddhi.io.http.sink.HttpSinkCustomConfigurationTestCase"/>
+            <class name="io.siddhi.extension.io.http.sink.HttpAuthTestCase"/>
+            <class name="io.siddhi.extension.io.http.sink.HttpSinkMappingTestCase"/>
+            <class name="io.siddhi.extension.io.http.sink.HttpSinkMethodTypeTestCase"/>
+            <class name="io.siddhi.extension.io.http.sink.HttpMultipleEventSinkTestCase"/>
+            <class name="io.siddhi.extension.io.http.sink.HttpSinkTestCase"/>
+            <class name="io.siddhi.extension.io.http.sink.HttpsSinkTestCase"/>
+            <class name="io.siddhi.extension.io.http.sink.HttpSinkCustomConfigurationTestCase"/>
 
         </classes>
     </test>
