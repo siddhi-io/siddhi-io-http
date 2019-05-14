@@ -18,7 +18,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>siddhi-io-http-tests</artifactId>
-        <groupId>org.wso2.extension.siddhi.io.http</groupId>
+        <groupId>io.siddhi.extension.io.http</groupId>
         <version>2.0.6-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -146,13 +146,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.extension.siddhi.io.http</groupId>
+            <groupId>io.siddhi.extension.io.http</groupId>
             <artifactId>siddhi-io-http</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.extension.siddhi.io.http</groupId>
+            <groupId>io.siddhi.extension.io.http</groupId>
             <artifactId>org.wso2.extension.io.http.test.distribution</artifactId>
             <version>${project.version}</version>
             <type>zip</type>
@@ -164,11 +164,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.extension.siddhi.map.xml</groupId>
+            <groupId>io.siddhi.extension.map.xml</groupId>
             <artifactId>siddhi-map-xml</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.extension.siddhi.map.text</groupId>
+            <groupId>io.siddhi.extension.map.text</groupId>
             <artifactId>siddhi-map-text</artifactId>
         </dependency>
     </dependencies>
@@ -195,7 +195,7 @@
                                 <configuration>
                                     <artifactItems>
                                         <artifactItem>
-                                            <groupId>org.wso2.extension.siddhi.io.http</groupId>
+                                            <groupId>io.siddhi.extension.io.http</groupId>
                                             <artifactId>org.wso2.extension.io.http.test.distribution</artifactId>
                                             <type>zip</type>
                                             <overWrite>true</overWrite>
@@ -229,7 +229,7 @@
                                 </org.ops4j.pax.url.mvn.localRepository>
                                 <jacoco-agent.destfile>${project.build.directory}/jacoco.exec</jacoco-agent.destfile>
                                 <org.wso2.carbon.test.default.distribution>
-                                    org.wso2.extension.siddhi.io.http:org.wso2.extension.io.http.test.distribution
+                                    io.siddhi.extension.io.http:org.wso2.extension.io.http.test.distribution
                                 </org.wso2.carbon.test.default.distribution>
                                 <org.ops4j.pax.logging.DefaultServiceLog.level>DEBUG
                                 </org.ops4j.pax.logging.DefaultServiceLog.level>

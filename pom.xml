@@ -34,7 +34,7 @@
         <module>tests</module>
         <module>coverage-report</module>
     </modules>
-    <groupId>org.wso2.extension.siddhi.io.http</groupId>
+    <groupId>io.siddhi.extension.io.http</groupId>
     <artifactId>siddhi-io-http-parent</artifactId>
     <version>2.0.6-SNAPSHOT</version>
     <name>WSO2 Siddhi IO Extension - HTTP IO Aggregator Pom</name>
@@ -76,19 +76,19 @@
                 <version>${siddhi.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.extension.siddhi.map.xml</groupId>
+                <groupId>io.siddhi.extension.map.xml</groupId>
                 <artifactId>siddhi-map-xml</artifactId>
                 <version>${siddhi.mapper.xml.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.wso2.extension.siddhi.map.json</groupId>
+                <groupId>io.siddhi.extension.map.json</groupId>
                 <artifactId>siddhi-map-json</artifactId>
                 <version>${siddhi.mapper.json.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.wso2.extension.siddhi.map.text</groupId>
+                <groupId>io.siddhi.extension.map.text</groupId>
                 <artifactId>siddhi-map-text</artifactId>
                 <version>${siddhi.mapper.text.version}</version>
                 <scope>test</scope>
@@ -395,10 +395,10 @@
         <msf4j.version>2.7.0</msf4j.version>
         <org.json.wso2.version>3.0.0.wso2v1</org.json.wso2.version>
         <javax.servlet.version>3.1.0</javax.servlet.version>
-        <siddhi.mapper.json.version>5.0.1</siddhi.mapper.json.version>
-        <siddhi.mapper.text.version>2.0.0</siddhi.mapper.text.version>
-        <siddhi.mapper.xml.version>5.0.0</siddhi.mapper.xml.version>
-        <siddhi.version>5.0.0-m12</siddhi.version>
+        <siddhi.mapper.json.version>5.0.2</siddhi.mapper.json.version>
+        <siddhi.mapper.text.version>2.0.1</siddhi.mapper.text.version>
+        <siddhi.mapper.xml.version>5.0.2</siddhi.mapper.xml.version>
+        <siddhi.version>5.0.0</siddhi.version>
         <siddhi.version.range>[5.0.0,6.0.0)</siddhi.version.range>
         <siddhi.distribution.version>1.0.0-m3</siddhi.distribution.version>
         <pax.exam.spi.version>4.10.0</pax.exam.spi.version>

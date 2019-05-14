@@ -20,12 +20,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>siddhi-io-http-parent</artifactId>
-        <groupId>org.wso2.extension.siddhi.io.http</groupId>
+        <groupId>io.siddhi.extension.io.http</groupId>
         <version>2.0.6-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>org.wso2.extension.siddhi.io.http.coverge.test</artifactId>
+    <artifactId>io.siddhi.extension.io.http.coverge.test</artifactId>
     <name>WSO2 Siddhi IO HTTP - Test Coverage</name>
     <description>Coverage reports Siddhi IO HTTP module</description>
     <url>http://wso2.com</url>
