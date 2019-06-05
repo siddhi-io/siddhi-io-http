@@ -76,6 +76,7 @@ import java.util.concurrent.TimeUnit;
 import static io.siddhi.extension.io.http.util.HttpConstants.EMPTY_STRING;
 import static io.siddhi.extension.io.http.util.HttpConstants.PORT_HOST_SEPARATOR;
 import static io.siddhi.extension.io.http.util.HttpConstants.SOCKET_IDEAL_TIMEOUT_VALUE;
+import static io.siddhi.extension.io.http.util.HttpConstants.TRUE;
 
 /**
  * {@code HttpSink } Handle the HTTP publishing tasks.
@@ -402,6 +403,12 @@ import static io.siddhi.extension.io.http.util.HttpConstants.SOCKET_IDEAL_TIMEOU
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = " "),
+                @Parameter(
+                        name = "hostname.verification.enabled",
+                        description = "To enable hostname verification",
+                        type = {DataType.BOOL},
+                        optional = true,
+                        defaultValue = "true"),
         },
         examples = {
                 @Example(syntax =
@@ -528,6 +535,7 @@ public class HttpSink extends Sink {
     private String authType;
     private AccessTokenCache accessTokenCache = AccessTokenCache.getInstance();
     private String tokenURL;
+    private String hostnameVerificationEnabled;
 
     private DefaultHttpWsConnectorFactory httpConnectorFactory;
 
@@ -619,6 +627,8 @@ public class HttpSink extends Sink {
         bootstrapBoss = configReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_BOSS_GROUP_SIZE, EMPTY_STRING);
         bootstrapClient = configReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_CLIENT_GROUP_SIZE,
                 EMPTY_STRING);
+        hostnameVerificationEnabled = optionHolder.validateAndGetStaticValue(
+                HttpConstants.HOSTNAME_VERIFICATION_ENABLED, TRUE);
         if (!HttpConstants.EMPTY_STRING.equals(userName) && !HttpConstants.EMPTY_STRING.equals(userPassword)) {
             authType = HttpConstants.BASIC_AUTH;
         } else if ((!HttpConstants.EMPTY_STRING.equals(consumerKey)
@@ -1127,6 +1137,9 @@ public class HttpSink extends Sink {
         */
         if (!EMPTY_STRING.equals(parametersList)) {
             senderConfig.setParameters(HttpIoUtil.populateParameters(parametersList));
+        }
+        if (!TRUE.equalsIgnoreCase(hostnameVerificationEnabled)) {
+            senderConfig.setHostNameVerificationEnabled(false);
         }
 
         //overwrite default transport configuration
