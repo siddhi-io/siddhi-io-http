@@ -175,14 +175,7 @@ public class HttpConstants {
     public static final String SERVER_BOOTSTRAP_SOCKET_BACKLOG_PARAM = "server.bootstrap.socket.backlog";
 
     //http source transport properties
-    public static final String CLIENT_CONNECTION_POOL_COUNT = "client.connection.pool.count";
-    public static final String CLIENT_MAX_ACTIVE_CONNECTIONS_PER_POOL = "client.max.active.connections.per.pool";
-    public static final String CLIENT_MIN_IDLE_CONNECTIONS_PER_POOL = "client.min.idle.connections.per.pool";
-    public static final String CLIENT_MAX_IDLE_CONNECTIONS_PER_POOL = "client.max.idle.connections.per.pool";
-    public static final String CLIENT_MIN_EVICTION_IDLE_TIME = "client.min.eviction.idle.time";
-    public static final String SENDER_THREAD_COUNT = "sender.thread.count";
-    public static final String EVENT_GROUP_EXECUTOR_THREAD_SIZE = "event.group.executor.thread.size";
-    public static final String MAX_WAIT_FOR_TRP_CLIENT_CONNECTION_POOL = "max.wait.for.trp.client.connection.pool";
+
     public static final String CLIENT_BOOTSTRAP_NODELAY = "client.bootstrap.nodelay";
     public static final String CLIENT_BOOTSTRAP_KEEPALIVE = "client.bootstrap.keepalive";
     public static final String CLIENT_BOOTSTRAP_SENDBUFFERSIZE = "client.bootstrap.sendbuffersize";
@@ -238,5 +231,27 @@ public class HttpConstants {
     public static final String ACCESS_TOKEN = "access_token";
     public static final String REFRESH_TOKEN = "refresh_token";
     public static final String BLOCKING_IO = "blocking.io";
+
+    //pool configurations
+    public static final String CONNECTION_POOL_COUNT = "connection.pool.count";
+    public static final String DEFAULT_CONNECTION_POOL_COUNT = "0";
+    public static final String MAX_ACTIVE_CONNECTIONS_PER_POOL = "max.active.connections.per.pool";
+    public static final String DEFAULT_MAX_ACTIVE_CONNECTIONS_PER_POOL = "-1"; // unlimited
+    public static final String MIN_IDLE_CONNECTIONS_PER_POOL = "min.idle.connections.per.pool";
+    public static final String DEFAULT_MIN_IDLE_CONNECTIONS_PER_POOL = "0";
+    public static final String MAX_IDLE_CONNECTIONS_PER_POOL = "max.idle.connections.per.pool";
+    public static final String DEFAULT_MAX_IDLE_CONNECTIONS_PER_POOL = "100";
+    public static final String MIN_EVICTABLE_IDLE_TIME = "min.evictable.idle.time";
+    public static final String DEFAULT_MIN_EVICTABLE_IDLE_TIME = "300000";
+    public static final String TIME_BETWEEN_EVICTION_RUNS = "time.between.eviction.runs";
+    public static final String DEFAULT_TIME_BETWEEN_EVICTION_RUNS = "30000";
+    public static final String TEST_ON_BORROW = "test.on.borrow";
+    public static final String DEFAULT_TEST_ON_BORROW = "true";
+    public static final String TEST_WHILE_IDLE = "test.while.idle";
+    public static final String DEFAULT_TEST_WHILE_IDLE = "true";
+    public static final String EXHAUSTED_ACTION = "exhausted.action";
+    public static final String DEFAULT_EXHAUSTED_ACTION = "1"; // block when exhausted
+    public static final String MAX_WAIT_TIME = "max.wait.time";
+    public static final String DEFAULT_MAX_WAIT_TIME = "60000";
     public static final String HOSTNAME_VERIFICATION_ENABLED = "hostname.verification.enabled";
 }
