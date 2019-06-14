@@ -8,7 +8,11 @@
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
+<<<<<<< HEAD
 @sink(type="http", publisher.url="<STRING>", basic.auth.username="<STRING>", basic.auth.password="<STRING>", https.truststore.file="<STRING>", https.truststore.password="<STRING>", headers="<STRING>", method="<STRING>", socket.idle.timeout="<INT>", chunk.disabled="<BOOL>", ssl.protocol="<STRING>", parameters="<STRING>", ciphers="<STRING>", ssl.enabled.protocols="<STRING>", client.enable.session.creation="<STRING>", follow.redirect="<BOOL>", max.redirect.count="<INT>", tls.store.type="<STRING>", proxy.host="<STRING>", proxy.port="<STRING>", proxy.username="<STRING>", proxy.password="<STRING>", client.bootstrap.configuration="<STRING>", client.bootstrap.nodelay="<BOOL>", client.bootstrap.keepalive="<BOOL>", client.bootstrap.sendbuffersize="<INT>", client.bootstrap.recievebuffersize="<INT>", client.bootstrap.connect.timeout="<INT>", client.bootstrap.socket.reuse="<BOOL>", client.bootstrap.socket.timeout="<STRING>", client.threadpool.configurations="<STRING>", client.connection.pool.count="<INT>", client.max.active.connections.per.pool="<INT>", client.min.idle.connections.per.pool="<INT>", client.max.idle.connections.per.pool="<INT>", client.min.eviction.idle.time="<STRING>", sender.thread.count="<STRING>", event.group.executor.thread.size="<STRING>", max.wait.for.client.connection.pool="<STRING>", oauth.username="<STRING>", oauth.password="<STRING>", consumer.key="<STRING>", consumer.secret="<STRING>", refresh.token="<STRING>", token.url="<STRING>", hostname.verification.enabled="<BOOL>", @map(...)))
+=======
+@sink(type="http", publisher.url="<STRING>", basic.auth.username="<STRING>", basic.auth.password="<STRING>", https.truststore.file="<STRING>", https.truststore.password="<STRING>", headers="<STRING>", method="<STRING>", socket.idle.timeout="<INT>", chunk.disabled="<BOOL>", ssl.protocol="<STRING>", parameters="<STRING>", ciphers="<STRING>", ssl.enabled.protocols="<STRING>", client.enable.session.creation="<STRING>", follow.redirect="<BOOL>", max.redirect.count="<INT>", tls.store.type="<STRING>", proxy.host="<STRING>", proxy.port="<STRING>", proxy.username="<STRING>", proxy.password="<STRING>", client.bootstrap.configuration="<STRING>", client.bootstrap.nodelay="<BOOL>", client.bootstrap.keepalive="<BOOL>", client.bootstrap.sendbuffersize="<INT>", client.bootstrap.recievebuffersize="<INT>", client.bootstrap.connect.timeout="<INT>", client.bootstrap.socket.reuse="<BOOL>", client.bootstrap.socket.timeout="<STRING>", connection.pool.count="<INT>", max.active.connections.per.pool="<INT>", min.idle.connections.per.pool="<INT>", max.idle.connections.per.pool="<INT>", min.evictable.idle.time="<STRING>", time.between.eviction.runs="<STRING>", max.wait.time="<STRING>", test.on.borrow="<BOOL>", test.while.idle="<BOOL>", exhausted.action="<INT>", oauth.username="<STRING>", oauth.password="<STRING>", consumer.key="<STRING>", consumer.secret="<STRING>", refresh.token="<STRING>", @map(...)))
+>>>>>>> b3537c3... Introduce pool configuration parameters to HttpSink
 ```
 
 <span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -254,81 +258,89 @@
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">client.threadpool.configurations</td>
-        <td style="vertical-align: top; word-wrap: break-word">Thread pool configuration. Expected format of these parameters is as follows: "'client.connection.pool.count:xxx','client.max.active.connections.per.pool:xxx'"</td>
-        <td style="vertical-align: top">TODO</td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">client.connection.pool.count</td>
-        <td style="vertical-align: top; word-wrap: break-word">Connection pool count.</td>
+        <td style="vertical-align: top">connection.pool.count</td>
+        <td style="vertical-align: top; word-wrap: break-word">Number of connection pools that need to be created for the particular client.</td>
         <td style="vertical-align: top">0</td>
         <td style="vertical-align: top">INT</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">client.max.active.connections.per.pool</td>
-        <td style="vertical-align: top; word-wrap: break-word">Active connections per pool.</td>
+        <td style="vertical-align: top">max.active.connections.per.pool</td>
+        <td style="vertical-align: top; word-wrap: break-word">Maximum possible number of active connection per pool for the client.</td>
         <td style="vertical-align: top">-1</td>
         <td style="vertical-align: top">INT</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">client.min.idle.connections.per.pool</td>
-        <td style="vertical-align: top; word-wrap: break-word">Minimum ideal connection per pool.</td>
+        <td style="vertical-align: top">min.idle.connections.per.pool</td>
+        <td style="vertical-align: top; word-wrap: break-word">Minimum allowed number of idle connections that can be existed in a pool of the client.</td>
         <td style="vertical-align: top">0</td>
         <td style="vertical-align: top">INT</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">client.max.idle.connections.per.pool</td>
-        <td style="vertical-align: top; word-wrap: break-word">Maximum ideal connection per pool.</td>
+        <td style="vertical-align: top">max.idle.connections.per.pool</td>
+        <td style="vertical-align: top; word-wrap: break-word">Maximum number of idle connections that can be existed in a pool of the client.</td>
         <td style="vertical-align: top">100</td>
         <td style="vertical-align: top">INT</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">client.min.eviction.idle.time</td>
-        <td style="vertical-align: top; word-wrap: break-word">Minimum eviction idle time.</td>
-        <td style="vertical-align: top">5 * 60 * 1000</td>
+        <td style="vertical-align: top">min.evictable.idle.time</td>
+        <td style="vertical-align: top; word-wrap: break-word">Minimum amount of time (in milliseconds) a connection may sit idle in the pool before it is eligible for eviction.</td>
+        <td style="vertical-align: top">300000ms</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">sender.thread.count</td>
-        <td style="vertical-align: top; word-wrap: break-word">Http sender thread count.</td>
-        <td style="vertical-align: top">20</td>
+        <td style="vertical-align: top">time.between.eviction.runs</td>
+        <td style="vertical-align: top; word-wrap: break-word">Time between two eviction operations (in miliseconds) on the connection pool</td>
+        <td style="vertical-align: top">30000ms</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">event.group.executor.thread.size</td>
-        <td style="vertical-align: top; word-wrap: break-word">Event group executor thread size.</td>
-        <td style="vertical-align: top">15</td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">max.wait.for.client.connection.pool</td>
-        <td style="vertical-align: top; word-wrap: break-word">Maximum wait for client connection pool.</td>
+        <td style="vertical-align: top">max.wait.time</td>
+        <td style="vertical-align: top; word-wrap: break-word">The maximum number of milliseconds that the pool will wait (when there are no available connections) for a connection to be returned.</td>
         <td style="vertical-align: top">60000</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
+        <td style="vertical-align: top">test.on.borrow</td>
+        <td style="vertical-align: top; word-wrap: break-word">The indication of whether objects will be validated before being borrowed from the pool. If the object validation is failed, it will be dropped from the pool, and will attempt to borrow another.</td>
+        <td style="vertical-align: top">true</td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">test.while.idle</td>
+        <td style="vertical-align: top; word-wrap: break-word">The indication of whether objects will be validated by the idle object evictor (if any). If the object validation is failed, it will be dropped from the pool.</td>
+        <td style="vertical-align: top">true</td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">exhausted.action</td>
+        <td style="vertical-align: top; word-wrap: break-word">Action which should be taken when the maximum number of active connections are being used. This action is indicated as an integer. Possible action are as following.<br>0 - Fail the request when pool is exhausted<br>1 - Block the request when pool is exhausted, until a connection return to the pool<br>2 - Grow the connection pool size when it's exhausted</td>
+        <td style="vertical-align: top">1 (Block when exhausted)</td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
         <td style="vertical-align: top">oauth.username</td>
         <td style="vertical-align: top; word-wrap: break-word">The username to be included in the authentication header of the oauth authentication enabled events. It is required to specify both username and password to enable oauth authentication. If one of the parameter is not given by user then an error is logged in the CLI. It is only applicable for for Oauth requests </td>
-        <td style="vertical-align: top"> </td>
+        <td style="vertical-align: top">NONE</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
@@ -336,7 +348,7 @@
     <tr>
         <td style="vertical-align: top">oauth.password</td>
         <td style="vertical-align: top; word-wrap: break-word">The password to be included in the authentication header of the oauth authentication enabled events. It is required to specify both username and password to enable oauth authentication. If one of the parameter is not given by user then an error is logged in the CLI. It is only applicable for for Oauth requests </td>
-        <td style="vertical-align: top"> </td>
+        <td style="vertical-align: top">NONE</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
@@ -344,7 +356,7 @@
     <tr>
         <td style="vertical-align: top">consumer.key</td>
         <td style="vertical-align: top; word-wrap: break-word">consumer key for the Http request. It is only applicable for for Oauth requests</td>
-        <td style="vertical-align: top"> </td>
+        <td style="vertical-align: top">NONE</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
@@ -352,7 +364,7 @@
     <tr>
         <td style="vertical-align: top">consumer.secret</td>
         <td style="vertical-align: top; word-wrap: break-word">consumer secret for the Http request. It is only applicable for for Oauth requests</td>
-        <td style="vertical-align: top"> </td>
+        <td style="vertical-align: top">NONE</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
@@ -360,15 +372,7 @@
     <tr>
         <td style="vertical-align: top">refresh.token</td>
         <td style="vertical-align: top; word-wrap: break-word">refresh token for the Http request. It is only applicable for for Oauth requests</td>
-        <td style="vertical-align: top"> </td>
-        <td style="vertical-align: top">STRING</td>
-        <td style="vertical-align: top">Yes</td>
-        <td style="vertical-align: top">No</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">token.url</td>
-        <td style="vertical-align: top; word-wrap: break-word">token url for generate a new access token. It is only applicable for for Oauth requests</td>
-        <td style="vertical-align: top"> </td>
+        <td style="vertical-align: top">NONE</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
@@ -834,11 +838,11 @@ define stream FooStream (payloadBody String, method string, headers string);
 ```
 @sink(type='http-request', sink.id='foo', publisher.url='http://localhost:8009/foo', @map(type='xml', @payload('{{payloadBody}}')))
 define stream FooStream (payloadBody String, method string, headers string);
-@source(type='http-response', sink.id='foo', http.status.code='2\\d+', 
+@source(type='http-response', sink.id='foo', http.status.code='2\\d+',
 @map(type='text', regex.A='((.|\n)*)', @attributes(headers='trp:headers', fileName='A[1]')))
 define stream responseStream2xx(fileName string, headers string);
 
-@source(type='http-response', sink.id='foo', http.status.code='4\\d+', 
+@source(type='http-response', sink.id='foo', http.status.code='4\\d+',
 @map(type='text', regex.A='((.|\n)*)', @attributes(errorMsg='A[1]')))
 define stream responseStream4xx(errorMsg string);
 ```
@@ -847,18 +851,18 @@ define stream responseStream4xx(errorMsg string);
 <span id="example-2" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 2</span>
 ```
 define stream FooStream (name String, id int, headers String, downloadPath string);
-@sink(type='http-request', 
+@sink(type='http-request',
 downloading.enabled='true',
 download.path='{{downloadPath}}',publisher.url='http://localhost:8005/files',
 method='GET', headers='{{headers}}',sink.id='download-sink',
-@map(type='json')) 
+@map(type='json'))
 define stream BarStream (name String, id int, headers String, downloadPath string);
 
-@source(type='http-response', sink.id='download-sink', http.status.code='2\\d+', 
+@source(type='http-response', sink.id='download-sink', http.status.code='2\\d+',
 @map(type='text', regex.A='((.|\n)*)', @attributes(headers='trp:headers', fileName='A[1]')))
 define stream responseStream2xx(fileName string, headers string);
 
-@source(type='http-response', sink.id='download-sink', http.status.code='4\\d+', 
+@source(type='http-response', sink.id='download-sink', http.status.code='4\\d+',
 @map(type='text', regex.A='((.|\n)*)', @attributes(errorMsg='A[1]')))
 define stream responseStream4xx(errorMsg string);
 ```
@@ -1754,17 +1758,17 @@ define stream FooStream (messageId string, symbol string, price float, volume lo
 <span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span>
 ```
-@sink(type='http-request', 
+@sink(type='http-request',
 downloading.enabled='true',
 publisher.url='http://localhost:8005/registry/employee',
 method='POST', headers='{{headers}}',sink.id='employee-info',
-@map(type='json')) 
+@map(type='json'))
 define stream BarStream (name String, id int, headers String, downloadPath string);
 
 @source(type='http-response' , sink.id='employee-info', http.status.code='2\\d+',
-@map(type='text', regex.A='((.|\n)*)', @attributes(message='A[1]'))) 
+@map(type='text', regex.A='((.|\n)*)', @attributes(message='A[1]')))
 define stream responseStream2xx(message string);@source(type='http-response' , sink.id='employee-info', http.status.code='4\\d+' ,
-@map(type='text', regex.A='((.|\n)*)', @attributes(message='A[1]')))  
+@map(type='text', regex.A='((.|\n)*)', @attributes(message='A[1]')))
 define stream responseStream4xx(message string);
 ```
 <p style="word-wrap: break-word">In above example, the defined http-request sink will send a POST requests to the endpoint defined by 'publisher.url'.<br>Then for those requests, the source with the response code '2\\d+' and sink.id 'employee-info' will receive the responses with 2xx status codes. <br>The http-response source which has 'employee-info' as the 'sink.id' and '4\\d+' as the http.response.code will receive all the responses with 4xx status codes.<br>. Then the body of the response message will be extracted using text mapper and converted into siddhi events.<br>.</p>

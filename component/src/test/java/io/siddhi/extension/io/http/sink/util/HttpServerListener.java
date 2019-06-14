@@ -76,5 +76,4 @@ public class HttpServerListener implements HttpHandler {
     public boolean isMessageArrive() {
         return isEventArrived.get();
     }
-
 }

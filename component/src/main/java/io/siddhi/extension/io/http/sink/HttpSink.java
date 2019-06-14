@@ -60,6 +60,7 @@ import org.wso2.transport.http.netty.contract.config.ChunkConfig;
 import org.wso2.transport.http.netty.contract.config.ProxyServerConfiguration;
 import org.wso2.transport.http.netty.contract.config.SenderConfiguration;
 import org.wso2.transport.http.netty.contractimpl.DefaultHttpWsConnectorFactory;
+import org.wso2.transport.http.netty.contractimpl.sender.channel.pool.PoolConfiguration;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.io.UnsupportedEncodingException;
@@ -301,61 +302,84 @@ import static io.siddhi.extension.io.http.util.HttpConstants.TRUE;
                         optional = true,
                         defaultValue = "15"),
 
+                // pool configurations
                 @Parameter(
-                        name = "client.threadpool.configurations",
-                        description = "Thread pool configuration. Expected format of these parameters is as follows:" +
-                                " \"'client.connection.pool.count:xxx','client.max.active.connections.per.pool:xxx'\"",
-                        type = {DataType.STRING},
-                        optional = true,
-                        defaultValue = "TODO"),
-                @Parameter(
-                        name = "client.connection.pool.count",
-                        description = "Connection pool count.",
+                        name = "connection.pool.count",
+                        description = "Number of connection pools that need to be created for the particular client.",
                         type = {DataType.INT},
                         optional = true,
                         defaultValue = "0"),
                 @Parameter(
-                        name = "client.max.active.connections.per.pool",
-                        description = "Active connections per pool.",
+                        name = "max.active.connections.per.pool",
+                        description = "Maximum possible number of active connection per pool for the client.",
                         type = {DataType.INT},
                         optional = true,
                         defaultValue = "-1"),
                 @Parameter(
-                        name = "client.min.idle.connections.per.pool",
-                        description = "Minimum ideal connection per pool.",
+                        name = "min.idle.connections.per.pool",
+                        description = "Minimum allowed number of idle connections that can be existed in a pool of " +
+                                "the client.",
                         type = {DataType.INT},
                         optional = true,
                         defaultValue = "0"),
                 @Parameter(
-                        name = "client.max.idle.connections.per.pool",
-                        description = "Maximum ideal connection per pool.",
+                        name = "max.idle.connections.per.pool",
+                        description = "Maximum number of idle connections that can be existed in a pool of the " +
+                                "client.",
                         type = {DataType.INT},
                         optional = true,
                         defaultValue = "100"),
                 @Parameter(
-                        name = "client.min.eviction.idle.time",
-                        description = "Minimum eviction idle time.",
+                        name = "min.evictable.idle.time",
+                        description = "Minimum amount of time (in milliseconds) a connection may sit idle in the pool" +
+                                " before it is eligible for eviction.",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = "5 * 60 * 1000"),
+                        defaultValue = "300000ms"),
                 @Parameter(
-                        name = "sender.thread.count",
-                        description = "Http sender thread count.",
+                        name = "time.between.eviction.runs",
+                        description = "Time between two eviction operations (in miliseconds) on the connection pool",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = "20"),
+                        defaultValue = "30000ms"),
                 @Parameter(
-                        name = "event.group.executor.thread.size",
-                        description = "Event group executor thread size.",
-                        type = {DataType.STRING},
-                        optional = true,
-                        defaultValue = "15"),
-                @Parameter(
-                        name = "max.wait.for.client.connection.pool",
-                        description = "Maximum wait for client connection pool.",
+                        name = "max.wait.time",
+                        description = "The maximum number of milliseconds that the pool will wait " +
+                                "(when there are no available connections) for a connection to be returned.",
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "60000"),
+                @Parameter(
+                        name = "test.on.borrow",
+                        description = "The indication of whether objects will be validated " +
+                                "before being borrowed from the pool. " +
+                                "If the object validation is failed, it will be dropped from the pool, " +
+                                "and will attempt to borrow another.",
+                        type = {DataType.BOOL},
+                        optional = true,
+                        defaultValue = "true"),
+                @Parameter(
+                        name = "test.while.idle",
+                        description = "The indication of whether objects will be validated " +
+                                "by the idle object evictor (if any). " +
+                                "If the object validation is failed, it will be dropped from the pool.",
+                        type = {DataType.BOOL},
+                        optional = true,
+                        defaultValue = "true"),
+                @Parameter(
+                        name = "exhausted.action",
+                        description = "Action which should be taken when the maximum number of active connections " +
+                                "are being used. This action is indicated as an integer. Possible action are as " +
+                                "following.\n" +
+                                "0 - Fail the request when pool is exhausted\n" +
+                                "1 - Block the request when pool is exhausted, until a connection return to the " +
+                                "pool\n" +
+                                "2 - Grow the connection pool size when it's exhausted",
+                        type = {DataType.INT},
+                        optional = true,
+                        defaultValue = "1 (Block when exhausted)"),
+
+
                 @Parameter(
                         name = "oauth.username",
                         description = "The username to be included in the authentication header of the oauth " +
@@ -365,7 +389,7 @@ import static io.siddhi.extension.io.http.util.HttpConstants.TRUE;
                                 " requests ",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = " "),
+                        defaultValue = "NONE"),
                 @Parameter(
                         name = "oauth.password",
                         description = "The password to be included in the authentication header of the oauth " +
@@ -375,20 +399,20 @@ import static io.siddhi.extension.io.http.util.HttpConstants.TRUE;
                                 " requests ",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = " "),
+                        defaultValue = "NONE"),
                 @Parameter(
                         name = "consumer.key",
                         description = "consumer key for the Http request. It is only applicable for for Oauth requests",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = " "),
+                        defaultValue = "NONE"),
                 @Parameter(
                         name = "consumer.secret",
                         description = "consumer secret for the Http request. It is only applicable for for " +
                                 "Oauth requests",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = " "),
+                        defaultValue = "NONE"),
                 @Parameter(
                         name = "refresh.token",
                         description = "refresh token for the Http request. It is only applicable for for" +
@@ -515,8 +539,6 @@ public class HttpSink extends Sink {
     private String sslProtocol;
     private String tlsStoreType;
     private String chunkDisabled;
-    private String followRedirect;
-    private String maxRedirectCount;
     private String parametersList;
     private String proxyHost;
     private String proxyPort;
@@ -535,6 +557,16 @@ public class HttpSink extends Sink {
     private String authType;
     private AccessTokenCache accessTokenCache = AccessTokenCache.getInstance();
     private String tokenURL;
+    private int maxActivePerPool;
+    private int minIdlePerPool;
+    private int maxIdlePerPool;
+    private boolean testOnBorrow;
+    private boolean testWhileIdle;
+    private long timeBetweenEvictionRuns;
+    private long minEvictableIdleTime;
+    private byte exhaustedAction;
+    private int numberOfPools;
+    private long maxWaitTime;
     private String hostnameVerificationEnabled;
 
     private DefaultHttpWsConnectorFactory httpConnectorFactory;
@@ -597,7 +629,7 @@ public class HttpSink extends Sink {
                 EMPTY_STRING);
         this.refreshToken = optionHolder.getOrCreateOption(HttpConstants.RECEIVER_REFRESH_TOKEN, EMPTY_STRING);
         this.tokenURL = optionHolder.validateAndGetStaticValue(HttpConstants.TOKEN_URL, EMPTY_STRING);
-        clientStoreFile = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PATH_PARAM,
+        this.clientStoreFile = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PATH_PARAM,
                 HttpSinkUtil.trustStorePath(configReader));
         clientStorePass = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD_PARAM,
                 HttpSinkUtil.trustStorePassword(configReader));
@@ -606,10 +638,29 @@ public class HttpSink extends Sink {
         sslProtocol = optionHolder.validateAndGetStaticValue(HttpConstants.SSL_PROTOCOL, EMPTY_STRING);
         tlsStoreType = optionHolder.validateAndGetStaticValue(HttpConstants.TLS_STORE_TYPE, EMPTY_STRING);
         chunkDisabled = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_CHUNK_ENABLED, EMPTY_STRING);
-        followRedirect = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_FOLLOW_REDIRECT,
-                EMPTY_STRING);
-        maxRedirectCount = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_MAX_REDIRECT_COUNT,
-                EMPTY_STRING);
+
+        //pool configurations
+        maxIdlePerPool = Integer.parseInt(optionHolder.validateAndGetStaticValue(
+                HttpConstants.MAX_IDLE_CONNECTIONS_PER_POOL, HttpConstants.DEFAULT_MAX_IDLE_CONNECTIONS_PER_POOL));
+        minIdlePerPool = Integer.parseInt(optionHolder.validateAndGetStaticValue(
+                HttpConstants.MIN_IDLE_CONNECTIONS_PER_POOL, HttpConstants.DEFAULT_MIN_IDLE_CONNECTIONS_PER_POOL));
+        maxActivePerPool = Integer.parseInt(optionHolder.validateAndGetStaticValue(
+                HttpConstants.MAX_ACTIVE_CONNECTIONS_PER_POOL, HttpConstants.DEFAULT_MAX_ACTIVE_CONNECTIONS_PER_POOL));
+        testOnBorrow = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants.TEST_ON_BORROW,
+                HttpConstants.DEFAULT_TEST_ON_BORROW));
+        testWhileIdle = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants.TEST_WHILE_IDLE,
+                HttpConstants.DEFAULT_TEST_WHILE_IDLE));
+        timeBetweenEvictionRuns = Long.parseLong(optionHolder.validateAndGetStaticValue(
+                HttpConstants.TIME_BETWEEN_EVICTION_RUNS, HttpConstants.DEFAULT_TIME_BETWEEN_EVICTION_RUNS));
+        minEvictableIdleTime = Long.parseLong(optionHolder.validateAndGetStaticValue(
+                HttpConstants.MIN_EVICTABLE_IDLE_TIME, HttpConstants.DEFAULT_MIN_EVICTABLE_IDLE_TIME));
+        exhaustedAction = (byte) Integer.parseInt(optionHolder.validateAndGetStaticValue(
+                HttpConstants.EXHAUSTED_ACTION, HttpConstants.DEFAULT_EXHAUSTED_ACTION));
+        numberOfPools = Integer.parseInt(optionHolder.validateAndGetStaticValue(HttpConstants.CONNECTION_POOL_COUNT,
+                HttpConstants.DEFAULT_CONNECTION_POOL_COUNT));
+        maxWaitTime = Integer.parseInt(optionHolder.validateAndGetStaticValue(
+                HttpConstants.MAX_WAIT_TIME,  HttpConstants.DEFAULT_MAX_WAIT_TIME));
+
         parametersList = optionHolder.validateAndGetStaticValue(HttpConstants.SINK_PARAMETERS, EMPTY_STRING);
         proxyHost = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_HOST, EMPTY_STRING);
         proxyPort = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_PORT, EMPTY_STRING);
@@ -976,9 +1027,6 @@ public class HttpSink extends Sink {
      */
     HttpCarbonMessage generateCarbonMessage(List<Header> headers, String contentType,
                                             String httpMethod, HttpCarbonMessage cMessage) {
-        /*
-         * set carbon message properties which is to be used in carbon transport.
-         */
         // Set protocol type http or https
         cMessage.setProperty(Constants.PROTOCOL, httpURLProperties.get(Constants.PROTOCOL));
         // Set uri
@@ -1002,10 +1050,8 @@ public class HttpSink extends Sink {
                     "supported.");
         }
 
+        //Set request headers.
         httpHeaders.set(Constants.HTTP_HOST, cMessage.getProperty(Constants.HTTP_HOST));
-        /*
-         *set request headers.
-         */
         // Set user given Headers
         if (headers != null) {
             for (Header header : headers) {
@@ -1047,7 +1093,7 @@ public class HttpSink extends Sink {
         }
     }
 
-    void initClientConnector(DynamicOptions dynamicOptions) {
+    public void initClientConnector(DynamicOptions dynamicOptions) {
         if (publisherURLOption.isStatic()) {
             publisherURL = publisherURLOption.getValue();
         } else {
@@ -1104,10 +1150,24 @@ public class HttpSink extends Sink {
                 }
                 senderConfig.setProxyServerConfiguration(proxyServerConfiguration);
             } catch (UnknownHostException e) {
-                log.error("Proxy url and password is invalid in sink " + streamID + " Siddhi app " +
+                log.error("Proxy url and password is invalid in sink " + streamID + " of siddhi app " +
                         siddhiAppContext.getName(), e);
             }
         }
+
+        PoolConfiguration poolConfiguration = new PoolConfiguration();
+        poolConfiguration.setMaxActivePerPool(maxActivePerPool);
+        poolConfiguration.setMinIdlePerPool(minIdlePerPool);
+        poolConfiguration.setMaxIdlePerPool(maxIdlePerPool);
+        poolConfiguration.setTestOnBorrow(testOnBorrow);
+        poolConfiguration.setTestWhileIdle(testWhileIdle);
+        poolConfiguration.setTimeBetweenEvictionRuns(timeBetweenEvictionRuns);
+        poolConfiguration.setMinEvictableIdleTime(minEvictableIdleTime);
+        poolConfiguration.setExhaustedAction(exhaustedAction);
+        poolConfiguration.setNumberOfPools(numberOfPools);
+        poolConfiguration.setMaxWaitTime(maxWaitTime);
+        senderConfig.setPoolConfiguration(poolConfiguration);
+
         //add advanced sender configurations
         if (socketIdleTimeout != -1) {
             senderConfig.setSocketIdleTimeout(socketIdleTimeout);
@@ -1127,14 +1187,6 @@ public class HttpSink extends Sink {
                 }
             }
         }
-        // TODO: 27/02/19 Add redirection support
-       /* if (!EMPTY_STRING.equals(followRedirect)) {
-            senderConfig.setFollowRedirect(Boolean.parseBoolean(followRedirect));
-        }
-        if (!EMPTY_STRING.equals(maxRedirectCount)) {
-            senderConfig.setMaxRedirectCount(Integer.parseInt(maxRedirectCount));
-        }
-        */
         if (!EMPTY_STRING.equals(parametersList)) {
             senderConfig.setParameters(HttpIoUtil.populateParameters(parametersList));
         }

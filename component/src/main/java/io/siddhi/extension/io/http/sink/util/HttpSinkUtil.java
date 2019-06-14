@@ -290,14 +290,6 @@ public class HttpSinkUtil {
      */
     private static Map<String, TrpPropertyTypes> trpPropertyTypeMap() {
         Map<String, TrpPropertyTypes> trpPropertyTypes = new HashMap<>();
-        trpPropertyTypes.put(CLIENT_CONNECTION_POOL_COUNT, TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put(CLIENT_MAX_ACTIVE_CONNECTIONS_PER_POOL, TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put(CLIENT_MIN_IDLE_CONNECTIONS_PER_POOL, TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put(CLIENT_MAX_IDLE_CONNECTIONS_PER_POOL, TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put(CLIENT_MIN_EVICTION_IDLE_TIME, TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put(SENDER_THREAD_COUNT, TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put(EVENT_GROUP_EXECUTOR_THREAD_SIZE, TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put(MAX_WAIT_FOR_TRP_CLIENT_CONNECTION_POOL, TrpPropertyTypes.INTEGER);
         trpPropertyTypes.put(CLIENT_BOOTSTRAP_NODELAY, TrpPropertyTypes.BOOLEAN);
         trpPropertyTypes.put(CLIENT_BOOTSTRAP_KEEPALIVE, TrpPropertyTypes.BOOLEAN);
         trpPropertyTypes.put(CLIENT_BOOTSTRAP_SENDBUFFERSIZE, TrpPropertyTypes.INTEGER);
@@ -305,7 +297,6 @@ public class HttpSinkUtil {
         trpPropertyTypes.put(CLIENT_BOOTSTRAP_CONNECT_TIMEOUT, TrpPropertyTypes.INTEGER);
         trpPropertyTypes.put(CLIENT_BOOTSTRAP_SOCKET_REUSE, TrpPropertyTypes.BOOLEAN);
         trpPropertyTypes.put(CLIENT_BOOTSTRAP_SOCKET_TIMEOUT, TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put(LATENCY_METRICS_ENABLED, TrpPropertyTypes.BOOLEAN);
         return trpPropertyTypes;
     }
 }
