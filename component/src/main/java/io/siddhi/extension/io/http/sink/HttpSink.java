@@ -261,13 +261,19 @@ import static io.siddhi.extension.io.http.util.HttpConstants.TRUE;
                         defaultValue = "TODO"),
                 @Parameter(
                         name = "client.bootstrap.nodelay",
-                        description = "Http client no delay.",
+                        description = " This is mapped to TCP_NODELAY socket option which allows the network to " +
+                                "bypass Nagle Delays by disabling Nagle's algorithm, and sending the data " +
+                                "as soon as it's available\n. " +
+                                "Setting this parameter to 'true' forces a socket to send the data in its buffer, " +
+                                "whatever the packet size. \n" ,
                         type = {DataType.BOOL},
                         optional = true,
                         defaultValue = "true"),
                 @Parameter(
                         name = "client.bootstrap.keepalive",
-                        description = "Http client keep alive.",
+                        description = "This parameter defines whether the tcp connection should remain open for " +
+                                "multiple HTTP requests/responses. If this is set to 'false', HTTP connections will " +
+                                "be closed after each request.",
                         type = {DataType.BOOL},
                         optional = true,
                         defaultValue = "true"),
@@ -310,20 +316,20 @@ import static io.siddhi.extension.io.http.util.HttpConstants.TRUE;
                         optional = true,
                         defaultValue = "0"),
                 @Parameter(
-                        name = "max.active.connections.per.pool",
+                        name = "max.pool.active.connections",
                         description = "Maximum possible number of active connection per pool for the client.",
                         type = {DataType.INT},
                         optional = true,
                         defaultValue = "-1"),
                 @Parameter(
-                        name = "min.idle.connections.per.pool",
+                        name = "min.pool.idle.connections",
                         description = "Minimum allowed number of idle connections that can be existed in a pool of " +
                                 "the client.",
                         type = {DataType.INT},
                         optional = true,
                         defaultValue = "0"),
                 @Parameter(
-                        name = "max.idle.connections.per.pool",
+                        name = "max.pool.idle.connections",
                         description = "Maximum number of idle connections that can be existed in a pool of the " +
                                 "client.",
                         type = {DataType.INT},
