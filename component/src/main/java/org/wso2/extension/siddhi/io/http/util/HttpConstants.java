@@ -235,11 +235,11 @@ public class HttpConstants {
     //pool configurations
     public static final String CONNECTION_POOL_COUNT = "connection.pool.count";
     public static final String DEFAULT_CONNECTION_POOL_COUNT = "0";
-    public static final String MAX_ACTIVE_CONNECTIONS_PER_POOL = "max.active.connections.per.pool";
+    public static final String MAX_ACTIVE_CONNECTIONS_PER_POOL = "max.pool.active.connections";
     public static final String DEFAULT_MAX_ACTIVE_CONNECTIONS_PER_POOL = "-1"; // unlimited
-    public static final String MIN_IDLE_CONNECTIONS_PER_POOL = "min.idle.connections.per.pool";
+    public static final String MIN_IDLE_CONNECTIONS_PER_POOL = "min.pool.idle.connections";
     public static final String DEFAULT_MIN_IDLE_CONNECTIONS_PER_POOL = "0";
-    public static final String MAX_IDLE_CONNECTIONS_PER_POOL = "max.idle.connections.per.pool";
+    public static final String MAX_IDLE_CONNECTIONS_PER_POOL = "max.pool.idle.connections";
     public static final String DEFAULT_MAX_IDLE_CONNECTIONS_PER_POOL = "100";
     public static final String MIN_EVICTABLE_IDLE_TIME = "min.evictable.idle.time";
     public static final String DEFAULT_MIN_EVICTABLE_IDLE_TIME = "300000";
