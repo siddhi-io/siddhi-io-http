@@ -344,7 +344,7 @@ import static io.siddhi.extension.io.http.util.HttpConstants.TRUE;
                         defaultValue = "300000ms"),
                 @Parameter(
                         name = "time.between.eviction.runs",
-                        description = "Time between two eviction operations (in miliseconds) on the connection pool",
+                        description = "Time between two eviction operations (in milliseconds) on the connection pool.",
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "30000ms"),
@@ -377,10 +377,10 @@ import static io.siddhi.extension.io.http.util.HttpConstants.TRUE;
                         description = "Action which should be taken when the maximum number of active connections " +
                                 "are being used. This action is indicated as an integer. Possible action are as " +
                                 "following.\n" +
-                                "0 - Fail the request when pool is exhausted\n" +
-                                "1 - Block the request when pool is exhausted, until a connection return to the " +
-                                "pool\n" +
-                                "2 - Grow the connection pool size when it's exhausted",
+                                "0 - Fail the request when pool is exhausted.\n" +
+                                "1 - Block the request when pool is exhausted, until a connection returns to the " +
+                                "pool.\n" +
+                                "2 - Grow the connection pool size when it's exhausted.",
                         type = {DataType.INT},
                         optional = true,
                         defaultValue = "1 (Block when exhausted)"),
