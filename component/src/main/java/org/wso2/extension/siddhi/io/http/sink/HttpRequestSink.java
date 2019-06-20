@@ -721,7 +721,7 @@ public class HttpRequestSink extends HttpSink {
         HttpResponseFuture httpResponseFuture = clientConnector.send(cMessage);
         HttpResponseMessageListener httpListener;
         CountDownLatch latch = isBlockingIO ? responseLatch : new CountDownLatch(1);
-        httpListener = new HttpResponseMessageListener(getTrpProperties(dynamicOptions), sinkId,
+        httpListener = new HttpResponseMessageListener(this, getTrpProperties(dynamicOptions), sinkId,
                 isDownloadEnabled, latch, tryCount, authType, isBlockingIO);
         httpResponseFuture.setHttpConnectorListener(httpListener);
 

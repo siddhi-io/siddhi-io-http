@@ -21,12 +21,14 @@ package org.wso2.extension.siddhi.io.http.source;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.extension.siddhi.io.http.sink.HttpSink;
 import org.wso2.extension.siddhi.io.http.util.HTTPSourceRegistry;
 import org.wso2.extension.siddhi.io.http.util.HttpConstants;
 import org.wso2.extension.siddhi.io.http.util.ResponseSourceId;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
@@ -47,9 +49,11 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
     private int tryCount;
     private String authType;
     private boolean isBlockingIO;
+    private HttpSink sink;
 
-    public HttpResponseMessageListener(Map<String, Object> trpProperties, String sinkId, boolean isDownloadEnabled,
-                                       CountDownLatch latch, int tryCount, String authType, boolean isBlockingIO) {
+    public HttpResponseMessageListener(HttpSink sink, Map<String, Object> trpProperties, String sinkId,
+                                       boolean isDownloadEnabled, CountDownLatch latch, int tryCount, String authType,
+                                       boolean isBlockingIO) {
         this.trpProperties = trpProperties;
         this.isDownloadEnabled = isDownloadEnabled;
         this.sinkId = sinkId;
@@ -57,6 +61,7 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
         this.tryCount = tryCount;
         this.authType = authType;
         this.isBlockingIO = isBlockingIO;
+        this.sink = sink;
     }
 
     @Override
@@ -85,6 +90,10 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
 
     @Override
     public void onError(Throwable throwable) {
+        if (throwable instanceof IOException) {
+            sink.initClientConnector(null);
+        }
+
         HttpResponseSource source = HTTPSourceRegistry.getResponseSource(sinkId, HttpConstants.DEFAULT_HTTP_ERROR_CODE);
         if (source != null) {
             responseConnectorListener = source.getConnectorListener();
