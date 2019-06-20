@@ -42,18 +42,9 @@ import static io.siddhi.extension.io.http.util.HttpConstants.CLIENT_BOOTSTRAP_RE
 import static io.siddhi.extension.io.http.util.HttpConstants.CLIENT_BOOTSTRAP_SENDBUFFERSIZE;
 import static io.siddhi.extension.io.http.util.HttpConstants.CLIENT_BOOTSTRAP_SOCKET_REUSE;
 import static io.siddhi.extension.io.http.util.HttpConstants.CLIENT_BOOTSTRAP_SOCKET_TIMEOUT;
-import static io.siddhi.extension.io.http.util.HttpConstants.CLIENT_CONNECTION_POOL_COUNT;
-import static io.siddhi.extension.io.http.util.HttpConstants.CLIENT_MAX_ACTIVE_CONNECTIONS_PER_POOL;
-import static io.siddhi.extension.io.http.util.HttpConstants.CLIENT_MAX_IDLE_CONNECTIONS_PER_POOL;
-import static io.siddhi.extension.io.http.util.HttpConstants.CLIENT_MIN_EVICTION_IDLE_TIME;
-import static io.siddhi.extension.io.http.util.HttpConstants.CLIENT_MIN_IDLE_CONNECTIONS_PER_POOL;
-import static io.siddhi.extension.io.http.util.HttpConstants.EVENT_GROUP_EXECUTOR_THREAD_SIZE;
 import static io.siddhi.extension.io.http.util.HttpConstants.HTTP_TRACE_LOG_ENABLED;
-import static io.siddhi.extension.io.http.util.HttpConstants.LATENCY_METRICS_ENABLED;
 import static io.siddhi.extension.io.http.util.HttpConstants.LOG_TRACE_ENABLE_DEFAULT_VALUE;
-import static io.siddhi.extension.io.http.util.HttpConstants.MAX_WAIT_FOR_TRP_CLIENT_CONNECTION_POOL;
 import static io.siddhi.extension.io.http.util.HttpConstants.PARAMETER_SEPARATOR;
-import static io.siddhi.extension.io.http.util.HttpConstants.SENDER_THREAD_COUNT;
 import static io.siddhi.extension.io.http.util.HttpIoUtil.populateParameterMap;
 
 /**
