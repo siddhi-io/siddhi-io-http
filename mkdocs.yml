@@ -1,37 +1,39 @@
 site_name: Siddhi IO HTTP
 site_description: Siddhi IO HTTP Extension
-site_author: WSO2
-site_url: https://wso2-extensions.github.io/siddhi-io-http/
-extra_css:
-- stylesheets/extra.css
-extra_javascript:
-- javascripts/extra.js
-repo_name: Siddhi-IO-http
-repo_url: https://github.com/wso2-extensions/siddhi-io-http
-copyright: Copyright &copy; 2011 - 2018 WSO2
+repo_name: Siddhi IO HTTP
+repo_url: https://github.com/siddhi-io/siddhi-io-http/
+edit_uri: https://github.com/siddhi-io/siddhi-io-http/blob/master/
+copyright: Siddhi - Documentation
 theme:
   name: material
-  logo: images/siddhi-logo-w.svg
+  logo: images/siddhi-logo.svg
   favicon: images/favicon.ico
   palette:
     primary: teal
     accent: teal
-google_analytics:
-- UA-103065-28
-- auto
+extra_css:
+- assets/stylesheets/extra.css
+extra_javascript:
+- assets/javascripts/extra.js
 extra:
   social:
   - type: github
-    link: https://github.com/wso2/siddhi
+    link: https://github.com/siddhi-io/siddhi
+  - type: medium
+    link: https://medium.com/siddhi-io
+  - type: twitter
+    link: https://twitter.com/siddhi_io
   - type: linkedin
     link: https://www.linkedin.com/groups/13553064
+google_analytics:
+- UA-103065-28
+- auto
 markdown_extensions:
-- admonition
-- toc(permalink=true)
-- codehilite(guess_lang=false)
+- markdown.extensions.admonition
 pages:
-- Welcome: index.md
+- Information: index.md
 - API Docs:
+  - latest: api/latest.md
   - 2.0.8: api/2.0.8.md
   - 2.0.7: api/2.0.7.md
   - 2.0.6: api/2.0.6.md
@@ -82,5 +84,4 @@ pages:
   - 1.0.11: api/1.0.11.md
   - 1.0.10: api/1.0.10.md
   - 1.0.4: api/1.0.4.md
-  - latest: api/latest.md
 - License: license.md
