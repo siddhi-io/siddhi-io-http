@@ -2,8 +2,8 @@ Siddhi IO HTTP
 ======================================
 
   [![Jenkins Build Status](https://wso2.org/jenkins/job/siddhi/job/siddhi-io-http/badge/icon)](https://wso2.org/jenkins/job/siddhi/job/siddhi-io-http/)
-  [![GitHub (pre-)Release](https://img.shields.io/github/release/siddhi-io/siddhi-io-http/all.svg)](https://github.com/siddhi-io/siddhi-io-http/releases)
-  [![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/siddhi-io/siddhi-io-http.svg)](https://github.com/siddhi-io/siddhi-io-http/releases)
+  [![GitHub Release](https://img.shields.io/github/release/siddhi-io/siddhi-io-http/all.svg)](https://github.com/siddhi-io/siddhi-io-http/releases)
+  [![GitHub Release Date](https://img.shields.io/github/release-date/siddhi-io/siddhi-io-http.svg)](https://github.com/siddhi-io/siddhi-io-http/releases)
   [![GitHub Open Issues](https://img.shields.io/github/issues-raw/siddhi-io/siddhi-io-http.svg)](https://github.com/siddhi-io/siddhi-io-http/issues)
   [![GitHub Last Commit](https://img.shields.io/github/last-commit/siddhi-io/siddhi-io-http.svg)](https://github.com/siddhi-io/siddhi-io-http/commits/master)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
