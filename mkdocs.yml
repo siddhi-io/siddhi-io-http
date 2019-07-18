@@ -28,12 +28,13 @@ extra:
 markdown_extensions:
 - admonition
 - toc:
-   permalink: true
+    permalink: true
 - codehilite:
-   guess_lang: false
+    guess_lang: false
 pages:
 - Welcome: index.md
 - API Docs:
+  - 1.2.2: api/1.2.2.md
   - 1.2.1: api/1.2.1.md
   - 1.2.0: api/1.2.0.md
   - 1.1.5: api/1.1.5.md
