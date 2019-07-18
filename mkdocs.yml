@@ -28,9 +28,9 @@ extra:
 markdown_extensions:
 - admonition
 - toc:
-  permalink: true
+   permalink: true
 - codehilite:
-  guess_lang: false
+   guess_lang: false
 pages:
 - Welcome: index.md
 - API Docs:
