@@ -992,9 +992,7 @@ public class HttpSink extends Sink {
      */
     @Override
     public void connect() {
-        if (publisherURLOption.isStatic()) {
-            log.info(streamID + " has successfully connected to " + publisherURL);
-        }
+
     }
 
     /**
