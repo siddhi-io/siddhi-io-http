@@ -506,8 +506,6 @@ public class HttpSink extends Sink {
         this.configReader = configReader;
         this.siddhiAppContext = siddhiAppContext;
         this.streamID = siddhiAppContext.getName() + PORT_HOST_SEPARATOR + outputStreamDefinition.toString();
-        this.mapType = outputStreamDefinition.getAnnotations().get(0).getAnnotations().get(0).getElements().get(0)
-                .getValue();
         this.publisherURLOption = optionHolder.validateAndGetOption(HttpConstants.PUBLISHER_URL);
         this.httpHeaderOption = optionHolder.getOrCreateOption(HttpConstants.HEADERS, HttpConstants.DEFAULT_HEADER);
         this.httpMethodOption = optionHolder.getOrCreateOption(HttpConstants.METHOD, HttpConstants.DEFAULT_METHOD);
@@ -830,6 +828,11 @@ public class HttpSink extends Sink {
         if (!publisherURLOption.isStatic()) {
             initClientConnector(dynamicOptions);
         }
+
+        if (mapType == null) {
+            mapType = getMapper().getType();
+        }
+
         String httpMethod = EMPTY_STRING.equals(httpMethodOption.getValue(dynamicOptions)) ?
                 HttpConstants.METHOD_DEFAULT : httpMethodOption.getValue(dynamicOptions);
         String contentType = HttpSinkUtil.getContentType(mapType, headersList);
@@ -875,9 +878,7 @@ public class HttpSink extends Sink {
      */
     @Override
     public void connect() {
-        if (publisherURLOption.isStatic()) {
-            log.info(streamID + " has successfully connected to " + publisherURL);
-        }
+
     }
 
     /**

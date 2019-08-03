@@ -144,5 +144,43 @@ public class HttpsSinkTestCase {
         lst.shutdown();
     }
 
+    /**
+     * Test case for HTTPS output publisher with log Sink.
+     */
+    @Test
+    public void testHTTPSPublisherWithLogSink() throws Exception {
+        setCarbonHome();
+        logger.info("Test case for HTTPS output publisher with log sink.");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
+        String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
+                + "@sink(type='log')"
+                + "@sink(type='http',publisher.url='https://localhost:8009/abc',method='{{method}}',"
+                + "headers='{{headers}}',"
+                + "@map(type='xml', "
+                + "@payload('{{message}}'))) "
+                + "Define stream BarStream (message String,method String,headers String);";
+        String query = (
+                "@info(name = 'query') "
+                        + "from FooStream "
+                        + "select message,method,headers "
+                        + "insert into BarStream;"
+        );
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager
+                .createSiddhiAppRuntime(inStreamDefinition + query);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+        HttpsServerListenerHandler lst = new HttpsServerListenerHandler(8009);
+        lst.run();
+        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
+        while (!lst.getServerListener().isMessageArrive()) {
+            Thread.sleep(10);
+        }
+        String eventData = lst.getServerListener().getData();
+        Assert.assertEquals(eventData, expected);
+        siddhiAppRuntime.shutdown();
+        lst.shutdown();
+    }
+
 }
 
