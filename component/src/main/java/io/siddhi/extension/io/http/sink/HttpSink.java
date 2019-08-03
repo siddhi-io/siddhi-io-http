@@ -83,444 +83,330 @@ import static io.siddhi.extension.io.http.util.HttpConstants.TRUE;
  * {@code HttpSink } Handle the HTTP publishing tasks.
  */
 @Extension(name = "http", namespace = "sink",
-        description = "This extension publish the HTTP events in any HTTP method  POST, GET, PUT, DELETE  via HTTP " +
-                "or https protocols. As the additional features this component can provide basic authentication " +
-                "as well as user can publish events using custom client truststore files when publishing events " +
-                "via https protocol. And also user can add any number of headers including HTTP_METHOD header for " +
-                "each event dynamically.\n" +
-                "Following content types will be set by default according to the type of sink mapper used.\n" +
-                "You can override them by setting the new content types in headers.\n" +
-                "     - TEXT : text/plain\n" +
-                "     - XML : application/xml\n" +
-                "     - JSON : application/json\n" +
-                "     - KEYVALUE : application/x-www-form-urlencoded",
+        description = "" +
+                "HTTP sink publishes messages via HTTP or HTTPS protocols using methods such as POST, GET, PUT, " +
+                "and DELETE on formats `text`, `XML` and `JSON`. It can also publish " +
+                "to endpoints protected by basic authentication or OAuth 2.0.",
         parameters = {
                 @Parameter(
                         name = "publisher.url",
-                        description = "The URL to which the outgoing events should be published via HTTP. " +
-                                "This is a mandatory parameter and if this is not specified, an error is logged in " +
-                                "the CLI. If user wants to enable SSL for the events, use `https` instead of `http` " +
-                                "in the publisher.url." +
-                                "e.g., " +
-                                "`http://localhost:8080/endpoint`, "
-                                + "`https://localhost:8080/endpoint`",
+                        description = "The URL to which the outgoing events should be published.\n" +
+                                "Examples:\n" +
+                                "`http://localhost:8080/endpoint`,\n" +
+                                "`https://localhost:8080/endpoint`",
                         type = {DataType.STRING}),
                 @Parameter(
                         name = "basic.auth.username",
-                        description = "The username to be included in the authentication header of the basic " +
-                                "authentication enabled events. It is required to specify both username and " +
-                                "password to enable basic authentication. If one of the parameter is not given " +
-                                "by user then an error is logged in the CLI.",
+                        description = "The username to be included in the authentication header when calling " +
+                                "endpoints protected by basic authentication. `basic.auth.password` property " +
+                                "should be also set when using this property.",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = " "),
+                        defaultValue = "-"),
                 @Parameter(
                         name = "basic.auth.password",
-                        description = "The password to include in the authentication header of the basic " +
-                                "authentication enabled events. It is required to specify both username and " +
-                                "password to enable basic authentication. If one of the parameter is not given " +
-                                "by user then an error is logged in the CLI.",
-                        type = {DataType.STRING},
-                        optional = true, defaultValue = " "),
-                @Parameter(
-                        name = "https.truststore.file",
-                        description = "The file path to the location of the truststore of the client that sends " +
-                                "the HTTP events through 'https' protocol. A custom client-truststore can be " +
-                                "specified if required.",
-                        type = {DataType.STRING},
-                        optional = true, defaultValue = "${carbon.home}/resources/security/client-truststore.jks"),
-                @Parameter(
-                        name = "https.truststore.password",
-                        description = "The password for the client-truststore. A custom password can be specified " +
-                                "if required. If no custom password is specified and the protocol of URL is 'https' " +
-                                "then, the system uses default password.",
-                        type = {DataType.STRING},
-                        optional = true, defaultValue = "wso2carbon"),
-                @Parameter(
-                        name = "headers",
-                        description = "The headers that should be included as HTTP request headers. \n" +
-                                "There can be any number of headers concatenated in following format. " +
-                                "\"'header1:value1','header2:value2'\". User can include Content-Type header if he " +
-                                "needs to use a specific content-type for the payload. Or else, system decides the " +
-                                "Content-Type by considering the type of sink mapper, in following way.\n" +
-                                " - @map(xml):application/xml\n" +
-                                " - @map(json):application/json\n" +
-                                " - @map(text):plain/text )\n" +
-                                " - if user does not include any mapping type then the system gets 'plain/text' " +
-                                "as default Content-Type header.\n" +
-                                "Note that providing content-length as a header is not supported. The size of the " +
-                                "payload will be automatically calculated and included in the content-length header.",
+                        description = "The password to be included in the authentication header when calling " +
+                                "endpoints protected by basic authentication. `basic.auth.username` property " +
+                                "should be also set when using this property.",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = " "),
+                        defaultValue = "-"),
+                @Parameter(
+                        name = "https.truststore.file",
+                        description = "The file path of the client truststore when sending messages through `https`" +
+                                " protocol.",
+                        type = {DataType.STRING},
+                        optional = true, defaultValue = "`${carbon.home}/resources/security/client-truststore.jks`"),
+                @Parameter(
+                        name = "https.truststore.password",
+                        description = "The password for the client-truststore.",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "wso2carbon"),
+                @Parameter(
+                        name = "oauth.username",
+                        description = "The username to be included in the authentication header when calling " +
+                                "endpoints protected by OAuth 2.0. `oauth.password` property " +
+                                "should be also set when using this property.",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "-"),
+                @Parameter(
+                        name = "oauth.password",
+                        description = "The password to be included in the authentication header when calling " +
+                                "endpoints protected by OAuth 2.0. `oauth.username` property " +
+                                "should be also set when using this property.",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "-"),
+                @Parameter(
+                        name = "consumer.key",
+                        description = "Consumer key used for calling endpoints protected by OAuth 2.0",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "-"),
+                @Parameter(
+                        name = "consumer.secret",
+                        description = "Consumer secret used for calling endpoints protected by OAuth 2.0",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "-"),
+                @Parameter(
+                        name = "token.url",
+                        description = "Token URL to generate a new access tokens " +
+                                "when calling endpoints protected by OAuth 2.0",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "-"),
+                @Parameter(
+                        name = "refresh.token",
+                        description = "Refresh token used for generating new access tokens " +
+                                "when calling endpoints protected by OAuth 2.0",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "-"),
+                @Parameter(
+                        name = "headers",
+                        description = "HTTP request headers in format `\"'<key>:<value>','<key>:<value>'\"`.\n" +
+                                "When `Content-Type` header is not provided the system derives the " +
+                                "Content-Type based on the provided sink mapper as following: \n" +
+                                " - `@map(type='xml')`: `application/xml`\n" +
+                                " - `@map(type='json')`: `application/json`\n" +
+                                " - `@map(type='text')`: `plain/text`\n" +
+                                " - `@map(type='keyvalue')`: `application/x-www-form-urlencoded`\n" +
+                                " - For all other cases system defaults to `plain/text`\n" +
+                                "Also the `Content-Length` header need not to be provided, as the system " +
+                                "automatically defines it by calculating the size of the payload.",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "Content-Type and Content-Length headers"),
                 @Parameter(
                         name = "method",
-                        description = "For HTTP events, HTTP_METHOD header should be included as a request header." +
-                                " If the parameter is null then system uses 'POST' as a default header.",
+                        description = "The HTTP method used for calling the endpoint.",
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "POST"),
                 @Parameter(
                         name = "socket.idle.timeout",
-                        description = "Socket timeout value in millisecond",
+                        description = "Socket timeout in millis.",
                         type = {DataType.INT},
                         optional = true,
                         defaultValue = "6000"),
                 @Parameter(
                         name = "chunk.disabled",
-                        description = "This parameter is used to disable/enable chunked transfer encoding",
+                        description = "Disable chunked transfer encoding.",
                         type = {DataType.BOOL},
                         optional = true,
                         defaultValue = "false"),
                 @Parameter(
                         name = "ssl.protocol",
-                        description = "The SSL protocol version",
+                        description = "SSL/TLS protocol.",
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "TLS"),
                 @Parameter(
-                        name = "parameters",
-                        description = "Parameters other than basics such as ciphers,sslEnabledProtocols,client.enable" +
-                                ".session.creation. Expected format of these parameters is as follows: " +
-                                "\"'ciphers:xxx','sslEnabledProtocols,client.enable:xxx'\"",
-                        type = {DataType.STRING},
-                        optional = true,
-                        defaultValue = "null"),
-                @Parameter(
-                        name = "ciphers",
-                        description = "List of ciphers to be used. This parameter should include under parameters Ex:" +
-                                " 'ciphers:TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256'",
-                        type = {DataType.STRING},
-                        optional = true,
-                        defaultValue = "null"),
-                @Parameter(
-                        name = "ssl.enabled.protocols",
-                        description = "SSL/TLS protocols to be enabled. This parameter should be in camel case format" +
-                                "(sslEnabledProtocols) under parameters. Ex 'sslEnabledProtocols:true'",
-                        type = {DataType.STRING},
-                        optional = true,
-                        defaultValue = "null"),
-                @Parameter(
-                        name = "client.enable.session.creation",
-                        description = "Enable HTTP session creation.This parameter should include under parameters " +
-                                "Ex:" +
-                                " 'client.enable.session.creation:true'",
-                        type = {DataType.STRING},
-                        optional = true,
-                        defaultValue = "null"),
-                @Parameter(
-                        name = "follow.redirect",
-                        description = "Redirect related enabled.",
-                        type = {DataType.BOOL},
-                        optional = true,
-                        defaultValue = "true"),
-                @Parameter(
-                        name = "max.redirect.count",
-                        description = "Maximum redirect count.",
-                        type = {DataType.INT},
-                        optional = true,
-                        defaultValue = "5"),
-                @Parameter(
                         name = "tls.store.type",
-                        description = "TLS store type to be used.",
+                        description = "TLS store type.",
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "JKS"),
+                @Parameter(
+                        name = "ssl.configurations",
+                        description = "SSL/TSL configurations in format `\"'<key>:<value>','<key>:<value>'\"`.\n" +
+                                "Some supported parameters:\n" +
+                                " - SSL/TLS protocols: `'sslEnabledProtocols:TLSv1.1,TLSv1.2'`\n" +
+                                " - List of ciphers: `'ciphers:TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256'`\n" +
+                                " - Enable session creation: `'client.enable.session.creation:true'`\n" +
+                                " - Supported server names: `'server.suported.server.names:server'`\n" +
+                                " - Add HTTP SNIMatcher: `'server.supported.snimatchers:SNIMatcher'`",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "-"),
                 @Parameter(
                         name = "proxy.host",
                         description = "Proxy server host",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = "null"),
+                        defaultValue = "-"),
                 @Parameter(
                         name = "proxy.port",
                         description = "Proxy server port",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = "null"),
+                        defaultValue = "-"),
                 @Parameter(
                         name = "proxy.username",
                         description = "Proxy server username",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = "null"),
+                        defaultValue = "-"),
                 @Parameter(
                         name = "proxy.password",
                         description = "Proxy server password",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = "null"),
-                //bootstrap configurations
+                        defaultValue = "-"),
                 @Parameter(
-                        name = "client.bootstrap.configuration",
-                        description = "Client bootsrap configurations. Expected format of these parameters is as " +
-                                "follows:" +
-                                " \"'client.bootstrap.nodelay:xxx','client.bootstrap.keepalive:xxx'\"",
+                        name = "client.bootstrap.configurations",
+                        description = "Client bootstrap configurations in format " +
+                                "`\"'<key>:<value>','<key>:<value>'\"`.\n" +
+                                "Some supported configurations :\n" +
+                                " - Client connect timeout in millis: `'client.bootstrap.connect.timeout:15000'`\n" +
+                                " - Client socket timeout in seconds: `'client.bootstrap.socket.timeout:15'`\n" +
+                                " - Client socket reuse: `'client.bootstrap.socket.reuse:true'`\n" +
+                                " - Enable TCP no delay: `'client.bootstrap.nodelay:true'`\n" +
+                                " - Enable client keep alive: `'client.bootstrap.keepalive:true'`\n" +
+                                " - Send buffer size: `'client.bootstrap.sendbuffersize:1048576'`\n" +
+                                " - Receive buffer size: `'client.bootstrap.recievebuffersize:1048576'`",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = "TODO"),
-                @Parameter(
-                        name = "client.bootstrap.nodelay",
-                        description = " This is mapped to TCP_NODELAY socket option which allows the network to " +
-                                "bypass Nagle Delays by disabling Nagle's algorithm, and sending the data " +
-                                "as soon as it's available\n. " +
-                                "Setting this parameter to 'true' forces a socket to send the data in its buffer, " +
-                                "whatever the packet size. \n" ,
-                        type = {DataType.BOOL},
-                        optional = true,
-                        defaultValue = "true"),
-                @Parameter(
-                        name = "client.bootstrap.keepalive",
-                        description = "This parameter defines whether the tcp connection should remain open for " +
-                                "multiple HTTP requests/responses. If this is set to 'false', HTTP connections will " +
-                                "be closed after each request.",
-                        type = {DataType.BOOL},
-                        optional = true,
-                        defaultValue = "true"),
-                @Parameter(
-                        name = "client.bootstrap.sendbuffersize",
-                        description = "Http client send buffer size.",
-                        type = {DataType.INT},
-                        optional = true,
-                        defaultValue = "1048576"),
-                @Parameter(
-                        name = "client.bootstrap.recievebuffersize",
-                        description = "Http client receive buffer size.",
-                        type = {DataType.INT},
-                        optional = true,
-                        defaultValue = "1048576"),
-                @Parameter(
-                        name = "client.bootstrap.connect.timeout",
-                        description = "Http client connection timeout.",
-                        type = {DataType.INT},
-                        optional = true,
-                        defaultValue = "15000"),
-                @Parameter(
-                        name = "client.bootstrap.socket.reuse",
-                        description = "To enable http socket reuse.",
-                        type = {DataType.BOOL},
-                        optional = true,
-                        defaultValue = "false"),
-                @Parameter(
-                        name = "client.bootstrap.socket.timeout",
-                        description = "Http client socket timeout.",
-                        type = {DataType.STRING},
-                        optional = true,
-                        defaultValue = "15"),
-
-                // pool configurations
-                @Parameter(
-                        name = "connection.pool.count",
-                        description = "Number of connection pools that need to be created for the particular client.",
-                        type = {DataType.INT},
-                        optional = true,
-                        defaultValue = "0"),
+                        defaultValue = "-"),
                 @Parameter(
                         name = "max.pool.active.connections",
-                        description = "Maximum possible number of active connection per pool for the client.",
+                        description = "Maximum possible number of active connection per client pool.",
                         type = {DataType.INT},
                         optional = true,
                         defaultValue = "-1"),
                 @Parameter(
                         name = "min.pool.idle.connections",
-                        description = "Minimum allowed number of idle connections that can be existed in a pool of " +
-                                "the client.",
+                        description = "Minimum number of idle connections that can exist per client pool.",
                         type = {DataType.INT},
                         optional = true,
                         defaultValue = "0"),
                 @Parameter(
                         name = "max.pool.idle.connections",
-                        description = "Maximum number of idle connections that can be existed in a pool of the " +
-                                "client.",
+                        description = "Maximum number of idle connections that can exist per client pool.",
                         type = {DataType.INT},
                         optional = true,
                         defaultValue = "100"),
                 @Parameter(
                         name = "min.evictable.idle.time",
-                        description = "Minimum amount of time (in milliseconds) a connection may sit idle in the pool" +
-                                " before it is eligible for eviction.",
+                        description = "Minimum time (in millis) a connection may sit idle in the " +
+                                "client pool before it become eligible for eviction.",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = "300000ms"),
+                        defaultValue = "300000"),
                 @Parameter(
                         name = "time.between.eviction.runs",
-                        description = "Time between two eviction operations (in milliseconds) on the connection pool.",
+                        description = "Time between two eviction operations (in millis) on the client pool.",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = "30000ms"),
+                        defaultValue = "30000"),
                 @Parameter(
                         name = "max.wait.time",
-                        description = "The maximum number of milliseconds that the pool will wait " +
-                                "(when there are no available connections) for a connection to be returned.",
+                        description = "The maximum time (in millis) the pool will wait (when there are no " +
+                                "available connections) for a connection to be returned to the pool.",
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "60000"),
                 @Parameter(
                         name = "test.on.borrow",
-                        description = "The indication of whether objects will be validated " +
-                                "before being borrowed from the pool. " +
-                                "If the object validation is failed, it will be dropped from the pool, " +
-                                "and will attempt to borrow another.",
+                        description = "Enable connections to be validated " +
+                                "before being borrowed from the client pool.",
                         type = {DataType.BOOL},
                         optional = true,
                         defaultValue = "true"),
                 @Parameter(
                         name = "test.while.idle",
-                        description = "The indication of whether objects will be validated " +
-                                "by the idle object evictor (if any). " +
-                                "If the object validation is failed, it will be dropped from the pool.",
+                        description = "Enable connections to be validated during the eviction operation (if any).",
                         type = {DataType.BOOL},
                         optional = true,
                         defaultValue = "true"),
                 @Parameter(
                         name = "exhausted.action",
-                        description = "Action which should be taken when the maximum number of active connections " +
-                                "are being used. This action is indicated as an integer. Possible action are as " +
-                                "following.\n" +
-                                "0 - Fail the request when pool is exhausted.\n" +
-                                "1 - Block the request when pool is exhausted, until a connection returns to the " +
+                        description = "Action that should be taken when the maximum number of active connections " +
+                                "are being used. This action should be indicated as an int and possible " +
+                                "action values are following.\n" +
+                                "0 - Fail the request.\n" +
+                                "1 - Block the request, until a connection returns to the " +
                                 "pool.\n" +
-                                "2 - Grow the connection pool size when it's exhausted.",
+                                "2 - Grow the connection pool size.",
                         type = {DataType.INT},
                         optional = true,
                         defaultValue = "1 (Block when exhausted)"),
-
-
-                @Parameter(
-                        name = "oauth.username",
-                        description = "The username to be included in the authentication header of the oauth " +
-                                "authentication enabled events. It is required to specify both username and " +
-                                "password to enable oauth authentication. If one of the parameter is not given " +
-                                "by user then an error is logged in the CLI. It is only applicable for for Oauth" +
-                                " requests ",
-                        type = {DataType.STRING},
-                        optional = true,
-                        defaultValue = "NONE"),
-                @Parameter(
-                        name = "oauth.password",
-                        description = "The password to be included in the authentication header of the oauth " +
-                                "authentication enabled events. It is required to specify both username and " +
-                                "password to enable oauth authentication. If one of the parameter is not given " +
-                                "by user then an error is logged in the CLI. It is only applicable for for Oauth" +
-                                " requests ",
-                        type = {DataType.STRING},
-                        optional = true,
-                        defaultValue = "NONE"),
-                @Parameter(
-                        name = "consumer.key",
-                        description = "consumer key for the Http request. It is only applicable for for Oauth requests",
-                        type = {DataType.STRING},
-                        optional = true,
-                        defaultValue = "NONE"),
-                @Parameter(
-                        name = "consumer.secret",
-                        description = "consumer secret for the Http request. It is only applicable for for " +
-                                "Oauth requests",
-                        type = {DataType.STRING},
-                        optional = true,
-                        defaultValue = "NONE"),
-                @Parameter(
-                        name = "refresh.token",
-                        description = "refresh token for the Http request. It is only applicable for for" +
-                                " Oauth requests",
-                        type = {DataType.STRING},
-                        optional = true,
-                        defaultValue = " "),
-                @Parameter(
-                        name = "token.url",
-                        description = "token url for generate a new access token. It is only applicable for for" +
-                                " Oauth requests",
-                        type = {DataType.STRING},
-                        optional = true,
-                        defaultValue = " "),
                 @Parameter(
                         name = "hostname.verification.enabled",
-                        description = "To enable hostname verification",
+                        description = "Enable hostname verification.",
                         type = {DataType.BOOL},
                         optional = true,
                         defaultValue = "true"),
         },
         examples = {
-                @Example(syntax =
-                        "@sink(type='http',publisher.url='http://localhost:8009/foo', method='{{method}}',"
-                                + "headers=\"'content-type:xml','content-length:94'\", client.bootstrap" +
-                                ".configuration=\"'client" +
-                                ".bootstrap" +
-                                ".socket" +
-                                ".timeout:20', 'client.bootstrap.worker.group.size:10'\", client.pool" +
-                                ".configuration=\"'client.connection.pool.count:10','client.max.active.connections" +
-                                ".per.pool:1'\", "
-                                + "@map(type='xml', @payload('{{payloadBody}}')))\n"
-                                + "define stream FooStream (payloadBody String, method string, headers string);\n",
-                        description =
-                                "If it is xml mapping expected input should be in following format for FooStream:\n"
-                                        + "{\n"
-                                        + "<events>\n"
-                                        + "    <event>\n"
-                                        + "        <symbol>WSO2</symbol>\n"
-                                        + "        <price>55.6</price>\n"
-                                        + "        <volume>100</volume>\n"
-                                        + "    </event>\n"
-                                        + "</events>,\n"
-                                        + "POST,\n"
-                                        + "Content-Length:24#Content-Location:USA#Retry-After:120\n"
-                                        + "}\n\n"
-                                        + "Above event will generate output as below.\n"
-                                        + "~Output http event payload\n"
-                                        + "<events>\n"
-                                        + "    <event>\n"
-                                        + "        <symbol>WSO2</symbol>\n"
-                                        + "        <price>55.6</price>\n"
-                                        + "        <volume>100</volume>\n"
-                                        + "    </event>\n"
-                                        + "</events>\n\n"
-                                        + "~Output http event headers\n"
-                                        + "Content-Length:24,\n"
-                                        + "Content-Location:'USA',\n"
-                                        + "Retry-After:120,\n"
-                                        + "Content-Type:'application/xml',\n"
-                                        + "HTTP_METHOD:'POST',\n\n"
-                                        + "~Output http event properties\n"
-                                        + "HTTP_METHOD:'POST',\n"
-                                        + "HOST:'localhost',\n"
-                                        + "PORT:8009,\n"
-                                        + "PROTOCOL:'http',\n"
-                                        + "TO:'/foo'"
+                @Example(syntax = "" +
+                        "@sink(type = 'http', publisher.url = 'http://stocks.com/stocks',\n" +
+                        "      @map(type = 'json'))\n" +
+                        "define stream StockStream (symbol string, price float, volume long);",
+                        description = "" +
+                                "Events arriving on the StockStream will be published to the HTTP endpoint " +
+                                "`http://stocks.com/stocks` using `POST` method with Content-Type `application/json` " +
+                                "by converting those events to the default JSON format as following:\n"
+                                + "```{\n" +
+                                "  \"event\": {\n" +
+                                "    \"symbol\": \"FB\",\n" +
+                                "    \"price\": 24.5,\n" +
+                                "    \"volume\": 5000\n" +
+                                "  }\n" +
+                                "}```"
+                ),
+                @Example(syntax = "" +
+                        "@sink(type='http', publisher.url = 'http://localhost:8009/foo',\n" +
+                        "      client.bootstrap.configurations = \"'client.bootstrap.socket.timeout:20'\",\n" +
+                        "      max.pool.active.connections = '1', headers = \"{{headers}}\",\n" +
+                        "      @map(type='xml', @payload(\"\"\"<stock>\n{{payloadBody}}\n</stock>\"\"\")))\n" +
+                        "define stream FooStream (payloadBody String, headers string);",
+                        description = "" +
+                                "Events arriving on FooStream will be published to the HTTP endpoint " +
+                                "`http://localhost:8009/foo` using `POST` method with Content-Type `application/xml` " +
+                                "and setting `payloadBody` and `header` attribute values.\n" +
+                                "If the `payloadBody` contains\n" +
+                                "```<symbol>WSO2</symbol>\n" +
+                                "<price>55.6</price>\n" +
+                                "<volume>100</volume>```" +
+                                "and `header` contains `'topic:foobar'` values, then the system will generate " +
+                                "an output with the body:\n" +
+                                "```<stock>\n" +
+                                "<symbol>WSO2</symbol>\n" +
+                                "<price>55.6</price>\n" +
+                                "<volume>100</volume>\n" +
+                                "</stock>```" +
+                                "and HTTP headers:\n" +
+                                "`Content-Length:xxx`,\n" +
+                                "`Content-Location:'xxx'`,\n" +
+                                "`Content-Type:'application/xml'`,\n" +
+                                "`HTTP_METHOD:'POST'`"
                 )},
         systemParameter = {
                 @SystemParameter(
+                        name = "clientBootstrapClientGroupSize",
+                        description = "Number of client threads to perform non-blocking read and write to " +
+                                "one or more channels.",
+                        defaultValue = "(Number of available processors) * 2",
+                        possibleParameters = "Any positive integer"
+                ),
+                @SystemParameter(
                         name = "clientBootstrapBossGroupSize",
-                        description = "property to configure number of boss threads, which accepts incoming " +
-                                "connections until the ports are unbound. Once connection accepts successfully, " +
-                                "boss thread passes the accepted channel to one of the worker threads.",
+                        description = "Number of boss threads to accept incoming connections.",
                         defaultValue = "Number of available processors",
-                        possibleParameters = "Any integer"
+                        possibleParameters = "Any positive integer"
                 ),
                 @SystemParameter(
                         name = "clientBootstrapWorkerGroupSize",
-                        description = "property to configure number of worker threads, which performs non " +
-                                "blocking read and write for one or more channels in non-blocking mode.",
-                        defaultValue = "(Number of available processors)*2",
-                        possibleParameters = "Any integer"
-                ),
-                @SystemParameter(
-                        name = "clientBootstrapClientGroupSize",
-                        description = "property to configure number of client threads, which performs non " +
-                                "blocking read and write for one or more channels in non-blocking mode.",
-                        defaultValue = "(Number of available processors)*2",
-                        possibleParameters = "Any integer"
+                        description = "Number of worker threads to accept the connections from boss threads and " +
+                                "perform non-blocking read and write from one or more channels.",
+                        defaultValue = "(Number of available processors) * 2",
+                        possibleParameters = "Any positive integer"
                 ),
                 @SystemParameter(
                         name = "trustStoreLocation",
                         description = "The default truststore file path.",
-                        defaultValue = "${carbon.home}/resources/security/client-truststore.jks",
-                        possibleParameters = "Path to client-truststore.jks"
+                        defaultValue = "`${carbon.home}/resources/security/client-truststore.jks`",
+                        possibleParameters = "Path to client truststore `.jks` file"
                 ),
                 @SystemParameter(
                         name = "trustStorePassword",
                         description = "The default truststore password.",
                         defaultValue = "wso2carbon",
-                        possibleParameters = "Truststore password"
+                        possibleParameters = "Truststore password as string"
                 )
         }
 )
@@ -551,7 +437,7 @@ public class HttpSink extends Sink {
     private String proxyUsername;
     private String proxyPassword;
     private String clientBootstrapConfiguration;
-    private String clientPoolConfiguration;
+//    private String clientPoolConfiguration;
     private String bootstrapWorker;
     private String bootstrapBoss;
     private String bootstrapClient;
@@ -571,7 +457,7 @@ public class HttpSink extends Sink {
     private long timeBetweenEvictionRuns;
     private long minEvictableIdleTime;
     private byte exhaustedAction;
-    private int numberOfPools;
+    //    private int numberOfPools;
     private long maxWaitTime;
     private String hostnameVerificationEnabled;
 
@@ -643,7 +529,7 @@ public class HttpSink extends Sink {
                 (HttpConstants.SOCKET_IDEAL_TIMEOUT, SOCKET_IDEAL_TIMEOUT_VALUE));
         sslProtocol = optionHolder.validateAndGetStaticValue(HttpConstants.SSL_PROTOCOL, EMPTY_STRING);
         tlsStoreType = optionHolder.validateAndGetStaticValue(HttpConstants.TLS_STORE_TYPE, EMPTY_STRING);
-        chunkDisabled = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_CHUNK_ENABLED, EMPTY_STRING);
+        chunkDisabled = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_CHUNK_DISABLED, EMPTY_STRING);
 
         //pool configurations
         maxIdlePerPool = Integer.parseInt(optionHolder.validateAndGetStaticValue(
@@ -662,10 +548,10 @@ public class HttpSink extends Sink {
                 HttpConstants.MIN_EVICTABLE_IDLE_TIME, HttpConstants.DEFAULT_MIN_EVICTABLE_IDLE_TIME));
         exhaustedAction = (byte) Integer.parseInt(optionHolder.validateAndGetStaticValue(
                 HttpConstants.EXHAUSTED_ACTION, HttpConstants.DEFAULT_EXHAUSTED_ACTION));
-        numberOfPools = Integer.parseInt(optionHolder.validateAndGetStaticValue(HttpConstants.CONNECTION_POOL_COUNT,
-                HttpConstants.DEFAULT_CONNECTION_POOL_COUNT));
+//        numberOfPools = Integer.parseInt(optionHolder.validateAndGetStaticValue(HttpConstants.CONNECTION_POOL_COUNT,
+//                HttpConstants.DEFAULT_CONNECTION_POOL_COUNT));
         maxWaitTime = Integer.parseInt(optionHolder.validateAndGetStaticValue(
-                HttpConstants.MAX_WAIT_TIME,  HttpConstants.DEFAULT_MAX_WAIT_TIME));
+                HttpConstants.MAX_WAIT_TIME, HttpConstants.DEFAULT_MAX_WAIT_TIME));
 
         parametersList = optionHolder.validateAndGetStaticValue(HttpConstants.SINK_PARAMETERS, EMPTY_STRING);
         proxyHost = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_HOST, EMPTY_STRING);
@@ -676,8 +562,8 @@ public class HttpSink extends Sink {
                 EMPTY_STRING);
         clientBootstrapConfiguration = optionHolder
                 .validateAndGetStaticValue(HttpConstants.CLIENT_BOOTSTRAP_CONFIGURATION, EMPTY_STRING);
-        clientPoolConfiguration = optionHolder
-                .validateAndGetStaticValue(HttpConstants.CLIENT_POOL_CONFIGURATION, EMPTY_STRING);
+//        clientPoolConfiguration = optionHolder
+//                .validateAndGetStaticValue(HttpConstants.CLIENT_POOL_CONFIGURATION, EMPTY_STRING);
         //read trp globe configuration
         bootstrapWorker = configReader
                 .readConfig(HttpConstants.CLIENT_BOOTSTRAP_WORKER_GROUP_SIZE, EMPTY_STRING);
@@ -1170,7 +1056,7 @@ public class HttpSink extends Sink {
         poolConfiguration.setTimeBetweenEvictionRuns(timeBetweenEvictionRuns);
         poolConfiguration.setMinEvictableIdleTime(minEvictableIdleTime);
         poolConfiguration.setExhaustedAction(exhaustedAction);
-        poolConfiguration.setNumberOfPools(numberOfPools);
+//        poolConfiguration.setNumberOfPools(numberOfPools);
         poolConfiguration.setMaxWaitTime(maxWaitTime);
         senderConfig.setPoolConfiguration(poolConfiguration);
 
@@ -1201,10 +1087,9 @@ public class HttpSink extends Sink {
         }
 
         //overwrite default transport configuration
-        Map<String, Object> properties = HttpSinkUtil
-                .populateTransportConfiguration(clientBootstrapConfiguration, clientPoolConfiguration);
-
-        clientConnector = httpConnectorFactory.createHttpClientConnector(properties, senderConfig);
+        Map<String, Object> bootStrapProperties = HttpSinkUtil
+                .populateTransportConfiguration(clientBootstrapConfiguration);
+        clientConnector = httpConnectorFactory.createHttpClientConnector(bootStrapProperties, senderConfig);
     }
 
     private String encodeMessage(Object s) {

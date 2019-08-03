@@ -25,7 +25,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.extension.io.http.test.distribution</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 HTTP IO - Test Distribution</name>
+    <name>HTTP IO - Test Distribution</name>
     <url>http://wso2.com</url>
 
     <dependencies>

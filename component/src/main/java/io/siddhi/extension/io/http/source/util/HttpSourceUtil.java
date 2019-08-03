@@ -49,17 +49,17 @@ import static io.siddhi.extension.io.http.util.HttpConstants.REQUEST_SIZE_VALIDA
 import static io.siddhi.extension.io.http.util.HttpConstants.REQUEST_SIZE_VALIDATION_REJECT_MESSAGE;
 import static io.siddhi.extension.io.http.util.HttpConstants.REQUEST_SIZE_VALIDATION_REJECT_MESSAGE_CONTENT_TYPE;
 import static io.siddhi.extension.io.http.util.HttpConstants.REQUEST_SIZE_VALIDATION_REJECT_STATUS_CODE;
-import static io.siddhi.extension.io.http.util.HttpConstants.SERVER_BOOTSTRAP_BOSS_GROUP_SIZE_PARAM;
-import static io.siddhi.extension.io.http.util.HttpConstants.SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE_PARAM;
+//import static io.siddhi.extension.io.http.util.HttpConstants.SERVER_BOOTSTRAP_BOSS_GROUP_SIZE_PARAM;
+//import static io.siddhi.extension.io.http.util.HttpConstants.SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE_PARAM;
 import static io.siddhi.extension.io.http.util.HttpConstants.SERVER_BOOTSTRAP_CONNECT_TIMEOUT_PARAM;
 import static io.siddhi.extension.io.http.util.HttpConstants.SERVER_BOOTSTRAP_KEEPALIVE_PARAM;
 import static io.siddhi.extension.io.http.util.HttpConstants.SERVER_BOOTSTRAP_NODELAY_PARAM;
 import static io.siddhi.extension.io.http.util.HttpConstants.SERVER_BOOTSTRAP_RECIEVEBUFFERSIZE_PARAM;
 import static io.siddhi.extension.io.http.util.HttpConstants.SERVER_BOOTSTRAP_SENDBUFFERSIZE_PARAM;
 import static io.siddhi.extension.io.http.util.HttpConstants.SERVER_BOOTSTRAP_SOCKET_BACKLOG_PARAM;
-import static io.siddhi.extension.io.http.util.HttpConstants.SERVER_BOOTSTRAP_SOCKET_REUSE_PARAM;
+//import static io.siddhi.extension.io.http.util.HttpConstants.SERVER_BOOTSTRAP_SOCKET_REUSE_PARAM;
 import static io.siddhi.extension.io.http.util.HttpConstants.SERVER_BOOTSTRAP_SOCKET_TIMEOUT_PARAM;
-import static io.siddhi.extension.io.http.util.HttpConstants.SERVER_BOOTSTRAP_WORKER_GROUP_SIZE_PARAM;
+//import static io.siddhi.extension.io.http.util.HttpConstants.SERVER_BOOTSTRAP_WORKER_GROUP_SIZE_PARAM;
 
 /**
  * Handles the http source util functions.
@@ -238,15 +238,15 @@ public class HttpSourceUtil {
         trpPropertyTypes.put(HEADER_VALIDATION_REJECT_STATUS_CODE, TrpPropertyTypes.INTEGER);
         trpPropertyTypes.put(HEADER_VALIDATION_REJECT_MESSAGE, TrpPropertyTypes.STRING);
         trpPropertyTypes.put(HEADER_VALIDATION_REJECT_MESSAGE_CONTENT_TYPE, TrpPropertyTypes.STRING);
-        trpPropertyTypes.put(SERVER_BOOTSTRAP_BOSS_GROUP_SIZE_PARAM, TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put(SERVER_BOOTSTRAP_WORKER_GROUP_SIZE_PARAM, TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put(SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE_PARAM, TrpPropertyTypes.INTEGER);
+//        trpPropertyTypes.put(SERVER_BOOTSTRAP_BOSS_GROUP_SIZE_PARAM, TrpPropertyTypes.INTEGER);
+//        trpPropertyTypes.put(SERVER_BOOTSTRAP_WORKER_GROUP_SIZE_PARAM, TrpPropertyTypes.INTEGER);
+//        trpPropertyTypes.put(SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE_PARAM, TrpPropertyTypes.INTEGER);
         trpPropertyTypes.put(SERVER_BOOTSTRAP_NODELAY_PARAM, TrpPropertyTypes.BOOLEAN);
         trpPropertyTypes.put(SERVER_BOOTSTRAP_KEEPALIVE_PARAM, TrpPropertyTypes.BOOLEAN);
         trpPropertyTypes.put(SERVER_BOOTSTRAP_SENDBUFFERSIZE_PARAM, TrpPropertyTypes.INTEGER);
         trpPropertyTypes.put(SERVER_BOOTSTRAP_RECIEVEBUFFERSIZE_PARAM, TrpPropertyTypes.INTEGER);
         trpPropertyTypes.put(SERVER_BOOTSTRAP_CONNECT_TIMEOUT_PARAM, TrpPropertyTypes.INTEGER);
-        trpPropertyTypes.put(SERVER_BOOTSTRAP_SOCKET_REUSE_PARAM, TrpPropertyTypes.BOOLEAN);
+//        trpPropertyTypes.put(SERVER_BOOTSTRAP_SOCKET_REUSE_PARAM, TrpPropertyTypes.BOOLEAN);
         trpPropertyTypes.put(SERVER_BOOTSTRAP_SOCKET_TIMEOUT_PARAM, TrpPropertyTypes.INTEGER);
         trpPropertyTypes.put(SERVER_BOOTSTRAP_SOCKET_BACKLOG_PARAM, TrpPropertyTypes.INTEGER);
         return trpPropertyTypes;

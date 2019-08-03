@@ -176,11 +176,9 @@ public class HttpSinkUtil {
      * Method is responsible for set transportation configuration values.
      *
      * @param clientBootstrapConfigurationList client bootstrap configuration list.
-     * @param clientConnectionConfiguration    client connection configuration.
      * @return return the set of config transportation configuration.
      */
-    public static Map<String, Object> populateTransportConfiguration(String clientBootstrapConfigurationList, String
-            clientConnectionConfiguration) {
+    public static Map<String, Object> populateTransportConfiguration(String clientBootstrapConfigurationList) {
         Map<String, Object> properties = new HashMap<>();
         //populate bootstrap configurations
         if (!HttpConstants.EMPTY_STRING.equals(clientBootstrapConfigurationList.trim())) {
@@ -189,13 +187,13 @@ public class HttpSinkUtil {
                     .split(PARAMETER_SEPARATOR);
             properties.putAll(populateClientConnectionConfiguration(populateParameterMap(valueList)));
         }
-        //populate connection configurations
-        if (!HttpConstants.EMPTY_STRING.equals(clientConnectionConfiguration.trim())) {
-            String[] valueList = clientConnectionConfiguration.trim()
-                    .substring(1, clientConnectionConfiguration.length() - 1)
-                    .split(PARAMETER_SEPARATOR);
-            properties.putAll(populateClientConnectionConfiguration(populateParameterMap(valueList)));
-        }
+//        //populate connection configurations
+//        if (!HttpConstants.EMPTY_STRING.equals(clientConnectionConfiguration.trim())) {
+//            String[] valueList = clientConnectionConfiguration.trim()
+//                    .substring(1, clientConnectionConfiguration.length() - 1)
+//                    .split(PARAMETER_SEPARATOR);
+//            properties.putAll(populateClientConnectionConfiguration(populateParameterMap(valueList)));
+//        }
         return properties;
     }
 

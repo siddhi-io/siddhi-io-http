@@ -25,7 +25,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>siddhi-io-http-tests</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 HTTP IO - Tests</name>
+    <name>HTTP IO - Tests</name>
     <url>http://wso2.com</url>
 
     <modules>

@@ -52,10 +52,7 @@ public class HttpSinkCustomConfigurationTestCase {
                 "socket.idle.timeout='150000'," +
                 "ssl.protocol='TLS'," +
                 "chunk.disabled='false'," +
-                "follow.redirect='false'," +
-                "max.redirect.count='5'," +
                 "parameters=\"'ciphers : TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256','sslEnabledProtocols : TLSv1.1'\"," +
-                "client.pool.configurations=\"'client.connection.pool.count:1','sender.thread.count:20'\"," +
                 "client.bootstrap.configurations=\"'client.bootstrap.nodelay:true','client.bootstrap" +
                 ".recievebuffersize:1048576'\"," +
                 "@map(type='xml', @payload('{{message}}'))) " +

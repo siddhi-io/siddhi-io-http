@@ -40,7 +40,7 @@ import java.util.concurrent.CountDownLatch;
 public class HttpResponseMessageListener implements HttpConnectorListener {
     private static final Logger log = LoggerFactory.getLogger(HttpResponseMessageListener.class);
 
-    private HttpResponseConnectorListener responseConnectorListener;
+    private HttpCallResponseConnectorListener responseConnectorListener;
     private Map<String, Object> trpProperties;
     private boolean isDownloadEnabled;
     private String sinkId;
@@ -74,7 +74,7 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
         String statusCode = Integer.toString(carbonMessage.getNettyHttpResponse().status().code());
         if (carbonMessage.getNettyHttpResponse().status().code() == (HttpConstants.SUCCESS_CODE) ||
                 HttpConstants.MAXIMUM_TRY_COUNT == tryCount) {
-            HttpResponseSource responseSource = findAndGetResponseSource(statusCode);
+            HttpCallResponseSource responseSource = findAndGetResponseSource(statusCode);
             if (responseSource != null) {
                 responseConnectorListener = responseSource.getConnectorListener();
                 responseConnectorListener.onMessage(carbonMessage);
@@ -94,7 +94,8 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
             sink.initClientConnector(null);
         }
 
-        HttpResponseSource source = HTTPSourceRegistry.getResponseSource(sinkId, HttpConstants.DEFAULT_HTTP_ERROR_CODE);
+        HttpCallResponseSource source = HTTPSourceRegistry.getCallResponseSource(sinkId,
+                HttpConstants.DEFAULT_HTTP_ERROR_CODE);
         if (source != null) {
             responseConnectorListener = source.getConnectorListener();
         } else {
@@ -118,12 +119,12 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
         responseConnectorListener.disconnect();
     }
 
-    private HttpResponseSource findAndGetResponseSource(String statusCode) {
+    private HttpCallResponseSource findAndGetResponseSource(String statusCode) {
         ResponseSourceId id = new ResponseSourceId(sinkId, statusCode);
-        for (Map.Entry entry : HTTPSourceRegistry.getResponseSourceRegistry().entrySet()) {
+        for (Map.Entry entry : HTTPSourceRegistry.getCallResponseSourceRegistry().entrySet()) {
             ResponseSourceId key = (ResponseSourceId) entry.getKey();
             if (id.equals(key)) {
-                return (HttpResponseSource) entry.getValue();
+                return (HttpCallResponseSource) entry.getValue();
             }
         }
         return null;

@@ -1,20 +1,19 @@
 /*
- *  Copyright (c) 2018 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package io.siddhi.extension.io.http.sink;
 
@@ -30,14 +29,13 @@ import io.siddhi.extension.io.http.sink.util.HttpServerListenerHandler;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class HttpRequestResponseTestCase {
-    private static final Logger log = Logger.getLogger(HttpRequestResponseTestCase.class);
+public class HttpCallResponseTestCase {
+    private static final Logger log = Logger.getLogger(HttpCallResponseTestCase.class);
 
     private AtomicInteger eventCount = new AtomicInteger(0);
     private String downloadPath;
@@ -51,24 +49,19 @@ public class HttpRequestResponseTestCase {
         downloadPath = rootPath + "/downloads";
     }
 
-    @BeforeMethod
-    public void initMethod() {
-        eventCount.set(0);
-    }
-
     @Test
     public void testHTTPRequestResponse1() throws Exception {
         log.info("Send a POST request with a json body message and receive the response");
         SiddhiManager siddhiManager = new SiddhiManager();
         String inStreamDefinition = "" +
                 "define stream FooStream (message String,headers String);"
-                + "@sink(type='http-request',publisher.url='http://localhost:8007/abc'," +
+                + "@sink(type='http-call',publisher.url='http://localhost:8005/abc'," +
                 " method='POST',"
                 + "headers='{{headers}}',sink.id='source-1',"
                 + "@map(type='json', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String, headers String);" +
                 "" +
-                "@source(type='http-response', sink.id='source-1', " +
+                "@source(type='http-call-response', sink.id='source-1', " +
                 "@map(type='json',@attributes(name='name', id='id')))" +
                 "define stream responseStream(name String, id int);";
         String query = (
@@ -101,7 +94,7 @@ public class HttpRequestResponseTestCase {
         };
 
         siddhiAppRuntime.addCallback("responseStream", streamCallback);
-        HttpServerListenerHandler httpServerListenerHandler = new HttpServerListenerHandler(8007);
+        HttpServerListenerHandler httpServerListenerHandler = new HttpServerListenerHandler(8005);
         httpServerListenerHandler.run();
         siddhiAppRuntime.start();
 
@@ -121,13 +114,13 @@ public class HttpRequestResponseTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inStreamDefinition = "" +
                 "define stream FooStream (name String, id int, headers String, volume long, price float);"
-                + "@sink(type='http-request',publisher.url='http://localhost:8007/abc'," +
+                + "@sink(type='http-call',publisher.url='http://localhost:8005/abc'," +
                 " method='POST',"
                 + "headers='{{headers}}',sink.id='source-1',"
                 + "@map(type='json', @payload(\"\"\"{\"name\":\"{{name}}\",\"id\":{{id}}}\"\"\"))) "
                 + "Define stream BarStream (name String, id int, headers String, volume long, price float);" +
                 "" +
-                "@source(type='http-response', sink.id='source-1', " +
+                "@source(type='http-call-response', sink.id='source-1', " +
                 "@map(type='json',@attributes(name='name', id='id', headers='trp:headers', volume='trp:volume', " +
                 "price='trp:price')))" +
                 "define stream responseStream(name String, id int, headers String, volume long, price float);";
@@ -162,7 +155,7 @@ public class HttpRequestResponseTestCase {
         };
 
         siddhiAppRuntime.addCallback("responseStream", streamCallback);
-        HttpServerListenerHandler httpServerListenerHandler = new HttpServerListenerHandler(8007);
+        HttpServerListenerHandler httpServerListenerHandler = new HttpServerListenerHandler(8005);
         httpServerListenerHandler.run();
         siddhiAppRuntime.start();
 
@@ -181,16 +174,16 @@ public class HttpRequestResponseTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inStreamDefinition = "" +
                 "define stream FooStream (name String, id int, headers String, downloadPath string);"
-                + "@sink(type='http-request'," +
+                + "@sink(type='http-call'," +
                 "downloading.enabled='true'," +
                 "download.path='{{downloadPath}}'," +
-                "publisher.url='http://localhost:8007/files'," +
+                "publisher.url='http://localhost:8005/files'," +
                 " method='GET',"
                 + "headers='{{headers}}',sink.id='source-1',"
                 + "@map(type='json')) "
                 + "Define stream BarStream (name String, id int, headers String, downloadPath string);" +
                 "" +
-                "@source(type='http-response', sink.id='source-1', http.status.code='2\\d+', " +
+                "@source(type='http-call-response', sink.id='source-1', http.status.code='2\\d+', " +
                 "@map(type='text', regex.A='((.|\\n)*)', @attributes(headers='trp:headers', fileName='A[1]'))) " +
                 "define stream responseStream(fileName string, headers string);";
         String query = (
@@ -221,7 +214,7 @@ public class HttpRequestResponseTestCase {
         };
 
         siddhiAppRuntime.addCallback("responseStream", streamCallback);
-        HttpFileServerListenerHandler httpFileServerListenerHandler = new HttpFileServerListenerHandler(8007);
+        HttpFileServerListenerHandler httpFileServerListenerHandler = new HttpFileServerListenerHandler(8005);
         httpFileServerListenerHandler.run();
         siddhiAppRuntime.start();
 
@@ -245,20 +238,20 @@ public class HttpRequestResponseTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         String inStreamDefinition = "" +
                 "define stream FooStream (name String, id int, headers String, downloadPath string);" +
-                "@sink(type='http-request'," +
+                "@sink(type='http-call'," +
                 "downloading.enabled='true'," +
                 "download.path='{{downloadPath}}'," +
-                "publisher.url='http://localhost:8007/files2', " +
+                "publisher.url='http://localhost:8005/files2', " +
                 "method='GET'," +
                 "headers='{{headers}}',sink.id='source-1'," +
                 "@map(type='json')) " +
                 "Define stream BarStream (name String, id int, headers String, downloadPath string);" +
                 "" +
-                "@source(type='http-response', sink.id='source-1', http.status.code='2\\d+', " +
+                "@source(type='http-call-response', sink.id='source-1', http.status.code='2\\d+', " +
                 "@map(type='text', regex.A='((.|\\n)*)', @attributes(headers='trp:headers', fileName='A[1]'))) " +
                 "define stream responseStream2xx(fileName string, headers string);" +
 
-                "@source(type='http-response', sink.id='source-1', http.status.code='4\\d+', " +
+                "@source(type='http-call-response', sink.id='source-1', http.status.code='4\\d+', " +
                 "@map(type='text', regex.A='((.|\\n)*)', @attributes(headers='trp:headers', errorMsg='A[1]'))) " +
                 "define stream responseStream4xx(errorMsg string);";
         String query = (
@@ -298,7 +291,7 @@ public class HttpRequestResponseTestCase {
 
         siddhiAppRuntime.addCallback("responseStream2xx", streamCallback2xx);
         siddhiAppRuntime.addCallback("responseStream4xx", streamCallback4xx);
-        HttpFileServerListenerHandler httpFileServerListenerHandler = new HttpFileServerListenerHandler(8007, 400);
+        HttpFileServerListenerHandler httpFileServerListenerHandler = new HttpFileServerListenerHandler(8005, 400);
         httpFileServerListenerHandler.run();
         siddhiAppRuntime.start();
 

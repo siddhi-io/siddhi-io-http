@@ -18,8 +18,8 @@
  */
 package io.siddhi.extension.io.http.util;
 
-import io.siddhi.extension.io.http.source.HttpRequestSource;
-import io.siddhi.extension.io.http.source.HttpResponseSource;
+import io.siddhi.extension.io.http.source.HttpCallResponseSource;
+import io.siddhi.extension.io.http.source.HttpServiceSource;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,36 +29,36 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class HTTPSourceRegistry {
 
-    private static Map<String, HttpRequestSource> requestSourceRegistry = new ConcurrentHashMap<>();
-    private static Map<ResponseSourceId, HttpResponseSource> responseSourceRegistry = new ConcurrentHashMap<>();
+    private static Map<String, HttpServiceSource> serviceSourceRegistry = new ConcurrentHashMap<>();
+    private static Map<ResponseSourceId, HttpCallResponseSource> callResponseSourceRegistry = new ConcurrentHashMap<>();
 
-    // handle request sources
-    public static HttpRequestSource getRequestSource(String sourceId) {
-        return requestSourceRegistry.get(sourceId);
+    // handle service sources
+    public static HttpServiceSource getServiceSource(String sourceId) {
+        return serviceSourceRegistry.get(sourceId);
     }
 
-    public static void registerRequestSource(String sourceId, HttpRequestSource source) {
-        requestSourceRegistry.put(sourceId, source);
+    public static void registerServiceSource(String sourceId, HttpServiceSource source) {
+        serviceSourceRegistry.put(sourceId, source);
     }
 
-    public static void removeRequestSource(String sourceId) {
-        requestSourceRegistry.remove(sourceId);
+    public static void removeServiceSource(String sourceId) {
+        serviceSourceRegistry.remove(sourceId);
     }
 
     // handle response sources
-    public static HttpResponseSource getResponseSource(String sinkId, String statusCode) {
-        return responseSourceRegistry.get(new ResponseSourceId(sinkId, statusCode));
+    public static HttpCallResponseSource getCallResponseSource(String sinkId, String statusCode) {
+        return callResponseSourceRegistry.get(new ResponseSourceId(sinkId, statusCode));
     }
 
-    public static void registerResponseSource(String sinkId, String statusCode, HttpResponseSource source) {
-        responseSourceRegistry.put(new ResponseSourceId(sinkId, statusCode), source);
+    public static void registerCallResponseSource(String sinkId, String statusCode, HttpCallResponseSource source) {
+        callResponseSourceRegistry.put(new ResponseSourceId(sinkId, statusCode), source);
     }
 
-    public static void removeResponseSource(String sinkId, String statusCode) {
-        responseSourceRegistry.remove(new ResponseSourceId(sinkId, statusCode));
+    public static void removeCallResponseSource(String sinkId, String statusCode) {
+        callResponseSourceRegistry.remove(new ResponseSourceId(sinkId, statusCode));
     }
 
-    public static Map<ResponseSourceId, HttpResponseSource> getResponseSourceRegistry() {
-        return responseSourceRegistry;
+    public static Map<ResponseSourceId, HttpCallResponseSource> getCallResponseSourceRegistry() {
+        return callResponseSourceRegistry;
     }
 }
