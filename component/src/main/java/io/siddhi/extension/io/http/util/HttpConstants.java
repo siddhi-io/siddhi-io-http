@@ -101,8 +101,8 @@ public class HttpConstants {
     public static final String KEYSTORE_FILE_VALUE = "${carbon.home}/resources/security/wso2carbon.jks";
     public static final String KEYSTORE_PASSWORD = "keyStorePassword";
     public static final String KEYSTORE_PASSWORD_VALUE = "wso2carbon";
-    public static final String CERT_PASSWORD = "certPassword";
-    public static final String CERT_PASSWORD_VALUE = "wso2carbon";
+//    public static final String CERT_PASSWORD = "certPassword";
+//    public static final String CERT_PASSWORD_VALUE = "wso2carbon";
     public static final String DEFAULT_SOURCE_SCHEME = "defaultScheme";
     public static final String DEFAULT_SOURCE_SCHEME_VALUE = "http";
     public static final String DEFAULT_TRACE_LOG_ENABLED = "httpTraceLogEnabled";
@@ -121,18 +121,21 @@ public class HttpConstants {
     public static final String SSL_VERIFY_CLIENT = "ssl.verify.client";
     public static final String SSL_PROTOCOL = "ssl.protocol";
     public static final String TLS_STORE_TYPE = "tls.store.type";
+    @Deprecated
     public static final String SOURCE_PARAMETERS = "parameters";
-    public static final String REQUEST_SIZE_VALIDATION_CONFIG = "request.size.validation.configurations";
-    public static final String SERVER_BOOTSTRAP_CONFIGURATION = "server.bootstrap.configurations";
-    public static final String CLIENT_CHUNK_ENABLED = "chunk.disabled";
-    public static final String CLIENT_FOLLOW_REDIRECT = "follow.redirect";
-    public static final String CLIENT_MAX_REDIRECT_COUNT = "max.redirect.count";
+    public static final String SSS_CONFIGS = "ssl.configurations";
+    public static final String REQUEST_SIZE_VALIDATION_CONFIGS = "request.size.validation.configurations";
+    public static final String SERVER_BOOTSTRAP_CONFIGS = "server.bootstrap.configurations";
+    public static final String CLIENT_CHUNK_DISABLED = "chunk.disabled";
+//    public static final String CLIENT_FOLLOW_REDIRECT = "follow.redirect";
+//    public static final String CLIENT_MAX_REDIRECT_COUNT = "max.redirect.count";
     public static final String CLIENT_BOOTSTRAP_CONFIGURATION = "client.bootstrap.configurations";
-    public static final String CLIENT_POOL_CONFIGURATION = "client.threadpool.configurations";
+//    public static final String CLIENT_POOL_CONFIGURATION = "client.threadpool.configurations";
     public static final String PROXY_HOST = "proxy.host";
     public static final String PROXY_PORT = "proxy.port";
     public static final String PROXY_USERNAME = "proxy.username";
     public static final String PROXY_PASSWORD = "proxy.password";
+    @Deprecated
     public static final String SINK_PARAMETERS = "parameters";
     public static final String MSG_ID = "msgId";
     //http sink transport properties
@@ -152,16 +155,17 @@ public class HttpConstants {
     public static final String HEADER_VALIDATION_REJECT_MESSAGE = "header.validation.reject.message";
     public static final String HEADER_VALIDATION_REJECT_MESSAGE_CONTENT_TYPE = "header.validation.reject.message" +
             ".content.type";
-    public static final String SERVER_BOOTSTRAP_BOSS_GROUP_SIZE_PARAM = "server.bootstrap.boss.group.size";
-    public static final String SERVER_BOOTSTRAP_WORKER_GROUP_SIZE_PARAM = "server.bootstrap.worker.group.size";
-    public static final String SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE_PARAM = "server.bootstrap.client.group.size";
+    // Not read in the carbon http
+    // public static final String SERVER_BOOTSTRAP_BOSS_GROUP_SIZE_PARAM = "server.bootstrap.boss.group.size";
+    // public static final String SERVER_BOOTSTRAP_WORKER_GROUP_SIZE_PARAM = "server.bootstrap.worker.group.size";
+    // public static final String SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE_PARAM = "server.bootstrap.client.group.size";
+    // public static final String SERVER_BOOTSTRAP_SOCKET_REUSE_PARAM = "server.bootstrap.socket.reuse";
+    public static final String SERVER_BOOTSTRAP_SOCKET_TIMEOUT_PARAM = "server.bootstrap.socket.timeout";
+    public static final String SERVER_BOOTSTRAP_CONNECT_TIMEOUT_PARAM = "server.bootstrap.connect.timeout";
     public static final String SERVER_BOOTSTRAP_NODELAY_PARAM = "server.bootstrap.nodelay";
     public static final String SERVER_BOOTSTRAP_KEEPALIVE_PARAM = "server.bootstrap.keepalive";
     public static final String SERVER_BOOTSTRAP_SENDBUFFERSIZE_PARAM = "server.bootstrap.sendbuffersize";
     public static final String SERVER_BOOTSTRAP_RECIEVEBUFFERSIZE_PARAM = "server.bootstrap.recievebuffersize";
-    public static final String SERVER_BOOTSTRAP_CONNECT_TIMEOUT_PARAM = "server.bootstrap.connect.timeout";
-    public static final String SERVER_BOOTSTRAP_SOCKET_REUSE_PARAM = "server.bootstrap.socket.reuse";
-    public static final String SERVER_BOOTSTRAP_SOCKET_TIMEOUT_PARAM = "server.bootstrap.socket.timeout";
     public static final String SERVER_BOOTSTRAP_SOCKET_BACKLOG_PARAM = "server.bootstrap.socket.backlog";
     //http source transport properties
 
@@ -219,8 +223,8 @@ public class HttpConstants {
     public static final String BLOCKING_IO = "blocking.io";
 
     //pool configurations
-    public static final String CONNECTION_POOL_COUNT = "connection.pool.count";
-    public static final String DEFAULT_CONNECTION_POOL_COUNT = "0";
+//    public static final String CONNECTION_POOL_COUNT = "connection.pool.count";
+//    public static final String DEFAULT_CONNECTION_POOL_COUNT = "0";
     public static final String MAX_ACTIVE_CONNECTIONS_PER_POOL = "max.pool.active.connections";
     public static final String DEFAULT_MAX_ACTIVE_CONNECTIONS_PER_POOL = "-1"; // unlimited
     public static final String MIN_IDLE_CONNECTIONS_PER_POOL = "min.pool.idle.connections";

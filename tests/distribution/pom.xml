@@ -18,14 +18,14 @@
     <parent>
         <artifactId>siddhi-io-http-tests</artifactId>
         <groupId>io.siddhi.extension.io.http</groupId>
-        <version>2.0.9-SNAPSHOT</version>
+        <version>2.1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.extension.io.http.test.distribution</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 HTTP IO - Test Distribution</name>
+    <name>HTTP IO - Test Distribution</name>
     <url>http://wso2.com</url>
 
     <dependencies>

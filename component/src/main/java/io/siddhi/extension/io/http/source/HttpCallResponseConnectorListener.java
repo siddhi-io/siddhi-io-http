@@ -31,8 +31,8 @@ import java.util.concurrent.Executors;
 /**
  * Connector Listener for HttpResponseSource
  */
-public class HttpResponseConnectorListener implements HttpConnectorListener {
-    private static final Logger log = LoggerFactory.getLogger(HttpResponseConnectorListener.class);
+public class HttpCallResponseConnectorListener implements HttpConnectorListener {
+    private static final Logger log = LoggerFactory.getLogger(HttpCallResponseConnectorListener.class);
     private SourceEventListener sourceEventListener;
     private String sinkId;
     private ExecutorService executorService;
@@ -40,9 +40,9 @@ public class HttpResponseConnectorListener implements HttpConnectorListener {
     private String[] trpPropertyNames;
     private boolean shouldAllowStreamingResponses;
 
-    public HttpResponseConnectorListener(int numberOfThreads, SourceEventListener sourceEventListener,
-                                         boolean shouldAllowStreamingResponses,
-                                         String sinkId, String[] trpPropertyNames, String siddhiAppName) {
+    public HttpCallResponseConnectorListener(int numberOfThreads, SourceEventListener sourceEventListener,
+                                             boolean shouldAllowStreamingResponses,
+                                             String sinkId, String[] trpPropertyNames, String siddhiAppName) {
         this.sourceEventListener = sourceEventListener;
         this.sinkId = sinkId;
         this.executorService = Executors.newFixedThreadPool(numberOfThreads);

@@ -27,20 +27,20 @@ import java.util.concurrent.ConcurrentHashMap;
  * {@code HttpConnectorRegistry} The code is responsible for maintaining the all active connector listeners for
  * http-response source.
  */
-class HttpResponseSourceConnectorRegistry {
-    private static HttpResponseSourceConnectorRegistry instance = new HttpResponseSourceConnectorRegistry();
-    private Map<String, HttpResponseConnectorListener> sourceListenersMap = new ConcurrentHashMap<>();
+class HttpCallResponseSourceConnectorRegistry {
+    private static HttpCallResponseSourceConnectorRegistry instance = new HttpCallResponseSourceConnectorRegistry();
+    private Map<String, HttpCallResponseConnectorListener> sourceListenersMap = new ConcurrentHashMap<>();
 
-    private HttpResponseSourceConnectorRegistry() {
+    private HttpCallResponseSourceConnectorRegistry() {
 
     }
 
     /**
-     * Get HttpResponseSourceConnectorRegistry instance.
+     * Get HttpCallResponseSourceConnectorRegistry instance.
      *
-     * @return HttpResponseSourceConnectorRegistry instance
+     * @return HttpCallResponseSourceConnectorRegistry instance
      */
-    static HttpResponseSourceConnectorRegistry getInstance() {
+    static HttpCallResponseSourceConnectorRegistry getInstance() {
         return instance;
     }
 
@@ -50,7 +50,7 @@ class HttpResponseSourceConnectorRegistry {
      *
      * @return the source listener map
      */
-    Map<String, HttpResponseConnectorListener> getSourceListenersMap() {
+    Map<String, HttpCallResponseConnectorListener> getSourceListenersMap() {
         return this.sourceListenersMap;
     }
 
@@ -60,9 +60,9 @@ class HttpResponseSourceConnectorRegistry {
      *
      * @param sinkId the sink id for the source
      */
-    void registerSourceListener(HttpResponseConnectorListener httpResponseSourceListener, String sinkId,
+    void registerSourceListener(HttpCallResponseConnectorListener httpResponseSourceListener, String sinkId,
                                 String statusCode) {
-        HttpResponseConnectorListener sourceListener =
+        HttpCallResponseConnectorListener sourceListener =
                 this.sourceListenersMap.putIfAbsent((sinkId + statusCode), httpResponseSourceListener);
         if (sourceListener != null) {
             throw new SiddhiAppCreationException("There is a connection already established for the source with " +
@@ -77,7 +77,7 @@ class HttpResponseSourceConnectorRegistry {
      * @param siddhiAppName name of the siddhi app
      */
     void unregisterSourceListener(String sinkId, String statusCode, String siddhiAppName) {
-        HttpResponseConnectorListener httpSourceListener =
+        HttpCallResponseConnectorListener httpSourceListener =
                 this.sourceListenersMap.get(sinkId + statusCode);
         if (httpSourceListener != null && httpSourceListener.getSiddhiAppName().equals(siddhiAppName)) {
             sourceListenersMap.remove(sinkId + statusCode);

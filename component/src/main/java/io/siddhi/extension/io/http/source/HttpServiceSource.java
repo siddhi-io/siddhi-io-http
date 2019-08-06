@@ -1,23 +1,31 @@
 /*
- *  Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
- *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 package io.siddhi.extension.io.http.source;
 
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.DefaultHttpResponse;
+import io.netty.handler.codec.http.DefaultLastHttpContent;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timeout;
+import io.netty.util.TimerTask;
 import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
@@ -25,34 +33,46 @@ import io.siddhi.annotation.SystemParameter;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
-import io.siddhi.core.stream.ServiceDeploymentInfo;
-import io.siddhi.core.stream.input.source.Source;
 import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.OptionHolder;
+import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
+import io.siddhi.extension.io.http.util.HTTPSourceRegistry;
 import io.siddhi.extension.io.http.util.HttpConstants;
-import io.siddhi.extension.io.http.util.HttpIoUtil;
 import org.apache.log4j.Logger;
-import org.wso2.transport.http.netty.contract.config.ListenerConfiguration;
+import org.wso2.carbon.messaging.Header;
+import org.wso2.transport.http.netty.contract.ServerConnectorException;
+import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
-import java.util.Locale;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
-import static io.siddhi.extension.io.http.util.HttpConstants.DEFAULT_WORKER_COUNT;
-import static io.siddhi.extension.io.http.util.HttpConstants.SOCKET_IDEAL_TIMEOUT_VALUE;
-
+import static org.wso2.carbon.messaging.Constants.DIRECTION;
+import static org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE;
+import static org.wso2.transport.http.netty.contract.Constants.HTTP_STATUS_CODE;
 
 /**
- * Http source for receive the http and https request.
+ * http-service source for receive the http and https request.
  */
-@Extension(name = "http", namespace = "source",
-        description = "HTTP source receives POST requests via HTTP and " +
-                "HTTPS protocols in format such as `text`, `XML` and `JSON`. It also supports basic " +
+@Extension(name = "http-service", namespace = "source",
+        description = "" +
+                "The http-service source receives POST requests via HTTP and HTTPS protocols " +
+                "in format such as `text`, `XML` and `JSON` and sends responses via its corresponding " +
+                "http-service-response sink correlated through a unique `source.id`.\n" +
+                "For request and response correlation, it generates a `messageId` upon each incoming request " +
+                "and expose it via transport properties in the format `trp:messageId` to correlate them with " +
+                "the responses at the http-service-response sink.\n" +
+                "It also supports basic " +
                 "authentication to ensure events are received from authorized users/systems.\n" +
                 "The request headers and properties are exposed via transport properties and they can be retrieved " +
-                "in the mapper in the format `trp:<header>`." ,
+                "in the mapper in the format `trp:<header>`.",
         parameters = {
                 @Parameter(name = "receiver.url",
                         description = "The URL on which events should be received. " +
@@ -60,6 +80,17 @@ import static io.siddhi.extension.io.http.util.HttpConstants.SOCKET_IDEAL_TIMEOU
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "`http://0.0.0.0:9763/<appNAme>/<streamName>`"),
+                @Parameter(name = "source.id",
+                        description = "Identifier to correlate the http-service source to its corresponding " +
+                                "http-service-response sinks to send responses.",
+                        type = {DataType.STRING}),
+                @Parameter(name = "connection.timeout",
+                        description = "Connection timeout in millis. The system will send a timeout, " +
+                                "if a corresponding response is not sent by an associated " +
+                                "http-service-response sink within the given time.",
+                        type = {DataType.INT},
+                        optional = true,
+                        defaultValue = "120000"),
                 @Parameter(name = "basic.auth.enabled",
                         description = "This only works in VM, Docker and Kubernetes.\nWhere when enabled " +
                                 "it authenticates each request using the " +
@@ -176,34 +207,37 @@ import static io.siddhi.extension.io.http.util.HttpConstants.SOCKET_IDEAL_TIMEOU
         },
         examples = {
                 @Example(syntax = "" +
-                        "@app.name('StockProcessor')\n\n" +
-                        "@source(type='http', @map(type = 'json'))\n" +
-                        "define stream StockStream (symbol string, price float, volume long);\n",
-                        description = "Above HTTP source listeners on url " +
-                                "`http://0.0.0.0:9763/StockProcessor/StockStream` " +
-                                "for JSON messages on the format:\n"
-                                + "```{\n" +
+                        "@source(type='http-service', receiver.url='http://localhost:5005/add',\n" +
+                        "        source.id='adder',\n" +
+                        "        @map(type='json, @attributes(messageId='trp:messageId',\n" +
+                        "                                     value1='$.event.value1',\n" +
+                        "                                     value2='$.event.value2')))\n" +
+                        "define stream AddStream (messageId string, value1 long, value2 long);\n" +
+                        "\n" +
+                        "@sink(type='http-service-response', source.id='adder',\n" +
+                        "      message.id='{{messageId}}', @map(type = 'json'))\n" +
+                        "define stream ResultStream (messageId string, results long);\n" +
+                        "\n" +
+                        "@info(name = 'query1')\n" +
+                        "from AddStream \n" +
+                        "select messageId, value1 + value2 as results \n" +
+                        "insert into ResultStream;",
+                        description = "Above sample listens events on `http://localhost:5005/stocks` url for " +
+                                "JSON messages on the format:\n" +
+                                "```{\n" +
                                 "  \"event\": {\n" +
-                                "    \"symbol\": \"FB\",\n" +
-                                "    \"price\": 24.5,\n" +
-                                "    \"volume\": 5000\n" +
+                                "    \"value1\": 3,\n" +
+                                "    \"value2\": 4\n" +
                                 "  }\n" +
-                                "}```" +
-                                "It maps the incoming messages and sends them to `StockStream` for processing."),
-                @Example(syntax = "" +
-                        "@source(type='http', receiver.url='http://localhost:5005/stocks',\n" +
-                        "        @map(type = 'xml'))\n" +
-                        "define stream StockStream (symbol string, price float, volume long);\n",
-                        description = "Above HTTP source listeners on url `http://localhost:5005/stocks` for " +
-                                "JSON messages on the format:\n"
-                                + "```<events>\n"
-                                + "    <event>\n"
-                                + "        <symbol>Fb</symbol>\n"
-                                + "        <price>55.6</price>\n"
-                                + "        <volume>100</volume>\n"
-                                + "    </event>\n"
-                                + "</events>```\n" +
-                                "It maps the incoming messages and sends them to `StockStream` for processing."),
+                                "}```\n" +
+                                "Map the vents into AddStream, process the events through query `query1`, and " +
+                                "sends the results produced on ResultStream via http-service-response sink " +
+                                "on the message format:" +
+                                "```{\n" +
+                                "  \"event\": {\n" +
+                                "    \"results\": 7\n" +
+                                "  }\n" +
+                                "}```"),
         },
         systemParameter = {
                 @SystemParameter(
@@ -264,27 +298,29 @@ import static io.siddhi.extension.io.http.util.HttpConstants.SOCKET_IDEAL_TIMEOU
                 )
         }
 )
-public class HttpSource extends Source {
-    private static final Logger log = Logger.getLogger(HttpSource.class);
-    protected String listenerUrl;
-    protected Boolean isAuth;
-    protected int workerThread;
-    protected SourceEventListener sourceEventListener;
-    protected String[] requestedTransportPropertyNames;
-    protected ListenerConfiguration listenerConfiguration;
-    private HttpConnectorRegistry httpConnectorRegistry;
+public class HttpServiceSource extends HttpSource {
+
+    private static final Logger log = Logger.getLogger(HttpServiceSource.class);
+    private HttpSyncConnectorRegistry httpConnectorRegistry;
+    private String sourceId;
+    private long connectionTimeout;
+
+    private Map<String, HttpCarbonMessage> requestContainerMap = new ConcurrentHashMap<>();
+
+    private HashedWheelTimer timer;
+    private WeakHashMap<String, Timeout> schedulerMap = new WeakHashMap<>();
     private String siddhiAppName;
-    private ServiceDeploymentInfo serviceDeploymentInfo;
-    private boolean isSecured;
 
     /**
-     * The initialization method for {@link Source}, which will be called before other methods and validate
-     * the all listenerConfiguration and getting the intial values.
+     * The initialization method for {@link io.siddhi.core.stream.input.source.Source}, which will be called
+     * before other methods and validate the all listenerConfiguration and getting the intial values.
      *
      * @param sourceEventListener After receiving events, the source should trigger onEvent() of this listener.
      *                            Listener will then pass on the events to the appropriate mappers for processing .
-     * @param optionHolder        Option holder containing static listenerConfiguration related to the {@link Source}
-     * @param configReader        to read the {@link Source} related system listenerConfiguration.
+     * @param optionHolder        Option holder containing static listenerConfiguration related to the
+     *                            {@link io.siddhi.core.stream.input.source.Source}
+     * @param configReader        to read the {@link io.siddhi.core.stream.input.source.Source} related system
+     *                            listenerConfiguration.
      * @param siddhiAppContext    the context of the {@link io.siddhi.query.api.SiddhiApp} used to get siddhi
      *                            related utilty functions.
      */
@@ -295,7 +331,20 @@ public class HttpSource extends Source {
 
         initSource(sourceEventListener, optionHolder, requestedTransportPropertyNames, configReader, siddhiAppContext);
         initConnectorRegistry(optionHolder, configReader);
+        timer = new HashedWheelTimer();
         return null;
+    }
+
+    protected void initSource(SourceEventListener sourceEventListener, OptionHolder optionHolder,
+                              String[] requestedTransportPropertyNames, ConfigReader configReader,
+                              SiddhiAppContext siddhiAppContext) {
+
+        super.initSource(sourceEventListener, optionHolder, requestedTransportPropertyNames, configReader,
+                siddhiAppContext);
+        this.sourceId = optionHolder.validateAndGetStaticValue(HttpConstants.SOURCE_ID);
+        this.connectionTimeout = Long.parseLong(
+                optionHolder.validateAndGetStaticValue(HttpConstants.CONNECTION_TIMEOUT, "120000"));
+        siddhiAppName = siddhiAppContext.getName();
     }
 
     protected void initConnectorRegistry(OptionHolder optionHolder, ConfigReader configReader) {
@@ -305,93 +354,9 @@ public class HttpSource extends Source {
         String serverBootstrapPropertiesList = optionHolder
                 .validateAndGetStaticValue(HttpConstants.SERVER_BOOTSTRAP_CONFIGS, HttpConstants.EMPTY_STRING);
 
-        this.httpConnectorRegistry = HttpConnectorRegistry.getInstance();
+        this.httpConnectorRegistry = HttpSyncConnectorRegistry.getInstance();
         this.httpConnectorRegistry.initBootstrapConfigIfFirst(configReader);
         this.httpConnectorRegistry.setTransportConfig(serverBootstrapPropertiesList, requestSizeValidationConfigList);
-    }
-
-    protected void initSource(SourceEventListener sourceEventListener, OptionHolder optionHolder,
-                              String[] requestedTransportPropertyNames, ConfigReader configReader,
-                              SiddhiAppContext siddhiAppContext) {
-
-        siddhiAppName = siddhiAppContext.getName();
-        String scheme = configReader.readConfig(HttpConstants.DEFAULT_SOURCE_SCHEME, HttpConstants
-                .DEFAULT_SOURCE_SCHEME_VALUE);
-        //generate default URL
-        String defaultURL;
-        int port;
-        if (HttpConstants.SCHEME_HTTPS.equals(scheme)) {
-            port = Integer.parseInt(configReader.readConfig(HttpConstants.HTTPS_PORT, HttpConstants.HTTPS_PORT_VALUE));
-            defaultURL = HttpConstants.SCHEME_HTTPS + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
-                    readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
-                    HttpConstants.PORT_HOST_SEPARATOR + port + HttpConstants.
-                    PORT_CONTEXT_SEPARATOR + siddhiAppContext.getName()
-                    + HttpConstants.PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
-        } else {
-            port = Integer.parseInt(configReader.readConfig(HttpConstants.HTTP_PORT, HttpConstants.HTTP_PORT_VALUE));
-            defaultURL = HttpConstants.SCHEME_HTTP + HttpConstants.PROTOCOL_HOST_SEPARATOR + configReader.
-                    readConfig(HttpConstants.DEFAULT_HOST, HttpConstants.DEFAULT_HOST_VALUE) +
-                    HttpConstants.PORT_HOST_SEPARATOR + port + HttpConstants.
-                    PORT_CONTEXT_SEPARATOR + siddhiAppContext.getName()
-                    + HttpConstants.PORT_CONTEXT_SEPARATOR + sourceEventListener.getStreamDefinition().getId();
-        }
-        //read configuration
-        this.listenerUrl = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_URL, defaultURL);
-        this.isAuth = Boolean.parseBoolean(optionHolder
-                .validateAndGetStaticValue(HttpConstants.IS_AUTH, HttpConstants.EMPTY_IS_AUTH)
-                .toLowerCase(Locale.ENGLISH));
-        this.workerThread = Integer.parseInt(optionHolder
-                .validateAndGetStaticValue(HttpConstants.WORKER_COUNT, DEFAULT_WORKER_COUNT));
-        this.sourceEventListener = sourceEventListener;
-        this.requestedTransportPropertyNames = requestedTransportPropertyNames.clone();
-        int socketIdleTimeout = Integer.parseInt(optionHolder
-                .validateAndGetStaticValue(HttpConstants.SOCKET_IDEAL_TIMEOUT, SOCKET_IDEAL_TIMEOUT_VALUE));
-        String verifyClient = optionHolder
-                .validateAndGetStaticValue(HttpConstants.SSL_VERIFY_CLIENT, HttpConstants.EMPTY_STRING);
-        String sslProtocol = optionHolder
-                .validateAndGetStaticValue(HttpConstants.SSL_PROTOCOL, HttpConstants.EMPTY_STRING);
-        String tlsStoreType = optionHolder
-                .validateAndGetStaticValue(HttpConstants.TLS_STORE_TYPE, HttpConstants.EMPTY_STRING);
-        String requestSizeValidationConfigList = optionHolder
-                .validateAndGetStaticValue(HttpConstants.REQUEST_SIZE_VALIDATION_CONFIGS, HttpConstants.EMPTY_STRING);
-
-        String sslConfigs = optionHolder
-                .validateAndGetStaticValue(HttpConstants.SSS_CONFIGS, HttpConstants.EMPTY_STRING);
-        if (sslConfigs.equalsIgnoreCase(HttpConstants.EMPTY_STRING)) {
-            sslConfigs = optionHolder
-                    .validateAndGetStaticValue(HttpConstants.SOURCE_PARAMETERS, HttpConstants.EMPTY_STRING);
-        }
-        String traceLog = optionHolder.validateAndGetStaticValue(HttpConstants.TRACE_LOG_ENABLED, configReader
-                .readConfig(HttpConstants.DEFAULT_TRACE_LOG_ENABLED, HttpConstants.EMPTY_STRING));
-        this.listenerConfiguration = HttpSourceUtil.getListenerConfiguration(this.listenerUrl, configReader);
-        if (socketIdleTimeout != -1) {
-            this.listenerConfiguration.setSocketIdleTimeout(socketIdleTimeout);
-        }
-        if (!HttpConstants.EMPTY_STRING.equals(verifyClient)) {
-            this.listenerConfiguration.setVerifyClient(verifyClient);
-        }
-        if (!HttpConstants.EMPTY_STRING.equals(sslProtocol)) {
-            this.listenerConfiguration.setSSLProtocol(sslProtocol);
-        }
-        if (!HttpConstants.EMPTY_STRING.equals(tlsStoreType)) {
-            this.listenerConfiguration.setTLSStoreType(tlsStoreType);
-        }
-        if (!HttpConstants.EMPTY_STRING.equals(traceLog)) {
-            this.listenerConfiguration.setHttpTraceLogEnabled(Boolean.parseBoolean(traceLog));
-        }
-        if (!HttpConstants.EMPTY_STRING.equals(requestSizeValidationConfigList)) {
-            this.listenerConfiguration.setRequestSizeValidationConfig(HttpConnectorRegistry.getInstance()
-                    .populateRequestSizeValidationConfiguration());
-        }
-        isSecured = (listenerConfiguration.getScheme().equalsIgnoreCase(HttpConstants.SCHEME_HTTPS));
-        port = listenerConfiguration.getPort();
-        listenerConfiguration.setParameters(HttpIoUtil.populateParameters(sslConfigs));
-        serviceDeploymentInfo = new ServiceDeploymentInfo(port, isSecured);
-    }
-
-    @Override
-    protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
-        return serviceDeploymentInfo;
     }
 
     /**
@@ -416,8 +381,10 @@ public class HttpSource extends Source {
     @Override
     public void connect(ConnectionCallback connectionCallback, State state) throws ConnectionUnavailableException {
         this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration);
-        this.httpConnectorRegistry.registerSourceListener(sourceEventListener, this.listenerUrl,
-                workerThread, isAuth, requestedTransportPropertyNames, siddhiAppName);
+        this.httpConnectorRegistry.registerSourceListener(sourceEventListener, listenerUrl,
+                workerThread, isAuth, requestedTransportPropertyNames, sourceId, siddhiAppName);
+
+        HTTPSourceRegistry.registerServiceSource(sourceId, this);
     }
 
     /**
@@ -427,23 +394,28 @@ public class HttpSource extends Source {
     public void disconnect() {
         this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl, siddhiAppName);
         this.httpConnectorRegistry.unregisterServerConnector(this.listenerUrl);
+
+        HTTPSourceRegistry.removeServiceSource(sourceId);
+        for (Map.Entry<String, HttpCarbonMessage> entry : requestContainerMap.entrySet()) {
+            cancelRequest(entry.getKey(), entry.getValue());
+        }
     }
 
     /**
-     * Called at the end to clean all the resources consumed by the {@link Source}
+     * Called at the end to clean all the resources consumed by the
+     * {@link io.siddhi.core.stream.input.source.Source}
      */
     @Override
     public void destroy() {
         this.httpConnectorRegistry.clearBootstrapConfigIfLast();
+        HTTPSourceRegistry.removeServiceSource(sourceId);
+        timer.stop();
     }
 
-    /**
-     * Called to pause event consumption
-     */
     @Override
     public void pause() {
-        HttpSourceListener httpSourceListener = this.httpConnectorRegistry.getSourceListenersMap().get(HttpSourceUtil
-                .getSourceListenerKey(listenerUrl));
+        HttpSourceListener httpSourceListener = this.httpConnectorRegistry.getSyncSourceListenersMap()
+                .get(HttpSourceUtil.getSourceListenerKey(listenerUrl));
         if ((httpSourceListener != null) && (httpSourceListener.isRunning())) {
             httpSourceListener.pause();
         }
@@ -454,11 +426,114 @@ public class HttpSource extends Source {
      */
     @Override
     public void resume() {
-        HttpSourceListener httpSourceListener = this.httpConnectorRegistry.getSourceListenersMap()
+        HttpSourceListener httpSourceListener = this.httpConnectorRegistry.getSyncSourceListenersMap()
                 .get(HttpSourceUtil.getSourceListenerKey(listenerUrl));
         if ((httpSourceListener != null) && (httpSourceListener.isPaused())) {
             httpSourceListener.resume();
         }
     }
 
+    public void registerCallback(HttpCarbonMessage carbonMessage, String messageId) {
+
+        // Add timeout handler to the timer.
+        addTimeout(messageId);
+
+        requestContainerMap.put(messageId, carbonMessage);
+    }
+
+    public void handleCallback(String messageId, String payload, List<Header> headersList, String contentType) {
+
+        HttpCarbonMessage carbonMessage = requestContainerMap.get(messageId);
+        if (carbonMessage != null) {
+            // Remove the message from the map as we are going to reply to the message.
+            requestContainerMap.remove(messageId);
+            // Remove the timeout task as are replying to the message.
+            removeTimeout(messageId);
+            // Send the response to the correlating message.
+            handleResponse(carbonMessage, 200, payload, headersList, contentType);
+        } else {
+            log.warn("No source message found for source: " + sourceId + " and message: " + messageId);
+        }
+    }
+
+    private void addTimeout(String messageId) {
+
+        Timeout timeout = timer.newTimeout(new HttpServiceSource.TimerTaskImpl(messageId), connectionTimeout,
+                TimeUnit.MILLISECONDS);
+        schedulerMap.put(messageId, timeout);
+    }
+
+    private void removeTimeout(String messageId) {
+
+        schedulerMap.get(messageId).cancel();
+    }
+
+    private void handleResponse(HttpCarbonMessage requestMsg, HttpCarbonMessage responseMsg) {
+
+        try {
+            requestMsg.respond(responseMsg);
+        } catch (ServerConnectorException e) {
+            throw new HttpSourceAdaptorRuntimeException("Error occurred during response", e);
+        }
+    }
+
+    private void handleResponse(HttpCarbonMessage requestMessage, Integer code, String payload, List<Header>
+            headers, String contentType) {
+
+        int statusCode = (code == null) ? 500 : code;
+        String responsePayload = (payload != null) ? payload : "";
+        handleResponse(requestMessage, createResponseMessage(responsePayload, statusCode, headers, contentType));
+    }
+
+    private void cancelRequest(String messageId, HttpCarbonMessage carbonMessage) {
+
+        requestContainerMap.remove(messageId);
+        schedulerMap.remove(messageId);
+        handleResponse(carbonMessage, 504, null, null, null);
+    }
+
+    private HttpCarbonMessage createResponseMessage(String payload, int statusCode, List<Header> headers,
+                                                    String contentType) {
+
+        HttpCarbonMessage response = new HttpCarbonMessage(
+                new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
+        response.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(payload
+                .getBytes(Charset.defaultCharset()))));
+
+        HttpHeaders httpHeaders = response.getHeaders();
+
+        response.setProperty(HTTP_STATUS_CODE, statusCode);
+        response.setProperty(DIRECTION, DIRECTION_RESPONSE);
+
+        // Set the Content-Type header as the system generated value. If the user has defined a specific Content-Type
+        // header this will be overridden.
+        if (contentType != null) {
+            httpHeaders.set(HttpConstants.HTTP_CONTENT_TYPE, contentType);
+        }
+
+        if (headers != null) {
+            for (Header header : headers) {
+                httpHeaders.set(header.getName(), header.getValue());
+            }
+        }
+
+        return response;
+    }
+
+    class TimerTaskImpl implements TimerTask {
+
+        String messageId;
+
+        TimerTaskImpl(String messageId) {
+
+            this.messageId = messageId;
+        }
+
+        @Override
+        public void run(Timeout timeout) {
+
+            HttpCarbonMessage carbonMessage = requestContainerMap.get(messageId);
+            cancelRequest(messageId, carbonMessage);
+        }
+    }
 }

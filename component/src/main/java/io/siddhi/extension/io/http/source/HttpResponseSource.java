@@ -22,20 +22,6 @@ import io.siddhi.annotation.Example;
 import io.siddhi.annotation.Extension;
 import io.siddhi.annotation.Parameter;
 import io.siddhi.annotation.util.DataType;
-import io.siddhi.core.config.SiddhiAppContext;
-import io.siddhi.core.exception.ConnectionUnavailableException;
-import io.siddhi.core.stream.ServiceDeploymentInfo;
-import io.siddhi.core.stream.input.source.Source;
-import io.siddhi.core.stream.input.source.SourceEventListener;
-import io.siddhi.core.util.config.ConfigReader;
-import io.siddhi.core.util.snapshot.state.State;
-import io.siddhi.core.util.snapshot.state.StateFactory;
-import io.siddhi.core.util.transport.OptionHolder;
-import io.siddhi.extension.io.http.util.HTTPSourceRegistry;
-import io.siddhi.extension.io.http.util.HttpConstants;
-import org.apache.log4j.Logger;
-
-import static io.siddhi.extension.io.http.util.HttpConstants.DEFAULT_WORKER_COUNT;
 
 /**
  * Http source for receive responses for the requests sent by http-request sinks
@@ -43,148 +29,93 @@ import static io.siddhi.extension.io.http.util.HttpConstants.DEFAULT_WORKER_COUN
 @Extension(
         name = "http-response",
         namespace = "source",
+        deprecated = true,
         description = "" +
-                "The http-response source co-relates with http-request sink  with the parameter 'sink.id'.\n" +
-                "This receives responses for the requests sent by the http-request sink which has the same " +
-                "sink id.\n" +
-                "Response messages can be in formats such as TEXT, JSON and XML.\n" +
-                "In order to handle the responses with different http status codes, user is allowed to defined the " +
-                "acceptable response source code using the parameter 'http.status.code'\n",
+                "_(Use http-call-response source instead)._\n" +
+        "The http-response source receives the responses for the calls made by its corresponding " +
+        "http-request sink, and maps them from formats such as `text`, `XML` and `JSON`.\n" +
+        "To handle messages with different http status codes having different formats, multiple " +
+        "http-response sources are allowed to associate with a single http-request sink. " +
+        "It also allows accessing the attributes of the event that " +
+        "initiated the call via transport properties and map them with the " +
+        "format `trp:<attribute name>`'.",
         parameters = {
-                @Parameter(name = "sink.id",
-                        description = "This parameter is used to map the http-response source to a " +
-                                "http-request sink. Then this source will accepts the response messages for " +
-                                "the requests sent by corresponding http-request sink.",
+                @Parameter(
+                        name = "sink.id",
+                        description = "Identifier to correlate the http-response source with its corresponding " +
+                                "http-request sink that published the messages.",
                         type = {DataType.STRING}),
-                @Parameter(name = "http.status.code",
-                        description = "Acceptable http status code for the responses.\n" +
-                                "This can be a complete string or a regex.\n" +
-                                "Only the responses with matching status codes to the defined value, will be received" +
-                                " by the http-response source.\n" +
-                                "Eg: 'http.status.code = '200', http.status.code = '2\\\\d+''",
+                @Parameter(
+                        name = "http.status.code",
+                        description = "The matching http responses status code regex, that is used to filter the " +
+                                "the messages which will be processed by the source." +
+                                "Eg: `http.status.code = '200'`,\n" +
+                                "`http.status.code = '4\\\\d+'`",
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "200"),
-                @Parameter(name = "allow.streaming.responses",
-                        description = "If responses can be received multiple times for a single request, " +
-                                "this option should be enabled. If this is not enabled, for every request, response " +
-                                "will be extracted only once.",
+                @Parameter(
+                        name = "allow.streaming.responses",
+                        description = "Enable consuming responses on a streaming manner.",
                         type = {DataType.BOOL},
                         optional = true,
                         defaultValue = "false"
-
                 )},
         examples = {
-                @Example(syntax = "" +
-                        "@sink(type='http-request', \n" +
-                        "downloading.enabled='true',\n" +
-                        "publisher.url='http://localhost:8005/registry/employee',\n" +
-                        "method='POST', " +
-                        "headers='{{headers}}',sink.id='employee-info',\n" +
-                        "@map(type='json')) \n" +
-                        "define stream BarStream (name String, id int, headers String, downloadPath string);\n\n" +
-                        "" +
-                        "@source(type='http-response' , sink.id='employee-info', http.status.code='2\\\\d+',\n" +
-                        "@map(type='text', regex.A='((.|\\n)*)', @attributes(message='A[1]'))) \n" +
-                        "define stream responseStream2xx(message string);" +
-                        "" +
-                        "@source(type='http-response' , sink.id='employee-info', http.status.code='4\\\\d+' ,\n" +
-                        "@map(type='text', regex.A='((.|\\n)*)', @attributes(message='A[1]')))  \n" +
-                        "define stream responseStream4xx(message string);",
+                @Example(
+                        syntax = "" +
+                                "@sink(type='http-request', method='POST',\n" +
+                                "      publisher.url='http://localhost:8005/registry/employee',\n" +
+                                "      sink.id='employee-info', @map(type='json')) \n" +
+                                "define stream EmployeeRequestStream (name string, id int);\n" +
+                                "\n" +
+                                "@source(type='http-response', sink.id='employee-info',\n" +
+                                "        http.status.code='2\\\\d+',\n" +
+                                "        @map(type='json',\n" +
+                                "             @attributes(name='trp:name', id='trp:id',\n" +
+                                "                         location='$.town', age='$.age')))\n" +
+                                "define stream EmployeeResponseStream(name string, id int,\n" +
+                                "                                     location string, age int);\n" +
+                                "\n" +
+                                "@source(type='http-response', sink.id='employee-info',\n" +
+                                "        http.status.code='4\\\\d+',\n" +
+                                "        @map(type='text', regex.A='((.|\\n)*)',\n" +
+                                "             @attributes(error='A[1]')))\n" +
+                                "define stream EmployeeErrorStream(error string);",
 
                         description = "" +
-                                "In above example, the defined http-request sink will send a POST requests to the " +
-                                "endpoint defined by 'publisher.url'.\n" +
-                                "Then for those requests, the source with the response code '2\\\\d+' and sink.id " +
-                                "'employee-info' will receive the responses with 2xx status codes. \n" +
-                                "The http-response source which has 'employee-info' as the 'sink.id' and '4\\\\d+' " +
-                                "as the http.response.code will receive all the responses with 4xx status codes.\n. " +
-                                "Then the body of the response message will be extracted using text mapper and " +
-                                "converted into siddhi events.\n.")}
+                                "When events arrive in `EmployeeRequestStream`, http-request sink makes calls to " +
+                                "endpoint on url `http://localhost:8005/registry/employee` with " +
+                                "`POST` method and Content-Type `application/json`.\n" +
+                                "If the arriving event has attributes `name`:`John` and `id`:`1423` it will send a " +
+                                "message with default JSON mapping as follows:\n" +
+                                "```{\n" +
+                                "  \"event\": {\n" +
+                                "    \"name\": \"John\",\n" +
+                                "    \"id\": 1423\n" +
+                                "  }\n" +
+                                "}```" +
+                                "When the endpoint responds with status code in the range of 200 " +
+                                "the message will be received by the http-response source associated with the " +
+                                "`EmployeeResponseStream` stream, because it is correlated with the sink by the " +
+                                "same `sink.id` `employee-info` and as that expects messages with " +
+                                "`http.status.code` in regex format `2\\\\d+`. " +
+                                "If the response message is in the format\n" +
+                                "```{\n" +
+                                "  \"town\": \"NY\",\n" +
+                                "  \"age\": 24\n" +
+                                "}```" +
+                                "the source maps the `location` and `age` attributes by executing JSON path on the " +
+                                "message and maps the `name` and `id` attributes by extracting them from the " +
+                                "request event via as transport properties.\n" +
+                                "If the response status code is in the range of 400 then the message will be " +
+                                "received by the http-response source associated with the `EmployeeErrorStream` " +
+                                "stream, because it is correlated with the sink by the same `sink.id` " +
+                                "`employee-info` and it expects messages with `http.status.code` in regex " +
+                                "format `4\\\\d+`, and maps the error response to the `error` attribute of the event."
+                )}
 )
+@Deprecated
+public class HttpResponseSource extends HttpCallResponseSource {
 
-public class HttpResponseSource extends Source {
-
-    private static final Logger log = Logger.getLogger(HttpResponseSource.class);
-    private String sinkId;
-    private SourceEventListener sourceEventListener;
-    private String[] requestedTransportPropertyNames;
-    private String siddhiAppName;
-    private String workerThread;
-    private HttpResponseConnectorListener httpResponseSourceListener;
-    private HttpResponseSourceConnectorRegistry httpConnectorRegistry;
-    private String httpStatusCode;
-    private boolean shouldAllowStreamingResponses;
-
-
-    @Override
-    protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
-        return null;
-    }
-
-    @Override
-    public StateFactory init(SourceEventListener sourceEventListener, OptionHolder optionHolder,
-                             String[] requestedTransportPropertyNames, ConfigReader configReader,
-                             SiddhiAppContext siddhiAppContext) {
-
-        this.sourceEventListener = sourceEventListener;
-        this.requestedTransportPropertyNames = requestedTransportPropertyNames.clone();
-        this.sinkId = optionHolder.validateAndGetStaticValue(HttpConstants.SINK_ID);
-        this.httpConnectorRegistry = HttpResponseSourceConnectorRegistry.getInstance();
-        this.siddhiAppName = siddhiAppContext.getName();
-        this.workerThread = optionHolder
-                .validateAndGetStaticValue(HttpConstants.WORKER_COUNT, DEFAULT_WORKER_COUNT);
-        this.httpStatusCode = optionHolder.validateAndGetStaticValue(HttpConstants.HTTP_STATUS_CODE,
-                HttpConstants.DEFAULT_HTTP_SUCCESS_CODE);
-        this.shouldAllowStreamingResponses = Boolean.parseBoolean(
-                optionHolder.validateAndGetStaticValue(HttpConstants.ALLOW_STREAMING_RESPONSES, HttpConstants.FALSE));
-        return null;
-    }
-
-    @Override
-    public Class[] getOutputEventClasses() {
-        return new Class[0];
-    }
-
-    /**
-     * Called to connect to the source backend for receiving events
-     *
-     * @param connectionCallback Callback to pass the ConnectionUnavailableException for connection failure after
-     *                           initial successful connection
-     * @param state              current state of the source
-     * @throws ConnectionUnavailableException if it cannot connect to the source backend
-     */
-    @Override
-    public void connect(ConnectionCallback connectionCallback, State state) throws ConnectionUnavailableException {
-        this.httpResponseSourceListener =
-                new HttpResponseConnectorListener(Integer.parseInt(workerThread), sourceEventListener,
-                        shouldAllowStreamingResponses, sinkId, requestedTransportPropertyNames, siddhiAppName);
-        this.httpConnectorRegistry.registerSourceListener(httpResponseSourceListener, sinkId, httpStatusCode);
-
-        HTTPSourceRegistry.registerResponseSource(sinkId, httpStatusCode, this);
-    }
-
-    @Override
-    public void disconnect() {
-        this.httpConnectorRegistry.unregisterSourceListener(sinkId, httpStatusCode, siddhiAppName);
-        HTTPSourceRegistry.removeResponseSource(sinkId, httpStatusCode);
-    }
-
-    @Override
-    public void destroy() {
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    public HttpResponseConnectorListener getConnectorListener() {
-        return httpResponseSourceListener;
-    }
 }
