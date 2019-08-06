@@ -113,9 +113,9 @@ public class HttpSourceListener {
         if (requestedTransportPropertyNames.length > 0) {      //cannot be null according to siddhi impl
             int i = 0;
             for (String property : requestedTransportPropertyNames) {
-                String value = String.valueOf(carbonMessage.getProperty(property));
-                if (value.trim().isEmpty()) {
-                    properties[i] = value;
+                Object value = carbonMessage.getProperty(property);
+                if (value != null) {
+                    properties[i] = String.valueOf(value);
                 }
                 i++;
             }
