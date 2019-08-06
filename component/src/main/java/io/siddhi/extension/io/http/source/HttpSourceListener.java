@@ -114,7 +114,7 @@ public class HttpSourceListener {
             int i = 0;
             for (String property : requestedTransportPropertyNames) {
                 String value = String.valueOf(carbonMessage.getProperty(property));
-                if (value != null) {
+                if (value.trim().isEmpty()) {
                     properties[i] = value;
                 }
                 i++;
