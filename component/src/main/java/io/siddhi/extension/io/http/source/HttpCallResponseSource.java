@@ -49,7 +49,9 @@ import static io.siddhi.extension.io.http.util.HttpConstants.DEFAULT_WORKER_COUN
                 "http-call-response sources are allowed to associate with a single http-call sink. " +
                 "It also allows accessing the attributes of the event that " +
                 "initiated the call via transport properties and map them with the " +
-                "format `trp:<attribute name>`'.",
+                "format `trp:<attribute name>`'." +
+                "The response headers and properties are exposed via transport properties and they can be retrieved " +
+                "in the mapper in the format `trp:<header>`.",
         parameters = {
                 @Parameter(
                         name = "sink.id",

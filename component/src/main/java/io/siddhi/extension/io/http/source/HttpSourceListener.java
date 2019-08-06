@@ -100,7 +100,10 @@ public class HttpSourceListener {
         if (requestedTransportPropertyNames.length > 0) {      //cannot be null according to siddhi impl
             int i = 0;
             for (String property : requestedTransportPropertyNames) {
-                properties[i] = carbonMessage.getHeader(property);      //can be null
+                String value = carbonMessage.getHeader(property);
+                if (value != null) {
+                    properties[i] = value;
+                }
                 i++;
             }
         }
@@ -110,7 +113,10 @@ public class HttpSourceListener {
         if (requestedTransportPropertyNames.length > 0) {      //cannot be null according to siddhi impl
             int i = 0;
             for (String property : requestedTransportPropertyNames) {
-                properties[i] = String.valueOf(carbonMessage.getProperty(property));      //can be null
+                String value = String.valueOf(carbonMessage.getProperty(property));
+                if (value != null) {
+                    properties[i] = value;
+                }
                 i++;
             }
         }

@@ -50,7 +50,9 @@ import static io.siddhi.extension.io.http.util.HttpConstants.SOCKET_IDEAL_TIMEOU
 @Extension(name = "http", namespace = "source",
         description = "HTTP source receives POST requests via HTTP and " +
                 "HTTPS protocols in format such as `text`, `XML` and `JSON`. It also supports basic " +
-                "authentication to ensure events are received from authorized users/systems.",
+                "authentication to ensure events are received from authorized users/systems.\n" +
+                "The request headers and properties are exposed via transport properties and they can be retrieved " +
+                "in the mapper in the format `trp:<header>`." ,
         parameters = {
                 @Parameter(name = "receiver.url",
                         description = "The URL on which events should be received. " +
