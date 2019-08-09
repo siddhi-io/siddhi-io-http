@@ -32,13 +32,13 @@ import io.siddhi.annotation.util.DataType;
         deprecated = true,
         description = "" +
                 "_(Use http-call-response source instead)._\n" +
-        "The http-response source receives the responses for the calls made by its corresponding " +
-        "http-request sink, and maps them from formats such as `text`, `XML` and `JSON`.\n" +
-        "To handle messages with different http status codes having different formats, multiple " +
-        "http-response sources are allowed to associate with a single http-request sink. " +
-        "It also allows accessing the attributes of the event that " +
-        "initiated the call via transport properties and map them with the " +
-        "format `trp:<attribute name>`'.",
+                "The http-response source receives the responses for the calls made by its corresponding " +
+                "http-request sink, and maps them from formats such as `text`, `XML` and `JSON`.\n" +
+                "To handle messages with different http status codes having different formats, multiple " +
+                "http-response sources are allowed to associate with a single http-request sink. " +
+                "It allows accessing the attributes of the event that initiated the call, " +
+                "and the response headers and properties via transport properties " +
+                "in the format `trp:<attribute name>` and `trp:<header/property>` respectively.",
         parameters = {
                 @Parameter(
                         name = "sink.id",
