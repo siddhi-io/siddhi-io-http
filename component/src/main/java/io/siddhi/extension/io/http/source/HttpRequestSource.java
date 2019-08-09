@@ -31,14 +31,15 @@ import io.siddhi.annotation.util.DataType;
         deprecated = true,
         description = "" +
                 "_(Use http-service source instead)._\n" +
-        "The http-request source receives POST requests via HTTP and HTTPS protocols " +
-        "in format such as `text`, `XML` and `JSON` and sends responses via its corresponding " +
-        "http-response sink correlated through a unique `source.id`.\n" +
-        "For request and response correlation, it generates a `messageId` upon each incoming request " +
-        "and expose it via transport properties in the format `trp:messageId` to correlate them with " +
-        "the responses at the http-response sink.\n" +
-        "It also supports basic " +
-        "authentication to ensure events are received from authorized users/systems.",
+                "The http-request source receives POST requests via HTTP and HTTPS protocols " +
+                "in format such as `text`, `XML` and `JSON` and sends responses via its corresponding " +
+                "http-response sink correlated through a unique `source.id`.\n" +
+                "For request and response correlation, it generates a `messageId` upon each incoming request " +
+                "and expose it via transport properties in the format `trp:messageId` to correlate them with " +
+                "the responses at the http-response sink.\n" +
+                "The request headers and properties can be accessed via transport properties in the format " +
+                "`trp:<header>`.\n" +
+                "It also supports basic authentication to ensure events are received from authorized users/systems.",
         parameters = {
                 @Parameter(name = "receiver.url",
                         description = "The URL on which events should be received. " +

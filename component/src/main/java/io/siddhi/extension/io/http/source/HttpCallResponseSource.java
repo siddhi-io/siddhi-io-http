@@ -46,12 +46,10 @@ import static io.siddhi.extension.io.http.util.HttpConstants.DEFAULT_WORKER_COUN
                 "The http-call-response source receives the responses for the calls made by its corresponding " +
                 "http-call sink, and maps them from formats such as `text`, `XML` and `JSON`.\n" +
                 "To handle messages with different http status codes having different formats, multiple " +
-                "http-call-response sources are allowed to associate with a single http-call sink. " +
-                "It also allows accessing the attributes of the event that " +
-                "initiated the call via transport properties and map them with the " +
-                "format `trp:<attribute name>`'." +
-                "The response headers and properties are exposed via transport properties and they can be retrieved " +
-                "in the mapper in the format `trp:<header>`.",
+                "http-call-response sources are allowed to associate with a single http-call sink.\n" +
+                "It allows accessing the attributes of the event that initiated the call, " +
+                "and the response headers and properties via transport properties " +
+                "in the format `trp:<attribute name>` and `trp:<header/property>` respectively.",
         parameters = {
                 @Parameter(
                         name = "sink.id",

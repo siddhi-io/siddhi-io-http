@@ -69,10 +69,9 @@ import static org.wso2.transport.http.netty.contract.Constants.HTTP_STATUS_CODE;
                 "For request and response correlation, it generates a `messageId` upon each incoming request " +
                 "and expose it via transport properties in the format `trp:messageId` to correlate them with " +
                 "the responses at the http-service-response sink.\n" +
-                "It also supports basic " +
-                "authentication to ensure events are received from authorized users/systems.\n" +
-                "The request headers and properties are exposed via transport properties and they can be retrieved " +
-                "in the mapper in the format `trp:<header>`.",
+                "The request headers and properties can be accessed via transport properties in the format " +
+                "`trp:<header>`.\n" +
+                "It also supports basic authentication to ensure events are received from authorized users/systems.",
         parameters = {
                 @Parameter(name = "receiver.url",
                         description = "The URL on which events should be received. " +
