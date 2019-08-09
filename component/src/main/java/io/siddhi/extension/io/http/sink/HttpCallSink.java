@@ -652,6 +652,11 @@ public class HttpCallSink extends HttpSink {
         if (!publisherURLOption.isStatic()) {
             super.initClientConnector(dynamicOptions);
         }
+
+        if (mapType == null) {
+            mapType = getMapper().getType();
+        }
+
         String httpMethod = EMPTY_STRING.equals(httpMethodOption.getValue(dynamicOptions)) ?
                 HttpConstants.METHOD_DEFAULT : httpMethodOption.getValue(dynamicOptions);
         String contentType = HttpSinkUtil.getContentType(mapType, headersList);
