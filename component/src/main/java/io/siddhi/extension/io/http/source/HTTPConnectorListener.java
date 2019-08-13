@@ -25,8 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.wso2.transport.http.netty.contract.Constants;
 import org.wso2.transport.http.netty.contract.HttpClientConnector;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
-import org.wso2.transport.http.netty.contract.ServerConnectorException;
 import org.wso2.transport.http.netty.contract.config.TransportsConfiguration;
+import org.wso2.transport.http.netty.contract.exceptions.ServerConnectorException;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 /**
@@ -58,8 +58,7 @@ public class HTTPConnectorListener implements HttpConnectorListener {
                     log.error("Error occurred during message notification: " + e.getMessage(), e);
                 }
             } else {
-                if (HttpConstants.HTTP_METHOD_POST.equalsIgnoreCase((String)
-                        carbonMessage.getProperty((HttpConstants.HTTP_METHOD)))) {
+                if (HttpConstants.HTTP_METHOD_POST.equalsIgnoreCase(carbonMessage.getHttpMethod())) {
                     //get the required source listener
                     StringBuilder sourceListenerKey = new StringBuilder().append(String
                             .valueOf(carbonMessage.getProperty(HttpConstants.LISTENER_PORT)))
@@ -71,8 +70,7 @@ public class HTTPConnectorListener implements HttpConnectorListener {
                     } else {
                         HttpSourceUtil.handleCallback(carbonMessage, 404);
                     }
-                } else if (HttpConstants.HTTP_METHOD_OPTIONS.equalsIgnoreCase((String)
-                        carbonMessage.getProperty((HttpConstants.HTTP_METHOD)))) {
+                } else if (HttpConstants.HTTP_METHOD_OPTIONS.equalsIgnoreCase(carbonMessage.getHttpMethod())) {
                     HttpSourceUtil.handleCORS(carbonMessage);
                 } else {
                     throw new HttpSourceAdaptorRuntimeException(carbonMessage, "Request type is not a type of POST ",

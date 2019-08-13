@@ -181,6 +181,12 @@ import io.siddhi.annotation.util.DataType;
                         optional = true,
                         defaultValue = "TLS"),
                 @Parameter(
+                        name = "ssl.verification.disabled",
+                        description = "Disable SSL verification.",
+                        type = {DataType.BOOL},
+                        optional = true,
+                        defaultValue = "false"),
+                @Parameter(
                         name = "ssl.configurations",
                         description = "SSL/TSL configurations in format `\"'<key>:<value>','<key>:<value>'\"`.\n" +
                                 "Some supported parameters:\n" +

@@ -27,6 +27,7 @@ import io.netty.handler.codec.http.HttpVersion;
 import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.apache.log4j.Logger;
 import org.wso2.transport.http.netty.contract.config.Parameter;
+import org.wso2.transport.http.netty.contract.exceptions.ServerConnectorException;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.io.UnsupportedEncodingException;
@@ -41,7 +42,6 @@ import static io.siddhi.extension.io.http.util.HttpConstants.PARAMETER_SEPARATOR
 import static io.siddhi.extension.io.http.util.HttpConstants.VALUE_SEPARATOR;
 import static org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE;
 import static org.wso2.transport.http.netty.contract.Constants.DIRECTION;
-import static org.wso2.transport.http.netty.contract.Constants.HTTP_STATUS_CODE;
 
 /**
  * Util class which is use for handle HTTP util function.
@@ -58,7 +58,7 @@ public class HttpIoUtil {
     public static void handleResponse(HttpCarbonMessage requestMsg, HttpCarbonMessage responseMsg) {
         try {
             requestMsg.respond(responseMsg);
-        } catch (org.wso2.transport.http.netty.contract.ServerConnectorException e) {
+        } catch (ServerConnectorException e) {
             throw new HttpSourceAdaptorRuntimeException("Error occurred during response", e);
         }
     }
@@ -106,7 +106,7 @@ public class HttpIoUtil {
             byteBuffer.flip();
             response.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(byteBuffer)));
         }
-        response.setProperty(HTTP_STATUS_CODE, statusCode);
+        response.setHttpStatusCode(statusCode);
         response.setProperty(DIRECTION, DIRECTION_RESPONSE);
         return response;
     }
@@ -129,7 +129,7 @@ public class HttpIoUtil {
                 String.format("%s,%s,%s,%s,%s", HttpHeaderNames.CONTENT_TYPE.toString(),
                         HttpHeaderNames.USER_AGENT.toString(), HttpHeaderNames.ORIGIN.toString(),
                         HttpHeaderNames.REFERER.toString(), HttpHeaderNames.ACCEPT.toString()));
-        response.setProperty(HTTP_STATUS_CODE, Integer.parseInt(HttpConstants.DEFAULT_HTTP_SUCCESS_CODE));
+        response.setHttpStatusCode(Integer.parseInt(HttpConstants.DEFAULT_HTTP_SUCCESS_CODE));
         response.setProperty(DIRECTION, DIRECTION_RESPONSE);
 
         return response;

@@ -101,8 +101,7 @@ public class HttpConstants {
     public static final String KEYSTORE_FILE_VALUE = "${carbon.home}/resources/security/wso2carbon.jks";
     public static final String KEYSTORE_PASSWORD = "keyStorePassword";
     public static final String KEYSTORE_PASSWORD_VALUE = "wso2carbon";
-//    public static final String CERT_PASSWORD = "certPassword";
-//    public static final String CERT_PASSWORD_VALUE = "wso2carbon";
+
     public static final String DEFAULT_SOURCE_SCHEME = "defaultScheme";
     public static final String DEFAULT_SOURCE_SCHEME_VALUE = "http";
     public static final String DEFAULT_TRACE_LOG_ENABLED = "httpTraceLogEnabled";
@@ -127,10 +126,8 @@ public class HttpConstants {
     public static final String REQUEST_SIZE_VALIDATION_CONFIGS = "request.size.validation.configurations";
     public static final String SERVER_BOOTSTRAP_CONFIGS = "server.bootstrap.configurations";
     public static final String CLIENT_CHUNK_DISABLED = "chunk.disabled";
-//    public static final String CLIENT_FOLLOW_REDIRECT = "follow.redirect";
-//    public static final String CLIENT_MAX_REDIRECT_COUNT = "max.redirect.count";
+
     public static final String CLIENT_BOOTSTRAP_CONFIGURATION = "client.bootstrap.configurations";
-//    public static final String CLIENT_POOL_CONFIGURATION = "client.threadpool.configurations";
     public static final String PROXY_HOST = "proxy.host";
     public static final String PROXY_PORT = "proxy.port";
     public static final String PROXY_USERNAME = "proxy.username";
@@ -138,6 +135,7 @@ public class HttpConstants {
     @Deprecated
     public static final String SINK_PARAMETERS = "parameters";
     public static final String MSG_ID = "msgId";
+
     //http sink transport properties
     public static final String LATENCY_METRICS_ENABLED = "latency.metrics.enabled";
     public static final String REQUEST_SIZE_VALIDATION = "request.size.validation";
@@ -223,8 +221,6 @@ public class HttpConstants {
     public static final String BLOCKING_IO = "blocking.io";
 
     //pool configurations
-//    public static final String CONNECTION_POOL_COUNT = "connection.pool.count";
-//    public static final String DEFAULT_CONNECTION_POOL_COUNT = "0";
     public static final String MAX_ACTIVE_CONNECTIONS_PER_POOL = "max.pool.active.connections";
     public static final String DEFAULT_MAX_ACTIVE_CONNECTIONS_PER_POOL = "-1"; // unlimited
     public static final String MIN_IDLE_CONNECTIONS_PER_POOL = "min.pool.idle.connections";
@@ -243,5 +239,7 @@ public class HttpConstants {
     public static final String DEFAULT_EXHAUSTED_ACTION = "1"; // block when exhausted
     public static final String MAX_WAIT_TIME = "max.wait.time";
     public static final String DEFAULT_MAX_WAIT_TIME = "60000";
+
     public static final String HOSTNAME_VERIFICATION_ENABLED = "hostname.verification.enabled";
+    public static final String SSL_VERIFICATION_DISABLED = "ssl.verification.disabled";
 }
