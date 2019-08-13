@@ -75,9 +75,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static io.siddhi.extension.io.http.util.HttpConstants.EMPTY_STRING;
+import static io.siddhi.extension.io.http.util.HttpConstants.FALSE;
 import static io.siddhi.extension.io.http.util.HttpConstants.PORT_HOST_SEPARATOR;
 import static io.siddhi.extension.io.http.util.HttpConstants.SOCKET_IDEAL_TIMEOUT_VALUE;
 import static io.siddhi.extension.io.http.util.HttpConstants.TRUE;
+import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientConstants.REQUEST_URL;
 
 /**
  * {@code HttpSink } Handle the HTTP publishing tasks.
@@ -204,6 +206,12 @@ import static io.siddhi.extension.io.http.util.HttpConstants.TRUE;
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "TLS"),
+                @Parameter(
+                        name = "ssl.verification.disabled",
+                        description = "Disable SSL verification.",
+                        type = {DataType.BOOL},
+                        optional = true,
+                        defaultValue = "false"),
                 @Parameter(
                         name = "tls.store.type",
                         description = "TLS store type.",
@@ -437,7 +445,6 @@ public class HttpSink extends Sink {
     private String proxyUsername;
     private String proxyPassword;
     private String clientBootstrapConfiguration;
-//    private String clientPoolConfiguration;
     private String bootstrapWorker;
     private String bootstrapBoss;
     private String bootstrapClient;
@@ -457,9 +464,9 @@ public class HttpSink extends Sink {
     private long timeBetweenEvictionRuns;
     private long minEvictableIdleTime;
     private byte exhaustedAction;
-    //    private int numberOfPools;
     private long maxWaitTime;
     private String hostnameVerificationEnabled;
+    private String sslVerificationDisabled;
 
     private DefaultHttpWsConnectorFactory httpConnectorFactory;
 
@@ -546,8 +553,6 @@ public class HttpSink extends Sink {
                 HttpConstants.MIN_EVICTABLE_IDLE_TIME, HttpConstants.DEFAULT_MIN_EVICTABLE_IDLE_TIME));
         exhaustedAction = (byte) Integer.parseInt(optionHolder.validateAndGetStaticValue(
                 HttpConstants.EXHAUSTED_ACTION, HttpConstants.DEFAULT_EXHAUSTED_ACTION));
-//        numberOfPools = Integer.parseInt(optionHolder.validateAndGetStaticValue(HttpConstants.CONNECTION_POOL_COUNT,
-//                HttpConstants.DEFAULT_CONNECTION_POOL_COUNT));
         maxWaitTime = Integer.parseInt(optionHolder.validateAndGetStaticValue(
                 HttpConstants.MAX_WAIT_TIME, HttpConstants.DEFAULT_MAX_WAIT_TIME));
 
@@ -560,8 +565,6 @@ public class HttpSink extends Sink {
                 EMPTY_STRING);
         clientBootstrapConfiguration = optionHolder
                 .validateAndGetStaticValue(HttpConstants.CLIENT_BOOTSTRAP_CONFIGURATION, EMPTY_STRING);
-//        clientPoolConfiguration = optionHolder
-//                .validateAndGetStaticValue(HttpConstants.CLIENT_POOL_CONFIGURATION, EMPTY_STRING);
         //read trp globe configuration
         bootstrapWorker = configReader
                 .readConfig(HttpConstants.CLIENT_BOOTSTRAP_WORKER_GROUP_SIZE, EMPTY_STRING);
@@ -570,6 +573,8 @@ public class HttpSink extends Sink {
                 EMPTY_STRING);
         hostnameVerificationEnabled = optionHolder.validateAndGetStaticValue(
                 HttpConstants.HOSTNAME_VERIFICATION_ENABLED, TRUE);
+        sslVerificationDisabled = optionHolder.validateAndGetStaticValue(HttpConstants.SSL_VERIFICATION_DISABLED,
+                FALSE);
         if (!HttpConstants.EMPTY_STRING.equals(userName) && !HttpConstants.EMPTY_STRING.equals(userPassword)) {
             authType = HttpConstants.BASIC_AUTH;
         } else if ((!HttpConstants.EMPTY_STRING.equals(consumerKey)
@@ -929,9 +934,9 @@ public class HttpSink extends Sink {
         //set port
         cMessage.setProperty(Constants.HTTP_PORT, Integer.valueOf(httpURLProperties.get(Constants.HTTP_PORT)));
         // Set method
-        cMessage.setProperty(Constants.HTTP_METHOD, httpMethod);
+        cMessage.setHttpMethod(httpMethod);
         //Set request URL
-        cMessage.setProperty(Constants.REQUEST_URL, httpURLProperties.get(Constants.REQUEST_URL));
+        cMessage.setRequestUrl(httpURLProperties.get(REQUEST_URL));
         HttpHeaders httpHeaders = cMessage.getHeaders();
         //if Authentication enabled
         if (!(userName.equals(EMPTY_STRING)) && !(userPassword.equals
@@ -956,7 +961,7 @@ public class HttpSink extends Sink {
             httpHeaders.set(HttpConstants.HTTP_CONTENT_TYPE, contentType);
         }
         //set method-type header
-        httpHeaders.set(HttpConstants.HTTP_METHOD, httpMethod);
+        cMessage.setHttpMethod(httpMethod);
         return cMessage;
     }
 
@@ -1057,7 +1062,6 @@ public class HttpSink extends Sink {
         poolConfiguration.setTimeBetweenEvictionRuns(timeBetweenEvictionRuns);
         poolConfiguration.setMinEvictableIdleTime(minEvictableIdleTime);
         poolConfiguration.setExhaustedAction(exhaustedAction);
-//        poolConfiguration.setNumberOfPools(numberOfPools);
         poolConfiguration.setMaxWaitTime(maxWaitTime);
         senderConfig.setPoolConfiguration(poolConfiguration);
 
@@ -1085,6 +1089,10 @@ public class HttpSink extends Sink {
         }
         if (!TRUE.equalsIgnoreCase(hostnameVerificationEnabled)) {
             senderConfig.setHostNameVerificationEnabled(false);
+        }
+
+        if (TRUE.equalsIgnoreCase(sslVerificationDisabled)) {
+            senderConfig.disableSsl();
         }
 
         //overwrite default transport configuration

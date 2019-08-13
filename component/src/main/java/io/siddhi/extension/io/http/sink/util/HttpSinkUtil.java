@@ -46,6 +46,7 @@ import static io.siddhi.extension.io.http.util.HttpConstants.HTTP_TRACE_LOG_ENAB
 import static io.siddhi.extension.io.http.util.HttpConstants.LOG_TRACE_ENABLE_DEFAULT_VALUE;
 import static io.siddhi.extension.io.http.util.HttpConstants.PARAMETER_SEPARATOR;
 import static io.siddhi.extension.io.http.util.HttpIoUtil.populateParameterMap;
+import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientConstants.REQUEST_URL;
 
 /**
  * {@code HttpSinkUtil } responsible of the all configuration reading and input formatting of http transport.
@@ -80,7 +81,7 @@ public class HttpSinkUtil {
                 port = url.getPort() != -1 ? url.getPort() : HttpConstants.DEFAULT_HTTP_PORT;
             }
             httpStaticProperties.put(Constants.HTTP_PORT, Integer.toString(port));
-            httpStaticProperties.put(Constants.REQUEST_URL, url.toString());
+            httpStaticProperties.put(REQUEST_URL, url.toString());
         } catch (MalformedURLException e) {
             throw new HttpSinkAdaptorRuntimeException(" Receiver url mandatory. Please insert valid url .", e);
         }
@@ -187,13 +188,7 @@ public class HttpSinkUtil {
                     .split(PARAMETER_SEPARATOR);
             properties.putAll(populateClientConnectionConfiguration(populateParameterMap(valueList)));
         }
-//        //populate connection configurations
-//        if (!HttpConstants.EMPTY_STRING.equals(clientConnectionConfiguration.trim())) {
-//            String[] valueList = clientConnectionConfiguration.trim()
-//                    .substring(1, clientConnectionConfiguration.length() - 1)
-//                    .split(PARAMETER_SEPARATOR);
-//            properties.putAll(populateClientConnectionConfiguration(populateParameterMap(valueList)));
-//        }
+
         return properties;
     }
 

@@ -44,7 +44,7 @@ import io.siddhi.extension.io.http.util.HTTPSourceRegistry;
 import io.siddhi.extension.io.http.util.HttpConstants;
 import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
-import org.wso2.transport.http.netty.contract.ServerConnectorException;
+import org.wso2.transport.http.netty.contract.exceptions.ServerConnectorException;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.nio.charset.Charset;
@@ -54,9 +54,9 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import static io.siddhi.extension.io.http.util.HttpConstants.HTTP_STATUS_CODE;
 import static org.wso2.carbon.messaging.Constants.DIRECTION;
 import static org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE;
-import static org.wso2.transport.http.netty.contract.Constants.HTTP_STATUS_CODE;
 
 /**
  * http-service source for receive the http and https request.

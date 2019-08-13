@@ -94,7 +94,7 @@ public class HttpRequest {
         httpPostRequest.setProperty(Constants.HTTP_HOST, serverHost);
         httpPostRequest.setProperty(Constants.HTTP_PORT, serverPort);
         httpPostRequest.setProperty(Constants.TO, serverPath);
-        httpPostRequest.setProperty(Constants.HTTP_METHOD, Constants.HTTP_POST_METHOD);
+        httpPostRequest.setHttpMethod(Constants.HTTP_POST_METHOD);
         ByteBuffer byteBuffer = ByteBuffer.wrap(payload.getBytes(Charset.forName("UTF-8")));
         httpPostRequest.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(byteBuffer)));
         return httpPostRequest;

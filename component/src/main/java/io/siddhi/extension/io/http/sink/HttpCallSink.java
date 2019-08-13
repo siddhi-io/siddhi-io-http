@@ -216,6 +216,12 @@ import static io.siddhi.extension.io.http.util.HttpConstants.EMPTY_STRING;
                         optional = true,
                         defaultValue = "TLS"),
                 @Parameter(
+                        name = "ssl.verification.disabled",
+                        description = "Disable SSL verification.",
+                        type = {DataType.BOOL},
+                        optional = true,
+                        defaultValue = "false"),
+                @Parameter(
                         name = "ssl.configurations",
                         description = "SSL/TSL configurations.\n" +
                                 "Expected format `\"'<key>:<value>','<key>:<value>'\"`.\n" +
