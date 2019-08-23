@@ -55,6 +55,7 @@ import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.transport.http.netty.contract.Constants;
 import org.wso2.transport.http.netty.contract.HttpClientConnector;
+import org.wso2.transport.http.netty.contract.HttpConnectorListener;
 import org.wso2.transport.http.netty.contract.HttpResponseFuture;
 import org.wso2.transport.http.netty.contract.config.ChunkConfig;
 import org.wso2.transport.http.netty.contract.config.ProxyServerConfiguration;
@@ -167,6 +168,13 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "-"),
+                @Parameter(
+                        name = "blocking.io",
+                        description = "Blocks the request thread until a response it received from HTTP " +
+                                "endpoint. This should be enabled for reliable messaging (error handling)",
+                        type = {DataType.BOOL},
+                        optional = true,
+                        defaultValue = "false"),
                 @Parameter(
                         name = "headers",
                         description = "HTTP request headers in format `\"'<key>:<value>','<key>:<value>'\"`.\n" +
@@ -467,6 +475,7 @@ public class HttpSink extends Sink {
     private long maxWaitTime;
     private String hostnameVerificationEnabled;
     private String sslVerificationDisabled;
+    private boolean isBlockingIO;
 
     private DefaultHttpWsConnectorFactory httpConnectorFactory;
 
@@ -586,6 +595,9 @@ public class HttpSink extends Sink {
             authType = HttpConstants.NO_AUTH;
         }
 
+        isBlockingIO = Boolean.parseBoolean(
+                optionHolder.validateAndGetStaticValue(HttpConstants.BLOCKING_IO, HttpConstants.FALSE));
+
         initConnectorFactory();
         if (publisherURLOption.isStatic()) {
             initClientConnector(null);
@@ -649,7 +661,7 @@ public class HttpSink extends Sink {
 
     private void handleOAuthFailure(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
                                     String encodedAuth) {
-        Boolean checkFromCache = accessTokenCache.checkAvailableKey(encodedAuth);
+        boolean checkFromCache = accessTokenCache.checkAvailableKey(encodedAuth);
         if (checkFromCache) {
             getNewAccessTokenWithCache(payload, dynamicOptions, headersList, encodedAuth);
         } else {
@@ -752,7 +764,7 @@ public class HttpSink extends Sink {
         }
     }
 
-    public void getAccessToken(DynamicOptions dynamicOptions, String encodedAuth, String tokenURL) {
+    void getAccessToken(DynamicOptions dynamicOptions, String encodedAuth, String tokenURL) {
         this.tokenURL = tokenURL;
         HttpsClient httpsClient = new HttpsClient();
         if (!HttpConstants.EMPTY_STRING.equals(oauthUsername) &&
@@ -769,8 +781,8 @@ public class HttpSink extends Sink {
         }
     }
 
-    public void setAccessToken(String encodedAuth, DynamicOptions dynamicOptions,
-                               List<Header> headersList) {
+    void setAccessToken(String encodedAuth, DynamicOptions dynamicOptions,
+                        List<Header> headersList) {
         //check the availability of the authorization
         String accessToken;
         boolean authAvailability = false;
@@ -870,9 +882,35 @@ public class HttpSink extends Sink {
             }
             HttpCarbonMessage response = listener.getHttpResponseMessage();
             return response.getNettyHttpResponse().status().code();
-        } else {
+        } else if (!isBlockingIO) {
             clientConnector.send(cMessage);
             return HttpConstants.SUCCESS_CODE;
+        } else {
+            CountDownLatch latch = new CountDownLatch(1);
+            HttpResponseFuture responseFuture = clientConnector.send(cMessage);
+            HTTPResponseListener responseListener = new HTTPResponseListener(latch);
+            responseFuture.setHttpConnectorListener(responseListener);
+
+            try {
+                boolean latchCount = latch.await(30, TimeUnit.SECONDS);
+                if (!latchCount) {
+                    log.debug("Time out due to getting getting response from " + publisherURL + ". Message dropped.");
+                    throw new HttpSinkAdaptorRuntimeException("Time out due to getting getting response from "
+                            + publisherURL + ". Message dropped.");
+
+                }
+            } catch (InterruptedException e) {
+                log.debug("Failed to get a response from " + publisherURL + "," + e + ". Message dropped.");
+                throw new HttpSinkAdaptorRuntimeException("Failed to get a response from " +
+                        publisherURL + ", " + e + ". Message dropped.");
+            }
+
+            if (responseListener.throwable == null) {
+                return HttpConstants.SUCCESS_CODE;
+            } else {
+                throw new SiddhiAppRuntimeException("Siddhi App " + siddhiAppContext.getName() + " failed to publish " +
+                        "events to HTTP endpoint", responseListener.throwable);
+            }
         }
     }
 
@@ -976,7 +1014,7 @@ public class HttpSink extends Sink {
         }
     }
 
-    void initConnectorFactory() {
+    private void initConnectorFactory() {
         //if bootstrap configurations are given then pass it if not let take default value of transport
         if (!EMPTY_STRING.equals(bootstrapBoss) && !EMPTY_STRING.equals(bootstrapWorker)) {
             if (!EMPTY_STRING.equals(bootstrapClient)) {
@@ -1029,8 +1067,7 @@ public class HttpSink extends Sink {
             throw new SiddhiAppCreationException("Please provide user name and password in " +
                     HttpConstants.HTTP_SINK_ID + " with the stream " + streamID + " in Siddhi app " +
                     siddhiAppContext.getName());
-        } else if (!(EMPTY_STRING.equals(userName) || EMPTY_STRING.equals
-                (userPassword))) {
+        } else if (!(EMPTY_STRING.equals(userName))) {
             byte[] val = (userName + HttpConstants.AUTH_USERNAME_PASSWORD_SEPARATOR + userPassword).getBytes(Charset
                     .defaultCharset());
             this.authorizationHeader = HttpConstants.AUTHORIZATION_METHOD + Base64.encode
@@ -1114,5 +1151,25 @@ public class HttpSink extends Sink {
         ByteBuf byteBuf = Unpooled.wrappedBuffer(consumerKeyValue.getBytes(StandardCharsets.UTF_8));
         ByteBuf encodedByteBuf = Base64.encode(byteBuf);
         return encodedByteBuf.toString(StandardCharsets.UTF_8);
+    }
+
+    static class HTTPResponseListener implements HttpConnectorListener {
+        Throwable throwable;
+        CountDownLatch countDownLatch;
+
+        HTTPResponseListener(CountDownLatch latch) {
+            this.countDownLatch = latch;
+        }
+
+        @Override
+        public void onMessage(HttpCarbonMessage httpCarbonMessage) {
+            countDownLatch.countDown();
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            this.throwable = throwable;
+            countDownLatch.countDown();
+        }
     }
 }

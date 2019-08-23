@@ -21,8 +21,10 @@ package io.siddhi.extension.io.http.sink;
 import com.sun.net.httpserver.Headers;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
+import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.extension.io.http.sink.util.HttpServerListenerHandler;
+import io.siddhi.extension.io.http.sink.util.UnitTestAppender;
 import io.siddhi.extension.map.xml.sinkmapper.XMLSinkMapper;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
@@ -153,5 +155,47 @@ public class HttpSinkTestCase {
         Assert.assertEquals(headers.get("Content-Type").toString(), headerContentType.toString());
         siddhiAppRuntime.shutdown();
         lst.shutdown();
+    }
+
+    /**
+     * Creating test to check the connection validity when publishing events.
+     *
+     * @throws Exception Interrupted exception
+     */
+    @Test
+    public void testHTTPConnectionFailure() throws InterruptedException {
+        log.info("Creating test for publishing events to invalid HTTP endpoint.");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
+        String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
+                + "@sink(type='http',blocking.io='true',publisher.url='http://localhost:8010/abcd',method='{{method}}',"
+                + "headers='{{headers}}',"
+                + "@map(type='xml', @payload('{{message}}'))) "
+                + "Define stream BarStream (message String,method String,headers String);";
+        String query = (
+                "@info(name = 'query') "
+                        + "from FooStream "
+                        + "select message,method,headers "
+                        + "insert into BarStream;"
+        );
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition + query);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+        Logger logger = Logger.getLogger(StreamJunction.class);
+        UnitTestAppender appender = new UnitTestAppender();
+        logger.addAppender(appender);
+
+        try {
+            fooStream.send(1566562744069L, new Object[]{payload, "POST", "'Name:John','Age:23'"});
+            String expectedMessage = "failed to publish events to HTTP endpoint. Hence, dropping event " +
+                    "'StreamEvent{ timestamp=1566562744069, beforeWindowData=null, onAfterWindowData=null, " +
+                    "outputData=[<events><event><symbol>WSO2</symbol><price>55.645</price><volume>100</volume>" +
+                    "</event></events>, POST, 'Name:John','Age:23'], type=CURRENT, next=null}";
+            Assert.assertTrue(appender.getMessages().contains(expectedMessage));
+        } finally {
+            logger.removeAppender(appender);
+            siddhiAppRuntime.shutdown();
+        }
     }
 }
