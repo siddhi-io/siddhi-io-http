@@ -99,13 +99,6 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
                                 "`https://localhost:8080/endpoint`",
                         type = {DataType.STRING}),
                 @Parameter(
-                        name = "blocking.io",
-                        description = "Blocks the request thread until a response it received from HTTP " +
-                                "call-response source before sending any other request.",
-                        type = {DataType.BOOL},
-                        optional = true,
-                        defaultValue = "false"),
-                @Parameter(
                         name = "basic.auth.username",
                         description = "The username to be included in the authentication header when calling " +
                                 "endpoints protected by basic authentication. `basic.auth.password` property " +
@@ -175,6 +168,13 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "-"),
+                @Parameter(
+                        name = "blocking.io",
+                        description = "Blocks the request thread until a response it received from HTTP " +
+                                "endpoint. This should be enabled for reliable messaging (error handling)",
+                        type = {DataType.BOOL},
+                        optional = true,
+                        defaultValue = "false"),
                 @Parameter(
                         name = "headers",
                         description = "HTTP request headers in format `\"'<key>:<value>','<key>:<value>'\"`.\n" +
