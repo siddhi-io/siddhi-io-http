@@ -114,7 +114,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#api-docs-v210" tabindex="1" class="md-skip">
+      <a href="#api-docs-v211" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -414,6 +414,18 @@
   
 </nav>
     
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../2.1.1/" title="2.1.1" class="md-nav__link">
+      2.1.1
+    </a>
   </li>
 
         
@@ -785,7 +797,7 @@
                   <a href="https://github.com/siddhi-io/siddhi-io-http/blob/master/api/latest.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="api-docs-v210">API Docs - v2.1.0</h1>
+                <h1 id="api-docs-v211">API Docs - v2.1.1</h1>
 <div class="admonition info">
 <p class="admonition-title">Tested Siddhi Core version: <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/">5.1.2</a></em></p>
 <p>It could also support other Siddhi Core minor versions.</p>
@@ -796,7 +808,7 @@
 <p style="word-wrap: break-word;margin: 0;">HTTP sink publishes messages via HTTP or HTTPS protocols using methods such as POST, GET, PUT, and DELETE on formats <code>text</code>, <code>XML</code> and <code>JSON</code>. It can also publish to endpoints protected by basic authentication or OAuth 2.0.</p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
-<pre><code>@sink(type=&quot;http&quot;, publisher.url=&quot;&lt;STRING&gt;&quot;, basic.auth.username=&quot;&lt;STRING&gt;&quot;, basic.auth.password=&quot;&lt;STRING&gt;&quot;, https.truststore.file=&quot;&lt;STRING&gt;&quot;, https.truststore.password=&quot;&lt;STRING&gt;&quot;, oauth.username=&quot;&lt;STRING&gt;&quot;, oauth.password=&quot;&lt;STRING&gt;&quot;, consumer.key=&quot;&lt;STRING&gt;&quot;, consumer.secret=&quot;&lt;STRING&gt;&quot;, token.url=&quot;&lt;STRING&gt;&quot;, refresh.token=&quot;&lt;STRING&gt;&quot;, headers=&quot;&lt;STRING&gt;&quot;, method=&quot;&lt;STRING&gt;&quot;, socket.idle.timeout=&quot;&lt;INT&gt;&quot;, chunk.disabled=&quot;&lt;BOOL&gt;&quot;, ssl.protocol=&quot;&lt;STRING&gt;&quot;, tls.store.type=&quot;&lt;STRING&gt;&quot;, ssl.configurations=&quot;&lt;STRING&gt;&quot;, proxy.host=&quot;&lt;STRING&gt;&quot;, proxy.port=&quot;&lt;STRING&gt;&quot;, proxy.username=&quot;&lt;STRING&gt;&quot;, proxy.password=&quot;&lt;STRING&gt;&quot;, client.bootstrap.configurations=&quot;&lt;STRING&gt;&quot;, max.pool.active.connections=&quot;&lt;INT&gt;&quot;, min.pool.idle.connections=&quot;&lt;INT&gt;&quot;, max.pool.idle.connections=&quot;&lt;INT&gt;&quot;, min.evictable.idle.time=&quot;&lt;STRING&gt;&quot;, time.between.eviction.runs=&quot;&lt;STRING&gt;&quot;, max.wait.time=&quot;&lt;STRING&gt;&quot;, test.on.borrow=&quot;&lt;BOOL&gt;&quot;, test.while.idle=&quot;&lt;BOOL&gt;&quot;, exhausted.action=&quot;&lt;INT&gt;&quot;, hostname.verification.enabled=&quot;&lt;BOOL&gt;&quot;, @map(...)))
+<pre><code>@sink(type=&quot;http&quot;, publisher.url=&quot;&lt;STRING&gt;&quot;, basic.auth.username=&quot;&lt;STRING&gt;&quot;, basic.auth.password=&quot;&lt;STRING&gt;&quot;, https.truststore.file=&quot;&lt;STRING&gt;&quot;, https.truststore.password=&quot;&lt;STRING&gt;&quot;, oauth.username=&quot;&lt;STRING&gt;&quot;, oauth.password=&quot;&lt;STRING&gt;&quot;, consumer.key=&quot;&lt;STRING&gt;&quot;, consumer.secret=&quot;&lt;STRING&gt;&quot;, token.url=&quot;&lt;STRING&gt;&quot;, refresh.token=&quot;&lt;STRING&gt;&quot;, blocking.io=&quot;&lt;BOOL&gt;&quot;, headers=&quot;&lt;STRING&gt;&quot;, method=&quot;&lt;STRING&gt;&quot;, socket.idle.timeout=&quot;&lt;INT&gt;&quot;, chunk.disabled=&quot;&lt;BOOL&gt;&quot;, ssl.protocol=&quot;&lt;STRING&gt;&quot;, ssl.verification.disabled=&quot;&lt;BOOL&gt;&quot;, tls.store.type=&quot;&lt;STRING&gt;&quot;, ssl.configurations=&quot;&lt;STRING&gt;&quot;, proxy.host=&quot;&lt;STRING&gt;&quot;, proxy.port=&quot;&lt;STRING&gt;&quot;, proxy.username=&quot;&lt;STRING&gt;&quot;, proxy.password=&quot;&lt;STRING&gt;&quot;, client.bootstrap.configurations=&quot;&lt;STRING&gt;&quot;, max.pool.active.connections=&quot;&lt;INT&gt;&quot;, min.pool.idle.connections=&quot;&lt;INT&gt;&quot;, max.pool.idle.connections=&quot;&lt;INT&gt;&quot;, min.evictable.idle.time=&quot;&lt;STRING&gt;&quot;, time.between.eviction.runs=&quot;&lt;STRING&gt;&quot;, max.wait.time=&quot;&lt;STRING&gt;&quot;, test.on.borrow=&quot;&lt;BOOL&gt;&quot;, test.while.idle=&quot;&lt;BOOL&gt;&quot;, exhausted.action=&quot;&lt;INT&gt;&quot;, hostname.verification.enabled=&quot;&lt;BOOL&gt;&quot;, @map(...)))
 </code></pre>
 
 <p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -898,6 +910,14 @@
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
+        <td style="vertical-align: top">blocking.io</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Blocks the request thread until a response it received from HTTP endpoint. This should be enabled for reliable messaging (error handling)</p></td>
+        <td style="vertical-align: top">false</td>
+        <td style="vertical-align: top">BOOL</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
         <td style="vertical-align: top">headers</td>
         <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">HTTP request headers in format <code>"'&lt;key&gt;:&lt;value&gt;','&lt;key&gt;:&lt;value&gt;'"</code>.<br>When <code>Content-Type</code> header is not provided the system derives the Content-Type based on the provided sink mapper as following: <br>&nbsp;- <code>@map(type='xml')</code>: <code>application/xml</code><br>&nbsp;- <code>@map(type='json')</code>: <code>application/json</code><br>&nbsp;- <code>@map(type='text')</code>: <code>plain/text</code><br>&nbsp;- <code>@map(type='keyvalue')</code>: <code>application/x-www-form-urlencoded</code><br>&nbsp;- For all other cases system defaults to <code>plain/text</code><br>Also the <code>Content-Length</code> header need not to be provided, as the system automatically defines it by calculating the size of the payload.</p></td>
         <td style="vertical-align: top">Content-Type and Content-Length headers</td>
@@ -934,6 +954,14 @@
         <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">SSL/TLS protocol.</p></td>
         <td style="vertical-align: top">TLS</td>
         <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ssl.verification.disabled</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Disable SSL verification.</p></td>
+        <td style="vertical-align: top">false</td>
+        <td style="vertical-align: top">BOOL</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
@@ -1171,7 +1199,7 @@ define stream FooStream (payloadBody String, headers string);
 <p style="word-wrap: break-word;margin: 0;">The http-call sink publishes messages to endpoints via HTTP or HTTPS protocols using methods such as POST, GET, PUT, and DELETE on formats <code>text</code>, <code>XML</code> or <code>JSON</code> and consume responses through its corresponding http-call-response source. It also supports calling endpoints protected with basic authentication or OAuth 2.0.</p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
-<pre><code>@sink(type=&quot;http-call&quot;, publisher.url=&quot;&lt;STRING&gt;&quot;, sink.id=&quot;&lt;STRING&gt;&quot;, basic.auth.username=&quot;&lt;STRING&gt;&quot;, basic.auth.password=&quot;&lt;STRING&gt;&quot;, https.truststore.file=&quot;&lt;STRING&gt;&quot;, https.truststore.password=&quot;&lt;STRING&gt;&quot;, oauth.username=&quot;&lt;STRING&gt;&quot;, oauth.password=&quot;&lt;STRING&gt;&quot;, consumer.key=&quot;&lt;STRING&gt;&quot;, consumer.secret=&quot;&lt;STRING&gt;&quot;, token.url=&quot;&lt;STRING&gt;&quot;, refresh.token=&quot;&lt;STRING&gt;&quot;, headers=&quot;&lt;STRING&gt;&quot;, method=&quot;&lt;STRING&gt;&quot;, downloading.enabled=&quot;&lt;BOOL&gt;&quot;, download.path=&quot;&lt;STRING&gt;&quot;, blocking.io=&quot;&lt;BOOL&gt;&quot;, socket.idle.timeout=&quot;&lt;INT&gt;&quot;, chunk.disabled=&quot;&lt;BOOL&gt;&quot;, ssl.protocol=&quot;&lt;STRING&gt;&quot;, ssl.configurations=&quot;&lt;STRING&gt;&quot;, proxy.host=&quot;&lt;STRING&gt;&quot;, proxy.port=&quot;&lt;STRING&gt;&quot;, proxy.username=&quot;&lt;STRING&gt;&quot;, proxy.password=&quot;&lt;STRING&gt;&quot;, client.bootstrap.configurations=&quot;&lt;STRING&gt;&quot;, max.pool.active.connections=&quot;&lt;INT&gt;&quot;, min.pool.idle.connections=&quot;&lt;INT&gt;&quot;, max.pool.idle.connections=&quot;&lt;INT&gt;&quot;, min.evictable.idle.time=&quot;&lt;STRING&gt;&quot;, time.between.eviction.runs=&quot;&lt;STRING&gt;&quot;, max.wait.time=&quot;&lt;STRING&gt;&quot;, test.on.borrow=&quot;&lt;BOOL&gt;&quot;, test.while.idle=&quot;&lt;BOOL&gt;&quot;, exhausted.action=&quot;&lt;INT&gt;&quot;, hostname.verification.enabled=&quot;&lt;BOOL&gt;&quot;, @map(...)))
+<pre><code>@sink(type=&quot;http-call&quot;, publisher.url=&quot;&lt;STRING&gt;&quot;, sink.id=&quot;&lt;STRING&gt;&quot;, basic.auth.username=&quot;&lt;STRING&gt;&quot;, basic.auth.password=&quot;&lt;STRING&gt;&quot;, https.truststore.file=&quot;&lt;STRING&gt;&quot;, https.truststore.password=&quot;&lt;STRING&gt;&quot;, oauth.username=&quot;&lt;STRING&gt;&quot;, oauth.password=&quot;&lt;STRING&gt;&quot;, consumer.key=&quot;&lt;STRING&gt;&quot;, consumer.secret=&quot;&lt;STRING&gt;&quot;, token.url=&quot;&lt;STRING&gt;&quot;, refresh.token=&quot;&lt;STRING&gt;&quot;, headers=&quot;&lt;STRING&gt;&quot;, method=&quot;&lt;STRING&gt;&quot;, downloading.enabled=&quot;&lt;BOOL&gt;&quot;, download.path=&quot;&lt;STRING&gt;&quot;, blocking.io=&quot;&lt;BOOL&gt;&quot;, socket.idle.timeout=&quot;&lt;INT&gt;&quot;, chunk.disabled=&quot;&lt;BOOL&gt;&quot;, ssl.protocol=&quot;&lt;STRING&gt;&quot;, ssl.verification.disabled=&quot;&lt;BOOL&gt;&quot;, ssl.configurations=&quot;&lt;STRING&gt;&quot;, proxy.host=&quot;&lt;STRING&gt;&quot;, proxy.port=&quot;&lt;STRING&gt;&quot;, proxy.username=&quot;&lt;STRING&gt;&quot;, proxy.password=&quot;&lt;STRING&gt;&quot;, client.bootstrap.configurations=&quot;&lt;STRING&gt;&quot;, max.pool.active.connections=&quot;&lt;INT&gt;&quot;, min.pool.idle.connections=&quot;&lt;INT&gt;&quot;, max.pool.idle.connections=&quot;&lt;INT&gt;&quot;, min.evictable.idle.time=&quot;&lt;STRING&gt;&quot;, time.between.eviction.runs=&quot;&lt;STRING&gt;&quot;, max.wait.time=&quot;&lt;STRING&gt;&quot;, test.on.borrow=&quot;&lt;BOOL&gt;&quot;, test.while.idle=&quot;&lt;BOOL&gt;&quot;, exhausted.action=&quot;&lt;INT&gt;&quot;, hostname.verification.enabled=&quot;&lt;BOOL&gt;&quot;, @map(...)))
 </code></pre>
 
 <p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -1341,6 +1369,14 @@ define stream FooStream (payloadBody String, headers string);
         <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">SSL/TLS protocol.</p></td>
         <td style="vertical-align: top">TLS</td>
         <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ssl.verification.disabled</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Disable SSL verification.</p></td>
+        <td style="vertical-align: top">false</td>
+        <td style="vertical-align: top">BOOL</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
@@ -1569,7 +1605,7 @@ define stream ResponseStream4xx(errorMsg string);
 <p style="word-wrap: break-word;margin: 0;"><em>(Use http-call sink instead).</em><br>The http-request sink publishes messages to endpoints via HTTP or HTTPS protocols using methods such as POST, GET, PUT, and DELETE on formats <code>text</code>, <code>XML</code> or <code>JSON</code> and consume responses through its corresponding http-response source. It also supports calling endpoints protected with basic authentication or OAuth 2.0.</p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
-<pre><code>@sink(type=&quot;http-request&quot;, publisher.url=&quot;&lt;STRING&gt;&quot;, sink.id=&quot;&lt;STRING&gt;&quot;, basic.auth.username=&quot;&lt;STRING&gt;&quot;, basic.auth.password=&quot;&lt;STRING&gt;&quot;, https.truststore.file=&quot;&lt;STRING&gt;&quot;, https.truststore.password=&quot;&lt;STRING&gt;&quot;, oauth.username=&quot;&lt;STRING&gt;&quot;, oauth.password=&quot;&lt;STRING&gt;&quot;, consumer.key=&quot;&lt;STRING&gt;&quot;, consumer.secret=&quot;&lt;STRING&gt;&quot;, token.url=&quot;&lt;STRING&gt;&quot;, refresh.token=&quot;&lt;STRING&gt;&quot;, headers=&quot;&lt;STRING&gt;&quot;, method=&quot;&lt;STRING&gt;&quot;, downloading.enabled=&quot;&lt;BOOL&gt;&quot;, download.path=&quot;&lt;STRING&gt;&quot;, blocking.io=&quot;&lt;BOOL&gt;&quot;, socket.idle.timeout=&quot;&lt;INT&gt;&quot;, chunk.disabled=&quot;&lt;BOOL&gt;&quot;, ssl.protocol=&quot;&lt;STRING&gt;&quot;, ssl.configurations=&quot;&lt;STRING&gt;&quot;, proxy.host=&quot;&lt;STRING&gt;&quot;, proxy.port=&quot;&lt;STRING&gt;&quot;, proxy.username=&quot;&lt;STRING&gt;&quot;, proxy.password=&quot;&lt;STRING&gt;&quot;, client.bootstrap.configurations=&quot;&lt;STRING&gt;&quot;, max.pool.active.connections=&quot;&lt;INT&gt;&quot;, min.pool.idle.connections=&quot;&lt;INT&gt;&quot;, max.pool.idle.connections=&quot;&lt;INT&gt;&quot;, min.evictable.idle.time=&quot;&lt;STRING&gt;&quot;, time.between.eviction.runs=&quot;&lt;STRING&gt;&quot;, max.wait.time=&quot;&lt;STRING&gt;&quot;, test.on.borrow=&quot;&lt;BOOL&gt;&quot;, test.while.idle=&quot;&lt;BOOL&gt;&quot;, exhausted.action=&quot;&lt;INT&gt;&quot;, hostname.verification.enabled=&quot;&lt;BOOL&gt;&quot;, @map(...)))
+<pre><code>@sink(type=&quot;http-request&quot;, publisher.url=&quot;&lt;STRING&gt;&quot;, sink.id=&quot;&lt;STRING&gt;&quot;, basic.auth.username=&quot;&lt;STRING&gt;&quot;, basic.auth.password=&quot;&lt;STRING&gt;&quot;, https.truststore.file=&quot;&lt;STRING&gt;&quot;, https.truststore.password=&quot;&lt;STRING&gt;&quot;, oauth.username=&quot;&lt;STRING&gt;&quot;, oauth.password=&quot;&lt;STRING&gt;&quot;, consumer.key=&quot;&lt;STRING&gt;&quot;, consumer.secret=&quot;&lt;STRING&gt;&quot;, token.url=&quot;&lt;STRING&gt;&quot;, refresh.token=&quot;&lt;STRING&gt;&quot;, headers=&quot;&lt;STRING&gt;&quot;, method=&quot;&lt;STRING&gt;&quot;, downloading.enabled=&quot;&lt;BOOL&gt;&quot;, download.path=&quot;&lt;STRING&gt;&quot;, blocking.io=&quot;&lt;BOOL&gt;&quot;, socket.idle.timeout=&quot;&lt;INT&gt;&quot;, chunk.disabled=&quot;&lt;BOOL&gt;&quot;, ssl.protocol=&quot;&lt;STRING&gt;&quot;, ssl.verification.disabled=&quot;&lt;BOOL&gt;&quot;, ssl.configurations=&quot;&lt;STRING&gt;&quot;, proxy.host=&quot;&lt;STRING&gt;&quot;, proxy.port=&quot;&lt;STRING&gt;&quot;, proxy.username=&quot;&lt;STRING&gt;&quot;, proxy.password=&quot;&lt;STRING&gt;&quot;, client.bootstrap.configurations=&quot;&lt;STRING&gt;&quot;, max.pool.active.connections=&quot;&lt;INT&gt;&quot;, min.pool.idle.connections=&quot;&lt;INT&gt;&quot;, max.pool.idle.connections=&quot;&lt;INT&gt;&quot;, min.evictable.idle.time=&quot;&lt;STRING&gt;&quot;, time.between.eviction.runs=&quot;&lt;STRING&gt;&quot;, max.wait.time=&quot;&lt;STRING&gt;&quot;, test.on.borrow=&quot;&lt;BOOL&gt;&quot;, test.while.idle=&quot;&lt;BOOL&gt;&quot;, exhausted.action=&quot;&lt;INT&gt;&quot;, hostname.verification.enabled=&quot;&lt;BOOL&gt;&quot;, @map(...)))
 </code></pre>
 
 <p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -1739,6 +1775,14 @@ define stream ResponseStream4xx(errorMsg string);
         <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">SSL/TLS protocol.</p></td>
         <td style="vertical-align: top">TLS</td>
         <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">ssl.verification.disabled</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Disable SSL verification.</p></td>
+        <td style="vertical-align: top">false</td>
+        <td style="vertical-align: top">BOOL</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
     </tr>
@@ -2135,7 +2179,7 @@ insert into ResultStream;
 <h2 id="source">Source</h2>
 <h3 id="http-source">http <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#source">(Source)</a></em></h3>
 <p><p></p>
-<p style="word-wrap: break-word;margin: 0;">HTTP source receives POST requests via HTTP and HTTPS protocols in format such as <code>text</code>, <code>XML</code> and <code>JSON</code>. It also supports basic authentication to ensure events are received from authorized users/systems.<br>The request headers and properties are exposed via transport properties and they can be retrieved in the mapper in the format <code>trp:&lt;header&gt;</code>.</p>
+<p style="word-wrap: break-word;margin: 0;">HTTP source receives POST requests via HTTP and HTTPS protocols in format such as <code>text</code>, <code>XML</code> and <code>JSON</code>. It also supports basic authentication to ensure events are received from authorized users/systems.<br>The request headers and properties can be accessed via transport properties in the format <code>trp:&lt;header&gt;</code>.</p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
 <pre><code>@source(type=&quot;http&quot;, receiver.url=&quot;&lt;STRING&gt;&quot;, basic.auth.enabled=&quot;&lt;STRING&gt;&quot;, worker.count=&quot;&lt;INT&gt;&quot;, socket.idle.timeout=&quot;&lt;INT&gt;&quot;, ssl.verify.client=&quot;&lt;STRING&gt;&quot;, ssl.protocol=&quot;&lt;STRING&gt;&quot;, tls.store.type=&quot;&lt;STRING&gt;&quot;, ssl.configurations=&quot;&lt;STRING&gt;&quot;, request.size.validation.configurations=&quot;&lt;STRING&gt;&quot;, header.validation.configurations=&quot;&lt;STRING&gt;&quot;, server.bootstrap.configurations=&quot;&lt;STRING&gt;&quot;, trace.log.enabled=&quot;&lt;BOOL&gt;&quot;, @map(...)))
@@ -2361,7 +2405,7 @@ define stream StockStream (symbol string, price float, volume long);
 
 <h3 id="http-call-response-source">http-call-response <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#source">(Source)</a></em></h3>
 <p><p></p>
-<p style="word-wrap: break-word;margin: 0;">The http-call-response source receives the responses for the calls made by its corresponding http-call sink, and maps them from formats such as <code>text</code>, <code>XML</code> and <code>JSON</code>.<br>To handle messages with different http status codes having different formats, multiple http-call-response sources are allowed to associate with a single http-call sink. It also allows accessing the attributes of the event that initiated the call via transport properties and map them with the format <code>trp:&lt;attribute name&gt;</code>'.The response headers and properties are exposed via transport properties and they can be retrieved in the mapper in the format <code>trp:&lt;header&gt;</code>.</p>
+<p style="word-wrap: break-word;margin: 0;">The http-call-response source receives the responses for the calls made by its corresponding http-call sink, and maps them from formats such as <code>text</code>, <code>XML</code> and <code>JSON</code>.<br>To handle messages with different http status codes having different formats, multiple http-call-response sources are allowed to associate with a single http-call sink.<br>It allows accessing the attributes of the event that initiated the call, and the response headers and properties via transport properties in the format <code>trp:&lt;attribute name&gt;</code> and <code>trp:&lt;header/property&gt;</code> respectively.</p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
 <pre><code>@source(type=&quot;http-call-response&quot;, sink.id=&quot;&lt;STRING&gt;&quot;, http.status.code=&quot;&lt;STRING&gt;&quot;, allow.streaming.responses=&quot;&lt;BOOL&gt;&quot;, @map(...)))
@@ -2449,7 +2493,7 @@ define stream EmployeeErrorStream(error string);
 <h3 id="http-request-source"><s>http-request <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#source">(Source)</a></em></s></h3>
 <p><p><i>Deprecated</i></p>
 <p></p>
-<p style="word-wrap: break-word;margin: 0;"><em>(Use http-service source instead).</em><br>The http-request source receives POST requests via HTTP and HTTPS protocols in format such as <code>text</code>, <code>XML</code> and <code>JSON</code> and sends responses via its corresponding http-response sink correlated through a unique <code>source.id</code>.<br>For request and response correlation, it generates a <code>messageId</code> upon each incoming request and expose it via transport properties in the format <code>trp:messageId</code> to correlate them with the responses at the http-response sink.<br>It also supports basic authentication to ensure events are received from authorized users/systems.</p>
+<p style="word-wrap: break-word;margin: 0;"><em>(Use http-service source instead).</em><br>The http-request source receives POST requests via HTTP and HTTPS protocols in format such as <code>text</code>, <code>XML</code> and <code>JSON</code> and sends responses via its corresponding http-response sink correlated through a unique <code>source.id</code>.<br>For request and response correlation, it generates a <code>messageId</code> upon each incoming request and expose it via transport properties in the format <code>trp:messageId</code> to correlate them with the responses at the http-response sink.<br>The request headers and properties can be accessed via transport properties in the format <code>trp:&lt;header&gt;</code>.<br>It also supports basic authentication to ensure events are received from authorized users/systems.</p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
 <pre><code>@source(type=&quot;http-request&quot;, receiver.url=&quot;&lt;STRING&gt;&quot;, source.id=&quot;&lt;STRING&gt;&quot;, connection.timeout=&quot;&lt;INT&gt;&quot;, basic.auth.enabled=&quot;&lt;STRING&gt;&quot;, worker.count=&quot;&lt;INT&gt;&quot;, socket.idle.timeout=&quot;&lt;INT&gt;&quot;, ssl.verify.client=&quot;&lt;STRING&gt;&quot;, ssl.protocol=&quot;&lt;STRING&gt;&quot;, tls.store.type=&quot;&lt;STRING&gt;&quot;, ssl.configurations=&quot;&lt;STRING&gt;&quot;, request.size.validation.configurations=&quot;&lt;STRING&gt;&quot;, header.validation.configurations=&quot;&lt;STRING&gt;&quot;, server.bootstrap.configurations=&quot;&lt;STRING&gt;&quot;, trace.log.enabled=&quot;&lt;BOOL&gt;&quot;, @map(...)))
@@ -2686,7 +2730,7 @@ insert into ResultStream;
 <h3 id="http-response-source"><s>http-response <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#source">(Source)</a></em></s></h3>
 <p><p><i>Deprecated</i></p>
 <p></p>
-<p style="word-wrap: break-word;margin: 0;"><em>(Use http-call-response source instead).</em><br>The http-response source receives the responses for the calls made by its corresponding http-request sink, and maps them from formats such as <code>text</code>, <code>XML</code> and <code>JSON</code>.<br>To handle messages with different http status codes having different formats, multiple http-response sources are allowed to associate with a single http-request sink. It also allows accessing the attributes of the event that initiated the call via transport properties and map them with the format <code>trp:&lt;attribute name&gt;</code>'.</p>
+<p style="word-wrap: break-word;margin: 0;"><em>(Use http-call-response source instead).</em><br>The http-response source receives the responses for the calls made by its corresponding http-request sink, and maps them from formats such as <code>text</code>, <code>XML</code> and <code>JSON</code>.<br>To handle messages with different http status codes having different formats, multiple http-response sources are allowed to associate with a single http-request sink. It allows accessing the attributes of the event that initiated the call, and the response headers and properties via transport properties in the format <code>trp:&lt;attribute name&gt;</code> and <code>trp:&lt;header/property&gt;</code> respectively.</p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
 <pre><code>@source(type=&quot;http-response&quot;, sink.id=&quot;&lt;STRING&gt;&quot;, http.status.code=&quot;&lt;STRING&gt;&quot;, allow.streaming.responses=&quot;&lt;BOOL&gt;&quot;, @map(...)))
@@ -2773,7 +2817,7 @@ define stream EmployeeErrorStream(error string);
 
 <h3 id="http-service-source">http-service <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#source">(Source)</a></em></h3>
 <p><p></p>
-<p style="word-wrap: break-word;margin: 0;">The http-service source receives POST requests via HTTP and HTTPS protocols in format such as <code>text</code>, <code>XML</code> and <code>JSON</code> and sends responses via its corresponding http-service-response sink correlated through a unique <code>source.id</code>.<br>For request and response correlation, it generates a <code>messageId</code> upon each incoming request and expose it via transport properties in the format <code>trp:messageId</code> to correlate them with the responses at the http-service-response sink.<br>It also supports basic authentication to ensure events are received from authorized users/systems.<br>The request headers and properties are exposed via transport properties and they can be retrieved in the mapper in the format <code>trp:&lt;header&gt;</code>.</p>
+<p style="word-wrap: break-word;margin: 0;">The http-service source receives POST requests via HTTP and HTTPS protocols in format such as <code>text</code>, <code>XML</code> and <code>JSON</code> and sends responses via its corresponding http-service-response sink correlated through a unique <code>source.id</code>.<br>For request and response correlation, it generates a <code>messageId</code> upon each incoming request and expose it via transport properties in the format <code>trp:messageId</code> to correlate them with the responses at the http-service-response sink.<br>The request headers and properties can be accessed via transport properties in the format <code>trp:&lt;header&gt;</code>.<br>It also supports basic authentication to ensure events are received from authorized users/systems.</p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
 <pre><code>@source(type=&quot;http-service&quot;, receiver.url=&quot;&lt;STRING&gt;&quot;, source.id=&quot;&lt;STRING&gt;&quot;, connection.timeout=&quot;&lt;INT&gt;&quot;, basic.auth.enabled=&quot;&lt;STRING&gt;&quot;, worker.count=&quot;&lt;INT&gt;&quot;, socket.idle.timeout=&quot;&lt;INT&gt;&quot;, ssl.verify.client=&quot;&lt;STRING&gt;&quot;, ssl.protocol=&quot;&lt;STRING&gt;&quot;, tls.store.type=&quot;&lt;STRING&gt;&quot;, ssl.configurations=&quot;&lt;STRING&gt;&quot;, request.size.validation.configurations=&quot;&lt;STRING&gt;&quot;, header.validation.configurations=&quot;&lt;STRING&gt;&quot;, server.bootstrap.configurations=&quot;&lt;STRING&gt;&quot;, trace.log.enabled=&quot;&lt;BOOL&gt;&quot;, @map(...)))
@@ -3041,13 +3085,13 @@ insert into ResultStream;
           </a>
         
         
-          <a href="../2.1.0/" title="2.1.0" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../2.1.1/" title="2.1.1" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                2.1.0
+                2.1.1
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
