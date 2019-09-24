@@ -21,8 +21,8 @@ package io.siddhi.extension.io.http.sink;
 import com.sun.net.httpserver.Headers;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
-import io.siddhi.core.stream.StreamJunction;
 import io.siddhi.core.stream.input.InputHandler;
+import io.siddhi.core.stream.output.sink.Sink;
 import io.siddhi.extension.io.http.sink.util.HttpServerListenerHandler;
 import io.siddhi.extension.io.http.sink.util.UnitTestAppender;
 import io.siddhi.extension.map.xml.sinkmapper.XMLSinkMapper;
@@ -168,7 +168,7 @@ public class HttpSinkTestCase {
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
-                + "@sink(type='http',blocking.io='true',publisher.url='http://localhost:8010/abcd',method='{{method}}',"
+                + "@sink(type='http', publisher.url='http://localhost:8010/abcd',method='{{method}}',"
                 + "headers='{{headers}}',"
                 + "@map(type='xml', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
@@ -182,16 +182,16 @@ public class HttpSinkTestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition + query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
-        Logger logger = Logger.getLogger(StreamJunction.class);
+        Logger logger = Logger.getLogger(Sink.class);
         UnitTestAppender appender = new UnitTestAppender();
         logger.addAppender(appender);
 
         try {
             fooStream.send(1566562744069L, new Object[]{payload, "POST", "'Name:John','Age:23'"});
-            String expectedMessage = "failed to publish events to HTTP endpoint. Hence, dropping event " +
-                    "'StreamEvent{ timestamp=1566562744069, beforeWindowData=null, onAfterWindowData=null, " +
-                    "outputData=[<events><event><symbol>WSO2</symbol><price>55.645</price><volume>100</volume>" +
-                    "</event></events>, POST, 'Name:John','Age:23'], type=CURRENT, next=null}";
+            Thread.sleep(3000);
+            String expectedMessage = "Dropping event at Sink 'http' at 'BarStream' as its still trying to " +
+                    "reconnect!, events dropped '<events><event><symbol>WSO2</symbol><price>55.645</price>" +
+                    "<volume>100</volume></event></events>'";
             Assert.assertTrue(appender.getMessages().contains(expectedMessage));
         } finally {
             logger.removeAppender(appender);
