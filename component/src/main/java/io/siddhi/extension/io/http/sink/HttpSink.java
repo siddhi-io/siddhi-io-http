@@ -169,13 +169,6 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
                         optional = true,
                         defaultValue = "-"),
                 @Parameter(
-                        name = "blocking.io",
-                        description = "Blocks the request thread until a response it received from HTTP " +
-                                "endpoint. This should be enabled for reliable messaging (error handling)",
-                        type = {DataType.BOOL},
-                        optional = true,
-                        defaultValue = "false"),
-                @Parameter(
                         name = "headers",
                         description = "HTTP request headers in format `\"'<key>:<value>','<key>:<value>'\"`.\n" +
                                 "When `Content-Type` header is not provided the system derives the " +
@@ -475,7 +468,6 @@ public class HttpSink extends Sink {
     private long maxWaitTime;
     private String hostnameVerificationEnabled;
     private String sslVerificationDisabled;
-    private boolean isBlockingIO;
 
     private DefaultHttpWsConnectorFactory httpConnectorFactory;
 
@@ -595,9 +587,6 @@ public class HttpSink extends Sink {
             authType = HttpConstants.NO_AUTH;
         }
 
-        isBlockingIO = Boolean.parseBoolean(
-                optionHolder.validateAndGetStaticValue(HttpConstants.BLOCKING_IO, HttpConstants.FALSE));
-
         initConnectorFactory();
         if (publisherURLOption.isStatic()) {
             initClientConnector(null);
@@ -632,7 +621,8 @@ public class HttpSink extends Sink {
         }
     }
 
-    private void sendOauthRequest(Object payload, DynamicOptions dynamicOptions, List<Header> headersList) {
+    private void sendOauthRequest(Object payload, DynamicOptions dynamicOptions, List<Header> headersList)
+            throws ConnectionUnavailableException {
         //generate encoded base64 auth for getting refresh token
         String consumerKeyValue = consumerKey + ":" + consumerSecret;
         String encodedAuth = "Basic " + encodeBase64(consumerKeyValue)
@@ -654,13 +644,13 @@ public class HttpSink extends Sink {
         } else {
             log.error("Error at sending oauth request to API endpoint " +
                     publisherURL + "', with response code: " + response + ". Message dropped.");
-            throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " +
+            throw new ConnectionUnavailableException("Error at sending oauth request to API endpoint " +
                     publisherURL + "', and response code: " + response + ". Message dropped.");
         }
     }
 
     private void handleOAuthFailure(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
-                                    String encodedAuth) {
+                                    String encodedAuth) throws ConnectionUnavailableException {
         boolean checkFromCache = accessTokenCache.checkAvailableKey(encodedAuth);
         if (checkFromCache) {
             getNewAccessTokenWithCache(payload, dynamicOptions, headersList, encodedAuth);
@@ -670,7 +660,7 @@ public class HttpSink extends Sink {
     }
 
     private void getNewAccessTokenWithCache(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
-                                            String encodedAuth) {
+                                            String encodedAuth) throws ConnectionUnavailableException {
         String accessToken = accessTokenCache.getAccessToken(encodedAuth);
         for (Header header : headersList) {
             if (header.getName().equals(HttpConstants.AUTHORIZATION_HEADER)) {
@@ -692,13 +682,13 @@ public class HttpSink extends Sink {
         } else {
             log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
                     response + ". Message dropped.");
-            throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " + publisherURL +
+            throw new ConnectionUnavailableException("Error at sending oauth request to API endpoint " + publisherURL +
                     "', with response code: " + response + ". Message dropped.");
         }
     }
 
     private void requestForNewAccessToken(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
-                                          String encodedAuth) {
+                                          String encodedAuth) throws ConnectionUnavailableException {
         Boolean checkRefreshToken = accessTokenCache.checkRefreshAvailableKey(encodedAuth);
         if (checkRefreshToken) {
             for (Header header : headersList) {
@@ -744,7 +734,7 @@ public class HttpSink extends Sink {
             } else {
                 log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
                         response + ". Message dropped.");
-                throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " +
+                throw new ConnectionUnavailableException("Error at sending oauth request to API endpoint " +
                         publisherURL + "', with response code: " + response + ". Message dropped.");
             }
         } else if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.AUTHENTICATION_FAIL_CODE) {
@@ -758,7 +748,7 @@ public class HttpSink extends Sink {
         } else {
             log.error("Failed to generate new access token for the expired access token. Error code: " +
                     accessTokenCache.getResponseCode(encodedAuth) + ". Message dropped.");
-            throw new HttpSinkAdaptorRuntimeException("Failed to generate new access token for the expired" +
+            throw new ConnectionUnavailableException("Failed to generate new access token for the expired" +
                     " access token. Error code: " + accessTokenCache.getResponseCode(encodedAuth)
                     + ". Message dropped.");
         }
@@ -782,7 +772,7 @@ public class HttpSink extends Sink {
     }
 
     void setAccessToken(String encodedAuth, DynamicOptions dynamicOptions,
-                        List<Header> headersList) {
+                        List<Header> headersList) throws ConnectionUnavailableException {
         //check the availability of the authorization
         String accessToken;
         boolean authAvailability = false;
@@ -823,7 +813,7 @@ public class HttpSink extends Sink {
             } else {
                 log.error("Failed to generate new access token for the expired access token. Error code: " +
                         accessTokenCache.getResponseCode(encodedAuth) + ". Message dropped.");
-                throw new HttpSinkAdaptorRuntimeException("Failed to generate new access token for the expired" +
+                throw new ConnectionUnavailableException("Failed to generate new access token for the expired" +
                         " access token. Error code: " + accessTokenCache.getResponseCode(encodedAuth) +
                         ". Message dropped.");
             }
@@ -841,7 +831,8 @@ public class HttpSink extends Sink {
         }
     }
 
-    private int sendRequest(Object payload, DynamicOptions dynamicOptions, List<Header> headersList) {
+    private int sendRequest(Object payload, DynamicOptions dynamicOptions, List<Header> headersList)
+            throws ConnectionUnavailableException {
         if (!publisherURLOption.isStatic()) {
             initClientConnector(dynamicOptions);
         }
@@ -872,45 +863,21 @@ public class HttpSink extends Sink {
                 boolean latchCount = latch.await(30, TimeUnit.SECONDS);
                 if (!latchCount) {
                     log.debug("Time out due to getting getting response from " + publisherURL + ". Message dropped.");
-                    throw new HttpSinkAdaptorRuntimeException("Time out due to getting getting response from "
+                    throw new ConnectionUnavailableException("Time out due to getting getting response from "
                             + publisherURL + ". Message dropped.");
                 }
             } catch (InterruptedException e) {
                 log.debug("Failed to get a response from " + publisherURL + "," + e + ". Message dropped.");
-                throw new HttpSinkAdaptorRuntimeException("Failed to get a response from " +
+                throw new ConnectionUnavailableException("Failed to get a response from " +
                         publisherURL + ", " + e + ". Message dropped.");
             }
             HttpCarbonMessage response = listener.getHttpResponseMessage();
             return response.getNettyHttpResponse().status().code();
-        } else if (!isBlockingIO) {
-            clientConnector.send(cMessage);
-            return HttpConstants.SUCCESS_CODE;
         } else {
-            CountDownLatch latch = new CountDownLatch(1);
             HttpResponseFuture responseFuture = clientConnector.send(cMessage);
-            HTTPResponseListener responseListener = new HTTPResponseListener(latch);
+            HTTPResponseListener responseListener = new HTTPResponseListener(payload, dynamicOptions, this);
             responseFuture.setHttpConnectorListener(responseListener);
-
-            try {
-                boolean latchCount = latch.await(30, TimeUnit.SECONDS);
-                if (!latchCount) {
-                    log.debug("Time out due to getting getting response from " + publisherURL + ". Message dropped.");
-                    throw new HttpSinkAdaptorRuntimeException("Time out due to getting getting response from "
-                            + publisherURL + ". Message dropped.");
-
-                }
-            } catch (InterruptedException e) {
-                log.debug("Failed to get a response from " + publisherURL + "," + e + ". Message dropped.");
-                throw new HttpSinkAdaptorRuntimeException("Failed to get a response from " +
-                        publisherURL + ", " + e + ". Message dropped.");
-            }
-
-            if (responseListener.throwable == null) {
-                return HttpConstants.SUCCESS_CODE;
-            } else {
-                throw new SiddhiAppRuntimeException("Siddhi App " + siddhiAppContext.getName() + " failed to publish " +
-                        "events to HTTP endpoint", responseListener.throwable);
-            }
+            return HttpConstants.SUCCESS_CODE;
         }
     }
 
@@ -1154,22 +1121,26 @@ public class HttpSink extends Sink {
     }
 
     static class HTTPResponseListener implements HttpConnectorListener {
-        Throwable throwable;
-        CountDownLatch countDownLatch;
+        Object payload;
+        DynamicOptions dynamicOptions;
+        HttpSink httpSink;
 
-        HTTPResponseListener(CountDownLatch latch) {
-            this.countDownLatch = latch;
+        HTTPResponseListener(Object payload, DynamicOptions dynamicOptions, HttpSink httpSink) {
+            this.payload = payload;
+            this.dynamicOptions = dynamicOptions;
+            this.httpSink = httpSink;
         }
 
         @Override
         public void onMessage(HttpCarbonMessage httpCarbonMessage) {
-            countDownLatch.countDown();
+
         }
 
         @Override
         public void onError(Throwable throwable) {
-            this.throwable = throwable;
-            countDownLatch.countDown();
+            httpSink.onError(payload, dynamicOptions,
+                    new ConnectionUnavailableException("Siddhi App " + httpSink.siddhiAppContext.getName() +
+                            " failed to publish events to HTTP endpoint: " + httpSink.publisherURL, throwable));
         }
     }
 }
