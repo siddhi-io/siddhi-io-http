@@ -18,6 +18,7 @@
  */
 package io.siddhi.extension.io.http.source.internal;
 
+import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorException;
 import org.apache.log4j.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
@@ -48,7 +49,13 @@ public class ServiceComponent {
      */
     @Activate
     protected void start(BundleContext bundleContext) throws Exception {
-        HttpIODataHolder.getInstance().setBundleContext(bundleContext);
+        try {
+            HttpIODataHolder.getInstance().setBundleContext(bundleContext);
+        } catch (Throwable throwable) {
+            log.error("Error occurred when initializing HTTP IO service component.", throwable);
+            throw new HttpSourceAdaptorException("Error occurred when initializing HTTP IO service component.",
+                    throwable);
+        }
     }
 
     /**
