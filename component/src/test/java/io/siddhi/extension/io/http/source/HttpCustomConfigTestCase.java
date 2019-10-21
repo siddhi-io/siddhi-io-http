@@ -46,7 +46,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class HttpCustomConfigTestCase {
     private static final Logger logger = Logger.getLogger(HttpCustomConfigTestCase.class);
     private AtomicInteger eventCount = new AtomicInteger(0);
-    private int waitTime = 50;
+    private int waitTime = 500;
     private int timeout = 30000;
 
     @BeforeMethod
@@ -260,6 +260,8 @@ public class HttpCustomConfigTestCase {
             }
         };
         thread1.start();
+        Thread.sleep(5000);
+
         Thread thread3 = new Thread() {
             public void run() {
                 HttpTestUtil.httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
