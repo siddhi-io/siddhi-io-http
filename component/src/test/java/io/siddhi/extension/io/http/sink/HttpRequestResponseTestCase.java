@@ -43,7 +43,6 @@ public class HttpRequestResponseTestCase {
     private String downloadPath;
     private String rootPath;
 
-
     @BeforeClass
     public void init() {
         ClassLoader classLoader = getClass().getClassLoader();
@@ -52,7 +51,7 @@ public class HttpRequestResponseTestCase {
     }
 
     @BeforeMethod
-    public void initMethod() {
+    public void reset() {
         eventCount.set(0);
     }
 
@@ -114,7 +113,7 @@ public class HttpRequestResponseTestCase {
         httpServerListenerHandler.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = "testHTTPRequestResponse1")
     public void testHTTPRequestResponse2() throws Exception {
         log.info("Send a POST request with a json body message and receive the response along with attributes in the " +
                 "request");
@@ -175,9 +174,10 @@ public class HttpRequestResponseTestCase {
         httpServerListenerHandler.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = "testHTTPRequestResponse2")
     public void testHTTPRequestResponse3() throws Exception {
         log.info("Download a file");
+
         SiddhiManager siddhiManager = new SiddhiManager();
         String inStreamDefinition = "" +
                 "define stream FooStream (name String, id int, headers String, downloadPath string);"
@@ -203,6 +203,7 @@ public class HttpRequestResponseTestCase {
         String downloadPath = rootPath + File.separator + "downloadedFile.txt";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition + query);
+
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         StreamCallback streamCallback = new StreamCallback() {
             @Override
@@ -224,22 +225,20 @@ public class HttpRequestResponseTestCase {
         HttpFileServerListenerHandler httpFileServerListenerHandler = new HttpFileServerListenerHandler(8007);
         httpFileServerListenerHandler.run();
         siddhiAppRuntime.start();
-
         fooStream.send(new Object[]{"wso2", 100, "'country:sri-lanka'", downloadPath});
 
         SiddhiTestHelper.waitForEvents(1000, 1, eventCount, 1000);
 
         File file = new File(downloadPath);
-        Assert.assertTrue(file != null);
         Assert.assertTrue(file.isFile());
         Assert.assertEquals(file.getName(), "downloadedFile.txt");
-
+        file.delete();
         Assert.assertEquals(eventCount.get(), 1);
         siddhiAppRuntime.shutdown();
         httpFileServerListenerHandler.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = "testHTTPRequestResponse3")
     public void testHTTPRequestResponse4() throws Exception {
         log.info("Try to download a file that not exists.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -307,9 +306,7 @@ public class HttpRequestResponseTestCase {
         SiddhiTestHelper.waitForEvents(1000, 1, eventCount, 1000);
 
         File file = new File(downloadPath);
-        Assert.assertTrue(file != null);
-        Assert.assertTrue(file.isFile());
-        Assert.assertEquals(file.getName(), "downloadedFile.txt");
+        Assert.assertFalse(file.isFile());
 
         Assert.assertEquals(eventCount.get(), 1);
         siddhiAppRuntime.shutdown();

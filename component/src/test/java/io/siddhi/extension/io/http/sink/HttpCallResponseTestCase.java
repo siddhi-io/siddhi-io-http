@@ -29,6 +29,7 @@ import io.siddhi.extension.io.http.sink.util.HttpServerListenerHandler;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -41,12 +42,16 @@ public class HttpCallResponseTestCase {
     private String downloadPath;
     private String rootPath;
 
-
     @BeforeClass
     public void init() {
         ClassLoader classLoader = getClass().getClassLoader();
         rootPath = classLoader.getResource("files").getFile();
         downloadPath = rootPath + "/downloads";
+    }
+
+    @BeforeMethod
+    public void reset() {
+        eventCount.set(0);
     }
 
     @Test
@@ -107,7 +112,7 @@ public class HttpCallResponseTestCase {
         httpServerListenerHandler.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = "testHTTPRequestResponse1")
     public void testHTTPRequestResponse2() throws Exception {
         log.info("Send a POST request with a json body message and receive the response along with attributes in the " +
                 "request");
@@ -168,7 +173,7 @@ public class HttpCallResponseTestCase {
         httpServerListenerHandler.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = "testHTTPRequestResponse2")
     public void testHTTPRequestResponse3() throws Exception {
         log.info("Download a file");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -223,16 +228,16 @@ public class HttpCallResponseTestCase {
         SiddhiTestHelper.waitForEvents(1000, 1, eventCount, 1000);
 
         File file = new File(downloadPath);
-        Assert.assertTrue(file != null);
         Assert.assertTrue(file.isFile());
         Assert.assertEquals(file.getName(), "downloadedFile.txt");
+        file.delete();
 
         Assert.assertEquals(eventCount.get(), 1);
         siddhiAppRuntime.shutdown();
         httpFileServerListenerHandler.shutdown();
     }
 
-    @Test
+    @Test(dependsOnMethods = "testHTTPRequestResponse3")
     public void testHTTPRequestResponse4() throws Exception {
         log.info("Try to download a file that not exists.");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -241,7 +246,7 @@ public class HttpCallResponseTestCase {
                 "@sink(type='http-call'," +
                 "downloading.enabled='true'," +
                 "download.path='{{downloadPath}}'," +
-                "publisher.url='http://localhost:8005/files2', " +
+                "publisher.url='http://localhost:8005/files', " +
                 "method='GET'," +
                 "headers='{{headers}}',sink.id='source-1'," +
                 "@map(type='json')) " +
@@ -300,12 +305,111 @@ public class HttpCallResponseTestCase {
         SiddhiTestHelper.waitForEvents(1000, 1, eventCount, 1000);
 
         File file = new File(downloadPath);
-        Assert.assertTrue(file != null);
-        Assert.assertTrue(file.isFile());
-        Assert.assertEquals(file.getName(), "downloadedFile.txt");
+        Assert.assertFalse(file.isFile());
 
         Assert.assertEquals(eventCount.get(), 1);
         siddhiAppRuntime.shutdown();
         httpFileServerListenerHandler.shutdown();
+    }
+
+    @Test(dependsOnMethods = "testHTTPRequestResponse4")
+    public void testHTTPRequestResponse5() throws Exception {
+        log.info("Send a POST request with a json body message and receive the response");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String inStreamDefinition = "" +
+                "define stream FooStream (message String,headers String);" +
+                "" +
+                "@sink(type='http-call', publisher.url='http://localhost:8005/abc'," +
+                " method='POST', headers='{{headers}}', sink.id='source-1'," +
+                "@map(type='json', @payload('{{message}}'))) " +
+                "define stream BarStream (message String, headers String);" +
+                "" +
+                "@source(type='http-call-response', sink.id='source-1', " +
+                "@map(type='json', @attributes(name='name', id='id')))" +
+                "define stream responseStream(name String, id int);";
+        String query = "" +
+                "@info(name = 'query') " +
+                "from FooStream " +
+                "select message,headers " +
+                "insert into BarStream;";
+
+        String payload = "{\"name\":\"wso2\", \"id\":\"1234\"}";
+        String headers = "'comapny:wso2', country:sl'";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition + query);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        StreamCallback streamCallback = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                Assert.fail();
+            }
+        };
+
+        siddhiAppRuntime.addCallback("responseStream", streamCallback);
+        siddhiAppRuntime.start();
+
+        fooStream.send(new Object[]{payload, headers});
+        SiddhiTestHelper.waitForEvents(1000, 1, eventCount, 1000);
+
+        Assert.assertEquals(eventCount.get(), 0);
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(dependsOnMethods = "testHTTPRequestResponse5")
+    public void testHTTPRequestResponse6() throws Exception {
+        log.info("Send a POST request with a json body message and receive the response");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String inStreamDefinition = "" +
+                "define stream FooStream (message String,headers String);" +
+                "" +
+                "@sink(type='http-call', publisher.url='http://localhost:8005/abc'," +
+                " method='POST', headers='{{headers}}',sink.id='source-1', on.error='wait', " +
+                "@map(type='json', @payload('{{message}}'))) " +
+                "define stream BarStream (message String, headers String);" +
+                "" +
+                "@source(type='http-call-response', sink.id='source-1', " +
+                "@map(type='json', @attributes(name='name', id='id')))" +
+                "define stream responseStream(name String, id int);";
+        String query = "" +
+                "@info(name = 'query') " +
+                "from FooStream " +
+                "select message,headers " +
+                "insert into BarStream;";
+
+        String payload = "{\"name\":\"wso2\", \"id\":\"1234\"}";
+        String headers = "'comapny:wso2', country:sl'";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition + query);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        StreamCallback streamCallback = new StreamCallback() {
+            @Override
+            public void receive(Event[] events) {
+                for (int i = 0; i < events.length; i++) {
+                    eventCount.incrementAndGet();
+                    switch (i) {
+                        case 0:
+                            Assert.assertEquals("wso2", (String) events[i].getData()[0]);
+                            Assert.assertEquals(1234, events[i].getData()[1]);
+                            break;
+
+                        default:
+                            Assert.fail();
+                    }
+                }
+            }
+        };
+
+        siddhiAppRuntime.addCallback("responseStream", streamCallback);
+        siddhiAppRuntime.start();
+
+        fooStream.send(new Object[]{payload, headers});
+        Thread.sleep(1000);
+        HttpServerListenerHandler httpServerListenerHandler = new HttpServerListenerHandler(8005);
+        httpServerListenerHandler.run();
+        Thread.sleep(5000);
+
+        SiddhiTestHelper.waitForEvents(1000, 1, eventCount, 1000);
+
+        Assert.assertEquals(eventCount.get(), 1);
+        siddhiAppRuntime.shutdown();
+        httpServerListenerHandler.shutdown();
     }
 }

@@ -43,6 +43,7 @@ public class HttpServerListenerHandler implements Runnable {
         try {
             server = HttpServer.create(new InetSocketAddress(port), 5);
             server.createContext("/abc", serverListener);
+            logger.info("Start server on port '" + port + "'");
             server.start();
         } catch (IOException e) {
             logger.error("Error in creating test server.", e);
@@ -51,7 +52,7 @@ public class HttpServerListenerHandler implements Runnable {
 
     public void shutdown() {
         if (server != null) {
-            logger.info("Shutting down");
+            logger.info("Shutting down server on port '" + port + "'");
             server.stop(1);
         }
     }

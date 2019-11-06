@@ -20,16 +20,21 @@ package io.siddhi.extension.io.http.sink.util;
 
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.extension.io.http.sink.exception.HttpSinkAdaptorRuntimeException;
 import io.siddhi.extension.io.http.util.HttpConstants;
 import io.siddhi.extension.io.http.util.TrpPropertyTypes;
 import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.transport.http.netty.contract.Constants;
+import org.wso2.transport.http.netty.contract.config.ProxyServerConfiguration;
 import org.wso2.transport.http.netty.contract.config.SenderConfiguration;
+import org.wso2.transport.http.netty.contractimpl.DefaultHttpWsConnectorFactory;
+import org.wso2.transport.http.netty.contractimpl.sender.channel.pool.PoolConfiguration;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +47,7 @@ import static io.siddhi.extension.io.http.util.HttpConstants.CLIENT_BOOTSTRAP_RE
 import static io.siddhi.extension.io.http.util.HttpConstants.CLIENT_BOOTSTRAP_SENDBUFFERSIZE;
 import static io.siddhi.extension.io.http.util.HttpConstants.CLIENT_BOOTSTRAP_SOCKET_REUSE;
 import static io.siddhi.extension.io.http.util.HttpConstants.CLIENT_BOOTSTRAP_SOCKET_TIMEOUT;
+import static io.siddhi.extension.io.http.util.HttpConstants.EMPTY_STRING;
 import static io.siddhi.extension.io.http.util.HttpConstants.HTTP_TRACE_LOG_ENABLED;
 import static io.siddhi.extension.io.http.util.HttpConstants.LOG_TRACE_ENABLE_DEFAULT_VALUE;
 import static io.siddhi.extension.io.http.util.HttpConstants.PARAMETER_SEPARATOR;
@@ -283,4 +289,84 @@ public class HttpSinkUtil {
         trpPropertyTypes.put(CLIENT_BOOTSTRAP_SOCKET_TIMEOUT, TrpPropertyTypes.INTEGER);
         return trpPropertyTypes;
     }
+
+    public static PoolConfiguration createPoolConfigurations(OptionHolder optionHolder) {
+        int maxIdlePerPool = Integer.parseInt(optionHolder.validateAndGetStaticValue(
+                HttpConstants.MAX_IDLE_CONNECTIONS_PER_POOL, HttpConstants.DEFAULT_MAX_IDLE_CONNECTIONS_PER_POOL));
+        int minIdlePerPool = Integer.parseInt(optionHolder.validateAndGetStaticValue(
+                HttpConstants.MIN_IDLE_CONNECTIONS_PER_POOL, HttpConstants.DEFAULT_MIN_IDLE_CONNECTIONS_PER_POOL));
+        int maxActivePerPool = Integer.parseInt(optionHolder.validateAndGetStaticValue(
+                HttpConstants.MAX_ACTIVE_CONNECTIONS_PER_POOL, HttpConstants.DEFAULT_MAX_ACTIVE_CONNECTIONS_PER_POOL));
+        boolean testOnBorrow = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants.TEST_ON_BORROW,
+                HttpConstants.DEFAULT_TEST_ON_BORROW));
+        boolean testWhileIdle = Boolean.parseBoolean(
+                optionHolder.validateAndGetStaticValue(HttpConstants.TEST_WHILE_IDLE,
+                HttpConstants.DEFAULT_TEST_WHILE_IDLE));
+        long timeBetweenEvictionRuns = Long.parseLong(optionHolder.validateAndGetStaticValue(
+                HttpConstants.TIME_BETWEEN_EVICTION_RUNS, HttpConstants.DEFAULT_TIME_BETWEEN_EVICTION_RUNS));
+        long minEvictableIdleTime = Long.parseLong(optionHolder.validateAndGetStaticValue(
+                HttpConstants.MIN_EVICTABLE_IDLE_TIME, HttpConstants.DEFAULT_MIN_EVICTABLE_IDLE_TIME));
+        byte exhaustedAction = (byte) Integer.parseInt(optionHolder.validateAndGetStaticValue(
+                HttpConstants.EXHAUSTED_ACTION, HttpConstants.DEFAULT_EXHAUSTED_ACTION));
+        int maxWaitTime = Integer.parseInt(optionHolder.validateAndGetStaticValue(
+                HttpConstants.MAX_WAIT_TIME, HttpConstants.DEFAULT_MAX_WAIT_TIME));
+        PoolConfiguration connectionPoolConfiguration = new PoolConfiguration();
+        connectionPoolConfiguration.setMaxActivePerPool(maxActivePerPool);
+        connectionPoolConfiguration.setMinIdlePerPool(minIdlePerPool);
+        connectionPoolConfiguration.setMaxIdlePerPool(maxIdlePerPool);
+        connectionPoolConfiguration.setTestOnBorrow(testOnBorrow);
+        connectionPoolConfiguration.setTestWhileIdle(testWhileIdle);
+        connectionPoolConfiguration.setTimeBetweenEvictionRuns(timeBetweenEvictionRuns);
+        connectionPoolConfiguration.setMinEvictableIdleTime(minEvictableIdleTime);
+        connectionPoolConfiguration.setExhaustedAction(exhaustedAction);
+        connectionPoolConfiguration.setMaxWaitTime(maxWaitTime);
+        return connectionPoolConfiguration;
+    }
+
+    public static DefaultHttpWsConnectorFactory createConnectorFactory(ConfigReader configReader) {
+        //read trp globe configuration
+        String bootstrapWorker = configReader
+                .readConfig(HttpConstants.CLIENT_BOOTSTRAP_WORKER_GROUP_SIZE, EMPTY_STRING);
+        String bootstrapBoss = configReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_BOSS_GROUP_SIZE, EMPTY_STRING);
+        String bootstrapClient = configReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_CLIENT_GROUP_SIZE,
+                EMPTY_STRING);
+        //if bootstrap configurations are given then pass it if not let take default value of transport
+        if (!EMPTY_STRING.equals(bootstrapBoss) && !EMPTY_STRING.equals(bootstrapWorker)) {
+            if (!EMPTY_STRING.equals(bootstrapClient)) {
+                return new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss),
+                        Integer.parseInt(bootstrapWorker), Integer.parseInt(bootstrapClient));
+            } else {
+                return new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss),
+                        Integer.parseInt(bootstrapWorker), Integer.parseInt(bootstrapWorker));
+            }
+        }
+        return new DefaultHttpWsConnectorFactory();
+    }
+
+    public static ProxyServerConfiguration createProxyServerConfiguration(OptionHolder optionHolder, String streamID,
+                                                                          String appName) {
+        String proxyHost = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_HOST, EMPTY_STRING);
+        String proxyPort = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_PORT, EMPTY_STRING);
+        String proxyUsername = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_USERNAME,
+                EMPTY_STRING);
+        String proxyPassword = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_PASSWORD,
+                EMPTY_STRING);
+        //if proxy username and password not equal to null then create proxy configurations
+        if (!EMPTY_STRING.equals(proxyHost) && !EMPTY_STRING.equals(proxyPort)) {
+            try {
+                ProxyServerConfiguration proxyServerConfiguration = new ProxyServerConfiguration(proxyHost, Integer
+                        .parseInt(proxyPort));
+                if (!EMPTY_STRING.equals(proxyPassword) && !EMPTY_STRING.equals
+                        (proxyUsername)) {
+                    proxyServerConfiguration.setProxyPassword(proxyPassword);
+                    proxyServerConfiguration.setProxyUsername(proxyUsername);
+                }
+            } catch (UnknownHostException e) {
+                log.error("Proxy url of sink defined in '" + streamID + "' of Siddhi App '" +
+                        appName + "' is invalid.", e);
+            }
+        }
+        return null;
+    }
+
 }

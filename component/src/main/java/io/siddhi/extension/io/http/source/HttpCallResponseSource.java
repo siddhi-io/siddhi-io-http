@@ -183,13 +183,12 @@ public class HttpCallResponseSource extends Source {
                 new HttpCallResponseConnectorListener(Integer.parseInt(workerThread), sourceEventListener,
                         shouldAllowStreamingResponses, sinkId, requestedTransportPropertyNames, siddhiAppName);
         this.httpConnectorRegistry.registerSourceListener(httpCallResponseSourceListener, sinkId, httpStatusCode);
-
         HTTPSourceRegistry.registerCallResponseSource(sinkId, httpStatusCode, this);
     }
 
     @Override
     public void disconnect() {
-        this.httpConnectorRegistry.unregisterSourceListener(sinkId, httpStatusCode, siddhiAppName);
+        httpConnectorRegistry.unregisterSourceListener(sinkId, httpStatusCode, siddhiAppName);
         HTTPSourceRegistry.removeCallResponseSource(sinkId, httpStatusCode);
     }
 
@@ -209,5 +208,11 @@ public class HttpCallResponseSource extends Source {
 
     public HttpCallResponseConnectorListener getConnectorListener() {
         return httpCallResponseSourceListener;
+    }
+
+    public boolean matches(String thatSinkId, String thatStatusCode) {
+        return (sinkId != null ? sinkId.equals(thatSinkId) : thatSinkId == null) &&
+                (httpStatusCode != null ?
+                        thatStatusCode != null && thatStatusCode.matches(httpStatusCode) : thatStatusCode == null);
     }
 }
