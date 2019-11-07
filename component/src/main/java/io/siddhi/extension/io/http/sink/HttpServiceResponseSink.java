@@ -191,8 +191,8 @@ public class HttpServiceResponseSink extends Sink {
         List<Header> headersList = HttpSinkUtil.getHeaders(headers);
         String messageId = messageIdOption.getValue(dynamicOptions);
         String contentType = HttpSinkUtil.getContentType(mapType, headersList);
-        HTTPSourceRegistry.
-                getServiceSource(sourceId).handleCallback(messageId, (String) payload, headersList, contentType);
+        HTTPSourceRegistry.getInstance()
+                .getServiceSource(sourceId).handleCallback(messageId, (String) payload, headersList, contentType);
     }
 
     /**

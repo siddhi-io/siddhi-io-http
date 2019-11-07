@@ -52,7 +52,7 @@ public class ResponseSourceId {
         if (sinkId != null ? !sinkId.equals(that.sinkId) : that.sinkId != null) {
             return false;
         }
-        return httpCode != null ? httpCode.matches(that.httpCode) : that.httpCode == null;
+        return httpCode != null ? httpCode.equals(that.httpCode) : that.httpCode == null;
     }
 
     @Override

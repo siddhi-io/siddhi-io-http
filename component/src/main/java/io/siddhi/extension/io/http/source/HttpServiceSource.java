@@ -383,7 +383,7 @@ public class HttpServiceSource extends HttpSource {
         this.httpConnectorRegistry.registerSourceListener(sourceEventListener, listenerUrl,
                 workerThread, isAuth, requestedTransportPropertyNames, sourceId, siddhiAppName);
 
-        HTTPSourceRegistry.registerServiceSource(sourceId, this);
+        HTTPSourceRegistry.getInstance().registerServiceSource(sourceId, this);
     }
 
     /**
@@ -394,7 +394,7 @@ public class HttpServiceSource extends HttpSource {
         this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl, siddhiAppName);
         this.httpConnectorRegistry.unregisterServerConnector(this.listenerUrl);
 
-        HTTPSourceRegistry.removeServiceSource(sourceId);
+        HTTPSourceRegistry.getInstance().removeServiceSource(sourceId);
         for (Map.Entry<String, HttpCarbonMessage> entry : requestContainerMap.entrySet()) {
             cancelRequest(entry.getKey(), entry.getValue());
         }
@@ -407,7 +407,7 @@ public class HttpServiceSource extends HttpSource {
     @Override
     public void destroy() {
         this.httpConnectorRegistry.clearBootstrapConfigIfLast();
-        HTTPSourceRegistry.removeServiceSource(sourceId);
+        HTTPSourceRegistry.getInstance().removeServiceSource(sourceId);
         timer.stop();
     }
 

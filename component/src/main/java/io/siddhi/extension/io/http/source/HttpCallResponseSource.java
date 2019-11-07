@@ -184,13 +184,13 @@ public class HttpCallResponseSource extends Source {
                         shouldAllowStreamingResponses, sinkId, requestedTransportPropertyNames, siddhiAppName);
         this.httpConnectorRegistry.registerSourceListener(httpCallResponseSourceListener, sinkId, httpStatusCode);
 
-        HTTPSourceRegistry.registerCallResponseSource(sinkId, httpStatusCode, this);
+        HTTPSourceRegistry.getInstance().registerCallResponseSource(sinkId, this);
     }
 
     @Override
     public void disconnect() {
         this.httpConnectorRegistry.unregisterSourceListener(sinkId, httpStatusCode, siddhiAppName);
-        HTTPSourceRegistry.removeCallResponseSource(sinkId, httpStatusCode);
+        HTTPSourceRegistry.getInstance().removeCallResponseSource(sinkId, httpStatusCode);
     }
 
     @Override
@@ -209,5 +209,9 @@ public class HttpCallResponseSource extends Source {
 
     public HttpCallResponseConnectorListener getConnectorListener() {
         return httpCallResponseSourceListener;
+    }
+
+    public String getHttpStatusCode() {
+        return httpStatusCode;
     }
 }

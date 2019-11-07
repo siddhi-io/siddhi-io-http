@@ -22,13 +22,13 @@ package io.siddhi.extension.io.http.source;
 import io.siddhi.extension.io.http.sink.HttpSink;
 import io.siddhi.extension.io.http.util.HTTPSourceRegistry;
 import io.siddhi.extension.io.http.util.HttpConstants;
-import io.siddhi.extension.io.http.util.ResponseSourceId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
@@ -74,10 +74,12 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
         String statusCode = Integer.toString(carbonMessage.getNettyHttpResponse().status().code());
         if (carbonMessage.getNettyHttpResponse().status().code() == (HttpConstants.SUCCESS_CODE) ||
                 HttpConstants.MAXIMUM_TRY_COUNT == tryCount) {
-            HttpCallResponseSource responseSource = findAndGetResponseSource(statusCode);
-            if (responseSource != null) {
-                responseConnectorListener = responseSource.getConnectorListener();
-                responseConnectorListener.onMessage(carbonMessage);
+            List<HttpCallResponseSource> result = HTTPSourceRegistry.getInstance()
+                    .getCallResponseSourcesMatchingHttpCodeRegex(sinkId, statusCode);
+            if (result.size() != 0) {
+                for (HttpCallResponseSource responseSource : result) {
+                    responseSource.getConnectorListener().onMessage(carbonMessage);
+                }
             } else {
                 log.error("No source of type 'http-response' that matches with the status code '" + statusCode +
                         "' has been defined. Hence dropping the response message.");
@@ -94,7 +96,7 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
             sink.initClientConnector(null);
         }
 
-        HttpCallResponseSource source = HTTPSourceRegistry.getCallResponseSource(sinkId,
+        HttpCallResponseSource source = HTTPSourceRegistry.getInstance().getCallResponseSource(sinkId,
                 HttpConstants.DEFAULT_HTTP_ERROR_CODE);
         if (source != null) {
             responseConnectorListener = source.getConnectorListener();
@@ -117,17 +119,6 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
      */
     void disconnect() {
         responseConnectorListener.disconnect();
-    }
-
-    private HttpCallResponseSource findAndGetResponseSource(String statusCode) {
-        ResponseSourceId id = new ResponseSourceId(sinkId, statusCode);
-        for (Map.Entry entry : HTTPSourceRegistry.getCallResponseSourceRegistry().entrySet()) {
-            ResponseSourceId key = (ResponseSourceId) entry.getKey();
-            if (id.equals(key)) {
-                return (HttpCallResponseSource) entry.getValue();
-            }
-        }
-        return null;
     }
 
     public HttpCarbonMessage getHttpResponseMessage() {

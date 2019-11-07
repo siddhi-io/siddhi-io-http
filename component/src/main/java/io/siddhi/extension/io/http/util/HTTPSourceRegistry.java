@@ -18,9 +18,12 @@
  */
 package io.siddhi.extension.io.http.util;
 
+
 import io.siddhi.extension.io.http.source.HttpCallResponseSource;
 import io.siddhi.extension.io.http.source.HttpServiceSource;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -28,37 +31,77 @@ import java.util.concurrent.ConcurrentHashMap;
  * Result handler
  */
 public class HTTPSourceRegistry {
+    private static HTTPSourceRegistry instance = new HTTPSourceRegistry();
+    private Map<String, HttpServiceSource> requestSourceRegistry = new ConcurrentHashMap<>();
+    private Map<String, List<HttpCallResponseSource>> responseSourceRegistry = new ConcurrentHashMap<>();
 
-    private static Map<String, HttpServiceSource> serviceSourceRegistry = new ConcurrentHashMap<>();
-    private static Map<ResponseSourceId, HttpCallResponseSource> callResponseSourceRegistry = new ConcurrentHashMap<>();
+    private HTTPSourceRegistry() {
+    }
+
+    public static HTTPSourceRegistry getInstance() {
+        return instance;
+    }
 
     // handle service sources
-    public static HttpServiceSource getServiceSource(String sourceId) {
-        return serviceSourceRegistry.get(sourceId);
+    public HttpServiceSource getServiceSource(String sourceId) {
+        return requestSourceRegistry.get(sourceId);
     }
 
-    public static void registerServiceSource(String sourceId, HttpServiceSource source) {
-        serviceSourceRegistry.put(sourceId, source);
+    public void registerServiceSource(String sourceId, HttpServiceSource source) {
+        requestSourceRegistry.put(sourceId, source);
     }
 
-    public static void removeServiceSource(String sourceId) {
-        serviceSourceRegistry.remove(sourceId);
+    public void removeServiceSource(String sourceId) {
+        requestSourceRegistry.remove(sourceId);
     }
 
-    // handle response sources
-    public static HttpCallResponseSource getCallResponseSource(String sinkId, String statusCode) {
-        return callResponseSourceRegistry.get(new ResponseSourceId(sinkId, statusCode));
+    // handle call response sources
+    public HttpCallResponseSource getCallResponseSource(String sinkId, String statusCode) {
+        List<HttpCallResponseSource> sourcesMatchingSinkID = responseSourceRegistry.get(sinkId);
+        if (sourcesMatchingSinkID != null) {
+            for (HttpCallResponseSource entry: sourcesMatchingSinkID) {
+                if (statusCode.equals(entry.getHttpStatusCode())) {
+                    return entry;
+                }
+            }
+        }
+        return null;
     }
 
-    public static void registerCallResponseSource(String sinkId, String statusCode, HttpCallResponseSource source) {
-        callResponseSourceRegistry.put(new ResponseSourceId(sinkId, statusCode), source);
+    public  List<HttpCallResponseSource> getCallResponseSourcesMatchingHttpCodeRegex(String sinkId, String statusCode) {
+        List<HttpCallResponseSource> sourcesMatchingSinkID = responseSourceRegistry.get(sinkId);
+        List<HttpCallResponseSource> result = new LinkedList<>();
+        if (sourcesMatchingSinkID != null) {
+            for (HttpCallResponseSource entry: sourcesMatchingSinkID) {
+                if (statusCode.matches(entry.getHttpStatusCode())) {
+                    result.add(entry);
+                }
+            }
+        }
+        return result;
     }
 
-    public static void removeCallResponseSource(String sinkId, String statusCode) {
-        callResponseSourceRegistry.remove(new ResponseSourceId(sinkId, statusCode));
+
+    public void registerCallResponseSource(String sinkId, HttpCallResponseSource source) {
+        List<HttpCallResponseSource> sourcesMatchingSinkID = responseSourceRegistry.get(sinkId);
+        if (sourcesMatchingSinkID == null) {
+            List<HttpCallResponseSource> sourcesMatchingSinkIDNew = new LinkedList<>();
+            sourcesMatchingSinkIDNew.add(source);
+            responseSourceRegistry.put(sinkId, sourcesMatchingSinkIDNew);
+        } else {
+            sourcesMatchingSinkID.add(source);
+        }
     }
 
-    public static Map<ResponseSourceId, HttpCallResponseSource> getCallResponseSourceRegistry() {
-        return callResponseSourceRegistry;
+    public void removeCallResponseSource(String sinkId, String statusCode) {
+        List<HttpCallResponseSource> sourcesMatchingSinkID = responseSourceRegistry.get(sinkId);
+        if (sourcesMatchingSinkID != null) {
+            for (HttpCallResponseSource entry: sourcesMatchingSinkID) {
+                if (statusCode.equals(entry.getHttpStatusCode())) {
+                    sourcesMatchingSinkID.remove(entry);
+                    return;
+                }
+            }
+        }
     }
 }
