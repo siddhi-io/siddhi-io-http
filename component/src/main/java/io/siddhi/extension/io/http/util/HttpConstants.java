@@ -187,7 +187,6 @@ public class HttpConstants {
     // HTTP codes for response source
     public static final String HTTP_STATUS_CODE = "http.status.code";
     public static final String DEFAULT_HTTP_SUCCESS_CODE = "200";
-    public static final String DEFAULT_HTTP_ERROR_CODE = "500";
     // HTTP Default ports if the port is not present in the given URL
     public static final int DEFAULT_HTTP_PORT = 80;
     public static final int DEFAULT_HTTPS_PORT = 443;
@@ -203,6 +202,7 @@ public class HttpConstants {
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
     public static final int SUCCESS_CODE = 200;
+    public static final int CLIENT_REQUEST_TIMEOUT = 408;
     public static final int AUTHENTICATION_FAIL_CODE = 401;
     public static final int PERSISTENT_ACCESS_FAIL_CODE = 400;
     public static final int INTERNAL_SERVER_FAIL_CODE = 500;

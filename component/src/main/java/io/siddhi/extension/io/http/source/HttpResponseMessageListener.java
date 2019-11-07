@@ -19,13 +19,17 @@
 
 package io.siddhi.extension.io.http.source;
 
+import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.exception.SiddhiAppRuntimeException;
+import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.extension.io.http.sink.HttpSink;
 import io.siddhi.extension.io.http.util.HTTPSourceRegistry;
 import io.siddhi.extension.io.http.util.HttpConstants;
-import io.siddhi.extension.io.http.util.ResponseSourceId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
+import org.wso2.transport.http.netty.contract.exceptions.ClientConnectorException;
+import org.wso2.transport.http.netty.contract.exceptions.ServerConnectorException;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.io.IOException;
@@ -40,28 +44,30 @@ import java.util.concurrent.CountDownLatch;
 public class HttpResponseMessageListener implements HttpConnectorListener {
     private static final Logger log = LoggerFactory.getLogger(HttpResponseMessageListener.class);
 
-    private HttpCallResponseConnectorListener responseConnectorListener;
     private Map<String, Object> trpProperties;
     private boolean isDownloadEnabled;
     private String sinkId;
     private HttpCarbonMessage carbonMessages;
     private CountDownLatch latch;
-    private int tryCount;
-    private String authType;
-    private boolean isBlockingIO;
     private HttpSink sink;
+    private final Object payload;
+    private final DynamicOptions dynamicOptions;
+    private String siddhiAppName;
+    private String publisherURL;
 
     public HttpResponseMessageListener(HttpSink sink, Map<String, Object> trpProperties, String sinkId,
-                                       boolean isDownloadEnabled, CountDownLatch latch, int tryCount, String authType,
-                                       boolean isBlockingIO) {
+                                       boolean isDownloadEnabled, CountDownLatch latch,
+                                       Object payload, DynamicOptions dynamicOptions,
+                                       String siddhiAppName, String publisherURL) {
         this.trpProperties = trpProperties;
         this.isDownloadEnabled = isDownloadEnabled;
         this.sinkId = sinkId;
         this.latch = latch;
-        this.tryCount = tryCount;
-        this.authType = authType;
-        this.isBlockingIO = isBlockingIO;
         this.sink = sink;
+        this.payload = payload;
+        this.dynamicOptions = dynamicOptions;
+        this.siddhiAppName = siddhiAppName;
+        this.publisherURL = publisherURL;
     }
 
     @Override
@@ -71,67 +77,52 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
         });
         carbonMessage.setProperty(HttpConstants.IS_DOWNLOADABLE_CONTENT, isDownloadEnabled);
         this.carbonMessages = carbonMessage;
-        String statusCode = Integer.toString(carbonMessage.getNettyHttpResponse().status().code());
-        if (carbonMessage.getNettyHttpResponse().status().code() == (HttpConstants.SUCCESS_CODE) ||
-                HttpConstants.MAXIMUM_TRY_COUNT == tryCount) {
-            HttpCallResponseSource responseSource = findAndGetResponseSource(statusCode);
-            if (responseSource != null) {
-                responseConnectorListener = responseSource.getConnectorListener();
-                responseConnectorListener.onMessage(carbonMessage);
-            } else {
-                log.error("No source of type 'http-response' that matches with the status code '" + statusCode +
-                        "' has been defined. Hence dropping the response message.");
-            }
-        }
-        if (isBlockingIO || HttpConstants.OAUTH.equals(authType)) {
+        if (latch != null) {
             latch.countDown();
         }
+        String statusCode = Integer.toString(carbonMessage.getNettyHttpResponse().status().code());
+        HttpCallResponseSource responseSource = HTTPSourceRegistry.findAndGetResponseSource(sinkId, statusCode);
+        if (responseSource != null) {
+            HttpCallResponseConnectorListener responseConnectorListener = responseSource.getConnectorListener();
+            responseConnectorListener.onMessage(carbonMessage);
+        } else {
+            log.error("No source of type 'http-call-response' with sink.id '" + sinkId +
+                    "' for the status code '" + statusCode +
+                    "' defined. Hence dropping the response message.");
+        }
+
     }
 
     @Override
     public void onError(Throwable throwable) {
         if (throwable instanceof IOException) {
-            sink.initClientConnector(null);
+            sink.createClientConnector(null);
         }
-
-        HttpCallResponseSource source = HTTPSourceRegistry.getCallResponseSource(sinkId,
-                HttpConstants.DEFAULT_HTTP_ERROR_CODE);
-        if (source != null) {
-            responseConnectorListener = source.getConnectorListener();
+        if (latch != null) {
+            latch.countDown();
+        }
+        if (throwable instanceof ClientConnectorException || throwable instanceof ServerConnectorException) {
+            sink.onError(payload, dynamicOptions, new ConnectionUnavailableException(
+                    "HTTP call sink on stream '" + sink.getStreamDefinition().getId() +
+                            "' of Siddhi App '" + siddhiAppName +
+                            "' failed to publish events to endpoint '" + publisherURL + "'. " +
+                            throwable.getMessage(), throwable));
         } else {
-            log.error("No source of type 'http-response' for status code '500' has been " +
-                    "defined. Hence dropping the response message.");
+            sink.onError(payload, dynamicOptions,
+                    new SiddhiAppRuntimeException("HTTP call sink on stream '" +
+                            sink.getStreamDefinition().getId() +
+                            "' of Siddhi App '" + siddhiAppName +
+                            "' failed to publish events to endpoint '" + publisherURL + "'. " +
+                            throwable.getMessage(), throwable));
         }
-        if (responseConnectorListener != null) {
-            responseConnectorListener.onError(throwable);
+    }
+
+    public int getHttpResponseStatusCode() {
+        if (carbonMessages != null) {
+            return carbonMessages.getNettyHttpResponse().status().code();
         } else {
-            if (log.isDebugEnabled()) {
-                log.debug("No connector listener for the response source with sink id '" + sinkId + "' and http " +
-                        "status code 500 found.");
-            }
+            return HttpConstants.CLIENT_REQUEST_TIMEOUT;
         }
-    }
-
-    /**
-     * Disconnect pool execution.
-     */
-    void disconnect() {
-        responseConnectorListener.disconnect();
-    }
-
-    private HttpCallResponseSource findAndGetResponseSource(String statusCode) {
-        ResponseSourceId id = new ResponseSourceId(sinkId, statusCode);
-        for (Map.Entry entry : HTTPSourceRegistry.getCallResponseSourceRegistry().entrySet()) {
-            ResponseSourceId key = (ResponseSourceId) entry.getKey();
-            if (id.equals(key)) {
-                return (HttpCallResponseSource) entry.getValue();
-            }
-        }
-        return null;
-    }
-
-    public HttpCarbonMessage getHttpResponseMessage() {
-        return carbonMessages;
     }
 
 }

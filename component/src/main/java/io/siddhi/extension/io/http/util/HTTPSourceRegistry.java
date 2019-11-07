@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class HTTPSourceRegistry {
 
     private static Map<String, HttpServiceSource> serviceSourceRegistry = new ConcurrentHashMap<>();
-    private static Map<ResponseSourceId, HttpCallResponseSource> callResponseSourceRegistry = new ConcurrentHashMap<>();
+    private static Map<String, HttpCallResponseSource> callResponseSourceRegistry = new ConcurrentHashMap<>();
 
     // handle service sources
     public static HttpServiceSource getServiceSource(String sourceId) {
@@ -45,20 +45,20 @@ public class HTTPSourceRegistry {
         serviceSourceRegistry.remove(sourceId);
     }
 
-    // handle response sources
-    public static HttpCallResponseSource getCallResponseSource(String sinkId, String statusCode) {
-        return callResponseSourceRegistry.get(new ResponseSourceId(sinkId, statusCode));
-    }
-
     public static void registerCallResponseSource(String sinkId, String statusCode, HttpCallResponseSource source) {
-        callResponseSourceRegistry.put(new ResponseSourceId(sinkId, statusCode), source);
+        callResponseSourceRegistry.put(sinkId + statusCode, source);
     }
 
     public static void removeCallResponseSource(String sinkId, String statusCode) {
-        callResponseSourceRegistry.remove(new ResponseSourceId(sinkId, statusCode));
+        callResponseSourceRegistry.remove(sinkId + statusCode);
     }
 
-    public static Map<ResponseSourceId, HttpCallResponseSource> getCallResponseSourceRegistry() {
-        return callResponseSourceRegistry;
+    public static HttpCallResponseSource findAndGetResponseSource(String sinkId, String statusCode) {
+        for (HttpCallResponseSource responseSource : callResponseSourceRegistry.values()) {
+            if (responseSource.matches(sinkId, statusCode)) {
+                return responseSource;
+            }
+        }
+        return null;
     }
 }

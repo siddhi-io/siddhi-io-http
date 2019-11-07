@@ -54,7 +54,6 @@ import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.transport.http.netty.contract.Constants;
-import org.wso2.transport.http.netty.contract.HttpClientConnector;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
 import org.wso2.transport.http.netty.contract.HttpResponseFuture;
 import org.wso2.transport.http.netty.contract.config.ChunkConfig;
@@ -66,7 +65,6 @@ import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -75,6 +73,9 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static io.siddhi.extension.io.http.sink.util.HttpSinkUtil.createConnectorFactory;
+import static io.siddhi.extension.io.http.sink.util.HttpSinkUtil.createPoolConfigurations;
+import static io.siddhi.extension.io.http.sink.util.HttpSinkUtil.createProxyServerConfiguration;
 import static io.siddhi.extension.io.http.util.HttpConstants.EMPTY_STRING;
 import static io.siddhi.extension.io.http.util.HttpConstants.FALSE;
 import static io.siddhi.extension.io.http.util.HttpConstants.PORT_HOST_SEPARATOR;
@@ -421,19 +422,17 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
 )
 public class HttpSink extends Sink {
     private static final Logger log = Logger.getLogger(HttpSink.class);
-    HttpClientConnector clientConnector;
     String mapType;
     Option httpHeaderOption;
     Option httpMethodOption;
-    private String streamID;
-    private Map<String, String> httpURLProperties;
-    private String consumerKey;
-    private String consumerSecret;
+    protected String streamID;
+    protected String consumerKey;
+    protected String consumerSecret;
     private String authorizationHeader;
-    private String userName;
-    private String userPassword;
-    private String publisherURL;
-    private Option publisherURLOption;
+    protected String userName;
+    protected String userPassword;
+    protected ClientConnector staticClientConnector;
+    protected Option publisherURLOption;
     private String clientStoreFile;
     private String clientStorePass;
     private int socketIdleTimeout;
@@ -441,35 +440,21 @@ public class HttpSink extends Sink {
     private String tlsStoreType;
     private String chunkDisabled;
     private String parametersList;
-    private String proxyHost;
-    private String proxyPort;
-    private String proxyUsername;
-    private String proxyPassword;
     private String clientBootstrapConfiguration;
-    private String bootstrapWorker;
-    private String bootstrapBoss;
-    private String bootstrapClient;
     private ConfigReader configReader;
-    private SiddhiAppContext siddhiAppContext;
-    private String oauthUsername;
-    private String oauthUserPassword;
+    protected SiddhiAppContext siddhiAppContext;
+    protected String oauthUsername;
+    protected String oauthUserPassword;
     private Option refreshToken;
-    private String authType;
+    protected String authType;
     private AccessTokenCache accessTokenCache = AccessTokenCache.getInstance();
-    private String tokenURL;
-    private int maxActivePerPool;
-    private int minIdlePerPool;
-    private int maxIdlePerPool;
-    private boolean testOnBorrow;
-    private boolean testWhileIdle;
-    private long timeBetweenEvictionRuns;
-    private long minEvictableIdleTime;
-    private byte exhaustedAction;
-    private long maxWaitTime;
+    protected String tokenURL;
     private String hostnameVerificationEnabled;
     private String sslVerificationDisabled;
 
     private DefaultHttpWsConnectorFactory httpConnectorFactory;
+    private ProxyServerConfiguration proxyServerConfiguration;
+    private PoolConfiguration connectionPoolConfiguration;
 
     /**
      * Returns the list of classes which this sink can consume.
@@ -519,8 +504,6 @@ public class HttpSink extends Sink {
         this.httpMethodOption = optionHolder.getOrCreateOption(HttpConstants.METHOD, HttpConstants.DEFAULT_METHOD);
         this.consumerKey = optionHolder.validateAndGetStaticValue(HttpConstants.CONSUMER_KEY, EMPTY_STRING);
         this.consumerSecret = optionHolder.validateAndGetStaticValue(HttpConstants.CONSUMER_SECRET, EMPTY_STRING);
-        this.userName = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_USERNAME, EMPTY_STRING);
-        this.userPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_PASSWORD, EMPTY_STRING);
         this.oauthUsername = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_OAUTH_USERNAME,
                 EMPTY_STRING);
         this.oauthUserPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_OAUTH_PASSWORD,
@@ -538,44 +521,20 @@ public class HttpSink extends Sink {
         chunkDisabled = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_CHUNK_DISABLED, EMPTY_STRING);
 
         //pool configurations
-        maxIdlePerPool = Integer.parseInt(optionHolder.validateAndGetStaticValue(
-                HttpConstants.MAX_IDLE_CONNECTIONS_PER_POOL, HttpConstants.DEFAULT_MAX_IDLE_CONNECTIONS_PER_POOL));
-        minIdlePerPool = Integer.parseInt(optionHolder.validateAndGetStaticValue(
-                HttpConstants.MIN_IDLE_CONNECTIONS_PER_POOL, HttpConstants.DEFAULT_MIN_IDLE_CONNECTIONS_PER_POOL));
-        maxActivePerPool = Integer.parseInt(optionHolder.validateAndGetStaticValue(
-                HttpConstants.MAX_ACTIVE_CONNECTIONS_PER_POOL, HttpConstants.DEFAULT_MAX_ACTIVE_CONNECTIONS_PER_POOL));
-        testOnBorrow = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants.TEST_ON_BORROW,
-                HttpConstants.DEFAULT_TEST_ON_BORROW));
-        testWhileIdle = Boolean.parseBoolean(optionHolder.validateAndGetStaticValue(HttpConstants.TEST_WHILE_IDLE,
-                HttpConstants.DEFAULT_TEST_WHILE_IDLE));
-        timeBetweenEvictionRuns = Long.parseLong(optionHolder.validateAndGetStaticValue(
-                HttpConstants.TIME_BETWEEN_EVICTION_RUNS, HttpConstants.DEFAULT_TIME_BETWEEN_EVICTION_RUNS));
-        minEvictableIdleTime = Long.parseLong(optionHolder.validateAndGetStaticValue(
-                HttpConstants.MIN_EVICTABLE_IDLE_TIME, HttpConstants.DEFAULT_MIN_EVICTABLE_IDLE_TIME));
-        exhaustedAction = (byte) Integer.parseInt(optionHolder.validateAndGetStaticValue(
-                HttpConstants.EXHAUSTED_ACTION, HttpConstants.DEFAULT_EXHAUSTED_ACTION));
-        maxWaitTime = Integer.parseInt(optionHolder.validateAndGetStaticValue(
-                HttpConstants.MAX_WAIT_TIME, HttpConstants.DEFAULT_MAX_WAIT_TIME));
+        connectionPoolConfiguration = createPoolConfigurations(optionHolder);
 
         parametersList = optionHolder.validateAndGetStaticValue(HttpConstants.SINK_PARAMETERS, EMPTY_STRING);
-        proxyHost = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_HOST, EMPTY_STRING);
-        proxyPort = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_PORT, EMPTY_STRING);
-        proxyUsername = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_USERNAME,
-                EMPTY_STRING);
-        proxyPassword = optionHolder.validateAndGetStaticValue(HttpConstants.PROXY_PASSWORD,
-                EMPTY_STRING);
+
         clientBootstrapConfiguration = optionHolder
                 .validateAndGetStaticValue(HttpConstants.CLIENT_BOOTSTRAP_CONFIGURATION, EMPTY_STRING);
-        //read trp globe configuration
-        bootstrapWorker = configReader
-                .readConfig(HttpConstants.CLIENT_BOOTSTRAP_WORKER_GROUP_SIZE, EMPTY_STRING);
-        bootstrapBoss = configReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_BOSS_GROUP_SIZE, EMPTY_STRING);
-        bootstrapClient = configReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_CLIENT_GROUP_SIZE,
-                EMPTY_STRING);
         hostnameVerificationEnabled = optionHolder.validateAndGetStaticValue(
                 HttpConstants.HOSTNAME_VERIFICATION_ENABLED, TRUE);
         sslVerificationDisabled = optionHolder.validateAndGetStaticValue(HttpConstants.SSL_VERIFICATION_DISABLED,
                 FALSE);
+
+        userName = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_USERNAME, EMPTY_STRING);
+        userPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_PASSWORD, EMPTY_STRING);
+
         if (!HttpConstants.EMPTY_STRING.equals(userName) && !HttpConstants.EMPTY_STRING.equals(userPassword)) {
             authType = HttpConstants.BASIC_AUTH;
         } else if ((!HttpConstants.EMPTY_STRING.equals(consumerKey)
@@ -587,12 +546,29 @@ public class HttpSink extends Sink {
             authType = HttpConstants.NO_AUTH;
         }
 
-        initConnectorFactory();
+        //if username and password both not equal to null consider as basic auth enabled if only one is null take it
+        // as exception
+        if ((EMPTY_STRING.equals(userName) ^
+                EMPTY_STRING.equals(userPassword))) {
+            throw new SiddhiAppCreationException("Please provide user name and password in " +
+                    HttpConstants.HTTP_SINK_ID + " with the stream " + streamID + " in Siddhi app " +
+                    siddhiAppContext.getName());
+        } else if (!(EMPTY_STRING.equals(userName))) {
+            byte[] val = (userName + HttpConstants.AUTH_USERNAME_PASSWORD_SEPARATOR + userPassword).getBytes(Charset
+                    .defaultCharset());
+            this.authorizationHeader = HttpConstants.AUTHORIZATION_METHOD + Base64.encode
+                    (Unpooled.copiedBuffer(val));
+        }
+
+        proxyServerConfiguration = createProxyServerConfiguration(optionHolder, streamID, siddhiAppContext.getName());
+
+        httpConnectorFactory = createConnectorFactory(configReader);
         if (publisherURLOption.isStatic()) {
-            initClientConnector(null);
+            staticClientConnector = createClientConnector(null);
         }
         return null;
     }
+
 
     @Override
     protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
@@ -614,53 +590,118 @@ public class HttpSink extends Sink {
         String headers = httpHeaderOption.getValue(dynamicOptions);
         List<Header> headersList = HttpSinkUtil.getHeaders(headers);
 
-        if (authType.equals(HttpConstants.BASIC_AUTH) || authType.equals(HttpConstants.NO_AUTH)) {
-            sendRequest(payload, dynamicOptions, headersList);
+        ClientConnector clientConnector;
+        if (staticClientConnector != null) {
+            clientConnector = staticClientConnector;
         } else {
-            sendOauthRequest(payload, dynamicOptions, headersList);
+            clientConnector = createClientConnector(dynamicOptions);
+        }
+
+        if (mapType == null) {
+            mapType = getMapper().getType();
+        }
+
+        if (authType.equals(HttpConstants.BASIC_AUTH) || authType.equals(HttpConstants.NO_AUTH)) {
+            sendRequest(payload, dynamicOptions, headersList, clientConnector);
+        } else {
+            sendOauthRequest(payload, dynamicOptions, headersList, clientConnector);
         }
     }
 
-    private void sendOauthRequest(Object payload, DynamicOptions dynamicOptions, List<Header> headersList)
+    protected int sendRequest(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
+                              ClientConnector clientConnector)
+            throws ConnectionUnavailableException {
+
+        String httpMethod = EMPTY_STRING.equals(httpMethodOption.getValue(dynamicOptions)) ?
+                HttpConstants.METHOD_DEFAULT : httpMethodOption.getValue(dynamicOptions);
+        String contentType = HttpSinkUtil.getContentType(mapType, headersList);
+        String messageBody = getMessageBody(payload);
+        HttpMethod httpReqMethod = new HttpMethod(httpMethod);
+        HttpCarbonMessage cMessage = new HttpCarbonMessage(
+                new DefaultHttpRequest(HttpVersion.HTTP_1_1, httpReqMethod, EMPTY_STRING));
+        cMessage = generateCarbonMessage(headersList, contentType, httpMethod, cMessage,
+                clientConnector.getHttpURLProperties());
+        if (!Constants.HTTP_GET_METHOD.equals(httpMethod)) {
+            cMessage.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(messageBody
+                    .getBytes(Charset.defaultCharset()))));
+        }
+        cMessage.completeMessage();
+        if (HttpConstants.OAUTH.equals(authType)) {
+            CountDownLatch latch = new CountDownLatch(1);
+            DefaultListener listener = new DefaultListener(latch, authType);
+            HttpResponseFuture responseFuture = clientConnector.send(cMessage);
+            responseFuture.setHttpConnectorListener(listener);
+            try {
+                boolean latchCount = latch.await(30, TimeUnit.SECONDS);
+                if (!latchCount) {
+                    log.debug("Time out due to getting getting response from " + clientConnector.getPublisherURL() +
+                            ". Message dropped.");
+                    throw new ConnectionUnavailableException("Time out due to getting getting response from "
+                            + clientConnector.getPublisherURL() + ". Message dropped.");
+                }
+            } catch (InterruptedException e) {
+                log.debug("Failed to get a response from " + clientConnector.getPublisherURL() + "," + e +
+                        ". Message dropped.");
+                throw new ConnectionUnavailableException("Failed to get a response from " +
+                        clientConnector.getPublisherURL() + ", " + e + ". Message dropped.");
+            }
+            HttpCarbonMessage response = listener.getHttpResponseMessage();
+            return response.getNettyHttpResponse().status().code();
+        } else {
+            HttpResponseFuture responseFuture = clientConnector.send(cMessage);
+            HTTPResponseListener responseListener = new HTTPResponseListener(payload, dynamicOptions, this,
+                    clientConnector.getPublisherURL());
+            responseFuture.setHttpConnectorListener(responseListener);
+            return HttpConstants.SUCCESS_CODE;
+        }
+    }
+
+
+    protected void sendOauthRequest(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
+                                    ClientConnector clientConnector)
             throws ConnectionUnavailableException {
         //generate encoded base64 auth for getting refresh token
         String consumerKeyValue = consumerKey + ":" + consumerSecret;
         String encodedAuth = "Basic " + encodeBase64(consumerKeyValue)
                 .replaceAll(HttpConstants.NEW_LINE, HttpConstants.EMPTY_STRING);
         //check the availability of access token in the header
-        setAccessToken(encodedAuth, dynamicOptions, headersList);
+        setAccessToken(encodedAuth, dynamicOptions, headersList, clientConnector.getPublisherURL());
         //send a request to API and get the response
-        int response = sendRequest(payload, dynamicOptions, headersList);
+        int response = sendRequest(payload, dynamicOptions, headersList, clientConnector);
         //if authentication fails then get the new access token
         if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
-            handleOAuthFailure(payload, dynamicOptions, headersList, encodedAuth);
+            handleOAuthFailure(payload, dynamicOptions, headersList, encodedAuth, clientConnector);
         } else if (response == HttpConstants.SUCCESS_CODE) {
-            log.info("Request sent successfully to " + publisherURL);
+            log.info("Request sent successfully to " + clientConnector.getPublisherURL());
         } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
-            log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+            log.error("Error at sending oauth request to API endpoint " + clientConnector.getPublisherURL() +
+                    "', with response code: " +
                     response + "- Internal server error. Message dropped");
             throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint, " +
-                    publisherURL + "', with response code: " + response + "- Internal server error. Message dropped.");
+                    clientConnector.getPublisherURL() + "', with response code: " + response +
+                    "- Internal server error. Message dropped.");
         } else {
             log.error("Error at sending oauth request to API endpoint " +
-                    publisherURL + "', with response code: " + response + ". Message dropped.");
+                    clientConnector.getPublisherURL() + "', with response code: " + response + ". Message dropped.");
             throw new ConnectionUnavailableException("Error at sending oauth request to API endpoint " +
-                    publisherURL + "', and response code: " + response + ". Message dropped.");
+                    clientConnector.getPublisherURL() + "', and response code: " + response + ". Message dropped.");
         }
     }
 
     private void handleOAuthFailure(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
-                                    String encodedAuth) throws ConnectionUnavailableException {
+                                    String encodedAuth, ClientConnector clientConnector)
+            throws ConnectionUnavailableException {
         boolean checkFromCache = accessTokenCache.checkAvailableKey(encodedAuth);
         if (checkFromCache) {
-            getNewAccessTokenWithCache(payload, dynamicOptions, headersList, encodedAuth);
+            getNewAccessTokenWithCache(payload, dynamicOptions, headersList, encodedAuth, clientConnector);
         } else {
-            requestForNewAccessToken(payload, dynamicOptions, headersList, encodedAuth);
+            requestForNewAccessToken(payload, dynamicOptions, headersList, encodedAuth, clientConnector);
         }
     }
 
     private void getNewAccessTokenWithCache(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
-                                            String encodedAuth) throws ConnectionUnavailableException {
+                                            String encodedAuth, ClientConnector clientConnector)
+            throws ConnectionUnavailableException {
         String accessToken = accessTokenCache.getAccessToken(encodedAuth);
         for (Header header : headersList) {
             if (header.getName().equals(HttpConstants.AUTHORIZATION_HEADER)) {
@@ -669,26 +710,32 @@ public class HttpSink extends Sink {
             }
         }
         //send a request to API with a new access token
-        int response = sendRequest(payload, dynamicOptions, headersList);
+        int response = sendRequest(payload, dynamicOptions, headersList, clientConnector
+        );
         if (response == HttpConstants.SUCCESS_CODE) {
-            log.info("Request sent successfully to " + publisherURL);
+            log.info("Request sent successfully to " + clientConnector.getPublisherURL());
         } else if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
-            requestForNewAccessToken(payload, dynamicOptions, headersList, encodedAuth);
+            requestForNewAccessToken(payload, dynamicOptions, headersList, encodedAuth, clientConnector);
         } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
-            log.error("Error at sending oauth request to API endpoint, " + publisherURL + "', with response code: " +
+            log.error("Error at sending oauth request to API endpoint, " + clientConnector.getPublisherURL() +
+                    "', with response code: " +
                     response + "- Internal server error. Message dropped");
             throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint, " +
-                    publisherURL + "', with response code: " + response + "- Internal server error. Message dropped");
+                    clientConnector.getPublisherURL() + "', with response code: " + response +
+                    "- Internal server error. Message dropped");
         } else {
-            log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+            log.error("Error at sending oauth request to API endpoint " + clientConnector.getPublisherURL() +
+                    "', with response code: " +
                     response + ". Message dropped.");
-            throw new ConnectionUnavailableException("Error at sending oauth request to API endpoint " + publisherURL +
+            throw new ConnectionUnavailableException("Error at sending oauth request to API endpoint " +
+                    clientConnector.getPublisherURL() +
                     "', with response code: " + response + ". Message dropped.");
         }
     }
 
     private void requestForNewAccessToken(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
-                                          String encodedAuth) throws ConnectionUnavailableException {
+                                          String encodedAuth, ClientConnector clientConnector)
+            throws ConnectionUnavailableException {
         Boolean checkRefreshToken = accessTokenCache.checkRefreshAvailableKey(encodedAuth);
         if (checkRefreshToken) {
             for (Header header : headersList) {
@@ -714,35 +761,43 @@ public class HttpSink extends Sink {
                 }
             }
             //send a request to API with a new access token
-            int response = sendRequest(payload, dynamicOptions, headersList);
+            int response = sendRequest(payload, dynamicOptions, headersList, clientConnector
+            );
             if (response == HttpConstants.SUCCESS_CODE) {
-                log.info("Request sent successfully to " + publisherURL);
+                log.info("Request sent successfully to " + clientConnector.getPublisherURL());
             } else if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
-                log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+                log.error("Error at sending oauth request to API endpoint " + clientConnector.getPublisherURL() +
+                        "', with response code: " +
                         response + "- Authentication Failure. Please provide a valid Consumer key, Consumer secret" +
                         " and token endpoint URL . Message dropped");
                 throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " +
-                        publisherURL + "', with response code: " + response + "- Authentication Failure." +
+                        clientConnector.getPublisherURL() + "', with response code: " + response +
+                        "- Authentication Failure." +
                         " Please provide a valid Consumer key, Consumer secret and token endpoint URL." +
                         " Message dropped");
             } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
-                log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+                log.error("Error at sending oauth request to API endpoint " + clientConnector.getPublisherURL() +
+                        "', with response code: " +
                         response + "- Internal server error. Message dropped");
                 throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint "
-                        + publisherURL + "', with response code: " + response +
+                        + clientConnector.getPublisherURL() + "', with response code: " + response +
                         "- Internal server error. Message dropped");
             } else {
-                log.error("Error at sending oauth request to API endpoint " + publisherURL + "', with response code: " +
+                log.error("Error at sending oauth request to API endpoint " + clientConnector.getPublisherURL() +
+                        "', with response code: " +
                         response + ". Message dropped.");
                 throw new ConnectionUnavailableException("Error at sending oauth request to API endpoint " +
-                        publisherURL + "', with response code: " + response + ". Message dropped.");
+                        clientConnector.getPublisherURL() + "', with response code: " + response +
+                        ". Message dropped.");
             }
         } else if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.AUTHENTICATION_FAIL_CODE) {
-            log.error("Failed to generate new access token for the expired access token to " + publisherURL + "', " +
+            log.error("Failed to generate new access token for the expired access token to " +
+                    clientConnector.getPublisherURL() + "', " +
                     accessTokenCache.getResponseCode(encodedAuth) + ": Authentication Failure.cPlease provide a " +
                     "valid Consumer key, Consumer secret and token endpoint URL . Message dropped");
             throw new HttpSinkAdaptorRuntimeException("Failed to generate new access token for the expired access " +
-                    "token to " + publisherURL + "', " + accessTokenCache.getResponseCode(encodedAuth) +
+                    "token to " + clientConnector.getPublisherURL() + "', " +
+                    accessTokenCache.getResponseCode(encodedAuth) +
                     ": Authentication Failure.Please provide a valid Consumer key, Consumer secret" +
                     " and token endpoint URL . Message dropped");
         } else {
@@ -772,7 +827,8 @@ public class HttpSink extends Sink {
     }
 
     void setAccessToken(String encodedAuth, DynamicOptions dynamicOptions,
-                        List<Header> headersList) throws ConnectionUnavailableException {
+                        List<Header> headersList, String publisherURL)
+            throws ConnectionUnavailableException {
         //check the availability of the authorization
         String accessToken;
         boolean authAvailability = false;
@@ -831,56 +887,6 @@ public class HttpSink extends Sink {
         }
     }
 
-    private int sendRequest(Object payload, DynamicOptions dynamicOptions, List<Header> headersList)
-            throws ConnectionUnavailableException {
-        if (!publisherURLOption.isStatic()) {
-            initClientConnector(dynamicOptions);
-        }
-
-        if (mapType == null) {
-            mapType = getMapper().getType();
-        }
-
-        String httpMethod = EMPTY_STRING.equals(httpMethodOption.getValue(dynamicOptions)) ?
-                HttpConstants.METHOD_DEFAULT : httpMethodOption.getValue(dynamicOptions);
-        String contentType = HttpSinkUtil.getContentType(mapType, headersList);
-        String messageBody = getMessageBody(payload);
-        HttpMethod httpReqMethod = new HttpMethod(httpMethod);
-        HttpCarbonMessage cMessage = new HttpCarbonMessage(
-                new DefaultHttpRequest(HttpVersion.HTTP_1_1, httpReqMethod, EMPTY_STRING));
-        cMessage = generateCarbonMessage(headersList, contentType, httpMethod, cMessage);
-        if (!Constants.HTTP_GET_METHOD.equals(httpMethod)) {
-            cMessage.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(messageBody
-                    .getBytes(Charset.defaultCharset()))));
-        }
-        cMessage.completeMessage();
-        if (HttpConstants.OAUTH.equals(authType)) {
-            CountDownLatch latch = new CountDownLatch(1);
-            DefaultListener listener = new DefaultListener(latch, authType);
-            HttpResponseFuture responseFuture = clientConnector.send(cMessage);
-            responseFuture.setHttpConnectorListener(listener);
-            try {
-                boolean latchCount = latch.await(30, TimeUnit.SECONDS);
-                if (!latchCount) {
-                    log.debug("Time out due to getting getting response from " + publisherURL + ". Message dropped.");
-                    throw new ConnectionUnavailableException("Time out due to getting getting response from "
-                            + publisherURL + ". Message dropped.");
-                }
-            } catch (InterruptedException e) {
-                log.debug("Failed to get a response from " + publisherURL + "," + e + ". Message dropped.");
-                throw new ConnectionUnavailableException("Failed to get a response from " +
-                        publisherURL + ", " + e + ". Message dropped.");
-            }
-            HttpCarbonMessage response = listener.getHttpResponseMessage();
-            return response.getNettyHttpResponse().status().code();
-        } else {
-            HttpResponseFuture responseFuture = clientConnector.send(cMessage);
-            HTTPResponseListener responseListener = new HTTPResponseListener(payload, dynamicOptions, this);
-            responseFuture.setHttpConnectorListener(responseListener);
-            return HttpConstants.SUCCESS_CODE;
-        }
-    }
-
     /**
      * This method will be called before the processing method.
      * Intention to establish connection to publish event.
@@ -896,9 +902,10 @@ public class HttpSink extends Sink {
      */
     @Override
     public void disconnect() {
-        if (clientConnector != null) {
-            clientConnector = null;
-            log.info("Server connector for url " + publisherURL + " disconnected.");
+        if (staticClientConnector != null) {
+            String publisherURL = staticClientConnector.getPublisherURL();
+            staticClientConnector = null;
+            log.debug("Server connector for url " + publisherURL + " disconnected.");
         }
 
         if (httpConnectorFactory != null) {
@@ -913,23 +920,26 @@ public class HttpSink extends Sink {
      */
     @Override
     public void destroy() {
-        if (clientConnector != null) {
-            clientConnector = null;
-            log.info("Server connector for url " + publisherURL + " disconnected.");
+        if (staticClientConnector != null) {
+            String publisherURL = staticClientConnector.getPublisherURL();
+            staticClientConnector = null;
+            log.debug("Server connector for url " + publisherURL + " disconnected.");
         }
     }
 
     /**
      * The method is responsible of generating carbon message to send.
      *
-     * @param headers     the headers set.
-     * @param contentType the content type. Value is if user has to given it as a header or if not it is map type.
-     * @param httpMethod  http method type.
-     * @param cMessage    carbon message to be send to the endpoint.
+     * @param headers           the headers set.
+     * @param contentType       the content type. Value is if user has to given it as a header or if not it is map type.
+     * @param httpMethod        http method type.
+     * @param cMessage          carbon message to be send to the endpoint.
+     * @param httpURLProperties
      * @return generated carbon message.
      */
     HttpCarbonMessage generateCarbonMessage(List<Header> headers, String contentType,
-                                            String httpMethod, HttpCarbonMessage cMessage) {
+                                            String httpMethod, HttpCarbonMessage cMessage,
+                                            Map<String, String> httpURLProperties) {
         // Set protocol type http or https
         cMessage.setProperty(Constants.PROTOCOL, httpURLProperties.get(Constants.PROTOCOL));
         // Set uri
@@ -981,22 +991,8 @@ public class HttpSink extends Sink {
         }
     }
 
-    private void initConnectorFactory() {
-        //if bootstrap configurations are given then pass it if not let take default value of transport
-        if (!EMPTY_STRING.equals(bootstrapBoss) && !EMPTY_STRING.equals(bootstrapWorker)) {
-            if (!EMPTY_STRING.equals(bootstrapClient)) {
-                httpConnectorFactory = new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss),
-                        Integer.parseInt(bootstrapWorker), Integer.parseInt(bootstrapClient));
-            } else {
-                httpConnectorFactory = new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss),
-                        Integer.parseInt(bootstrapWorker), Integer.parseInt(bootstrapWorker));
-            }
-        } else {
-            httpConnectorFactory = new DefaultHttpWsConnectorFactory();
-        }
-    }
-
-    public void initClientConnector(DynamicOptions dynamicOptions) {
+    public ClientConnector createClientConnector(DynamicOptions dynamicOptions) {
+        String publisherURL;
         if (publisherURLOption.isStatic()) {
             publisherURL = publisherURLOption.getValue();
         } else {
@@ -1014,7 +1010,7 @@ public class HttpSink extends Sink {
             }
         }
         String scheme = HttpSinkUtil.getScheme(publisherURL);
-        this.httpURLProperties = HttpSinkUtil.getURLProperties(publisherURL);
+        Map<String, String> httpURLProperties = HttpSinkUtil.getURLProperties(publisherURL);
         //Generate basic sender configurations
         SenderConfiguration senderConfig = HttpSinkUtil
                 .getSenderConfigurations(httpURLProperties, clientStoreFile, clientStorePass, configReader);
@@ -1027,47 +1023,10 @@ public class HttpSink extends Sink {
                     "default scheme is 'https'. Please provide client " +
                     "trustStore file path and password in " + streamID);
         }
-        //if username and password both not equal to null consider as basic auth enabled if only one is null take it
-        // as exception
-        if ((EMPTY_STRING.equals(userName) ^
-                EMPTY_STRING.equals(userPassword))) {
-            throw new SiddhiAppCreationException("Please provide user name and password in " +
-                    HttpConstants.HTTP_SINK_ID + " with the stream " + streamID + " in Siddhi app " +
-                    siddhiAppContext.getName());
-        } else if (!(EMPTY_STRING.equals(userName))) {
-            byte[] val = (userName + HttpConstants.AUTH_USERNAME_PASSWORD_SEPARATOR + userPassword).getBytes(Charset
-                    .defaultCharset());
-            this.authorizationHeader = HttpConstants.AUTHORIZATION_METHOD + Base64.encode
-                    (Unpooled.copiedBuffer(val));
+        if (proxyServerConfiguration != null) {
+            senderConfig.setProxyServerConfiguration(proxyServerConfiguration);
         }
-        //if proxy username and password not equal to null then create proxy configurations
-        if (!EMPTY_STRING.equals(proxyHost) && !EMPTY_STRING.equals(proxyPort)) {
-            try {
-                ProxyServerConfiguration proxyServerConfiguration = new ProxyServerConfiguration(proxyHost, Integer
-                        .parseInt(proxyPort));
-                if (!EMPTY_STRING.equals(proxyPassword) && !EMPTY_STRING.equals
-                        (proxyUsername)) {
-                    proxyServerConfiguration.setProxyPassword(proxyPassword);
-                    proxyServerConfiguration.setProxyUsername(proxyUsername);
-                }
-                senderConfig.setProxyServerConfiguration(proxyServerConfiguration);
-            } catch (UnknownHostException e) {
-                log.error("Proxy url and password is invalid in sink " + streamID + " of siddhi app " +
-                        siddhiAppContext.getName(), e);
-            }
-        }
-
-        PoolConfiguration poolConfiguration = new PoolConfiguration();
-        poolConfiguration.setMaxActivePerPool(maxActivePerPool);
-        poolConfiguration.setMinIdlePerPool(minIdlePerPool);
-        poolConfiguration.setMaxIdlePerPool(maxIdlePerPool);
-        poolConfiguration.setTestOnBorrow(testOnBorrow);
-        poolConfiguration.setTestWhileIdle(testWhileIdle);
-        poolConfiguration.setTimeBetweenEvictionRuns(timeBetweenEvictionRuns);
-        poolConfiguration.setMinEvictableIdleTime(minEvictableIdleTime);
-        poolConfiguration.setExhaustedAction(exhaustedAction);
-        poolConfiguration.setMaxWaitTime(maxWaitTime);
-        senderConfig.setPoolConfiguration(poolConfiguration);
+        senderConfig.setPoolConfiguration(connectionPoolConfiguration);
 
         //add advanced sender configurations
         if (socketIdleTimeout != -1) {
@@ -1102,7 +1061,8 @@ public class HttpSink extends Sink {
         //overwrite default transport configuration
         Map<String, Object> bootStrapProperties = HttpSinkUtil
                 .populateTransportConfiguration(clientBootstrapConfiguration);
-        clientConnector = httpConnectorFactory.createHttpClientConnector(bootStrapProperties, senderConfig);
+        return new ClientConnector(publisherURL, httpURLProperties,
+                httpConnectorFactory.createHttpClientConnector(bootStrapProperties, senderConfig));
     }
 
     private String encodeMessage(Object s) {
@@ -1124,11 +1084,13 @@ public class HttpSink extends Sink {
         Object payload;
         DynamicOptions dynamicOptions;
         HttpSink httpSink;
+        private String publisherURL;
 
-        HTTPResponseListener(Object payload, DynamicOptions dynamicOptions, HttpSink httpSink) {
+        HTTPResponseListener(Object payload, DynamicOptions dynamicOptions, HttpSink httpSink, String publisherURL) {
             this.payload = payload;
             this.dynamicOptions = dynamicOptions;
             this.httpSink = httpSink;
+            this.publisherURL = publisherURL;
         }
 
         @Override
@@ -1139,8 +1101,10 @@ public class HttpSink extends Sink {
         @Override
         public void onError(Throwable throwable) {
             httpSink.onError(payload, dynamicOptions,
-                    new ConnectionUnavailableException("Siddhi App " + httpSink.siddhiAppContext.getName() +
-                            " failed to publish events to HTTP endpoint: " + httpSink.publisherURL, throwable));
+                    new ConnectionUnavailableException("HTTP sink on stream " + httpSink.streamID +
+                            " of Siddhi App '" + httpSink.siddhiAppContext.getName() +
+                            "' failed to publish events to endpoint '" + publisherURL + "'. " +
+                            throwable.getMessage(), throwable));
         }
     }
 }
