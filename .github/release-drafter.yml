@@ -1,0 +1,33 @@
+name-template: Siddhi IO HTTP $NEXT_PATCH_VERSION Release
+tag-template: v$NEXT_PATCH_VERSION
+change-template: '* $TITLE (#$NUMBER)'
+
+categories:
+  - title: 'Features and Improvements'
+    labels:
+      - type/new-feature
+      - type/improvement
+  - title: 'Bug Fixes'
+    labels:
+      - type/bug
+
+template: |
+  > This Release is compatible with Siddhi 5.x.x
+
+  ## Overview
+  > Include overview
+  > Recheck all PR listed and finalise
+
+  $CHANGES
+
+  ## Complete Changes
+  Please find the complete changes [here](https://github.com/siddhi-io/REPO_NAME/compare/$PREVIOUS_TAG...$NEXT_PATCH_VERSION)
+
+  ## Download
+  Download the release from [here](https://mvnrepository.com/artifact/GROUP_ID/REPO_NAME/$NEXT_PATCH_VERSION)
+
+replacers:
+  - search: 'REPO_NAME'
+    replace: 'siddhi-io-http'
+  - search: 'GROUP_ID'
+    replace: 'io.siddhi.extension.io.http'
