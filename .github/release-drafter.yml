@@ -21,7 +21,7 @@ template: |
   $CHANGES
 
   ## Complete Changes
-  Please find the complete changes [here](https://github.com/siddhi-io/REPO_NAME/compare/$PREVIOUS_TAG...$NEXT_PATCH_VERSION)
+  Please find the complete changes [here](https://github.com/siddhi-io/REPO_NAME/compare/$PREVIOUS_TAG...v$NEXT_PATCH_VERSION)
 
   ## Download
   Download the release from [here](https://mvnrepository.com/artifact/GROUP_ID/REPO_NAME/$NEXT_PATCH_VERSION)
