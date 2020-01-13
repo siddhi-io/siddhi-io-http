@@ -139,6 +139,7 @@ public class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
 
         synchronized (this) {
             if ((this.sourceListenersMap.isEmpty()) && (httpConnectorFactory != null)) {
+                this.httpConnectorFactory.shutdownNow();
                 this.httpConnectorFactory = null;
             }
         }
