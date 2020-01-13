@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.transport.http.netty.contract.Constants;
 import org.wso2.transport.http.netty.contract.HttpClientConnector;
-import org.wso2.transport.http.netty.contract.HttpWsConnectorFactory;
 import org.wso2.transport.http.netty.contract.config.SenderConfiguration;
 import org.wso2.transport.http.netty.contractimpl.DefaultHttpWsConnectorFactory;
 
@@ -82,7 +81,7 @@ public class HttpsClient {
     public void getPasswordGrantAccessToken(String tokenUrl, String trustStorePath, String trustStorePassword,
                                             String username, String password, String encodedAuth) {
         tokenURLProperties = HttpSinkUtil.getURLProperties(tokenUrl);
-        HttpWsConnectorFactory factory = new DefaultHttpWsConnectorFactory();
+        DefaultHttpWsConnectorFactory factory = new DefaultHttpWsConnectorFactory();
         HttpClientConnector httpClientConnector = factory
                 .createHttpClientConnector(new HashMap<>(), getSenderConfigurationForHttp(trustStorePath,
                         trustStorePassword));
@@ -108,12 +107,13 @@ public class HttpsClient {
         } else {
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         }
+        factory.shutdownNow();
     }
 
     public void getRefreshGrantAccessToken(String url, String trustStorePath, String trustStorePassword,
                                            String encodedAuth, String refreshToken) {
         tokenURLProperties = HttpSinkUtil.getURLProperties(url);
-        HttpWsConnectorFactory factory = new DefaultHttpWsConnectorFactory();
+        DefaultHttpWsConnectorFactory factory = new DefaultHttpWsConnectorFactory();
         HttpClientConnector httpClientConnector = factory
                 .createHttpClientConnector(new HashMap<>(), getSenderConfigurationForHttp(trustStorePath,
                         trustStorePassword));
@@ -140,12 +140,13 @@ public class HttpsClient {
         } else {
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         }
+        factory.shutdownNow();
     }
 
     public void getClientGrantAccessToken(String url, String trustStorePath, String trustStorePassword,
                                           String encodedAuth) {
         tokenURLProperties = HttpSinkUtil.getURLProperties(url);
-        HttpWsConnectorFactory factory = new DefaultHttpWsConnectorFactory();
+        DefaultHttpWsConnectorFactory factory = new DefaultHttpWsConnectorFactory();
         HttpClientConnector httpClientConnector = factory
                 .createHttpClientConnector(new HashMap<>(), getSenderConfigurationForHttp(trustStorePath,
                         trustStorePassword));
@@ -166,5 +167,6 @@ public class HttpsClient {
         } else {
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         }
+        factory.shutdownNow();
     }
 }
