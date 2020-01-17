@@ -56,6 +56,9 @@ class HttpConnectorRegistry {
     protected DefaultHttpWsConnectorFactory httpConnectorFactory;
     private Map<String, HttpServerConnectorContext> serverConnectorPool = new ConcurrentHashMap<>();
     private Map<String, HttpSourceListener> sourceListenersMap = new ConcurrentHashMap<>();
+    private String bootstrapWorker;
+    private String bootstrapBoss;
+    private String bootstrapClient;
 
     protected HttpConnectorRegistry() {
     }
@@ -97,13 +100,6 @@ class HttpConnectorRegistry {
                     .substring(1, serverBootstrapConfigurationList.length() - 1)
                     .split(PARAMETER_SEPARATOR);
             trpConfig.setTransportProperties(HttpSourceUtil.populateBootstrapConfigurations
-                    (populateParameterMap(valueList), transportProperties));
-        }
-        if (!HttpConstants.EMPTY_STRING.equals(serverHeaderValidation.trim())) {
-            String[] valueList = serverHeaderValidation.trim()
-                    .substring(1, serverHeaderValidation.length() - 1)
-                    .split(PARAMETER_SEPARATOR);
-            trpConfig.setTransportProperties(HttpSourceUtil.populateTransportProperties
                     (populateParameterMap(valueList), transportProperties));
         }
     }
@@ -161,12 +157,17 @@ class HttpConnectorRegistry {
     protected synchronized void initBootstrapConfigIfFirst(ConfigReader sourceConfigReader) {
         // to make sure it will create only once
         if ((this.sourceListenersMap.isEmpty()) && (httpConnectorFactory == null)) {
-            String bootstrapWorker = sourceConfigReader.readConfig(HttpConstants
+            bootstrapWorker = sourceConfigReader.readConfig(HttpConstants
                     .SERVER_BOOTSTRAP_WORKER_GROUP_SIZE, HttpConstants.EMPTY_STRING);
-            String bootstrapBoss = sourceConfigReader.readConfig(HttpConstants
+            bootstrapBoss = sourceConfigReader.readConfig(HttpConstants
                     .SERVER_BOOTSTRAP_BOSS_GROUP_SIZE, HttpConstants.EMPTY_STRING);
-            String bootstrapClient = sourceConfigReader.readConfig(HttpConstants
+            bootstrapClient = sourceConfigReader.readConfig(HttpConstants
                     .SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE, HttpConstants.EMPTY_STRING);
+        }
+    }
+
+    protected synchronized void createHTTPConnectorFactoryIfFirst() {
+        if (httpConnectorFactory == null) {
             if (!HttpConstants.EMPTY_STRING.equals(bootstrapBoss) && !HttpConstants.EMPTY_STRING.equals
                     (bootstrapWorker)) {
                 if (!HttpConstants.EMPTY_STRING.equals(bootstrapClient)) {

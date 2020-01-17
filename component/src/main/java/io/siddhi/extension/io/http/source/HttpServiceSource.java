@@ -379,6 +379,7 @@ public class HttpServiceSource extends HttpSource {
      */
     @Override
     public void connect(ConnectionCallback connectionCallback, State state) throws ConnectionUnavailableException {
+        this.httpConnectorRegistry.createHTTPConnectorFactoryIfFirst();
         this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration);
         this.httpConnectorRegistry.registerSourceListener(sourceEventListener, listenerUrl,
                 workerThread, isAuth, requestedTransportPropertyNames, sourceId, siddhiAppName);
