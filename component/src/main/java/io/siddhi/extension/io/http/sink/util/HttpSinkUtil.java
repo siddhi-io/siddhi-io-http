@@ -323,13 +323,8 @@ public class HttpSinkUtil {
         return connectionPoolConfiguration;
     }
 
-    public static DefaultHttpWsConnectorFactory createConnectorFactory(ConfigReader configReader) {
-        //read trp globe configuration
-        String bootstrapWorker = configReader
-                .readConfig(HttpConstants.CLIENT_BOOTSTRAP_WORKER_GROUP_SIZE, EMPTY_STRING);
-        String bootstrapBoss = configReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_BOSS_GROUP_SIZE, EMPTY_STRING);
-        String bootstrapClient = configReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_CLIENT_GROUP_SIZE,
-                EMPTY_STRING);
+    public static DefaultHttpWsConnectorFactory createConnectorFactory(String bootstrapWorker, String bootstrapBoss,
+                                                                       String bootstrapClient) {
         //if bootstrap configurations are given then pass it if not let take default value of transport
         if (!EMPTY_STRING.equals(bootstrapBoss) && !EMPTY_STRING.equals(bootstrapWorker)) {
             if (!EMPTY_STRING.equals(bootstrapClient)) {

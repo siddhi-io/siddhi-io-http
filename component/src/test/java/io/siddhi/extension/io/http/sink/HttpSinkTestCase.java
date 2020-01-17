@@ -198,4 +198,63 @@ public class HttpSinkTestCase {
             siddhiAppRuntime.shutdown();
         }
     }
+
+    @Test
+    public void testHTTPRestart() throws Exception {
+        log.info("Creating test for publishing events without Content-Type header include.");
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
+        String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
+                + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}',"
+                + "headers='{{headers}}',"
+                + "@map(type='xml', @payload('{{message}}'))) "
+                + "Define stream BarStream (message String,method String,headers String);";
+        String query = (
+                "@info(name = 'query') "
+                        + "from FooStream "
+                        + "select message,method,headers "
+                        + "insert into BarStream;"
+        );
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition +
+                query);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        lst.run();
+        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
+        while (!lst.getServerListener().isMessageArrive()) {
+            Thread.sleep(10);
+        }
+        ArrayList<String> headerName = new ArrayList<>();
+        headerName.add("John");
+        LinkedList<String> headerAge = new LinkedList<>();
+        headerAge.add("23");
+        ArrayList<String> headerContentType = new ArrayList<>();
+        headerContentType.add("application/xml");
+        Headers headers = lst.getServerListener().getHeaders();
+        String eventData = lst.getServerListener().getData();
+        Assert.assertEquals(expected, eventData);
+        Assert.assertEquals(headers.get("Name").toString(), headerName.toString());
+        Assert.assertEquals(headers.get("Age").toString(), headerAge.toString());
+        Assert.assertEquals(headers.get("Content-Type").toString(), headerContentType.toString());
+        siddhiAppRuntime.shutdown();
+
+        siddhiAppRuntime.start();
+
+        fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23'"});
+        while (!lst.getServerListener().isMessageArrive()) {
+            Thread.sleep(10);
+        }
+        headers = lst.getServerListener().getHeaders();
+        eventData = lst.getServerListener().getData();
+        Assert.assertEquals(expected, eventData);
+        Assert.assertEquals(headers.get("Name").toString(), headerName.toString());
+        Assert.assertEquals(headers.get("Age").toString(), headerAge.toString());
+        Assert.assertEquals(headers.get("Content-Type").toString(), headerContentType.toString());
+        siddhiAppRuntime.shutdown();
+
+        lst.shutdown();
+    }
+
 }

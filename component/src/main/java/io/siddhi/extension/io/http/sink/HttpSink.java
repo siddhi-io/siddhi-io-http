@@ -456,6 +456,10 @@ public class HttpSink extends Sink {
     private ProxyServerConfiguration proxyServerConfiguration;
     private PoolConfiguration connectionPoolConfiguration;
 
+    private String bootstrapWorker;
+    private String bootstrapBoss;
+    private String bootstrapClient;
+
     /**
      * Returns the list of classes which this sink can consume.
      * Based on the type of the sink, it may be limited to being able to publish specific type of classes.
@@ -560,12 +564,12 @@ public class HttpSink extends Sink {
                     (Unpooled.copiedBuffer(val));
         }
 
-        proxyServerConfiguration = createProxyServerConfiguration(optionHolder, streamID, siddhiAppContext.getName());
+        this.bootstrapWorker = configReader
+                .readConfig(HttpConstants.CLIENT_BOOTSTRAP_WORKER_GROUP_SIZE, EMPTY_STRING);
+        this.bootstrapBoss = configReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_BOSS_GROUP_SIZE, EMPTY_STRING);
+        this.bootstrapClient = configReader.readConfig(HttpConstants.CLIENT_BOOTSTRAP_CLIENT_GROUP_SIZE, EMPTY_STRING);
 
-        httpConnectorFactory = createConnectorFactory(configReader);
-        if (publisherURLOption.isStatic()) {
-            staticClientConnector = createClientConnector(null);
-        }
+        proxyServerConfiguration = createProxyServerConfiguration(optionHolder, streamID, siddhiAppContext.getName());
         return null;
     }
 
@@ -894,7 +898,10 @@ public class HttpSink extends Sink {
      */
     @Override
     public void connect() {
-
+        httpConnectorFactory = createConnectorFactory(this.bootstrapWorker, this.bootstrapBoss, this.bootstrapClient);
+        if (publisherURLOption.isStatic()) {
+            staticClientConnector = createClientConnector(null);
+        }
     }
 
     /**
