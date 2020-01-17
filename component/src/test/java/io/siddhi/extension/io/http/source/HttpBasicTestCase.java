@@ -523,7 +523,7 @@ public class HttpBasicTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test
+    @Test(enabled = false)
     public void testHTTPStopAndStart() throws Exception {
         logger.info(" Creating test for publishing events without URL.");
         URI baseURI = URI.create(String.format("http://%s:%d", "0.0.0.0", 8280));

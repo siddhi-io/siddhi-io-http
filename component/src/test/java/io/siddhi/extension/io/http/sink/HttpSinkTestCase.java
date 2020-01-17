@@ -199,7 +199,7 @@ public class HttpSinkTestCase {
         }
     }
 
-    @Test
+    @Test(enabled = false)
     public void testHTTPRestart() throws Exception {
         log.info("Creating test for publishing events without Content-Type header include.");
         SiddhiManager siddhiManager = new SiddhiManager();
