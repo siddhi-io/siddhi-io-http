@@ -579,10 +579,11 @@ public class HttpBasicTestCase {
         siddhiAppRuntime.shutdown();
 
         eventCount.set(0);
+        receivedEventNameList.clear();
+
         siddhiAppRuntime.start();
         HttpTestUtil.httpPublishEventDefault(event1, baseURI);
-        HttpTestUtil.httpPublishEventDefault(event2, baseURI);
-        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
 
