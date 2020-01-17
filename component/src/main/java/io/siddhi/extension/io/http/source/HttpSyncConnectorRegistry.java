@@ -20,12 +20,8 @@ package io.siddhi.extension.io.http.source;
 
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.input.source.SourceEventListener;
-import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
-import io.siddhi.extension.io.http.util.HttpConstants;
-import org.apache.log4j.Logger;
 import org.wso2.transport.http.netty.contract.ServerConnectorFuture;
-import org.wso2.transport.http.netty.contractimpl.DefaultHttpWsConnectorFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,7 +32,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
 
     private static HttpSyncConnectorRegistry instance = new HttpSyncConnectorRegistry();
-    private final Logger log = Logger.getLogger(HttpSyncConnectorRegistry.class);
     private Map<String, HttpSyncSourceListener> sourceListenersMap = new ConcurrentHashMap<>();
 
     private HttpSyncConnectorRegistry() {
@@ -84,64 +79,6 @@ public class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
                         requestedTransportPropertyNames, sourceId, siddhiAppName));
         if (httpSourceListener != null) {
             throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected");
-        }
-    }
-
-    /**
-     * Unregister the source listener.
-     *
-     * @param listenerUrl   the listener url
-     * @param siddhiAppName
-     */
-    protected void unregisterSourceListener(String listenerUrl, String siddhiAppName) {
-
-        String key = HttpSourceUtil.getSourceListenerKey(listenerUrl);
-        HttpSourceListener httpSourceListener = this.sourceListenersMap.get(key);
-        if (httpSourceListener != null && httpSourceListener.getSiddhiAppName().equals(siddhiAppName)) {
-            sourceListenersMap.remove(key);
-            httpSourceListener.disconnect();
-        }
-    }
-
-    /**
-     * Initialize and start the server connector factory. This should be created at once for siddhi.
-     *
-     * @param sourceConfigReader the siddhi source config reader.
-     */
-    protected synchronized void initBootstrapConfigIfFirst(ConfigReader sourceConfigReader) {
-        // to make sure it will create only once
-        if ((this.sourceListenersMap.isEmpty()) && (httpConnectorFactory == null)) {
-            String bootstrapWorker = sourceConfigReader.readConfig(HttpConstants
-                    .SERVER_BOOTSTRAP_WORKER_GROUP_SIZE, HttpConstants.EMPTY_STRING);
-            String bootstrapBoss = sourceConfigReader.readConfig(HttpConstants
-                    .SERVER_BOOTSTRAP_BOSS_GROUP_SIZE, HttpConstants.EMPTY_STRING);
-            String bootstrapClient = sourceConfigReader.readConfig(HttpConstants
-                    .SERVER_BOOTSTRAP_CLIENT_GROUP_SIZE, HttpConstants.EMPTY_STRING);
-            if (!HttpConstants.EMPTY_STRING.equals(bootstrapBoss) && !HttpConstants.EMPTY_STRING.equals
-                    (bootstrapWorker)) {
-                if (!HttpConstants.EMPTY_STRING.equals(bootstrapClient)) {
-                    httpConnectorFactory = new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss), Integer
-                            .parseInt(bootstrapWorker), Integer.parseInt(bootstrapClient));
-                } else {
-                    httpConnectorFactory = new DefaultHttpWsConnectorFactory(Integer.parseInt(bootstrapBoss), Integer
-                            .parseInt(bootstrapWorker), Integer.parseInt(bootstrapWorker));
-                }
-            } else {
-                httpConnectorFactory = new DefaultHttpWsConnectorFactory();
-            }
-        }
-    }
-
-    /**
-     * Stop server connector controller.
-     */
-    protected void clearBootstrapConfigIfLast() {
-
-        synchronized (this) {
-            if ((this.sourceListenersMap.isEmpty()) && (httpConnectorFactory != null)) {
-                this.httpConnectorFactory.shutdownNow();
-                this.httpConnectorFactory = null;
-            }
         }
     }
 
