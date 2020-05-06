@@ -67,7 +67,8 @@ public class HttpsClient {
     private static String getPayload(Map<String, String> refreshTokenBody) {
         return refreshTokenBody.entrySet().stream()
                 .map(p -> encodeMessage(p.getKey()) + "=" + encodeMessage(p.getValue()))
-                .reduce("", (p1, p2) -> p1 + "&" + p2);
+                .reduce((p1, p2) -> p1 + "&" + p2)
+                .orElse("");
     }
 
     private static HashMap<String, String> setHeaders(String encodedAuth) {

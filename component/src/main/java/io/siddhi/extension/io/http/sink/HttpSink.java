@@ -671,7 +671,7 @@ public class HttpSink extends Sink {
         //if authentication fails then get the new access token
         if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
             handleOAuthFailure(payload, dynamicOptions, headersList, encodedAuth, clientConnector);
-        } else if (response == HttpConstants.SUCCESS_CODE) {
+        } else if (HttpConstants.SUCCESS_CODE <= response && response < HttpConstants.MULTIPLE_CHOICES) {
             log.info("Request sent successfully to " + clientConnector.getPublisherURL());
         } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
             log.error("Error at sending oauth request to API endpoint " + clientConnector.getPublisherURL() +

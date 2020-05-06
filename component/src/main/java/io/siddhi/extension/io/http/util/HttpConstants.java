@@ -202,6 +202,7 @@ public class HttpConstants {
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
     public static final int SUCCESS_CODE = 200;
+    public static final int MULTIPLE_CHOICES = 300;
     public static final int CLIENT_REQUEST_TIMEOUT = 408;
     public static final int AUTHENTICATION_FAIL_CODE = 401;
     public static final int PERSISTENT_ACCESS_FAIL_CODE = 400;
