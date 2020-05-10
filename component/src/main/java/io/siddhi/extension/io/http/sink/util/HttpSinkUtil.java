@@ -222,6 +222,9 @@ public class HttpSinkUtil {
 
             case HttpConstants.MAP_JSON:
                 return HttpConstants.APPLICATION_JSON;
+            
+            case HttpConstants.MAP_KEYVALUE:
+                return HttpConstants.APPLICATION_URL_ENCODED;
 
             default: {
                 log.info("Invalid payload map type. System support only text," +
