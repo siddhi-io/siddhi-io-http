@@ -26,6 +26,7 @@ import org.wso2.transport.http.netty.contract.Constants;
 import org.wso2.transport.http.netty.contract.HttpClientConnector;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
 import org.wso2.transport.http.netty.contract.config.TransportsConfiguration;
+import org.wso2.transport.http.netty.contract.exceptions.ClientClosedConnectionException;
 import org.wso2.transport.http.netty.contract.exceptions.ServerConnectorException;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
@@ -112,6 +113,10 @@ public class HTTPConnectorListener implements HttpConnectorListener {
 
     @Override
     public void onError(Throwable throwable) {
-        log.error("Error in http server connector", throwable);
+        if (throwable instanceof ClientClosedConnectionException) {
+            log.debug("Error in http server connector", throwable);
+        } else {
+            log.error("Error in http server connector", throwable);
+        }
     }
 }
