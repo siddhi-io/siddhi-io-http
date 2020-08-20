@@ -80,7 +80,8 @@ public class HttpsClient {
     }
 
     public void getPasswordGrantAccessToken(String tokenUrl, String trustStorePath, String trustStorePassword,
-                                            String username, String password, String encodedAuth) {
+                                            String username, String password, String encodedAuth,
+                                            String consumerKey, String consumerSecret, String oAuth2Scope) {
         tokenURLProperties = HttpSinkUtil.getURLProperties(tokenUrl);
         DefaultHttpWsConnectorFactory factory = new DefaultHttpWsConnectorFactory();
         HttpClientConnector httpClientConnector = factory
@@ -90,6 +91,18 @@ public class HttpsClient {
         refreshTokenBody.put(HttpConstants.GRANT_TYPE, HttpConstants.GRANT_PASSWORD);
         refreshTokenBody.put(HttpConstants.USERNAME, username);
         refreshTokenBody.put(HttpConstants.PASSWORD, password);
+        if (!HttpConstants.EMPTY_STRING.equals(oAuth2Scope)) {
+            refreshTokenBody.put(HttpConstants.OAuth2_SCOPE_PARAMETER_KEY, oAuth2Scope);
+        }
+
+        if (!HttpConstants.EMPTY_STRING.equals(consumerKey)) {
+            refreshTokenBody.put(HttpConstants.OAUTH_CLIENT_ID, consumerKey);
+        }
+
+        if (!HttpConstants.EMPTY_STRING.equals(consumerSecret)) {
+            refreshTokenBody.put(HttpConstants.OAUTH_CLIENT_SECRET, consumerSecret);
+        }
+
         String payload = getPayload(refreshTokenBody);
         Map<String, String> headers = setHeaders(encodedAuth);
         ArrayList<String> response = HttpRequest.sendPostRequest(httpClientConnector,
@@ -101,9 +114,11 @@ public class HttpsClient {
         int statusCode = Integer.parseInt(response.get(0));
         if (statusCode == HttpConstants.SUCCESS_CODE) {
             String accessToken = jsonObject.getString(HttpConstants.ACCESS_TOKEN);
-            String newRefreshToken = jsonObject.getString(HttpConstants.REFRESH_TOKEN);
             accessTokenCache.setAccessToken(encodedAuth, HttpConstants.BEARER + accessToken);
-            accessTokenCache.setRefreshtoken(encodedAuth, newRefreshToken);
+            if (jsonObject.has(HttpConstants.REFRESH_TOKEN)) {
+                String newRefreshToken = jsonObject.getString(HttpConstants.REFRESH_TOKEN);
+                accessTokenCache.setRefreshtoken(encodedAuth, newRefreshToken);
+            }
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         } else {
             accessTokenCache.setResponseCode(encodedAuth, statusCode);

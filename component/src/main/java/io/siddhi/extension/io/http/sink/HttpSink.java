@@ -150,7 +150,21 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
                         optional = true,
                         defaultValue = "-"),
                 @Parameter(
+                        name = "body.consumer.key",
+                        description = "Consumer key used for calling endpoints protected by OAuth 2.0 if it's " +
+                                "required to be sent in token request body",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "-"),
+                @Parameter(
                         name = "consumer.secret",
+                        description = "Consumer secret used for calling endpoints protected by OAuth 2.0 if it's " +
+                                "required to be sent in token request body",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "-"),
+                @Parameter(
+                        name = "body.consumer.secret",
                         description = "Consumer secret used for calling endpoints protected by OAuth 2.0",
                         type = {DataType.STRING},
                         optional = true,
@@ -169,6 +183,13 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "-"),
+                @Parameter(
+                        name = HttpConstants.OAuth2_SCOPE_PARAMETER_NAME,
+                        description = "Standard OAuth 2.0 scope parameter",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "default"
+                ),
                 @Parameter(
                         name = "headers",
                         description = "HTTP request headers in format `\"'<key>:<value>','<key>:<value>'\"`.\n" +
@@ -451,6 +472,9 @@ public class HttpSink extends Sink {
     protected String tokenURL;
     private String hostnameVerificationEnabled;
     private String sslVerificationDisabled;
+    private String bodyConsumerKey;
+    private String bodyConsumerSecret;
+    private String oauth2Scope;
 
     private DefaultHttpWsConnectorFactory httpConnectorFactory;
     private ProxyServerConfiguration proxyServerConfiguration;
@@ -504,6 +528,8 @@ public class HttpSink extends Sink {
         this.httpMethodOption = optionHolder.getOrCreateOption(HttpConstants.METHOD, HttpConstants.DEFAULT_METHOD);
         this.consumerKey = optionHolder.validateAndGetStaticValue(HttpConstants.CONSUMER_KEY, EMPTY_STRING);
         this.consumerSecret = optionHolder.validateAndGetStaticValue(HttpConstants.CONSUMER_SECRET, EMPTY_STRING);
+        this.bodyConsumerKey = optionHolder.validateAndGetStaticValue(HttpConstants.BODY_CONSUMER_KEY, EMPTY_STRING);
+        this.bodyConsumerSecret = optionHolder.validateAndGetStaticValue(HttpConstants.BODY_CONSUMER_SECRET, EMPTY_STRING);
         this.oauthUsername = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_OAUTH_USERNAME,
                 EMPTY_STRING);
         this.oauthUserPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_OAUTH_PASSWORD,
@@ -511,6 +537,8 @@ public class HttpSink extends Sink {
         this.refreshToken = optionHolder.getOrCreateOption(HttpConstants.RECEIVER_REFRESH_TOKEN, EMPTY_STRING);
         this.tokenURL = optionHolder.validateAndGetStaticValue(HttpConstants.TOKEN_URL, EMPTY_STRING);
         this.clientStoreFile = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PATH_PARAM,
+                HttpSinkUtil.trustStorePath(configReader));
+        this.oauth2Scope = optionHolder.validateAndGetStaticValue(HttpConstants.OAuth2_SCOPE_PARAMETER_NAME,
                 HttpSinkUtil.trustStorePath(configReader));
         clientStorePass = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD_PARAM,
                 HttpSinkUtil.trustStorePassword(configReader));
@@ -537,10 +565,12 @@ public class HttpSink extends Sink {
 
         if (!HttpConstants.EMPTY_STRING.equals(userName) && !HttpConstants.EMPTY_STRING.equals(userPassword)) {
             authType = HttpConstants.BASIC_AUTH;
-        } else if ((!HttpConstants.EMPTY_STRING.equals(consumerKey)
+        } else if (((!HttpConstants.EMPTY_STRING.equals(consumerKey)
                 && !HttpConstants.EMPTY_STRING.equals(consumerSecret)) ||
-                (!HttpConstants.EMPTY_STRING.equals(oauthUsername)
-                        && !HttpConstants.EMPTY_STRING.equals(oauthUserPassword))) {
+                (!HttpConstants.EMPTY_STRING.equals(bodyConsumerKey)
+                        && !HttpConstants.EMPTY_STRING.equals(bodyConsumerSecret)))
+                || (!HttpConstants.EMPTY_STRING.equals(oauthUsername)
+                && !HttpConstants.EMPTY_STRING.equals(oauthUserPassword))) {
             authType = HttpConstants.OAUTH;
         } else {
             authType = HttpConstants.NO_AUTH;
@@ -661,7 +691,12 @@ public class HttpSink extends Sink {
                                     ClientConnector clientConnector)
             throws ConnectionUnavailableException {
         //generate encoded base64 auth for getting refresh token
-        String consumerKeyValue = consumerKey + ":" + consumerSecret;
+        String consumerKeyValue = "";
+        if (!EMPTY_STRING.equals(consumerKey) && !EMPTY_STRING.equals(consumerSecret)) {
+            consumerKeyValue = consumerKey + ":" + consumerSecret;
+        } else {
+            consumerKeyValue = bodyConsumerKey + ":" + bodyConsumerSecret;
+        }
         String encodedAuth = "Basic " + encodeBase64(consumerKeyValue)
                 .replaceAll(HttpConstants.NEW_LINE, HttpConstants.EMPTY_STRING);
         //check the availability of access token in the header
@@ -815,7 +850,8 @@ public class HttpSink extends Sink {
         if (!HttpConstants.EMPTY_STRING.equals(oauthUsername) &&
                 !HttpConstants.EMPTY_STRING.equals(oauthUserPassword)) {
             httpsClient.getPasswordGrantAccessToken(tokenURL, clientStoreFile,
-                    clientStorePass, oauthUsername, oauthUserPassword, encodedAuth);
+                    clientStorePass, oauthUsername, oauthUserPassword, encodedAuth, bodyConsumerKey,
+                    bodyConsumerSecret, oauth2Scope);
         } else if (!HttpConstants.EMPTY_STRING.equals(refreshToken.getValue(dynamicOptions)) ||
                 accessTokenCache.getRefreshtoken(encodedAuth) != null) {
             httpsClient.getRefreshGrantAccessToken(tokenURL, clientStoreFile,
