@@ -95,6 +95,8 @@ public class HttpRequest {
         httpPostRequest.setProperty(Constants.HTTP_PORT, serverPort);
         httpPostRequest.setProperty(Constants.TO, serverPath);
         httpPostRequest.setHttpMethod(Constants.HTTP_POST_METHOD);
+        // this header is mandatory otherwise the request would result in 400 status
+        httpPostRequest.setHeader(Constants.HTTP_HOST, serverHost);
         ByteBuffer byteBuffer = ByteBuffer.wrap(payload.getBytes(Charset.forName("UTF-8")));
         httpPostRequest.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(byteBuffer)));
         return httpPostRequest;
