@@ -184,7 +184,7 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
                         optional = true,
                         defaultValue = "-"),
                 @Parameter(
-                        name = HttpConstants.OAuth2_SCOPE_PARAMETER_NAME,
+                        name = HttpConstants.OAUTH2_SCOPE_PARAMETER_NAME,
                         description = "Standard OAuth 2.0 scope parameter",
                         type = {DataType.STRING},
                         optional = true,
@@ -529,7 +529,8 @@ public class HttpSink extends Sink {
         this.consumerKey = optionHolder.validateAndGetStaticValue(HttpConstants.CONSUMER_KEY, EMPTY_STRING);
         this.consumerSecret = optionHolder.validateAndGetStaticValue(HttpConstants.CONSUMER_SECRET, EMPTY_STRING);
         this.bodyConsumerKey = optionHolder.validateAndGetStaticValue(HttpConstants.BODY_CONSUMER_KEY, EMPTY_STRING);
-        this.bodyConsumerSecret = optionHolder.validateAndGetStaticValue(HttpConstants.BODY_CONSUMER_SECRET, EMPTY_STRING);
+        this.bodyConsumerSecret = optionHolder.validateAndGetStaticValue(HttpConstants.BODY_CONSUMER_SECRET,
+                EMPTY_STRING);
         this.oauthUsername = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_OAUTH_USERNAME,
                 EMPTY_STRING);
         this.oauthUserPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_OAUTH_PASSWORD,
@@ -538,8 +539,8 @@ public class HttpSink extends Sink {
         this.tokenURL = optionHolder.validateAndGetStaticValue(HttpConstants.TOKEN_URL, EMPTY_STRING);
         this.clientStoreFile = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PATH_PARAM,
                 HttpSinkUtil.trustStorePath(configReader));
-        this.oauth2Scope = optionHolder.validateAndGetStaticValue(HttpConstants.OAuth2_SCOPE_PARAMETER_NAME,
-                HttpSinkUtil.trustStorePath(configReader));
+        this.oauth2Scope = optionHolder.validateAndGetStaticValue(HttpConstants.OAUTH2_SCOPE_PARAMETER_NAME,
+                EMPTY_STRING);
         clientStorePass = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD_PARAM,
                 HttpSinkUtil.trustStorePassword(configReader));
         socketIdleTimeout = Integer.parseInt(optionHolder.validateAndGetStaticValue
@@ -1035,7 +1036,8 @@ public class HttpSink extends Sink {
             publisherURL = publisherURLOption.getValue(dynamicOptions);
         }
         if (authType.equals(HttpConstants.OAUTH)) {
-            if (EMPTY_STRING.equals(consumerSecret) || EMPTY_STRING.equals(consumerKey)) {
+            if ((EMPTY_STRING.equals(consumerSecret) || EMPTY_STRING.equals(consumerKey)) &&
+                    (EMPTY_STRING.equals(bodyConsumerKey) || EMPTY_STRING.equals(bodyConsumerSecret))) {
                 throw new SiddhiAppCreationException(HttpConstants.CONSUMER_KEY + " and " +
                         HttpConstants.CONSUMER_SECRET + " found empty but it is Mandatory field in " +
                         HttpConstants.HTTP_SINK_ID + " in " + streamID);

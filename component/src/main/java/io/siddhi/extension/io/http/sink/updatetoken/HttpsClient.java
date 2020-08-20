@@ -92,7 +92,7 @@ public class HttpsClient {
         refreshTokenBody.put(HttpConstants.USERNAME, username);
         refreshTokenBody.put(HttpConstants.PASSWORD, password);
         if (!HttpConstants.EMPTY_STRING.equals(oAuth2Scope)) {
-            refreshTokenBody.put(HttpConstants.OAuth2_SCOPE_PARAMETER_KEY, oAuth2Scope);
+            refreshTokenBody.put(HttpConstants.OAUTH2_SCOPE_PARAMETER_KEY, oAuth2Scope);
         }
 
         if (!HttpConstants.EMPTY_STRING.equals(consumerKey)) {

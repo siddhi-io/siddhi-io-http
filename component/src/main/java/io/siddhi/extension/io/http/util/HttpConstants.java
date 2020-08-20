@@ -58,8 +58,8 @@ public class HttpConstants {
     public static final String DEFAULT_ENCODING = "UTF-8";
     public static final String DOWNLOAD_ENABLED = "downloading.enabled";
     public static final String DEFAULT_DOWNLOAD_ENABLED_VALUE = "false";
-    public static final String OAuth2_SCOPE_PARAMETER_NAME = "oauth.scope";
-    public static final String OAuth2_SCOPE_PARAMETER_KEY = "scope";
+    public static final String OAUTH2_SCOPE_PARAMETER_NAME = "oauth.scope";
+    public static final String OAUTH2_SCOPE_PARAMETER_KEY = "scope";
     //Common util values
     public static final String HTTP_METHOD_POST = "POST"; //method name
     public static final String HTTP_METHOD_OPTIONS = "OPTIONS";
