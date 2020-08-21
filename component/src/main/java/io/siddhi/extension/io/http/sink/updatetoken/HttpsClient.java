@@ -101,9 +101,11 @@ public class HttpsClient {
         int statusCode = Integer.parseInt(response.get(0));
         if (statusCode == HttpConstants.SUCCESS_CODE) {
             String accessToken = jsonObject.getString(HttpConstants.ACCESS_TOKEN);
-            String newRefreshToken = jsonObject.getString(HttpConstants.REFRESH_TOKEN);
             accessTokenCache.setAccessToken(encodedAuth, HttpConstants.BEARER + accessToken);
-            accessTokenCache.setRefreshtoken(encodedAuth, newRefreshToken);
+            if (jsonObject.has(HttpConstants.REFRESH_TOKEN)) {
+                String newRefreshToken = jsonObject.getString(HttpConstants.REFRESH_TOKEN);
+                accessTokenCache.setRefreshtoken(encodedAuth, newRefreshToken);
+            }
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         } else {
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
