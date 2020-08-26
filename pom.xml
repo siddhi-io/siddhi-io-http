@@ -403,6 +403,13 @@
                 <artifactId>json</artifactId>
                 <version>${org.json.wso2.version}</version>
             </dependency>
+            <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${okhttp.client.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
     <properties>
@@ -480,6 +487,7 @@
         <maven.dependency.plugin.version>2.10</maven.dependency.plugin.version>
         <org.jacoco.version>0.7.9</org.jacoco.version>
         <surefire.plugin.version>2.22.1</surefire.plugin.version>
+        <okhttp.client.version>4.8.1</okhttp.client.version>
     </properties>
     <build>
         <extensions>

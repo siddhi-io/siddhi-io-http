@@ -851,8 +851,7 @@ public class HttpSink extends Sink {
         if (!HttpConstants.EMPTY_STRING.equals(oauthUsername) &&
                 !HttpConstants.EMPTY_STRING.equals(oauthUserPassword)) {
             httpsClient.getPasswordGrantAccessToken(tokenURL, clientStoreFile,
-                    clientStorePass, oauthUsername, oauthUserPassword, encodedAuth, bodyConsumerKey,
-                    bodyConsumerSecret, oauth2Scope);
+                    clientStorePass, oauthUsername, oauthUserPassword, encodedAuth, oauth2Scope);
         } else if (!HttpConstants.EMPTY_STRING.equals(refreshToken.getValue(dynamicOptions)) ||
                 accessTokenCache.getRefreshtoken(encodedAuth) != null) {
             httpsClient.getRefreshGrantAccessToken(tokenURL, clientStoreFile,
