@@ -73,6 +73,7 @@ public class HttpWorkerThread implements Runnable {
         } finally {
             try {
                 buf.close();
+                carbonMessage.waitAndReleaseAllEntities();
             } catch (IOException e) {
                 logger.error("Error occurred when closing the byte buffer in source " + sourceID, e);
             }
