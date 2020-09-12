@@ -61,45 +61,26 @@ public class HttpResponseProcessor implements Runnable {
 
     @Override
     public void run() {
-        int code = carbonMessage.getNettyHttpResponse().status().code() / 100;
-        boolean isDownloadableContent = (boolean) (carbonMessage.getProperty(HttpConstants.IS_DOWNLOADABLE_CONTENT));
+        try {
+            int code = carbonMessage.getNettyHttpResponse().status().code() / 100;
+            boolean isDownloadableContent =
+                    (boolean) (carbonMessage.getProperty(HttpConstants.IS_DOWNLOADABLE_CONTENT));
 
-        if (isDownloadableContent && code == 2) {
-            filePath = carbonMessage.getProperty(HttpConstants.DOWNLOAD_PATH).toString();
-            String fileName = writeToTile(carbonMessage);
-            if (fileName != null) {
-                sourceEventListener.onEvent(fileName, trpProperties);
-            }
-        } else {
-            HttpContent content;
-            if (!shouldAllowStreamingResponses) {
-                BufferedReader buf = new BufferedReader(
-                        new InputStreamReader(
-                                new HttpMessageDataStreamer(carbonMessage).getInputStream(), Charset.defaultCharset()));
-                try {
-                    String payload = buf.lines().collect(Collectors.joining("\n"));
-                    if (!payload.equals(HttpConstants.EMPTY_STRING)) {
-                        sourceEventListener.onEvent(payload, trpProperties);
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Submitted Event :" + payload);
-                        }
-                    } else {
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Empty payload event, hence dropping the event chunk at source " + sinkId);
-                        }
-                    }
-                } finally {
-                    try {
-                        buf.close();
-                    } catch (IOException e) {
-                        logger.error("Error occurred when closing the byte buffer in source " + sinkId, e);
-                    }
+            if (isDownloadableContent && code == 2) {
+                filePath = carbonMessage.getProperty(HttpConstants.DOWNLOAD_PATH).toString();
+                String fileName = writeToTile(carbonMessage);
+                if (fileName != null) {
+                    sourceEventListener.onEvent(fileName, trpProperties);
                 }
             } else {
-                do {
-                    content = carbonMessage.getHttpContent();
-                    if (content != null) {
-                        String payload = content.content().toString(Charset.defaultCharset());
+                HttpContent content;
+                if (!shouldAllowStreamingResponses) {
+                    BufferedReader buf = new BufferedReader(
+                            new InputStreamReader(
+                                    new HttpMessageDataStreamer(carbonMessage).getInputStream(),
+                                    Charset.defaultCharset()));
+                    try {
+                        String payload = buf.lines().collect(Collectors.joining("\n"));
                         if (!payload.equals(HttpConstants.EMPTY_STRING)) {
                             sourceEventListener.onEvent(payload, trpProperties);
                             if (logger.isDebugEnabled()) {
@@ -107,13 +88,38 @@ public class HttpResponseProcessor implements Runnable {
                             }
                         } else {
                             if (logger.isDebugEnabled()) {
-                                logger.debug("Empty payload event, hence dropping the event chunk in the source " +
-                                        "with sink.id : " + sinkId);
+                                logger.debug("Empty payload event, hence dropping the event chunk at source " + sinkId);
                             }
                         }
+                    } finally {
+                        try {
+                            buf.close();
+                        } catch (IOException e) {
+                            logger.error("Error occurred when closing the byte buffer in source " + sinkId, e);
+                        }
                     }
-                } while (!(content instanceof LastHttpContent));
+                } else {
+                    do {
+                        content = carbonMessage.getHttpContent();
+                        if (content != null) {
+                            String payload = content.content().toString(Charset.defaultCharset());
+                            if (!payload.equals(HttpConstants.EMPTY_STRING)) {
+                                sourceEventListener.onEvent(payload, trpProperties);
+                                if (logger.isDebugEnabled()) {
+                                    logger.debug("Submitted Event :" + payload);
+                                }
+                            } else {
+                                if (logger.isDebugEnabled()) {
+                                    logger.debug("Empty payload event, hence dropping the event chunk in the source " +
+                                            "with sink.id : " + sinkId);
+                                }
+                            }
+                        }
+                    } while (!(content instanceof LastHttpContent));
+                }
             }
+        } finally {
+            carbonMessage.waitAndReleaseAllEntities();
         }
     }
 

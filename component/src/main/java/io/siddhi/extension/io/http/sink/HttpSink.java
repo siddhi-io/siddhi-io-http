@@ -62,7 +62,12 @@ import org.wso2.transport.http.netty.contract.config.SenderConfiguration;
 import org.wso2.transport.http.netty.contractimpl.DefaultHttpWsConnectorFactory;
 import org.wso2.transport.http.netty.contractimpl.sender.channel.pool.PoolConfiguration;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
+import org.wso2.transport.http.netty.message.HttpMessageDataStreamer;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
@@ -71,6 +76,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static io.siddhi.extension.io.http.sink.util.HttpSinkUtil.createConnectorFactory;
@@ -451,6 +458,7 @@ public class HttpSink extends Sink {
     protected String tokenURL;
     private String hostnameVerificationEnabled;
     private String sslVerificationDisabled;
+    private Executor executor = null;
 
     private DefaultHttpWsConnectorFactory httpConnectorFactory;
     private ProxyServerConfiguration proxyServerConfiguration;
@@ -654,6 +662,22 @@ public class HttpSink extends Sink {
             responseFuture.setHttpConnectorListener(responseListener);
             return HttpConstants.SUCCESS_CODE;
         }
+    }
+
+    private String getStringFromInputStream(InputStream in) {
+        BufferedInputStream bis = new BufferedInputStream(in);
+        String result;
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            int data;
+            while ((data = bis.read()) != -1) {
+                bos.write(data);
+            }
+            result = bos.toString(StandardCharsets.UTF_8.toString());
+        } catch (IOException ioe) {
+            log.error("Couldn't read the complete input stream");
+            return "";
+        }
+        return result;
     }
 
 
@@ -1058,6 +1082,9 @@ public class HttpSink extends Sink {
             senderConfig.disableSsl();
         }
 
+        executor = Executors.newFixedThreadPool(
+                senderConfig.getPoolConfiguration().getExecutorServiceThreads());
+
         //overwrite default transport configuration
         Map<String, Object> bootStrapProperties = HttpSinkUtil
                 .populateTransportConfiguration(clientBootstrapConfiguration);
@@ -1080,7 +1107,7 @@ public class HttpSink extends Sink {
         return encodedByteBuf.toString(StandardCharsets.UTF_8);
     }
 
-    static class HTTPResponseListener implements HttpConnectorListener {
+    private class HTTPResponseListener implements HttpConnectorListener {
         Object payload;
         DynamicOptions dynamicOptions;
         HttpSink httpSink;
@@ -1095,7 +1122,20 @@ public class HttpSink extends Sink {
 
         @Override
         public void onMessage(HttpCarbonMessage httpCarbonMessage) {
-
+            if (executor != null) {
+                executor.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                            /*
+                            Read content from the input stream of the HTTP Carbon message
+                            and make sure that the Carbon message is cleaned up,
+                            for preventing leaks.
+                             */
+                        getStringFromInputStream(
+                                new HttpMessageDataStreamer(httpCarbonMessage).getInputStream());
+                    }
+                });
+            }
         }
 
         @Override
