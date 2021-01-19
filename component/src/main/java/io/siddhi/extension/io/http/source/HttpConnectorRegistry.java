@@ -27,8 +27,8 @@ import io.siddhi.extension.io.http.util.HttpConstants;
 import org.apache.log4j.Logger;
 import org.wso2.transport.http.netty.contract.ServerConnector;
 import org.wso2.transport.http.netty.contract.ServerConnectorFuture;
+import org.wso2.transport.http.netty.contract.config.InboundMsgSizeValidationConfig;
 import org.wso2.transport.http.netty.contract.config.ListenerConfiguration;
-import org.wso2.transport.http.netty.contract.config.RequestSizeValidationConfig;
 import org.wso2.transport.http.netty.contract.config.ServerBootstrapConfiguration;
 import org.wso2.transport.http.netty.contract.config.TransportProperty;
 import org.wso2.transport.http.netty.contract.config.TransportsConfiguration;
@@ -79,8 +79,8 @@ class HttpConnectorRegistry {
         return aURL.getHost() + ":" + String.valueOf(aURL.getPort());
     }
 
-    RequestSizeValidationConfig populateRequestSizeValidationConfiguration() {
-        return new RequestSizeValidationConfig();
+    InboundMsgSizeValidationConfig populateRequestSizeValidationConfiguration() {
+        return new InboundMsgSizeValidationConfig();
     }
 
     /**

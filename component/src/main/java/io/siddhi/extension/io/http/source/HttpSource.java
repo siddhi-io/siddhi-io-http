@@ -380,7 +380,7 @@ public class HttpSource extends Source {
             this.listenerConfiguration.setHttpTraceLogEnabled(Boolean.parseBoolean(traceLog));
         }
         if (!HttpConstants.EMPTY_STRING.equals(requestSizeValidationConfigList)) {
-            this.listenerConfiguration.setRequestSizeValidationConfig(HttpConnectorRegistry.getInstance()
+            this.listenerConfiguration.setMsgSizeValidationConfig(HttpConnectorRegistry.getInstance()
                     .populateRequestSizeValidationConfiguration());
         }
         isSecured = (listenerConfiguration.getScheme().equalsIgnoreCase(HttpConstants.SCHEME_HTTPS));
