@@ -21,6 +21,7 @@ package io.siddhi.extension.io.http.source;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
 import io.siddhi.extension.io.http.util.HttpConstants;
@@ -128,12 +129,16 @@ class HttpConnectorRegistry {
      */
     void registerSourceListener(SourceEventListener sourceEventListener, String listenerUrl,
                                 int workerThread, Boolean isAuth, String[] requestedTransportPropertyNames,
-                                String siddhiAppName) {
-        String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl);
+                                String siddhiAppName, SourceMetrics metrics) {
+        String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
         HttpSourceListener httpSourceListener = this.sourceListenersMap.putIfAbsent(listenerKey,
                 new HttpSourceListener(workerThread, listenerUrl, isAuth, sourceEventListener,
-                        requestedTransportPropertyNames, siddhiAppName));
+                        requestedTransportPropertyNames, siddhiAppName, metrics));
         if (httpSourceListener != null) {
+            if (metrics != null) {
+                metrics.getTotalHttpErrorsMetric().inc();
+            }
+
             throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected");
         }
     }
@@ -144,8 +149,8 @@ class HttpConnectorRegistry {
      * @param listenerUrl   the listener url
      * @param siddhiAppName
      */
-    protected void unregisterSourceListener(String listenerUrl, String siddhiAppName) {
-        String key = HttpSourceUtil.getSourceListenerKey(listenerUrl);
+    protected void unregisterSourceListener(String listenerUrl, String siddhiAppName, SourceMetrics metrics) {
+        String key = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
         HttpSourceListener httpSourceListener = this.sourceListenersMap.get(key);
         if (httpSourceListener != null && httpSourceListener.getSiddhiAppName().equals(siddhiAppName)) {
             sourceListenersMap.remove(key);
@@ -199,13 +204,17 @@ class HttpConnectorRegistry {
      *
      * @param listenerConfig listener configurations.
      */
-    void createHttpServerConnector(ListenerConfiguration listenerConfig) {
+    void createHttpServerConnector(ListenerConfiguration listenerConfig, SourceMetrics metrics) {
         synchronized (this) {
             String listenerInterface = listenerConfig.getHost() + ":" + listenerConfig.getPort();
             HttpServerConnectorContext httpServerConnectorContext =
                     serverConnectorPool.get(listenerInterface);
             if (httpServerConnectorContext != null) {
                 if (checkForConflicts(listenerConfig, httpServerConnectorContext)) {
+                    if (metrics != null) {
+                        metrics.getTotalHttpErrorsMetric().inc();
+                    }
+
                     throw new HttpSourceAdaptorRuntimeException("Conflicting configuration detected for listener " +
                             "configuration id " + listenerConfig.getId());
                 }
@@ -219,7 +228,7 @@ class HttpConnectorRegistry {
             httpServerConnectorContext = new HttpServerConnectorContext(serverConnector, listenerConfig);
             serverConnectorPool.put(serverConnector.getConnectorID(), httpServerConnectorContext);
             httpServerConnectorContext.incrementReferenceCount();
-            this.registerServerConnector(serverConnector, listenerConfig);
+            this.registerServerConnector(serverConnector, listenerConfig, metrics);
         }
     }
 
@@ -229,11 +238,12 @@ class HttpConnectorRegistry {
      * @param serverConnector server connector.
      * @param listenerConfig  listener configuration.
      */
-    void registerServerConnector(ServerConnector serverConnector, ListenerConfiguration listenerConfig) {
+    void registerServerConnector(ServerConnector serverConnector, ListenerConfiguration listenerConfig,
+                                 SourceMetrics metrics) {
         ServerConnectorFuture connectorFuture = serverConnector.start();
         ConnectorStartupSynchronizer startupSyncer =
                 new ConnectorStartupSynchronizer(new CountDownLatch(1));
-        setConnectorListeners(connectorFuture, serverConnector.getConnectorID(), startupSyncer);
+        setConnectorListeners(connectorFuture, serverConnector.getConnectorID(), startupSyncer, metrics);
         try {
             // Wait for all the connectors to start
             startupSyncer.getCountDownLatch().await();
@@ -273,7 +283,7 @@ class HttpConnectorRegistry {
     /**
      * This method wil check that if there is already registered server connectors which may be http but if it have
      * jks security setup then it can be use as https transport as well
-     * listener configuration
+     * listener configuration.
      *
      * @param listenerConfiguration server listener configuration.
      * @param context               server connector context handler
@@ -301,10 +311,10 @@ class HttpConnectorRegistry {
     }
 
     protected void setConnectorListeners(ServerConnectorFuture connectorFuture, String serverConnectorId,
-                                         ConnectorStartupSynchronizer startupSyncer) {
+                                         ConnectorStartupSynchronizer startupSyncer, SourceMetrics metrics) {
         connectorFuture.setHttpConnectorListener(new HTTPConnectorListener());
         connectorFuture.setPortBindingEventListener(
-                new HttpConnectorPortBindingListener(startupSyncer, serverConnectorId));
+                new HttpConnectorPortBindingListener(startupSyncer, serverConnectorId, metrics));
     }
 
     private void validateConnectorStartup(ConnectorStartupSynchronizer startupSyncer) {

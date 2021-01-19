@@ -455,6 +455,7 @@ public class HttpCallSink extends HttpSink {
         }
         isBlockingIO = Boolean.parseBoolean(
                 optionHolder.validateAndGetStaticValue(HttpConstants.BLOCKING_IO, HttpConstants.FALSE));
+        initMetrics(outputStreamDefinition.getId());
         return stateFactory;
     }
 
@@ -466,6 +467,13 @@ public class HttpCallSink extends HttpSink {
             super.createClientConnector(dynamicOptions);
         }
 
+        String publisherURL;
+        if (publisherURLOption.isStatic()) {
+            publisherURL = publisherURLOption.getValue();
+        } else {
+            publisherURL = publisherURLOption.getValue(dynamicOptions);
+        }
+
         if (mapType == null) {
             mapType = getMapper().getType();
         }
@@ -474,6 +482,13 @@ public class HttpCallSink extends HttpSink {
                 HttpConstants.METHOD_DEFAULT : httpMethodOption.getValue(dynamicOptions);
         String contentType = HttpSinkUtil.getContentType(mapType, headersList);
         String messageBody = getMessageBody(payload);
+
+        if (metrics != null) {
+            metrics.getTotalWritesMetric().inc();
+            metrics.getTotalHttpWritesMetric(publisherURL).inc();
+            metrics.getRequestSizeMetric(publisherURL).inc(HttpSinkUtil.getByteSize(messageBody));
+        }
+
         HttpMethod httpReqMethod = new HttpMethod(httpMethod);
         HttpCarbonMessage cMessage = new HttpCarbonMessage(
                 new DefaultHttpRequest(HttpVersion.HTTP_1_1, httpReqMethod, EMPTY_STRING));
@@ -492,7 +507,7 @@ public class HttpCallSink extends HttpSink {
         HttpResponseMessageListener httpListener = new HttpResponseMessageListener(this,
                 getTrpProperties(dynamicOptions), sinkId, isDownloadEnabled, latch,
                 payload, dynamicOptions, siddhiAppContext.getName(),
-                clientConnector.getPublisherURL());
+                clientConnector.getPublisherURL(), metrics, startTime);
         httpResponseFuture.setHttpConnectorListener(httpListener);
 
         if (latch != null) {

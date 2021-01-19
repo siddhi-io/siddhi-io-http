@@ -19,6 +19,7 @@
 package io.siddhi.extension.io.http.source;
 
 import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
 import io.siddhi.extension.io.http.util.HttpConstants;
 import org.slf4j.Logger;
@@ -41,13 +42,15 @@ public class HttpWorkerThread implements Runnable {
     private SourceEventListener sourceEventListener;
     private String sourceID;
     private String[] trpProperties;
+    private SourceMetrics metrics;
 
     HttpWorkerThread(HttpCarbonMessage cMessage, SourceEventListener sourceEventListener,
-                     String sourceID, String[] trpProperties) {
+                     String sourceID, String[] trpProperties, SourceMetrics metrics) {
         this.carbonMessage = cMessage;
         this.sourceEventListener = sourceEventListener;
         this.sourceID = sourceID;
         this.trpProperties = trpProperties;
+        this.metrics = metrics;
     }
 
     @Override
@@ -59,12 +62,24 @@ public class HttpWorkerThread implements Runnable {
             String payload = buf.lines().collect(Collectors.joining("\n"));
 
             if (!payload.equals(HttpConstants.EMPTY_STRING)) {
+
+                if (metrics != null) {
+                    metrics.getTotalReadsMetric().inc();
+                    metrics.getTotalHttpReadsMetric().inc();
+                    metrics.getRequestSizeMetric().inc(HttpSourceUtil.getByteSize(payload));
+                    metrics.setLastEventTime(System.currentTimeMillis());
+                }
+
                 sourceEventListener.onEvent(payload, trpProperties);
                 HttpSourceUtil.handleCallback(carbonMessage, 200);
                 if (logger.isDebugEnabled()) {
                     logger.debug("Submitted Event " + payload + " Stream");
                 }
             } else {
+                if (metrics != null) {
+                    metrics.getTotalHttpErrorsMetric().inc();
+                }
+
                 HttpSourceUtil.handleCallback(carbonMessage, 405);
                 if (logger.isDebugEnabled()) {
                     logger.debug("Empty payload event, hence dropping the event chunk at source " + sourceID);
@@ -75,6 +90,10 @@ public class HttpWorkerThread implements Runnable {
                 buf.close();
                 carbonMessage.waitAndReleaseAllEntities();
             } catch (IOException e) {
+                if (metrics != null) {
+                    metrics.getTotalHttpErrorsMetric().inc();
+                }
+
                 logger.error("Error occurred when closing the byte buffer in source " + sourceID, e);
             }
         }

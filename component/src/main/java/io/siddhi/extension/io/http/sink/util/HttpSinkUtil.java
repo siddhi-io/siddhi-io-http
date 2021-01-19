@@ -35,6 +35,7 @@ import org.wso2.transport.http.netty.contractimpl.sender.channel.pool.PoolConfig
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -277,7 +278,7 @@ public class HttpSinkUtil {
     }
 
     /**
-     * This map contains the properties other than String
+     * This map contains the properties other than String.
      *
      * @return
      */
@@ -372,4 +373,13 @@ public class HttpSinkUtil {
         return null;
     }
 
+    /**
+     * This method return byte size for a given string.
+     *
+     * @param body http request body
+     * @return byte size of the body
+     */
+    public static long getByteSize(String body) {
+        return body.getBytes(Charset.defaultCharset()).length;
+    }
 }
