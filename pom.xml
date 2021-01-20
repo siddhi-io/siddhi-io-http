@@ -31,7 +31,6 @@
     </scm>
     <modules>
         <module>component</module>
-        <module>tests</module>
         <module>coverage-report</module>
     </modules>
     <groupId>io.siddhi.extension.io.http</groupId>
@@ -47,7 +46,6 @@
             </activation>
             <modules>
                 <module>component</module>
-                <module>tests</module>
                 <module>coverage-report</module>
             </modules>
         </profile>
