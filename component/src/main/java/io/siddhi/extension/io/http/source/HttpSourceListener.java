@@ -113,9 +113,24 @@ public class HttpSourceListener {
         if (requestedTransportPropertyNames.length > 0) {      //cannot be null according to siddhi impl
             int i = 0;
             for (String property : requestedTransportPropertyNames) {
-                Object value = carbonMessage.getProperty(property);
-                if (value != null) {
-                    properties[i] = String.valueOf(value);
+                if (property.startsWith("_")) {
+                    String[] param = property.split("_", -2);
+                    String value = carbonMessage.getProperty("TO").toString();
+                    if (value != null) {
+                        String[] temp1 = value.split("\\?", -2);
+                        String[] temp2 = temp1[1].split("&", -2);
+                        for (String temp3 : temp2) {
+                            String[] temp4 = temp3.split("=", -2);
+                            if (temp4[0].equals(param[1])) {
+                                properties[i] = temp4[1];
+                            }
+                        }
+                    }
+                } else {
+                    Object value = carbonMessage.getProperty(property);
+                    if (value != null) {
+                        properties[i] = String.valueOf(value);
+                    }
                 }
                 i++;
             }
