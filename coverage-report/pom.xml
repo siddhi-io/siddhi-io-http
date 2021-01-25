@@ -76,14 +76,10 @@
                                         </taskdef>
                                         <jacoco:merge destfile="${project.build.directory}/merged.exec">
                                             <fileset dir="../component/target/coverage-reports" includes="*.exec" />
-                                            <fileset dir="../tests/osgi-tests/target/coverage-reports" includes="*.exec" />
                                         </jacoco:merge>
                                         <jacoco:report>
                                             <executiondata>
                                                 <fileset dir="../component/target/coverage-reports">
-                                                    <include name="jacoco.exec" />
-                                                </fileset>
-                                                <fileset dir="../tests/osgi-tests/target/coverage-reports">
                                                     <include name="jacoco.exec" />
                                                 </fileset>
                                             </executiondata>

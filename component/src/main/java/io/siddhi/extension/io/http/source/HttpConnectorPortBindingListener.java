@@ -17,6 +17,8 @@
  */
 package io.siddhi.extension.io.http.source;
 
+import io.siddhi.extension.io.http.metrics.EndpointStatus;
+import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.transport.http.netty.contract.PortBindingEventListener;
@@ -34,25 +36,36 @@ public class HttpConnectorPortBindingListener implements PortBindingEventListene
 
     private ConnectorStartupSynchronizer connectorStartupSynchronizer;
     private String serverConnectorId;
+    private SourceMetrics metrics;
 
     public HttpConnectorPortBindingListener(ConnectorStartupSynchronizer connectorStartupSynchronizer,
-                                            String serverConnectorId) {
+                                            String serverConnectorId, SourceMetrics metrics) {
         this.connectorStartupSynchronizer = connectorStartupSynchronizer;
         this.serverConnectorId = serverConnectorId;
+        this.metrics = metrics;
     }
 
     @Override
     public void onOpen(String serverConnectorId, boolean isHttps) {
+        if (metrics != null) {
+            metrics.setEndpointStatusMetric(EndpointStatus.ONLINE);
+        }
+
         if (isHttps) {
             log.info("HTTPS source " + serverConnectorId + " has been started");
         } else {
             log.info("HTTP source " + serverConnectorId + " has been started");
         }
+
         connectorStartupSynchronizer.getCountDownLatch().countDown();
     }
 
     @Override
     public void onClose(String serverConnectorId, boolean isHttps) {
+        if (metrics != null) {
+            metrics.setEndpointStatusMetric(EndpointStatus.OFFLINE);
+        }
+
         if (isHttps) {
             log.info("HTTPS source " + serverConnectorId + " has been closed");
         } else {
@@ -62,6 +75,10 @@ public class HttpConnectorPortBindingListener implements PortBindingEventListene
 
     @Override
     public void onError(Throwable throwable) {
+        if (metrics != null) {
+            metrics.setEndpointStatusMetric(EndpointStatus.OFFLINE);
+        }
+
         log.error("Error in http source ", throwable);
 
         if (throwable instanceof BindException) {

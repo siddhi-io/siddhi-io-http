@@ -20,6 +20,7 @@ package io.siddhi.extension.io.http.source.util;
 
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import io.siddhi.extension.io.http.util.HttpConstants;
 import io.siddhi.extension.io.http.util.HttpIoUtil;
@@ -31,6 +32,7 @@ import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -136,11 +138,15 @@ public class HttpSourceUtil {
      * @param listenerUrl the listener URL
      * @return key value for source Listener
      */
-    public static String getSourceListenerKey(String listenerUrl) {
+    public static String getSourceListenerKey(String listenerUrl, SourceMetrics metrics) {
         URL aURL;
         try {
             aURL = new URL(listenerUrl);
         } catch (MalformedURLException e) {
+            if (metrics != null) {
+                metrics.getTotalHttpErrorsMetric().inc();
+            }
+
             throw new SiddhiAppCreationException("ListenerUrl is not in a proper format ", e);
         }
         return String.valueOf(aURL.getPort()) + HttpConstants.PORT_CONTEXT_KEY_SEPARATOR + aURL.getPath();
@@ -219,7 +225,7 @@ public class HttpSourceUtil {
     }
 
     /**
-     * This map contains the properties other than String
+     * This map contains the properties other than String.
      *
      * @return
      */
@@ -253,12 +259,22 @@ public class HttpSourceUtil {
     }
 
     /**
-     * This method handles OPTIONS requests received by the http-source
+     * This method handles OPTIONS requests received by the http-source.
      *
      * @param requestMessage OPTIONS request which needs to be handled.
      */
     public static void handleCORS(HttpCarbonMessage requestMessage) {
         HttpIoUtil.handleResponse(requestMessage, HttpIoUtil.createOptionsResponseMessage(requestMessage));
+    }
+
+    /**
+     * This method return byte size for a given string.
+     *
+     * @param body http request body
+     * @return byte size of the body
+     */
+    public static long getByteSize(String body) {
+        return body.getBytes(Charset.defaultCharset()).length;
     }
 }
 

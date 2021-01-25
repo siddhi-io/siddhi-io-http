@@ -22,6 +22,8 @@ package io.siddhi.extension.io.http.source;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.util.transport.DynamicOptions;
+import io.siddhi.extension.io.http.metrics.EndpointStatus;
+import io.siddhi.extension.io.http.metrics.SinkMetrics;
 import io.siddhi.extension.io.http.sink.HttpSink;
 import io.siddhi.extension.io.http.util.HTTPSourceRegistry;
 import io.siddhi.extension.io.http.util.HttpConstants;
@@ -54,11 +56,14 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
     private final DynamicOptions dynamicOptions;
     private String siddhiAppName;
     private String publisherURL;
+    private SinkMetrics metrics;
+    private long startTime;
+    private long endTime;
 
     public HttpResponseMessageListener(HttpSink sink, Map<String, Object> trpProperties, String sinkId,
                                        boolean isDownloadEnabled, CountDownLatch latch,
                                        Object payload, DynamicOptions dynamicOptions,
-                                       String siddhiAppName, String publisherURL) {
+                                       String siddhiAppName, String publisherURL, SinkMetrics metrics, long startTime) {
         this.trpProperties = trpProperties;
         this.isDownloadEnabled = isDownloadEnabled;
         this.sinkId = sinkId;
@@ -68,10 +73,25 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
         this.dynamicOptions = dynamicOptions;
         this.siddhiAppName = siddhiAppName;
         this.publisherURL = publisherURL;
+        this.metrics = metrics;
+        this.startTime = startTime;
     }
 
     @Override
     public void onMessage(HttpCarbonMessage carbonMessage) {
+        endTime = System.currentTimeMillis();
+
+        if (metrics != null) {
+            metrics.setEndpointStatusMetric(publisherURL, EndpointStatus.ONLINE);
+            metrics.setLatencyMetric(publisherURL, endTime - startTime);
+            metrics.setLastEventTime(publisherURL, endTime);
+
+            // Catch unsuccessful requests
+            if (carbonMessage.getHttpStatusCode() / 100 != 2) {
+                metrics.getTotalHttpErrorsMetric(publisherURL).inc();
+            }
+        }
+
         trpProperties.forEach((k, v) -> {
             carbonMessage.setProperty(k, v);
         });
@@ -95,6 +115,11 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
 
     @Override
     public void onError(Throwable throwable) {
+        if (metrics != null) {
+            metrics.getTotalHttpErrorsMetric(publisherURL).inc();
+            metrics.setEndpointStatusMetric(publisherURL, EndpointStatus.OFFLINE);
+        }
+
         if (throwable instanceof IOException) {
             sink.createClientConnector(null);
         }

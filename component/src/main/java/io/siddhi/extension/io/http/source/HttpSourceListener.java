@@ -19,6 +19,7 @@
 package io.siddhi.extension.io.http.source;
 
 import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
 import org.slf4j.Logger;
@@ -45,9 +46,11 @@ public class HttpSourceListener {
     protected SourceEventListener sourceEventListener;
     protected String[] requestedTransportPropertyNames;
     private String siddhiAppName;
+    protected SourceMetrics metrics;
 
     protected HttpSourceListener(int workerThread, String url, Boolean auth, SourceEventListener sourceEventListener,
-                                 String[] requestedTransportPropertyNames, String siddhiAppName) {
+                                 String[] requestedTransportPropertyNames, String siddhiAppName,
+                                 SourceMetrics metrics) {
         this.executorService = Executors.newFixedThreadPool(workerThread);
         this.siddhiAppName = siddhiAppName;
         this.paused = false;
@@ -57,6 +60,7 @@ public class HttpSourceListener {
         this.isAuthEnabled = auth;
         this.sourceEventListener = sourceEventListener;
         this.requestedTransportPropertyNames = requestedTransportPropertyNames;
+        this.metrics = metrics;
     }
 
     public String getSiddhiAppName() {
@@ -77,6 +81,10 @@ public class HttpSourceListener {
                 }
             } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
+                if (metrics != null) {
+                    metrics.getTotalHttpErrorsMetric().inc();
+                }
+
                 logger.error("Thread interrupted while pausing ", ie);
                 HttpSourceUtil.handleCallback(carbonMessage, 500);
             } finally {
@@ -85,6 +93,10 @@ public class HttpSourceListener {
         }
         if (isAuthEnabled) {
             if (!HttpAuthenticator.authenticate(carbonMessage)) {
+                if (metrics != null) {
+                    metrics.getTotalHttpErrorsMetric().inc();
+                }
+
                 throw new HttpSourceAdaptorRuntimeException(carbonMessage, "Authorisation fails", 401);
             }
         }
@@ -92,7 +104,7 @@ public class HttpSourceListener {
         populateTransportHeaders(carbonMessage, trpProperties);
         populateTransportProperties(carbonMessage, trpProperties);
         executorService.execute(new HttpWorkerThread(carbonMessage,
-                sourceEventListener, sourceEventListener.getStreamDefinition().toString(), trpProperties));
+                sourceEventListener, sourceEventListener.getStreamDefinition().toString(), trpProperties, metrics));
 
     }
 

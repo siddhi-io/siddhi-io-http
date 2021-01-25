@@ -243,4 +243,6 @@ public class HttpConstants {
 
     public static final String HOSTNAME_VERIFICATION_ENABLED = "hostname.verification.enabled";
     public static final String SSL_VERIFICATION_DISABLED = "ssl.verification.disabled";
+
+    public static final String PROMETHEUS_REPORTER_NAME = "prometheus";
 }
