@@ -484,7 +484,7 @@
         <maven.dependency.plugin.version>2.10</maven.dependency.plugin.version>
         <org.jacoco.version>0.7.9</org.jacoco.version>
         <surefire.plugin.version>2.22.1</surefire.plugin.version>
-        <carbon.analytics.version>3.0.48</carbon.analytics.version>
+        <carbon.analytics.version>3.0.49</carbon.analytics.version>
     </properties>
     <build>
         <extensions>
