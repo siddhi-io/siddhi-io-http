@@ -75,7 +75,7 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
         description = "HTTP SSE source send a request to a given url and listen to the response stream.",
         parameters = {
                 @Parameter(
-                        name = "listener.url",
+                        name = "event.source.url",
                         description = "The sse endpoint url which should be listened.",
                         type = {DataType.STRING}
                 ),
@@ -180,10 +180,11 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
         examples = {
                 @Example(
                         syntax = "" +
-                                "@Source(type = 'http-sse', listener.url='http://localhost:8080/sse', " +
+                                "@Source(type = 'http-sse', event.source.url='http://localhost:8080/sse', " +
                                 "@map(type='json')) " +
                                 "define stream IncomingStream (param1 string);",
-                        description = "It listens to the events emitted from the listener url"
+                        description = "This subscribes to the events which gets published by the " +
+                                "SSE server at event.source.url"
                 )
         }
 )
@@ -192,7 +193,7 @@ public class HttpSSESource extends Source {
     private int workerThread;
     private String siddhiAppName;
     private String streamID;
-    private String listenerUrl;
+    private String eventSourceUrl;
     private String mapType;
     private String clientStoreFile;
     private String clientStorePass;
@@ -254,7 +255,7 @@ public class HttpSSESource extends Source {
         }
 
         this.serviceDeploymentInfo = new ServiceDeploymentInfo(port, isSecured);
-        this.listenerUrl = optionHolder.validateAndGetOption(HttpConstants.LISTENER_URL).getValue();
+        this.eventSourceUrl = optionHolder.validateAndGetOption(HttpConstants.EVENT_SOURCE_URL).getValue();
         this.httpConnectorRegistry = HttpSSESourceConnectorRegistry.getInstance();
         this.requestedTransportPropertyNames = requestedTransportPropertyNames.clone();
         this.httpConnectorFactory = createConnectorFactory(configReader);
@@ -376,19 +377,19 @@ public class HttpSSESource extends Source {
     }
 
     public ClientConnector createClientConnector() {
-        Map<String, String> httpURLProperties = HttpSinkUtil.getURLProperties(listenerUrl);
+        Map<String, String> httpURLProperties = HttpSinkUtil.getURLProperties(eventSourceUrl);
         SenderConfiguration senderConfig = HttpSinkUtil
                 .getSenderConfigurations(httpURLProperties, clientStoreFile, clientStorePass, configReader);
         senderConfig.setKeepAliveConfig(KeepAliveConfig.ALWAYS);
-        if (EMPTY_STRING.equals(listenerUrl)) {
-            throw new SiddhiAppCreationException("Listener URL found empty but it is Mandatory field in http source "
-                    + streamID);
+        if (EMPTY_STRING.equals(eventSourceUrl)) {
+            throw new SiddhiAppCreationException("Event Source URL found empty but it is Mandatory field " +
+                    "in http source " + streamID);
         }
 
         senderConfig.setPoolConfiguration(connectionPoolConfiguration);
         Map<String, Object> bootStrapProperties = HttpSinkUtil
                 .populateTransportConfiguration(clientBootstrapConfiguration);
-        return new ClientConnector(listenerUrl, httpURLProperties,
+        return new ClientConnector(eventSourceUrl, httpURLProperties,
                 httpConnectorFactory.createHttpClientConnector(bootStrapProperties, senderConfig));
     }
 
@@ -437,7 +438,7 @@ public class HttpSSESource extends Source {
                 if (MetricsDataHolder.getInstance().getMetricManagementService()
                         .isReporterRunning(HttpConstants.PROMETHEUS_REPORTER_NAME)) {
                     metrics = new SourceMetrics(siddhiAppName, sourceEventListener.getStreamDefinition().getId(),
-                            listenerUrl);
+                            eventSourceUrl);
                 }
             } catch (IllegalArgumentException e) {
                 log.debug("Prometheus reporter is not running. Hence http source metrics will not be initialized for "

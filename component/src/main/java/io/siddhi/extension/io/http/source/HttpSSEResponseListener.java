@@ -33,7 +33,6 @@ import java.util.concurrent.CountDownLatch;
  */
 public class HttpSSEResponseListener implements HttpConnectorListener {
     private static final Logger log = LoggerFactory.getLogger(HttpSSEResponseListener.class);
-
     private String streamId;
     private CountDownLatch latch;
     private HttpSSESource source;
@@ -53,6 +52,7 @@ public class HttpSSEResponseListener implements HttpConnectorListener {
         if (latch != null) {
             latch.countDown();
         }
+
         HttpSSESource responseSource = HTTPSourceRegistry.findAndGetSSESource(streamId);
         if (responseSource != null) {
             HttpSSEResponseConnectorListener responseConnectorListener = responseSource.getConnectorListener();
@@ -61,7 +61,6 @@ public class HttpSSEResponseListener implements HttpConnectorListener {
             log.error("No sse source is registered for the stream '" + streamId +
                     "'. Hence dropping the response message.");
         }
-
     }
 
     @Override
@@ -69,6 +68,7 @@ public class HttpSSEResponseListener implements HttpConnectorListener {
         if (throwable instanceof IOException) {
             source.createClientConnector();
         }
+
         if (latch != null) {
             latch.countDown();
         }

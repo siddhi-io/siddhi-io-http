@@ -40,6 +40,7 @@ limitations under the License.
             <class name="io.siddhi.extension.io.http.sink.HttpSinkCustomConfigurationTestCase"/>
             <class name="io.siddhi.extension.io.http.sink.HttpRequestResponseTestCase"/>
             <class name="io.siddhi.extension.io.http.sink.HttpCallResponseTestCase"/>
+
         </classes>
     </test>
 </suite>

@@ -63,9 +63,8 @@ class HttpSSESourceConnectorRegistry {
         HttpSSEResponseConnectorListener sourceListener =
                 this.sourceListenersMap.putIfAbsent((streamId), httpSSEResponseConnectorListener);
         if (sourceListener != null) {
-            //TODO: update error message
-            throw new SiddhiAppCreationException("There is a connection already established for the source with " +
-                    "sink.id : '" + streamId + "' and http.status.code : '" + "statusCode" + "'.");
+            throw new SiddhiAppCreationException("There is a connection already established for the sse source with "
+                    + "stream id : '" + streamId + "'.");
         }
     }
 

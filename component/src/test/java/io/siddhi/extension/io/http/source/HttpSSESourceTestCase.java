@@ -57,7 +57,7 @@ public class HttpSSESourceTestCase {
     private static final int TIMEOUT = 30000;
     private AtomicInteger eventCount = new AtomicInteger(0);
     private HttpServer sseServer;
-    ThreadPoolExecutor threadPoolExecutor;
+    private ThreadPoolExecutor threadPoolExecutor;
 
     @BeforeMethod
     public void init() {
@@ -87,7 +87,6 @@ public class HttpSSESourceTestCase {
                     httpExchange.getResponseHeaders().set("connection", "keep-alive");
                     httpExchange.getResponseHeaders().set("cache-control", "no-cache");
                     httpExchange.getResponseHeaders().set("content-type", "application/json");
-
                     OutputStream outputStream = httpExchange.getResponseBody();
                     String responseBody = "{\"param1\":\"pizza\"}";
                     for (int i = 0; i < EVENT_COUNT; i++) {
@@ -112,7 +111,7 @@ public class HttpSSESourceTestCase {
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("json-output-mapper", JsonSinkMapper.class);
         siddhiManager.setExtension("json-input-mapper", JsonSourceMapper.class);
-        String inStreamDefinition = "@Source(type = 'http-sse', listener.url='http://localhost:8010/',\n" +
+        String inStreamDefinition = "@Source(type = 'http-sse', event.source.url='http://localhost:8010/',\n" +
                 "@map(type='json'))\n" +
                 "define stream RecieveProductionStream (param1 string);\n" +
                 "\n" +
@@ -126,7 +125,6 @@ public class HttpSSESourceTestCase {
                 "select *\n" +
                 "insert into LogProductionStream";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
-
         siddhiAppRuntime.addCallback("log", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -137,7 +135,6 @@ public class HttpSSESourceTestCase {
                 }
             }
         });
-
         siddhiAppRuntime.start();
         List<String> expected = new ArrayList<>(10);
         for (int i = 0; i < EVENT_COUNT; i++) {
