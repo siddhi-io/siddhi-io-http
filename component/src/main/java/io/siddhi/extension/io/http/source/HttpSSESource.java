@@ -37,6 +37,7 @@ import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
+import io.siddhi.core.util.transport.Option;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.sink.ClientConnector;
@@ -44,6 +45,7 @@ import io.siddhi.extension.io.http.sink.util.HttpSinkUtil;
 import io.siddhi.extension.io.http.util.HTTPSourceRegistry;
 import io.siddhi.extension.io.http.util.HttpConstants;
 import org.apache.log4j.Logger;
+import org.wso2.carbon.messaging.Header;
 import org.wso2.carbon.si.metrics.core.internal.MetricsDataHolder;
 import org.wso2.transport.http.netty.contract.Constants;
 import org.wso2.transport.http.netty.contract.HttpResponseFuture;
@@ -54,6 +56,7 @@ import org.wso2.transport.http.netty.contractimpl.sender.channel.pool.PoolConfig
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
@@ -108,6 +111,21 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
                         optional = true,
                         defaultValue = "1"
                 ),
+                @Parameter(
+                        name = "headers",
+                        description = "HTTP request headers in format `\"'<key>:<value>','<key>:<value>'\"`.\n" +
+                                "When the `Content-Type` header is not provided the system decides the " +
+                                "Content-Type based on the provided sink mapper as following: \n" +
+                                " - `@map(type='xml')`: `application/xml`\n" +
+                                " - `@map(type='json')`: `application/json`\n" +
+                                " - `@map(type='text')`: `plain/text`\n" +
+                                " - `@map(type='keyvalue')`: `application/x-www-form-urlencoded`\n" +
+                                " - For all other cases system defaults to `plain/text`\n" +
+                                "Also the `Content-Length` header need not to be provided, as the system " +
+                                "automatically defines it by calculating the size of the payload.",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "Content-Type and Content-Length headers"),
                 @Parameter(
                         name = "https.truststore.file",
                         description = "The file path of the client truststore when sending messages through `https`" +
@@ -185,6 +203,7 @@ public class HttpSSESource extends Source {
     private String authType;
     private String authorizationHeader;
     private String[] requestedTransportPropertyNames;
+    private Option httpHeaderOption;
     private ClientConnector clientConnector;
     private DefaultHttpWsConnectorFactory httpConnectorFactory;
     private ConfigReader configReader;
@@ -220,9 +239,8 @@ public class HttpSSESource extends Source {
                 .validateAndGetStaticValue(HttpConstants.CLIENT_BOOTSTRAP_CONFIGURATION, EMPTY_STRING);
         this.userName = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_USERNAME, EMPTY_STRING);
         this.userPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_PASSWORD, EMPTY_STRING);
-
-        authType = validateAndGetAuthType();
-
+        this.httpHeaderOption = optionHolder.getOrCreateOption(HttpConstants.HEADERS, HttpConstants.DEFAULT_HEADER);
+        this.authType = validateAndGetAuthType();
         String scheme = configReader.readConfig(HttpConstants.DEFAULT_SOURCE_SCHEME, HttpConstants
                 .DEFAULT_SOURCE_SCHEME_VALUE);
         int port;
@@ -260,25 +278,24 @@ public class HttpSSESource extends Source {
         this.httpConnectorRegistry.registerSourceListener(httpSSEResponseConnectorListener, streamID);
         HTTPSourceRegistry.registerSSESource(streamID, this);
 
-        String contentType = HttpConstants.APPLICATION_JSON;
+        // Send initial request
+        String headers = httpHeaderOption.getValue();
+        List<Header> headersList = HttpSinkUtil.getHeaders(headers);
+        String contentType = HttpSinkUtil.getContentType(mapType, headersList);
         HttpMethod httpReqMethod = new HttpMethod(httpMethod);
         HttpCarbonMessage cMessage = new HttpCarbonMessage(
                 new DefaultHttpRequest(HttpVersion.HTTP_1_1, httpReqMethod, EMPTY_STRING));
-        cMessage = generateCarbonMessage(contentType, httpMethod, cMessage,
+        cMessage = generateCarbonMessage(headersList, contentType, httpMethod, cMessage,
                 clientConnector.getHttpURLProperties());
-
         cMessage.completeMessage();
-
         HttpResponseFuture httpResponseFuture = clientConnector.send(cMessage);
         CountDownLatch latch = null;
-
         if (HttpConstants.OAUTH.equals(authType)) {
             latch = new CountDownLatch(1);
         }
 
         HttpSSEResponseListener httpListener = new HttpSSEResponseListener(this, streamID, latch, metrics);
         httpResponseFuture.setHttpConnectorListener(httpListener);
-
         if (latch != null) {
             try {
                 boolean latchCount = latch.await(30, TimeUnit.SECONDS);
@@ -375,7 +392,7 @@ public class HttpSSESource extends Source {
                 httpConnectorFactory.createHttpClientConnector(bootStrapProperties, senderConfig));
     }
 
-    private HttpCarbonMessage generateCarbonMessage(String contentType,
+    private HttpCarbonMessage generateCarbonMessage(List<Header> headers, String contentType,
                                                     String httpMethod, HttpCarbonMessage cMessage,
                                                     Map<String, String> httpURLProperties) {
         cMessage.setProperty(Constants.PROTOCOL, httpURLProperties.get(Constants.PROTOCOL));
@@ -385,7 +402,6 @@ public class HttpSSESource extends Source {
         cMessage.setHttpMethod(httpMethod);
         cMessage.setRequestUrl(httpURLProperties.get(REQUEST_URL));
         HttpHeaders httpHeaders = cMessage.getHeaders();
-
         if (!(userName.equals(EMPTY_STRING)) && !(userPassword.equals
                 (EMPTY_STRING))) {
             httpHeaders.set(HttpConstants.AUTHORIZATION_HEADER, authorizationHeader);
@@ -396,6 +412,11 @@ public class HttpSSESource extends Source {
         }
 
         httpHeaders.set(Constants.HTTP_HOST, cMessage.getProperty(Constants.HTTP_HOST));
+        if (headers != null) {
+            for (Header header : headers) {
+                httpHeaders.set(header.getName(), header.getValue());
+            }
+        }
 
         if (contentType.contains(mapType)) {
             httpHeaders.set(HttpConstants.HTTP_CONTENT_TYPE, contentType);
