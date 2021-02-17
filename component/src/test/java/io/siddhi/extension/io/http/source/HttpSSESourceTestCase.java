@@ -111,9 +111,9 @@ public class HttpSSESourceTestCase {
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("json-output-mapper", JsonSinkMapper.class);
         siddhiManager.setExtension("json-input-mapper", JsonSourceMapper.class);
-        String inStreamDefinition = "@Source(type = 'http-sse', event.source.url='http://localhost:8010/',\n" +
+        String inStreamDefinition = "@Source(type='sse', event.source.url='http://localhost:8010/',\n" +
                 "@map(type='json'))\n" +
-                "define stream RecieveProductionStream (param1 string);\n" +
+                "define stream ReceiveProductionStream (param1 string);\n" +
                 "\n" +
                 "@sink(type='log') \n" +
                 "define stream LogProductionStream(param1 string);\n" +
@@ -121,7 +121,7 @@ public class HttpSSESourceTestCase {
                 "/* Queries */\n" +
                 "\n" +
                 "@info(name='log') \n" +
-                "from RecieveProductionStream\n" +
+                "from ReceiveProductionStream\n" +
                 "select *\n" +
                 "insert into LogProductionStream";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);

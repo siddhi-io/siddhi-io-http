@@ -71,7 +71,7 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
 /**
  * Http source to receive sse events.
  */
-@Extension(name = "http-sse", namespace = "source",
+@Extension(name = "sse", namespace = "source",
         description = "HTTP SSE source send a request to a given url and listen to the response stream.",
         parameters = {
                 @Parameter(
@@ -180,7 +180,7 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
         examples = {
                 @Example(
                         syntax = "" +
-                                "@Source(type = 'http-sse', event.source.url='http://localhost:8080/sse', " +
+                                "@Source(type='sse', event.source.url='http://localhost:8080/sse', " +
                                 "@map(type='json')) " +
                                 "define stream IncomingStream (param1 string);",
                         description = "This subscribes to the events which gets published by the " +
