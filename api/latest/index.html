@@ -114,7 +114,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#api-docs-v224" tabindex="1" class="md-skip">
+      <a href="#api-docs-v230" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -401,6 +401,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#sse-source" title="sse (Source)" class="md-nav__link">
+    sse (Source)
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -414,6 +421,18 @@
   
 </nav>
     
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../2.3.0/" title="2.3.0" class="md-nav__link">
+      2.3.0
+    </a>
   </li>
 
         
@@ -845,6 +864,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#sse-source" title="sse (Source)" class="md-nav__link">
+    sse (Source)
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -869,7 +895,7 @@
                   <a href="https://github.com/siddhi-io/siddhi-io-http/blob/master/api/latest.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="api-docs-v224">API Docs - v2.2.4</h1>
+                <h1 id="api-docs-v230">API Docs - v2.3.0</h1>
 <div class="admonition info">
 <p class="admonition-title">Tested Siddhi Core version: <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/">5.1.13</a></em></p>
 <p>It could also support other Siddhi Core minor versions.</p>
@@ -3114,6 +3140,135 @@ insert into ResultStream;
 <p style="word-wrap: break-word;margin: 0;"></p>
 
 <p></p>
+
+<h3 id="sse-source">sse <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#source">(Source)</a></em></h3>
+<p><p></p>
+<p style="word-wrap: break-word;margin: 0;">HTTP SSE source send a request to a given url and listen to the response stream.</p>
+<p></p>
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<pre><code>@source(type=&quot;sse&quot;, event.source.url=&quot;&lt;STRING&gt;&quot;, method=&quot;&lt;STRING&gt;&quot;, basic.auth.username=&quot;&lt;STRING&gt;&quot;, basic.auth.password=&quot;&lt;STRING&gt;&quot;, worker.count=&quot;&lt;INT&gt;&quot;, headers=&quot;&lt;STRING&gt;&quot;, https.truststore.file=&quot;&lt;STRING&gt;&quot;, https.truststore.password=&quot;&lt;STRING&gt;&quot;, client.bootstrap.configurations=&quot;&lt;STRING&gt;&quot;, @map(...)))
+</code></pre>
+
+<p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Data Types</th>
+        <th>Optional</th>
+        <th>Dynamic</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">event.source.url</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The sse endpoint url which should be listened.</p></td>
+        <td style="vertical-align: top"></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">No</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">method</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The HTTP method used for calling the endpoint.</p></td>
+        <td style="vertical-align: top">GET</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">basic.auth.username</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The username to be included in the authentication header when calling endpoints protected by basic authentication. <code>basic.auth.password</code> property should be also set when using this property.</p></td>
+        <td style="vertical-align: top">-</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">basic.auth.password</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The password to be included in the authentication header when calling endpoints protected by basic authentication. <code>basic.auth.username</code> property should be also set when using this property.</p></td>
+        <td style="vertical-align: top">-</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">worker.count</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The number of active worker threads to serve the incoming events. By default the value is set to <code>1</code> to ensure events are processed in the same order they arrived. By increasing this value, higher performance can be achieved in the expense of loosing event ordering.</p></td>
+        <td style="vertical-align: top">1</td>
+        <td style="vertical-align: top">INT</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">headers</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">HTTP request headers in format <code>"'&lt;key&gt;:&lt;value&gt;','&lt;key&gt;:&lt;value&gt;'"</code>.<br>When the <code>Content-Type</code> header is not provided the system decides the Content-Type based on the provided sink mapper as following: <br>&nbsp;- <code>@map(type='xml')</code>: <code>application/xml</code><br>&nbsp;- <code>@map(type='json')</code>: <code>application/json</code><br>&nbsp;- <code>@map(type='text')</code>: <code>plain/text</code><br>&nbsp;- <code>@map(type='keyvalue')</code>: <code>application/x-www-form-urlencoded</code><br>&nbsp;- For all other cases system defaults to <code>plain/text</code><br>Also the <code>Content-Length</code> header need not to be provided, as the system automatically defines it by calculating the size of the payload.</p></td>
+        <td style="vertical-align: top">Content-Type and Content-Length headers</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">https.truststore.file</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The file path of the client truststore when sending messages through <code>https</code> protocol.</p></td>
+        <td style="vertical-align: top"><code>${carbon.home}/resources/security/client-truststore.jks</code></td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">https.truststore.password</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The password for the client-truststore.</p></td>
+        <td style="vertical-align: top">wso2carbon</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">client.bootstrap.configurations</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Client bootstrap configurations in format <code>"'&lt;key&gt;:&lt;value&gt;','&lt;key&gt;:&lt;value&gt;'"</code>.<br>Some supported configurations :<br>&nbsp;- Client connect timeout in millis: <code>'client.bootstrap.connect.timeout:15000'</code><br>&nbsp;- Client socket timeout in seconds: <code>'client.bootstrap.socket.timeout:15'</code><br>&nbsp;- Client socket reuse: <code>'client.bootstrap.socket.reuse:true'</code><br>&nbsp;- Enable TCP no delay: <code>'client.bootstrap.nodelay:true'</code><br>&nbsp;- Enable client keep alive: <code>'client.bootstrap.keepalive:true'</code><br>&nbsp;- Send buffer size: <code>'client.bootstrap.sendbuffersize:1048576'</code><br>&nbsp;- Receive buffer size: <code>'client.bootstrap.recievebuffersize:1048576'</code></p></td>
+        <td style="vertical-align: top">-</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+</table></p>
+<p><span id="system-parameters" class="md-typeset" style="display: block; font-weight: bold;">System Parameters</span>
+<table>
+    <tr>
+        <th>Name</th>
+        <th style="min-width: 20em">Description</th>
+        <th>Default Value</th>
+        <th>Possible Parameters</th>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">defaultScheme</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The default protocol.</p></td>
+        <td style="vertical-align: top">http</td>
+        <td style="vertical-align: top">http<br>https</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">defaultHttpPort</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The default HTTP port when default scheme is <code>http</code>.</p></td>
+        <td style="vertical-align: top">8280</td>
+        <td style="vertical-align: top">Any valid port</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">defaultHost</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The default host of the transport.</p></td>
+        <td style="vertical-align: top">0.0.0.0</td>
+        <td style="vertical-align: top">Any valid host</td>
+    </tr>
+</table></p>
+<p><span id="examples" class="md-typeset" style="display: block; font-weight: bold;">Examples</span>
+<span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
+<pre><code>@Source(type='sse', event.source.url='http://localhost:8080/sse', @map(type='json')) define stream IncomingStream (param1 string);
+</code></pre>
+
+<p></p>
+
+<p style="word-wrap: break-word;margin: 0;">This subscribes to the events which gets published by the SSE server at event.source.url</p>
+
+<p></p>
                 
                   
                 
@@ -3149,13 +3304,13 @@ insert into ResultStream;
           </a>
         
         
-          <a href="../2.2.4/" title="2.2.4" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../2.3.0/" title="2.3.0" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                2.2.4
+                2.3.0
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
