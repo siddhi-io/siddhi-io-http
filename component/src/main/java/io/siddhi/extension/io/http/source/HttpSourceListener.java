@@ -47,6 +47,12 @@ public class HttpSourceListener {
     protected String[] requestedTransportPropertyNames;
     private String siddhiAppName;
     protected SourceMetrics metrics;
+    protected String urlString;
+    private final char QUERY_PARAMS_IDENTIFIER = '_'; //Query params are given a prefix of _ in the SiddhiApp
+    private final String QUERY_PARAMS_CONTAINING_PROPERTY = "TO";
+    private final char QUERY_PARAMS_SEPARATOR = '&';
+    private final String QUERY_PARAMS_SPLITTER_FROM_URLSTRING = "\\?";
+    private final char QUERY_PARAMS_KEY_AND_VALUE_SEPARATOR = '=';
 
     protected HttpSourceListener(int workerThread, String url, Boolean auth, SourceEventListener sourceEventListener,
                                  String[] requestedTransportPropertyNames, String siddhiAppName,
@@ -125,9 +131,24 @@ public class HttpSourceListener {
         if (requestedTransportPropertyNames.length > 0) {      //cannot be null according to siddhi impl
             int i = 0;
             for (String property : requestedTransportPropertyNames) {
-                Object value = carbonMessage.getProperty(property);
-                if (value != null) {
-                    properties[i] = String.valueOf(value);
+                if (property.startsWith(String.valueOf(QUERY_PARAMS_IDENTIFIER))) {
+                    String[] param = property.split(String.valueOf(QUERY_PARAMS_IDENTIFIER), -2);
+                    urlString = carbonMessage.getProperty(QUERY_PARAMS_CONTAINING_PROPERTY).toString();
+                    if (urlString != null) {
+                        String[] temp1 = urlString.split(String.valueOf(QUERY_PARAMS_SPLITTER_FROM_URLSTRING), -2);
+                        String[] temp2 = temp1[1].split(String.valueOf(QUERY_PARAMS_SEPARATOR), -2);
+                        for (String temp3 : temp2) {
+                            String[] temp4 = temp3.split(String.valueOf(QUERY_PARAMS_KEY_AND_VALUE_SEPARATOR), -2);
+                            if (temp4[0].equals(param[1])) {
+                                properties[i] = temp4[1];
+                            }
+                        }
+                    }
+                } else {
+                    Object value = carbonMessage.getProperty(property);
+                    if (value != null) {
+                        properties[i] = String.valueOf(value);
+                    }
                 }
                 i++;
             }
