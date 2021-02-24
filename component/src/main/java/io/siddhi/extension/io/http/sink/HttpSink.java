@@ -43,6 +43,8 @@ import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.core.util.transport.Option;
 import io.siddhi.core.util.transport.OptionHolder;
+import io.siddhi.extension.io.http.metrics.EndpointStatus;
+import io.siddhi.extension.io.http.metrics.SinkMetrics;
 import io.siddhi.extension.io.http.sink.exception.HttpSinkAdaptorRuntimeException;
 import io.siddhi.extension.io.http.sink.updatetoken.AccessTokenCache;
 import io.siddhi.extension.io.http.sink.updatetoken.DefaultListener;
@@ -53,6 +55,7 @@ import io.siddhi.extension.io.http.util.HttpIoUtil;
 import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
+import org.wso2.carbon.si.metrics.core.internal.MetricsDataHolder;
 import org.wso2.transport.http.netty.contract.Constants;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
 import org.wso2.transport.http.netty.contract.HttpResponseFuture;
@@ -459,6 +462,10 @@ public class HttpSink extends Sink {
     private String hostnameVerificationEnabled;
     private String sslVerificationDisabled;
     private Executor executor = null;
+    private String publisherURL;
+    protected SinkMetrics metrics;
+    protected long startTime;
+    protected long endTime;
 
     private DefaultHttpWsConnectorFactory httpConnectorFactory;
     private ProxyServerConfiguration proxyServerConfiguration;
@@ -479,7 +486,7 @@ public class HttpSink extends Sink {
 
     /**
      * Returns a list of supported dynamic options (that means for each event value of the option can change) by
-     * the transport
+     * the transport.
      *
      * @return the list of supported dynamic option keys
      */
@@ -554,7 +561,7 @@ public class HttpSink extends Sink {
             authType = HttpConstants.NO_AUTH;
         }
 
-        //if username and password both not equal to null consider as basic auth enabled if only one is null take it
+        // if username and password both not equal to null consider as basic auth enabled if only one is null take it
         // as exception
         if ((EMPTY_STRING.equals(userName) ^
                 EMPTY_STRING.equals(userPassword))) {
@@ -574,6 +581,7 @@ public class HttpSink extends Sink {
         if (publisherURLOption.isStatic()) {
             staticClientConnector = createClientConnector(null);
         }
+        initMetrics(outputStreamDefinition.getId());
         return null;
     }
 
@@ -584,7 +592,7 @@ public class HttpSink extends Sink {
     }
 
     /**
-     * Sending events via output transport
+     * Sending events via output transport.
      *
      * @param payload        payload of the event
      * @param dynamicOptions one of the event constructing the payload
@@ -594,6 +602,8 @@ public class HttpSink extends Sink {
     @Override
     public void publish(Object payload, DynamicOptions dynamicOptions, State state)
             throws ConnectionUnavailableException {
+        startTime = System.currentTimeMillis();
+
         //get the dynamic parameter
         String headers = httpHeaderOption.getValue(dynamicOptions);
         List<Header> headersList = HttpSinkUtil.getHeaders(headers);
@@ -619,7 +629,6 @@ public class HttpSink extends Sink {
     protected int sendRequest(Object payload, DynamicOptions dynamicOptions, List<Header> headersList,
                               ClientConnector clientConnector)
             throws ConnectionUnavailableException {
-
         String httpMethod = EMPTY_STRING.equals(httpMethodOption.getValue(dynamicOptions)) ?
                 HttpConstants.METHOD_DEFAULT : httpMethodOption.getValue(dynamicOptions);
         String contentType = HttpSinkUtil.getContentType(mapType, headersList);
@@ -629,6 +638,19 @@ public class HttpSink extends Sink {
                 new DefaultHttpRequest(HttpVersion.HTTP_1_1, httpReqMethod, EMPTY_STRING));
         cMessage = generateCarbonMessage(headersList, contentType, httpMethod, cMessage,
                 clientConnector.getHttpURLProperties());
+
+        if (publisherURLOption.isStatic()) {
+            publisherURL = publisherURLOption.getValue();
+        } else {
+            publisherURL = publisherURLOption.getValue(dynamicOptions);
+        }
+
+        if (metrics != null) {
+            metrics.getTotalWritesMetric().inc();
+            metrics.getTotalHttpWritesMetric(publisherURL).inc();
+            metrics.getRequestSizeMetric(publisherURL).inc(HttpSinkUtil.getByteSize(messageBody));
+        }
+
         if (!Constants.HTTP_GET_METHOD.equals(httpMethod)) {
             cMessage.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(messageBody
                     .getBytes(Charset.defaultCharset()))));
@@ -952,6 +974,24 @@ public class HttpSink extends Sink {
     }
 
     /**
+     * Initialize metrics.
+     */
+    protected void initMetrics(String streamName) {
+        if (MetricsDataHolder.getInstance().getMetricService() != null
+                && MetricsDataHolder.getInstance().getMetricManagementService().isEnabled()) {
+            try {
+                if (MetricsDataHolder.getInstance().getMetricManagementService()
+                        .isReporterRunning(HttpConstants.PROMETHEUS_REPORTER_NAME)) {
+                    metrics = new SinkMetrics(siddhiAppContext.getName(), streamName);
+                }
+            } catch (IllegalArgumentException e) {
+                log.debug("Prometheus reporter is not running. Hence http sink metrics will not be initialized for "
+                        + siddhiAppContext.getName());
+            }
+        }
+    }
+
+    /**
      * The method is responsible of generating carbon message to send.
      *
      * @param headers           the headers set.
@@ -1016,7 +1056,6 @@ public class HttpSink extends Sink {
     }
 
     public ClientConnector createClientConnector(DynamicOptions dynamicOptions) {
-        String publisherURL;
         if (publisherURLOption.isStatic()) {
             publisherURL = publisherURLOption.getValue();
         } else {
@@ -1111,7 +1150,7 @@ public class HttpSink extends Sink {
         Object payload;
         DynamicOptions dynamicOptions;
         HttpSink httpSink;
-        private String publisherURL;
+        private final String publisherURL;
 
         HTTPResponseListener(Object payload, DynamicOptions dynamicOptions, HttpSink httpSink, String publisherURL) {
             this.payload = payload;
@@ -1122,6 +1161,19 @@ public class HttpSink extends Sink {
 
         @Override
         public void onMessage(HttpCarbonMessage httpCarbonMessage) {
+            endTime = System.currentTimeMillis();
+
+            if (metrics != null) {
+                metrics.setEndpointStatusMetric(publisherURL, EndpointStatus.ONLINE);
+                metrics.setLatencyMetric(publisherURL, endTime - startTime);
+                metrics.setLastEventTime(publisherURL, endTime);
+
+                // Catch unsuccessful requests
+                if (httpCarbonMessage.getHttpStatusCode() / 100 != 2) {
+                    metrics.getTotalHttpErrorsMetric(publisherURL).inc();
+                }
+            }
+
             if (executor != null) {
                 executor.execute(new Runnable() {
                     @Override
@@ -1140,6 +1192,11 @@ public class HttpSink extends Sink {
 
         @Override
         public void onError(Throwable throwable) {
+            if (metrics != null) {
+                metrics.getTotalHttpErrorsMetric(publisherURL).inc();
+                metrics.setEndpointStatusMetric(publisherURL, EndpointStatus.OFFLINE);
+            }
+
             httpSink.onError(payload, dynamicOptions,
                     new ConnectionUnavailableException("HTTP sink on stream " + httpSink.streamID +
                             " of Siddhi App '" + httpSink.siddhiAppContext.getName() +

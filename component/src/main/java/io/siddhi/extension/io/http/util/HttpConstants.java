@@ -29,6 +29,7 @@ public class HttpConstants {
     public static final String DEFAULT_WORKER_COUNT = "1";
     //--source general configuration
     public static final String RECEIVER_URL = "receiver.url";
+    public static final String EVENT_SOURCE_URL = "event.source.url";
     public static final String SOURCE_ID = "source.id";
     public static final String SINK_ID = "sink.id";
     public static final String CONNECTION_TIMEOUT = "connection.timeout";
@@ -59,6 +60,7 @@ public class HttpConstants {
     public static final String DOWNLOAD_ENABLED = "downloading.enabled";
     public static final String DEFAULT_DOWNLOAD_ENABLED_VALUE = "false";
     //Common util values
+    public static final String HTTP_METHOD_GET = "GET";
     public static final String HTTP_METHOD_POST = "POST"; //method name
     public static final String HTTP_METHOD_OPTIONS = "OPTIONS";
     public static final String HTTP_METHOD = "HTTP_METHOD";
@@ -243,4 +245,6 @@ public class HttpConstants {
 
     public static final String HOSTNAME_VERIFICATION_ENABLED = "hostname.verification.enabled";
     public static final String SSL_VERIFICATION_DISABLED = "ssl.verification.disabled";
+
+    public static final String PROMETHEUS_REPORTER_NAME = "prometheus";
 }

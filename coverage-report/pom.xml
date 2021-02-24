@@ -21,7 +21,7 @@
     <parent>
         <artifactId>siddhi-io-http-parent</artifactId>
         <groupId>io.siddhi.extension.io.http</groupId>
-        <version>2.2.3-SNAPSHOT</version>
+        <version>2.3.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -76,14 +76,10 @@
                                         </taskdef>
                                         <jacoco:merge destfile="${project.build.directory}/merged.exec">
                                             <fileset dir="../component/target/coverage-reports" includes="*.exec" />
-                                            <fileset dir="../tests/osgi-tests/target/coverage-reports" includes="*.exec" />
                                         </jacoco:merge>
                                         <jacoco:report>
                                             <executiondata>
                                                 <fileset dir="../component/target/coverage-reports">
-                                                    <include name="jacoco.exec" />
-                                                </fileset>
-                                                <fileset dir="../tests/osgi-tests/target/coverage-reports">
                                                     <include name="jacoco.exec" />
                                                 </fileset>
                                             </executiondata>

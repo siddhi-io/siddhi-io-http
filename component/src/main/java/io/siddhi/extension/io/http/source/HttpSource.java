@@ -32,10 +32,12 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.snapshot.state.State;
 import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.OptionHolder;
+import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
 import io.siddhi.extension.io.http.util.HttpConstants;
 import io.siddhi.extension.io.http.util.HttpIoUtil;
 import org.apache.log4j.Logger;
+import org.wso2.carbon.si.metrics.core.internal.MetricsDataHolder;
 import org.wso2.transport.http.netty.contract.config.ListenerConfiguration;
 
 import java.util.Locale;
@@ -52,7 +54,7 @@ import static io.siddhi.extension.io.http.util.HttpConstants.SOCKET_IDEAL_TIMEOU
                 "HTTPS protocols in format such as `text`, `XML` and `JSON`. It also supports basic " +
                 "authentication to ensure events are received from authorized users/systems.\n" +
                 "The request headers and properties can be accessed via transport properties " +
-                "in the format `trp:<header>`." ,
+                "in the format `trp:<header>`.",
         parameters = {
                 @Parameter(name = "receiver.url",
                         description = "The URL on which events should be received. " +
@@ -276,6 +278,7 @@ public class HttpSource extends Source {
     private String siddhiAppName;
     private ServiceDeploymentInfo serviceDeploymentInfo;
     private boolean isSecured;
+    protected SourceMetrics metrics;
 
     /**
      * The initialization method for {@link Source}, which will be called before other methods and validate
@@ -295,6 +298,7 @@ public class HttpSource extends Source {
 
         initSource(sourceEventListener, optionHolder, requestedTransportPropertyNames, configReader, siddhiAppContext);
         initConnectorRegistry(optionHolder, configReader);
+        initMetrics(siddhiAppContext.getName());
         return null;
     }
 
@@ -380,7 +384,7 @@ public class HttpSource extends Source {
             this.listenerConfiguration.setHttpTraceLogEnabled(Boolean.parseBoolean(traceLog));
         }
         if (!HttpConstants.EMPTY_STRING.equals(requestSizeValidationConfigList)) {
-            this.listenerConfiguration.setRequestSizeValidationConfig(HttpConnectorRegistry.getInstance()
+            this.listenerConfiguration.setMsgSizeValidationConfig(HttpConnectorRegistry.getInstance()
                     .populateRequestSizeValidationConfiguration());
         }
         isSecured = (listenerConfiguration.getScheme().equalsIgnoreCase(HttpConstants.SCHEME_HTTPS));
@@ -406,7 +410,7 @@ public class HttpSource extends Source {
     }
 
     /**
-     * Called to connect to the source backend for receiving events
+     * Called to connect to the source backend for receiving events.
      *
      * @param connectionCallback Callback to pass the ConnectionUnavailableException for connection failure after
      *                           initial successful connection
@@ -415,9 +419,9 @@ public class HttpSource extends Source {
      */
     @Override
     public void connect(ConnectionCallback connectionCallback, State state) throws ConnectionUnavailableException {
-        this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration);
+        this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration, metrics);
         this.httpConnectorRegistry.registerSourceListener(sourceEventListener, this.listenerUrl,
-                workerThread, isAuth, requestedTransportPropertyNames, siddhiAppName);
+                workerThread, isAuth, requestedTransportPropertyNames, siddhiAppName, metrics);
     }
 
     /**
@@ -425,12 +429,12 @@ public class HttpSource extends Source {
      */
     @Override
     public void disconnect() {
-        this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl, siddhiAppName);
+        this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl, siddhiAppName, metrics);
         this.httpConnectorRegistry.unregisterServerConnector(this.listenerUrl);
     }
 
     /**
-     * Called at the end to clean all the resources consumed by the {@link Source}
+     * Called at the end to clean all the resources consumed by the {@link Source}.
      */
     @Override
     public void destroy() {
@@ -438,27 +442,45 @@ public class HttpSource extends Source {
     }
 
     /**
-     * Called to pause event consumption
+     * Called to pause event consumption.
      */
     @Override
     public void pause() {
         HttpSourceListener httpSourceListener = this.httpConnectorRegistry.getSourceListenersMap().get(HttpSourceUtil
-                .getSourceListenerKey(listenerUrl));
+                .getSourceListenerKey(listenerUrl, metrics));
         if ((httpSourceListener != null) && (httpSourceListener.isRunning())) {
             httpSourceListener.pause();
         }
     }
 
     /**
-     * Called to resume event consumption
+     * Called to resume event consumption.
      */
     @Override
     public void resume() {
         HttpSourceListener httpSourceListener = this.httpConnectorRegistry.getSourceListenersMap()
-                .get(HttpSourceUtil.getSourceListenerKey(listenerUrl));
+                .get(HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics));
         if ((httpSourceListener != null) && (httpSourceListener.isPaused())) {
             httpSourceListener.resume();
         }
     }
 
+    /**
+     * Initialize metrics.
+     */
+    protected void initMetrics(String appName) {
+        if (MetricsDataHolder.getInstance().getMetricService() != null
+                && MetricsDataHolder.getInstance().getMetricManagementService().isEnabled()) {
+            try {
+                if (MetricsDataHolder.getInstance().getMetricManagementService()
+                        .isReporterRunning(HttpConstants.PROMETHEUS_REPORTER_NAME)) {
+                    metrics = new SourceMetrics(appName, sourceEventListener.getStreamDefinition().getId(),
+                            listenerUrl);
+                }
+            } catch (IllegalArgumentException e) {
+                log.debug("Prometheus reporter is not running. Hence http source metrics will not be initialized for "
+                        + appName);
+            }
+        }
+    }
 }

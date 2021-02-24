@@ -19,6 +19,7 @@
 package io.siddhi.extension.io.http.source;
 
 import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
 import org.slf4j.Logger;
@@ -39,9 +40,9 @@ public class HttpSyncSourceListener extends HttpSourceListener {
     protected HttpSyncSourceListener(int workerThread, String url, Boolean auth,
                                      SourceEventListener sourceEventListener,
                                      String[] requestedTransportPropertyNames,
-                                     String sourceId, String siddhiAppName) {
+                                     String sourceId, String siddhiAppName, SourceMetrics metrics) {
 
-        super(workerThread, url, auth, sourceEventListener, requestedTransportPropertyNames, siddhiAppName);
+        super(workerThread, url, auth, sourceEventListener, requestedTransportPropertyNames, siddhiAppName, metrics);
         this.sourceId = sourceId;
     }
 
@@ -60,6 +61,10 @@ public class HttpSyncSourceListener extends HttpSourceListener {
                 }
             } catch (InterruptedException ie) {
                 Thread.currentThread().interrupt();
+                if (metrics != null) {
+                    metrics.getTotalHttpErrorsMetric().inc();
+                }
+
                 logger.error("Thread interrupted while pausing ", ie);
                 HttpSourceUtil.handleCallback(carbonMessage, 500);
             } finally {
@@ -68,6 +73,10 @@ public class HttpSyncSourceListener extends HttpSourceListener {
         }
         if (isAuthEnabled) {
             if (!HttpAuthenticator.authenticate(carbonMessage)) {
+                if (metrics != null) {
+                    metrics.getTotalHttpErrorsMetric().inc();
+                }
+
                 throw new HttpSourceAdaptorRuntimeException(carbonMessage, "Authorisation fails", 401);
             }
         }
@@ -78,7 +87,7 @@ public class HttpSyncSourceListener extends HttpSourceListener {
         populateTransportProperties(trpProperties, messageId);
         executorService.execute(new HttpSyncWorkerThread(carbonMessage,
                 sourceEventListener, sourceEventListener.getStreamDefinition().toString(), trpProperties,
-                sourceId, messageId));
+                sourceId, messageId, metrics));
 
     }
 

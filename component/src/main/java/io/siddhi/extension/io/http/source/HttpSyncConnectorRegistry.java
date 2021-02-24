@@ -21,6 +21,7 @@ package io.siddhi.extension.io.http.source;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.core.util.config.ConfigReader;
+import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
 import io.siddhi.extension.io.http.util.HttpConstants;
 import org.apache.log4j.Logger;
@@ -76,12 +77,11 @@ public class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
      */
     protected void registerSourceListener(SourceEventListener sourceEventListener, String listenerUrl,
                                           int workerThread, Boolean isAuth, String[] requestedTransportPropertyNames,
-                                          String sourceId, String siddhiAppName) {
-
-        String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl);
+                                          String sourceId, String siddhiAppName, SourceMetrics metrics) {
+        String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
         HttpSourceListener httpSourceListener = this.sourceListenersMap.putIfAbsent(listenerKey,
                 new HttpSyncSourceListener(workerThread, listenerUrl, isAuth, sourceEventListener,
-                        requestedTransportPropertyNames, sourceId, siddhiAppName));
+                        requestedTransportPropertyNames, sourceId, siddhiAppName, metrics));
         if (httpSourceListener != null) {
             throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected");
         }
@@ -93,9 +93,8 @@ public class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
      * @param listenerUrl   the listener url
      * @param siddhiAppName
      */
-    protected void unregisterSourceListener(String listenerUrl, String siddhiAppName) {
-
-        String key = HttpSourceUtil.getSourceListenerKey(listenerUrl);
+    protected void unregisterSourceListener(String listenerUrl, String siddhiAppName, SourceMetrics metrics) {
+        String key = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
         HttpSourceListener httpSourceListener = this.sourceListenersMap.get(key);
         if (httpSourceListener != null && httpSourceListener.getSiddhiAppName().equals(siddhiAppName)) {
             sourceListenersMap.remove(key);
@@ -146,10 +145,10 @@ public class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
     }
 
     protected void setConnectorListeners(ServerConnectorFuture connectorFuture, String serverConnectorId,
-                                         ConnectorStartupSynchronizer startupSyncer) {
+                                         ConnectorStartupSynchronizer startupSyncer, SourceMetrics metrics) {
 
         connectorFuture.setHttpConnectorListener(new HTTPSyncConnectorListener());
         connectorFuture.setPortBindingEventListener(
-                new HttpConnectorPortBindingListener(startupSyncer, serverConnectorId));
+                new HttpConnectorPortBindingListener(startupSyncer, serverConnectorId, metrics));
     }
 }

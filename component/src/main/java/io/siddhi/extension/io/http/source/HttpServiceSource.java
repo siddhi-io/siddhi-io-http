@@ -331,6 +331,7 @@ public class HttpServiceSource extends HttpSource {
         initSource(sourceEventListener, optionHolder, requestedTransportPropertyNames, configReader, siddhiAppContext);
         initConnectorRegistry(optionHolder, configReader);
         timer = new HashedWheelTimer();
+        initMetrics(siddhiAppContext.getName());
         return null;
     }
 
@@ -370,7 +371,7 @@ public class HttpServiceSource extends HttpSource {
     }
 
     /**
-     * Called to connect to the source backend for receiving events
+     * Called to connect to the source backend for receiving events.
      *
      * @param connectionCallback Callback to pass the ConnectionUnavailableException for connection failure after
      *                           initial successful connection
@@ -379,9 +380,9 @@ public class HttpServiceSource extends HttpSource {
      */
     @Override
     public void connect(ConnectionCallback connectionCallback, State state) throws ConnectionUnavailableException {
-        this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration);
+        this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration, metrics);
         this.httpConnectorRegistry.registerSourceListener(sourceEventListener, listenerUrl,
-                workerThread, isAuth, requestedTransportPropertyNames, sourceId, siddhiAppName);
+                workerThread, isAuth, requestedTransportPropertyNames, sourceId, siddhiAppName, metrics);
 
         HTTPSourceRegistry.registerServiceSource(sourceId, this);
     }
@@ -391,7 +392,7 @@ public class HttpServiceSource extends HttpSource {
      */
     @Override
     public void disconnect() {
-        this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl, siddhiAppName);
+        this.httpConnectorRegistry.unregisterSourceListener(this.listenerUrl, siddhiAppName, metrics);
         this.httpConnectorRegistry.unregisterServerConnector(this.listenerUrl);
 
         HTTPSourceRegistry.removeServiceSource(sourceId);
@@ -402,7 +403,7 @@ public class HttpServiceSource extends HttpSource {
 
     /**
      * Called at the end to clean all the resources consumed by the
-     * {@link io.siddhi.core.stream.input.source.Source}
+     * {@link io.siddhi.core.stream.input.source.Source}.
      */
     @Override
     public void destroy() {
@@ -414,19 +415,19 @@ public class HttpServiceSource extends HttpSource {
     @Override
     public void pause() {
         HttpSourceListener httpSourceListener = this.httpConnectorRegistry.getSyncSourceListenersMap()
-                .get(HttpSourceUtil.getSourceListenerKey(listenerUrl));
+                .get(HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics));
         if ((httpSourceListener != null) && (httpSourceListener.isRunning())) {
             httpSourceListener.pause();
         }
     }
 
     /**
-     * Called to resume event consumption
+     * Called to resume event consumption.
      */
     @Override
     public void resume() {
         HttpSourceListener httpSourceListener = this.httpConnectorRegistry.getSyncSourceListenersMap()
-                .get(HttpSourceUtil.getSourceListenerKey(listenerUrl));
+                .get(HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics));
         if ((httpSourceListener != null) && (httpSourceListener.isPaused())) {
             httpSourceListener.resume();
         }
