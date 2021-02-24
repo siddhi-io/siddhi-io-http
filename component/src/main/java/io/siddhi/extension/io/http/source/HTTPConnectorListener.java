@@ -30,6 +30,8 @@ import org.wso2.transport.http.netty.contract.exceptions.ClientClosedConnectionE
 import org.wso2.transport.http.netty.contract.exceptions.ServerConnectorException;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
+import java.net.URI;
+
 /**
  * HTTP connector listener for Siddhi.
  */
@@ -62,10 +64,12 @@ public class HTTPConnectorListener implements HttpConnectorListener {
                 } else {
                 if (HttpConstants.HTTP_METHOD_POST.equalsIgnoreCase(carbonMessage.getHttpMethod())) {
                         //get the required source listener
+
+                        String rawPath = URI.create((String) carbonMessage.getProperty(HttpConstants.TO)).getRawPath();
                         StringBuilder sourceListenerKey = new StringBuilder().append(String
                                 .valueOf(carbonMessage.getProperty(HttpConstants.LISTENER_PORT)))
                                 .append(HttpConstants.PORT_CONTEXT_KEY_SEPARATOR)
-                                .append(carbonMessage.getProperty(HttpConstants.TO));
+                                .append(rawPath);
                         HttpSourceListener sourceListener = getSourceListener(sourceListenerKey);
                         if (sourceListener != null) {
                             sourceListener.send(carbonMessage);
