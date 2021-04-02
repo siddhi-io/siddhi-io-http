@@ -86,10 +86,11 @@ public class HttpWebSubResponseProcessor implements Runnable {
     private UpdateSet updateSet;
     private CompiledUpdateSet compiledUpdateSet;
     private CompiledCondition deleteCompileCondition;
+    private List<String> topics;
 
     HttpWebSubResponseProcessor(HttpCarbonMessage cMessage, SourceEventListener sourceEventListener,
                                 String sourceID, String[] trpProperties, SourceMetrics metrics, Table table,
-                                String hubId, SiddhiAppContext siddhiAppContext) {
+                                String hubId, SiddhiAppContext siddhiAppContext, List<String> topics) {
         this.carbonMessage = cMessage;
         this.sourceEventListener = sourceEventListener;
         this.sourceID = sourceID;
@@ -104,6 +105,7 @@ public class HttpWebSubResponseProcessor implements Runnable {
         createTableUpdateResources();
         createTableDeleteResource();
         this.addingStreamEventExtractor = new AddingStreamEventExtractor(0);
+        this.topics = topics;
     }
 
     @Override
@@ -124,7 +126,7 @@ public class HttpWebSubResponseProcessor implements Runnable {
 
                 Map<String, Object> parameterMap = HttpIoUtil.processPayload(payload);
                 boolean isRequestValid = HttpIoUtil.validateAndVerifySubscriptionRequest(carbonMessage, parameterMap,
-                        payload);
+                        payload, topics);
                 if (isRequestValid) {
                     List<Object> event = new ArrayList<>();
                     List<Attribute> attributeList = table.getTableDefinition().getAttributeList();

@@ -254,6 +254,7 @@ public class HttpConstants {
     public static final String HUB = "hub";
     public static final String HUB_ID_COLUMN_NAME = "id";
     public static final String HUB_ID = "hub.id";
+    public static final String TOPIC_LIST = "topic.list";
     public static final String HUB_MODE = "mode";
     public static final String HUB_MODE_COLUMN_NAME = "mode";
     public static final String HUB_TOPIC = "topic";

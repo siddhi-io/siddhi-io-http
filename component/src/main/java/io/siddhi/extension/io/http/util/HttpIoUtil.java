@@ -233,7 +233,7 @@ public class HttpIoUtil {
 
     public static boolean validateAndVerifySubscriptionRequest(HttpCarbonMessage carbonMessage,
                                                                Map<String, Object> parameterMap,
-                                                               String decodedPayload) {
+                                                               String decodedPayload, List<String> topics) {
 
         Map<String, Object> responsePayloadMap = new HashMap<>();
         String responseMessage;
@@ -251,7 +251,13 @@ public class HttpIoUtil {
                     responsePayloadMap.get(key)).collect(Collectors.joining("&"));
             handleFailure(carbonMessage, null, responseCode, responseMessage);
             log.error("Subscription request must contains hub.callback, hub.mode and " +
-                    "hub.topic parameters. But only found:" + decodedPayload);
+                    "hub.topic parameters.");
+            return false;
+        } else if (!topics.contains(parameterMap.get(HUB_TOPIC))) {
+            responseMessage = "Subscription request failed!. Subscribed topic" + parameterMap.get(HUB_TOPIC) +
+                    "is not found in the WebSub hub ";
+            handleFailure(carbonMessage, null, PERSISTENT_ACCESS_FAIL_CODE, responseMessage);
+            log.error(responseMessage);
             return false;
         } else {
             return true;

@@ -47,6 +47,7 @@ import org.wso2.carbon.si.metrics.core.internal.MetricsDataHolder;
 import org.wso2.transport.http.netty.contract.config.ListenerConfiguration;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -58,6 +59,7 @@ import static io.siddhi.extension.io.http.util.HttpConstants.HUB_ID_COLUMN_NAME;
 import static io.siddhi.extension.io.http.util.HttpConstants.HUB_TOPIC;
 import static io.siddhi.extension.io.http.util.HttpConstants.REQUEST_TIMESTAMP;
 import static io.siddhi.extension.io.http.util.HttpConstants.SOCKET_IDEAL_TIMEOUT_VALUE;
+import static io.siddhi.extension.io.http.util.HttpConstants.TOPIC_LIST;
 import static io.siddhi.extension.io.http.util.HttpConstants.WEB_SUB_SUBSCRIPTION_DATA_TABLE_DEFAULT_NAME;
 
 /**
@@ -95,7 +97,13 @@ import static io.siddhi.extension.io.http.util.HttpConstants.WEB_SUB_SUBSCRIPTIO
                                 "To enable SSL use `https` protocol in the url.",
                         type = {DataType.STRING},
                         optional = true,
-                        defaultValue = "`http://0.0.0.0:9763/<appNAme>/<streamName>`"),
+                        defaultValue = "`http://0.0.0.0:9763/<appNAme>/<streamName>`"
+                ),
+                @Parameter(name = "topic.list",
+                        description = "topics allowed in the websub hub",
+                        type = {DataType.STRING},
+                        defaultValue = "empty"
+                ),
                 @Parameter(name = "basic.auth.enabled",
                         description = "This only works in VM, Docker and Kubernetes.\nWhere when enabled " +
                                 "it authenticates each request using the " +
@@ -301,6 +309,8 @@ public class HttpWebSubSource extends Source {
     private Table webSubMetaTable;
     private Option httpHeaderOption;
     private String hubId;
+    private String topicList;
+    private List<String> topics = new ArrayList<>();
 
     @Override
     protected ServiceDeploymentInfo exposeServiceDeploymentInfo() {
@@ -321,6 +331,8 @@ public class HttpWebSubSource extends Source {
         String scheme = configReader.readConfig(HttpConstants.DEFAULT_SOURCE_SCHEME, HttpConstants
                 .DEFAULT_SOURCE_SCHEME_VALUE);
         String defaultURL;
+        topicList = optionHolder.validateAndGetStaticValue(TOPIC_LIST);
+        topics = validateTopics(topicList);
         this.httpHeaderOption = optionHolder.getOrCreateOption(HttpConstants.HEADERS, HttpConstants.DEFAULT_HEADER);
         String webSubMetaTableName = optionHolder.validateAndGetStaticValue(
                 HttpConstants.WEB_SUB_SUBSCRIPTION_DATA_TABLE_KEY, WEB_SUB_SUBSCRIPTION_DATA_TABLE_DEFAULT_NAME);
@@ -330,6 +342,7 @@ public class HttpWebSubSource extends Source {
         siddhiAppRuntimeBuilder.defineTable(webSubMetaTableDefinition);
         siddhiAppRuntimeBuilder.getTableDefinitionMap().put(webSubMetaTableName, webSubMetaTableDefinition);
         webSubMetaTable = siddhiAppRuntimeBuilder.getTableMap().get(webSubMetaTableName);
+
         int port;
         if (HttpConstants.SCHEME_HTTPS.equals(scheme)) {
             port = Integer.parseInt(configReader.readConfig(HttpConstants.HTTPS_PORT, HttpConstants.HTTPS_PORT_VALUE));
@@ -409,7 +422,8 @@ public class HttpWebSubSource extends Source {
     public void connect(ConnectionCallback connectionCallback, State state) throws ConnectionUnavailableException {
         this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration, metrics);
         this.httpConnectorRegistry.registerSourceListener(sourceEventListener, listenerUrl, workerThread, isAuth,
-                requestedTransportPropertyNames, siddhiAppName, metrics, webSubMetaTable, hubId, siddhiAppContext);
+                requestedTransportPropertyNames, siddhiAppName, metrics, webSubMetaTable, hubId, siddhiAppContext,
+                topics);
     }
 
     protected void initConnectorRegistry(OptionHolder optionHolder, ConfigReader configReader) {
@@ -497,5 +511,10 @@ public class HttpWebSubSource extends Source {
         }
         tableDefinition.attribute(REQUEST_TIMESTAMP, Attribute.Type.LONG);
         return tableDefinition;
+    }
+
+    private List<String> validateTopics(String topicList) {
+        String[] topics = topicList.split(",");
+        return new ArrayList<>(Arrays.asList(topics));
     }
 }
