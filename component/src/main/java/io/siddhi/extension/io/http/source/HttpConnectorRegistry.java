@@ -140,11 +140,23 @@ class HttpConnectorRegistry {
             if (metrics != null) {
                 metrics.getTotalHttpErrorsMetric().inc();
             }
-
             throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected");
         }
     }
 
+    /**
+     * Register new source listener.
+     *
+     * @param sourceEventListener the source event listener.
+     * @param listenerUrl         the listener url.
+     * @param workerThread        the worker thread count of siddhi level thread pool executor.
+     * @param isAuth              the authentication is required for source listener.
+     * @param siddhiAppName       the Siddhi application name
+     * @param metrics             Source metrics object
+     * @param table               Subscription data table
+     * @param hubId               webhub ID
+     * @param siddhiAppContext    siddhiAppContext
+     */
     void registerSourceListener(SourceEventListener sourceEventListener, String listenerUrl, int workerThread,
                                 Boolean isAuth, String[] requestedTransportPropertyNames,
                                 String siddhiAppName, SourceMetrics metrics, Table table, String hubId,
@@ -157,7 +169,6 @@ class HttpConnectorRegistry {
             if (metrics != null) {
                 metrics.getTotalHttpErrorsMetric().inc();
             }
-
             throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected");
         }
     }
