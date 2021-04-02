@@ -30,6 +30,7 @@ public class HttpConstants {
     //--source general configuration
     public static final String RECEIVER_URL = "receiver.url";
     public static final String EVENT_SOURCE_URL = "event.source.url";
+    public static final String EVENT_SINK_URL = "event.sink.url";
     public static final String SOURCE_ID = "source.id";
     public static final String SINK_ID = "sink.id";
     public static final String CONNECTION_TIMEOUT = "connection.timeout";

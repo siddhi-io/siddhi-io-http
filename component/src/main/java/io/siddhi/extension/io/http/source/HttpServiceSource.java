@@ -303,7 +303,7 @@ public class HttpServiceSource extends HttpSource {
     private HttpSyncConnectorRegistry httpConnectorRegistry;
     private String sourceId;
     private long connectionTimeout;
-
+    
     private Map<String, HttpCarbonMessage> requestContainerMap = new ConcurrentHashMap<>();
 
     private HashedWheelTimer timer;
