@@ -162,12 +162,10 @@ public class HttpWebSubResponseProcessor implements Runnable {
                         stateEvent.setType(ComplexEvent.Type.CURRENT);
                         eventChunk.add(stateEvent);
                         table.deleteEvents(eventChunk, deleteCompileCondition, 1);
-
                     }
                     HttpIoUtil.handleResponse(carbonMessage, HttpIoUtil.createResponseMessageForWebSub(carbonMessage));
                     sourceEventListener.onEvent(parameterMap, trpProperties);
                 }
-
                 if (logger.isDebugEnabled()) {
                     logger.debug("Submitted Event " + payload + " Stream");
                 }
@@ -175,7 +173,6 @@ public class HttpWebSubResponseProcessor implements Runnable {
                 if (metrics != null) {
                     metrics.getTotalHttpErrorsMetric().inc();
                 }
-
                 HttpSourceUtil.handleCallback(carbonMessage, 405);
                 if (logger.isDebugEnabled()) {
                     logger.debug("Empty payload event, hence dropping the event chunk at source " + sourceID);
@@ -192,7 +189,6 @@ public class HttpWebSubResponseProcessor implements Runnable {
                 if (metrics != null) {
                     metrics.getTotalHttpErrorsMetric().inc();
                 }
-
                 logger.error("Error occurred when closing the byte buffer in source " + sourceID, e);
             }
         }

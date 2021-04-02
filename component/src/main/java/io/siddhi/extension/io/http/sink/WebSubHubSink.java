@@ -568,7 +568,7 @@ public class WebSubHubSink extends Sink {
             }
             result = bos.toString(StandardCharsets.UTF_8.toString());
         } catch (IOException ioe) {
-            log.error("Couldn't read the complete input stream");
+            log.error("Couldn't read the complete input stream due to: " + ioe.getMessage(), ioe);
             return "";
         }
         return result;
