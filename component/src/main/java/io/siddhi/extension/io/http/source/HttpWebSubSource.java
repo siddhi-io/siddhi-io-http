@@ -65,7 +65,7 @@ import static io.siddhi.extension.io.http.util.HttpConstants.WEB_SUB_SUBSCRIPTIO
 /**
  * {@code WebSubHub } Handle the WebSubHub Receiving task
  **/
-@Extension(name = "WebSubHub", namespace = "source",
+@Extension(name = "websubhub", namespace = "source",
         description = " WebSub Hub source receive subscription requests via Http and according to the request," +
                 " the subscription details will be saved to the given table and against the callback and topic name. " +
                 "The subscription request  MUST have a Content-Type header of application/x-www-form-urlencoded and " +
@@ -223,7 +223,7 @@ import static io.siddhi.extension.io.http.util.HttpConstants.WEB_SUB_SUBSCRIPTIO
                         "@app.name('StockProcessor')\n\n" +
                         "@store(type='rdbms' , jdbc.url='jdbc:mysql://localhost:3306/production?useSSL=false', " +
                         "username='root', password='root', jdbc.driver.name='com.mysql.jdbc.Driver') \n" +
-                        "@source(type='WebSubHub' , hub.id='anu_123',table.name='SessionTable', " +
+                        "@source(type='websubhub' , hub.id='anu_123',table.name='SessionTable', " +
                         "receiver.url='http://localhost:8006/productionStream',basic.auth.enabled='false', " +
                         "@map(type='keyvalue',implicit.cast.enable='true')) \n" +
                         "define stream webSubStream(callback string, lease_seconds long, secret string, " +
