@@ -120,7 +120,7 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
 /**
  * {@code WebSubHubEventPublisher } Handle the WebSubHub Publishing task
  */
-@Extension(name = "WebSubHubEventPublisher", namespace = "sink",
+@Extension(name = "websubhubeventpublisher", namespace = "sink",
         description = "" +
                 "WebSubHubEventPublisher publishes messages via HTTP/HTTP according to the provided URL when " +
                 "subscribe to the WebSub hub. The table.name, hub.id and ",
@@ -347,7 +347,7 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
                 @Example(syntax = "" +
                         "@store(type='rdbms' , jdbc.url='jdbc:mysql://localhost:3306/production?useSSL=false', " +
                         "username='root', password='root', jdbc.driver.name='com.mysql.jdbc.Driver') \n" +
-                        "@sink(type='WebSubHubEventPublisher', hub.id=\"anu_123\" , table.name='SessionTable'," +
+                        "@sink(type='websubhubeventpublisher', hub.id=\"anu_123\" , table.name='SessionTable'," +
                         "publisher.url=\"mysql://localhost:3306/production?useSSL=false\",\n" +
                         "@map(type='keyvalue',implicit.cast.enable='true'))\n" +
                         "define stream LowProductionAlertStream (topic string, payload string);",

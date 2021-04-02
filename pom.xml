@@ -176,7 +176,7 @@
         <maven.shadeplugin.version>2.4.1</maven.shadeplugin.version>
         <org.jacoco.ant.version>0.7.5.201505241946</org.jacoco.ant.version>
         <maven.paxexam.plugin.version>1.2.4</maven.paxexam.plugin.version>
-        <org.wso2.transport.http.version>6.3.20</org.wso2.transport.http.version>
+        <org.wso2.transport.http.version>6.3.22</org.wso2.transport.http.version>
         <org.wso2.transport.http.version.range>[6.0.0,7.0.0)</org.wso2.transport.http.version.range>
         <commons-io.version>2.4.0.wso2v1</commons-io.version>
         <commons.lang3.version>3.7</commons.lang3.version>
