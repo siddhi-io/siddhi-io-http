@@ -41,7 +41,6 @@ public class SSESyncConnectorRegistry extends SSEConnectorRegistry {
     private Map<String, HttpSSERequestListener> sourceListenersMap = new ConcurrentHashMap<>();
 
     private SSESyncConnectorRegistry() {
-
     }
 
     /**
@@ -50,7 +49,6 @@ public class SSESyncConnectorRegistry extends SSEConnectorRegistry {
      * @return HttpConnectorRegistry instance
      */
     public static SSESyncConnectorRegistry getInstance() {
-
         return instance;
     }
 
@@ -60,7 +58,6 @@ public class SSESyncConnectorRegistry extends SSEConnectorRegistry {
      * @return the source listener map
      */
     protected Map<String, HttpSSERequestListener> getSyncSourceListenersMap() {
-
         return this.sourceListenersMap;
     }
 
@@ -70,17 +67,15 @@ public class SSESyncConnectorRegistry extends SSEConnectorRegistry {
      * @param listenerUrl                     the listener url.
      * @param workerThread                    the worker thread count of siddhi level thread pool executor.
      * @param isAuth                          the authentication is required for source listener.
-     * @param requestedTransportPropertyNames requested transport property names.
      * @param sourceId                        source Id.
      * @param siddhiAppName
      */
     protected void registerSourceListener(String listenerUrl,
-                                          int workerThread, Boolean isAuth, String[] requestedTransportPropertyNames,
-                                          String sourceId, String siddhiAppName, SourceMetrics metrics) {
+                                          int workerThread, Boolean isAuth, String sourceId, String siddhiAppName,
+                                          SourceMetrics metrics) {
         String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
         HttpSSERequestListener httpSourceListener = this.sourceListenersMap.putIfAbsent(listenerKey,
-                new HttpSSERequestListener(workerThread, listenerUrl, isAuth,
-                        requestedTransportPropertyNames, sourceId, siddhiAppName, metrics));
+                new HttpSSERequestListener(workerThread, listenerUrl, isAuth, sourceId, siddhiAppName, metrics));
         if (httpSourceListener != null) {
             throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected");
         }

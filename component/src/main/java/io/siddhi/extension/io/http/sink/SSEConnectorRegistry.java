@@ -132,8 +132,7 @@ public class SSEConnectorRegistry {
                                 String siddhiAppName, SourceMetrics metrics) {
         String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
         HttpSSERequestListener httpSourceListener = this.sourceListenersMap.putIfAbsent(listenerKey,
-                new HttpSSERequestListener(workerThread, listenerUrl, isAuth,
-                        requestedTransportPropertyNames, "", siddhiAppName, metrics));
+                new HttpSSERequestListener(workerThread, listenerUrl, isAuth, "", siddhiAppName, metrics));
         if (httpSourceListener != null) {
             if (metrics != null) {
                 metrics.getTotalHttpErrorsMetric().inc();

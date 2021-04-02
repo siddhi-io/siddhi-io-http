@@ -298,9 +298,8 @@ public class HttpSSESink extends Sink {
         listenerConfiguration.setChunkConfig(ChunkConfig.ALWAYS);
         listenerConfiguration.setKeepAliveConfig(KeepAliveConfig.ALWAYS);
         this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration, metrics);
-        this.httpConnectorRegistry.registerSourceListener(listenerUrl,
-                workerThread, isAuth, requestedTransportPropertyNames, streamId, siddhiAppName, metrics);
-
+        this.httpConnectorRegistry.registerSourceListener(listenerUrl, workerThread, isAuth, streamId, siddhiAppName,
+                metrics);
         HTTPSinkRegistry.registerSSESink(streamId, this);
     }
 
