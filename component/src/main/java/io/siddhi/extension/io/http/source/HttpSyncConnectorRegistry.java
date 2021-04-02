@@ -77,11 +77,12 @@ public class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
      */
     protected void registerSourceListener(SourceEventListener sourceEventListener, String listenerUrl,
                                           int workerThread, Boolean isAuth, String[] requestedTransportPropertyNames,
-                                          String sourceId, String siddhiAppName, SourceMetrics metrics) {
+                                          String sourceId, String siddhiAppName, SourceMetrics metrics,
+                                          boolean isWebSub) {
         String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
         HttpSourceListener httpSourceListener = this.sourceListenersMap.putIfAbsent(listenerKey,
                 new HttpSyncSourceListener(workerThread, listenerUrl, isAuth, sourceEventListener,
-                        requestedTransportPropertyNames, sourceId, siddhiAppName, metrics));
+                        requestedTransportPropertyNames, sourceId, siddhiAppName, metrics, isWebSub));
         if (httpSourceListener != null) {
             throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected");
         }

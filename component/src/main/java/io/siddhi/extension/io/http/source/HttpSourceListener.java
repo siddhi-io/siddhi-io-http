@@ -18,7 +18,9 @@
  */
 package io.siddhi.extension.io.http.source;
 
+import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.core.table.Table;
 import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
@@ -37,6 +39,11 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class HttpSourceListener {
     private static final Logger logger = LoggerFactory.getLogger(HttpSourceListener.class);
+    private static final char QUERY_PARAMS_IDENTIFIER = '_'; //Query params are given a prefix of _ in the SiddhiApp
+    private static final String QUERY_PARAMS_CONTAINING_PROPERTY = "TO";
+    private static final char QUERY_PARAMS_SEPARATOR = '&';
+    private static final String QUERY_PARAMS_SPLITTER_FROM_URLSTRING = "\\?";
+    private static final char QUERY_PARAMS_KEY_AND_VALUE_SEPARATOR = '=';
     protected ExecutorService executorService;
     protected boolean paused;
     protected ReentrantLock lock;
@@ -45,14 +52,13 @@ public class HttpSourceListener {
     protected Boolean isAuthEnabled;
     protected SourceEventListener sourceEventListener;
     protected String[] requestedTransportPropertyNames;
-    private String siddhiAppName;
     protected SourceMetrics metrics;
     protected String urlString;
-    private final char QUERY_PARAMS_IDENTIFIER = '_'; //Query params are given a prefix of _ in the SiddhiApp
-    private final String QUERY_PARAMS_CONTAINING_PROPERTY = "TO";
-    private final char QUERY_PARAMS_SEPARATOR = '&';
-    private final String QUERY_PARAMS_SPLITTER_FROM_URLSTRING = "\\?";
-    private final char QUERY_PARAMS_KEY_AND_VALUE_SEPARATOR = '=';
+    boolean isWebSub = false;
+    Table table;
+    String hubId;
+    private String siddhiAppName;
+    private SiddhiAppContext siddhiAppContext;
 
     protected HttpSourceListener(int workerThread, String url, Boolean auth, SourceEventListener sourceEventListener,
                                  String[] requestedTransportPropertyNames, String siddhiAppName,
@@ -67,6 +73,25 @@ public class HttpSourceListener {
         this.sourceEventListener = sourceEventListener;
         this.requestedTransportPropertyNames = requestedTransportPropertyNames;
         this.metrics = metrics;
+    }
+
+    protected HttpSourceListener(int workerThread, String url, Boolean auth, SourceEventListener sourceEventListener,
+                                 String[] requestedTransportPropertyNames, String siddhiAppName,
+                                 SourceMetrics metrics, Table table, String hubId, SiddhiAppContext siddhiAppContext) {
+        this.executorService = Executors.newFixedThreadPool(workerThread);
+        this.siddhiAppName = siddhiAppName;
+        this.paused = false;
+        this.lock = new ReentrantLock();
+        this.condition = lock.newCondition();
+        this.url = url;
+        this.isAuthEnabled = auth;
+        this.sourceEventListener = sourceEventListener;
+        this.requestedTransportPropertyNames = requestedTransportPropertyNames;
+        this.metrics = metrics;
+        this.isWebSub = true;
+        this.table = table;
+        this.hubId = hubId;
+        this.siddhiAppContext = siddhiAppContext;
     }
 
     public String getSiddhiAppName() {
@@ -109,9 +134,14 @@ public class HttpSourceListener {
         String[] trpProperties = new String[requestedTransportPropertyNames.length];
         populateTransportHeaders(carbonMessage, trpProperties);
         populateTransportProperties(carbonMessage, trpProperties);
-        executorService.execute(new HttpWorkerThread(carbonMessage,
-                sourceEventListener, sourceEventListener.getStreamDefinition().toString(), trpProperties, metrics));
-
+        if (isWebSub) {
+            executorService.execute(new HttpWebSubResponseProcessor(carbonMessage,
+                    sourceEventListener, sourceEventListener.getStreamDefinition().toString(), trpProperties,
+                    metrics, table, hubId, siddhiAppContext));
+        } else {
+            executorService.execute(new HttpWorkerThread(carbonMessage,
+                    sourceEventListener, sourceEventListener.getStreamDefinition().toString(), trpProperties, metrics));
+        }
     }
 
     protected void populateTransportHeaders(HttpCarbonMessage carbonMessage, String[] properties) {
@@ -134,8 +164,7 @@ public class HttpSourceListener {
                 if (property.startsWith(String.valueOf(QUERY_PARAMS_IDENTIFIER))) {
                     String[] param = property.split(String.valueOf(QUERY_PARAMS_IDENTIFIER), -2);
                     urlString = carbonMessage.getProperty(QUERY_PARAMS_CONTAINING_PROPERTY).toString();
-                    if (urlString != null) {
-                        String[] temp1 = urlString.split(String.valueOf(QUERY_PARAMS_SPLITTER_FROM_URLSTRING), -2);
+                        String[] temp1 = urlString.split(QUERY_PARAMS_SPLITTER_FROM_URLSTRING, -2);
                         String[] temp2 = temp1[1].split(String.valueOf(QUERY_PARAMS_SEPARATOR), -2);
                         for (String temp3 : temp2) {
                             String[] temp4 = temp3.split(String.valueOf(QUERY_PARAMS_KEY_AND_VALUE_SEPARATOR), -2);
@@ -143,7 +172,6 @@ public class HttpSourceListener {
                                 properties[i] = temp4[1];
                             }
                         }
-                    }
                 } else {
                     Object value = carbonMessage.getProperty(property);
                     if (value != null) {

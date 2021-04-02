@@ -133,7 +133,8 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
                             org.wso2.transport.http.netty.*;version="${org.wso2.transport.http.version}",
-                            io.netty.*;version="${io.netty.version}"
+                            io.netty.*;version="${io.netty.version}",
+                            org.apache.commons.codec.*;version="${commons.codec.version}
                         </Private-Package>
                         <Export-Package>
                             io.siddhi.extension.io.http.*
