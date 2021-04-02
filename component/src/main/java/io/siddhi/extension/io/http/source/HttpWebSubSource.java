@@ -61,7 +61,7 @@ import static io.siddhi.extension.io.http.util.HttpConstants.SOCKET_IDEAL_TIMEOU
 import static io.siddhi.extension.io.http.util.HttpConstants.WEB_SUB_SUBSCRIPTION_DATA_TABLE_DEFAULT_NAME;
 
 /**
- *
+ * {@code WebSubHub } Handle the WebSubHub Receiving task
  **/
 @Extension(name = "WebSubHub", namespace = "source",
         description = " WebSub Hub source receive subscription requests via Http and according to the request," +
@@ -284,7 +284,6 @@ import static io.siddhi.extension.io.http.util.HttpConstants.WEB_SUB_SUBSCRIPTIO
 )
 public class HttpWebSubSource extends Source {
     private static final Logger log = Logger.getLogger(HttpWebSubSource.class);
-    private static String streamId;
     public String siddhiAppName;
     protected SourceMetrics metrics;
     private HttpConnectorRegistry httpConnectorRegistry;
@@ -365,7 +364,6 @@ public class HttpWebSubSource extends Source {
                 .validateAndGetStaticValue(HttpConstants.TLS_STORE_TYPE, HttpConstants.EMPTY_STRING);
         String requestSizeValidationConfigList = optionHolder
                 .validateAndGetStaticValue(HttpConstants.REQUEST_SIZE_VALIDATION_CONFIGS, HttpConstants.EMPTY_STRING);
-
         String sslConfigs = optionHolder
                 .validateAndGetStaticValue(HttpConstants.SSS_CONFIGS, HttpConstants.EMPTY_STRING);
         if (sslConfigs.equalsIgnoreCase(HttpConstants.EMPTY_STRING)) {
@@ -419,7 +417,6 @@ public class HttpWebSubSource extends Source {
                 .validateAndGetStaticValue(HttpConstants.REQUEST_SIZE_VALIDATION_CONFIGS, HttpConstants.EMPTY_STRING);
         String serverBootstrapPropertiesList = optionHolder
                 .validateAndGetStaticValue(HttpConstants.SERVER_BOOTSTRAP_CONFIGS, HttpConstants.EMPTY_STRING);
-
         this.httpConnectorRegistry = HttpConnectorRegistry.getInstance();
         this.httpConnectorRegistry.initBootstrapConfigIfFirst(configReader);
         this.httpConnectorRegistry.setTransportConfig(serverBootstrapPropertiesList, requestSizeValidationConfigList);

@@ -104,8 +104,6 @@ public class HttpWebSubResponseProcessor implements Runnable {
         createTableUpdateResources();
         createTableDeleteResource();
         this.addingStreamEventExtractor = new AddingStreamEventExtractor(0);
-
-
     }
 
     @Override
@@ -233,7 +231,6 @@ public class HttpWebSubResponseProcessor implements Runnable {
         table.getTableDefinition().getAttributeList().forEach((
                 attribute -> inputTableDefinition.attribute(attribute.getName(), attribute.getType())));
         inputStreamMetaStreamEvent.addInputDefinition(inputTableDefinition);
-
 
         tableMetaStreamEvent.addInputDefinition(table.getTableDefinition());
         table.getTableDefinition().getAttributeList().forEach(tableMetaStreamEvent::addOutputData);

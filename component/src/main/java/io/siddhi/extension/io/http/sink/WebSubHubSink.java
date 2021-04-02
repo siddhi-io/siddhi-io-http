@@ -88,7 +88,6 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +95,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.siddhi.extension.io.http.sink.util.HttpSinkUtil.createConnectorFactory;
 import static io.siddhi.extension.io.http.sink.util.HttpSinkUtil.createPoolConfigurations;
@@ -120,7 +118,7 @@ import static io.siddhi.extension.io.http.util.HttpConstants.X_HUB_SIGNATURE;
 import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientConstants.REQUEST_URL;
 
 /**
- * {@code HttpSink } Handle the HTTP publishing tasks.
+ * {@code WebSubHubEventPublisher } Handle the WebSubHub Publishing task
  */
 @Extension(name = "WebSubHubEventPublisher", namespace = "sink",
         description = "" +
@@ -410,7 +408,6 @@ public class WebSubHubSink extends Sink {
     Option httpMethodOption;
     String[] mandatoryColumns = new String[]{HUB_CALLBACK, HUB_LEASE_SECONDS, HUB_SECRET, HUB_TOPIC,
             HUB_MODE_COLUMN_NAME, HUB_ID_COLUMN_NAME, REQUEST_TIMESTAMP};
-    private String authorizationHeader;
     private String clientStoreFile;
     private String clientStorePass;
     private int socketIdleTimeout;
@@ -480,18 +477,14 @@ public class WebSubHubSink extends Sink {
 
         //pool configurations
         connectionPoolConfiguration = createPoolConfigurations(optionHolder);
-
         parametersList = optionHolder.validateAndGetStaticValue(HttpConstants.SINK_PARAMETERS, EMPTY_STRING);
-
         clientBootstrapConfiguration = optionHolder
                 .validateAndGetStaticValue(HttpConstants.CLIENT_BOOTSTRAP_CONFIGURATION, EMPTY_STRING);
         hostnameVerificationEnabled = optionHolder.validateAndGetStaticValue(
                 HttpConstants.HOSTNAME_VERIFICATION_ENABLED, TRUE);
         sslVerificationDisabled = optionHolder.validateAndGetStaticValue(HttpConstants.SSL_VERIFICATION_DISABLED,
                 FALSE);
-
         proxyServerConfiguration = createProxyServerConfiguration(optionHolder, streamID, siddhiAppContext.getName());
-
         httpConnectorFactory = createConnectorFactory(configReader);
         initMetrics(outputStreamDefinition.getId());
         return null;
@@ -522,9 +515,7 @@ public class WebSubHubSink extends Sink {
                     }
 
                     String publisherURL = webSubDTO.getCallback();
-
                     ClientConnector clientConnector;
-
                     clientConnector = createClientConnector(dynamicOptions, publisherURL);
 
                     if (mapType == null) {
@@ -588,7 +579,6 @@ public class WebSubHubSink extends Sink {
         subscriptionTable.connectWithRetry();
         scheduledExecutorService.scheduleAtFixedRate(new SubscriptionMapUpdate(),
                 0, 1, TimeUnit.MINUTES);
-        log.info("Table update scheduled successfully");
     }
 
     @Override
@@ -838,7 +828,6 @@ public class WebSubHubSink extends Sink {
                     metrics.getTotalHttpErrorsMetric(publisherURL).inc();
                 }
             }
-
             if (executor != null) {
                 executor.execute(new Runnable() {
                     @Override
@@ -861,7 +850,6 @@ public class WebSubHubSink extends Sink {
                 metrics.getTotalHttpErrorsMetric(publisherURL).inc();
                 metrics.setEndpointStatusMetric(publisherURL, EndpointStatus.OFFLINE);
             }
-
             httpSink.onError(payload, dynamicOptions,
                     new ConnectionUnavailableException("HTTP sink on stream " + httpSink.streamID +
                             " of Siddhi App '" + httpSink.siddhiAppContext.getName() +
@@ -870,9 +858,7 @@ public class WebSubHubSink extends Sink {
         }
     }
 
-
     private class SubscriptionMapUpdate implements Runnable {
-        AtomicInteger executionCount = new AtomicInteger(0);
 
         SubscriptionMapUpdate() {
         }
@@ -881,7 +867,6 @@ public class WebSubHubSink extends Sink {
         public void run() {
             Map<String, List<WebSubSubscriptionDTO>> tempWebSubSubscriptionDTOMap = new HashMap<>();
             try {
-                log.info("Execution Count " + executionCount.incrementAndGet());
                 Event[] events = onDemandQueryRuntime.execute();
                 if (events.length > 0) {
                     for (Event event : events) {
@@ -894,8 +879,6 @@ public class WebSubHubSink extends Sink {
                     }
                 }
                 setWebSubSubscriptionMap(tempWebSubSubscriptionDTOMap);
-
-                log.info(Arrays.toString(events));
             } catch (Exception e) {
                 log.error("Error Exception ", e);
             }
