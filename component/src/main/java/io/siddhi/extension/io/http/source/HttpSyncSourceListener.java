@@ -40,7 +40,7 @@ public class HttpSyncSourceListener extends HttpSourceListener {
     protected HttpSyncSourceListener(int workerThread, String url, Boolean auth,
                                      SourceEventListener sourceEventListener,
                                      String[] requestedTransportPropertyNames,
-                                     String sourceId, String siddhiAppName, SourceMetrics metrics) {
+                                     String sourceId, String siddhiAppName, SourceMetrics metrics, boolean isWebSub) {
 
         super(workerThread, url, auth, sourceEventListener, requestedTransportPropertyNames, siddhiAppName, metrics);
         this.sourceId = sourceId;

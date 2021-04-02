@@ -204,6 +204,7 @@ public class HttpConstants {
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
     public static final int SUCCESS_CODE = 200;
+    public static final int ACCEPTED_CODE = 202;
     public static final int MULTIPLE_CHOICES = 300;
     public static final int CLIENT_REQUEST_TIMEOUT = 408;
     public static final int AUTHENTICATION_FAIL_CODE = 401;
@@ -247,4 +248,32 @@ public class HttpConstants {
     public static final String SSL_VERIFICATION_DISABLED = "ssl.verification.disabled";
 
     public static final String PROMETHEUS_REPORTER_NAME = "prometheus";
+
+    public static final String WEB_SUB_SUBSCRIPTION_DATA_TABLE_KEY = "table.name";
+    public static final String WEB_SUB_SUBSCRIPTION_DATA_TABLE_DEFAULT_NAME = "SubscriptionsTable";
+    public static final String HUB = "hub";
+    public static final String HUB_ID_COLUMN_NAME = "id";
+    public static final String HUB_ID = "hub.id";
+    public static final String HUB_MODE = "mode";
+    public static final String HUB_MODE_COLUMN_NAME = "mode";
+    public static final String HUB_TOPIC = "topic";
+    public static final String HUB_TOPIC_COLUMN_NAME = "topic";
+    public static final String HUB_REASON = "reason";
+    public static final String HUB_CHALLENGE = "challenge";
+    public static final String HUB_LEASE_SECONDS = "lease_seconds";
+    public static final String HUB_LEASE_SECOND_COLUMN_NAME = "lease_seconds";
+    public static final String HUB_CALLBACK = "callback";
+    public static final String HUB_CALLBACK_COLUMN_NAME = "callback";
+    public static final String HUB_SECRET = "secret";
+    public static final String HUB_SECRET_COLUMN_NAME = "secret";
+    public static final String REQUEST_TIMESTAMP = "timestamp";
+
+    public static final String WEB_SUB_SINK_TOPICS = "topics";
+    public static final String SHA256_HASHING = "sha256=";
+    public static final String X_HUB_SIGNATURE = "X-Hub-Signature";
+
+    public static final String HUB_MODE_DENIED = "denied";
+    public static final String HUB_MODE_SUBSCRIBE = "subscribe";
+    public static final String HUB_MODE_UNSUBSCRIBE = "unsubscribe";
+
 }

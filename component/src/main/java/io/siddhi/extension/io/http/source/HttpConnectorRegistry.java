@@ -18,8 +18,10 @@
  */
 package io.siddhi.extension.io.http.source;
 
+import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.core.table.Table;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeException;
@@ -138,7 +140,35 @@ class HttpConnectorRegistry {
             if (metrics != null) {
                 metrics.getTotalHttpErrorsMetric().inc();
             }
+            throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected");
+        }
+    }
 
+    /**
+     * Register new source listener.
+     *
+     * @param sourceEventListener the source event listener.
+     * @param listenerUrl         the listener url.
+     * @param workerThread        the worker thread count of siddhi level thread pool executor.
+     * @param isAuth              the authentication is required for source listener.
+     * @param siddhiAppName       the Siddhi application name
+     * @param metrics             Source metrics object
+     * @param table               Subscription data table
+     * @param hubId               webhub ID
+     * @param siddhiAppContext    siddhiAppContext
+     */
+    void registerSourceListener(SourceEventListener sourceEventListener, String listenerUrl, int workerThread,
+                                Boolean isAuth, String[] requestedTransportPropertyNames,
+                                String siddhiAppName, SourceMetrics metrics, Table table, String hubId,
+                                SiddhiAppContext siddhiAppContext) {
+        String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
+        HttpSourceListener httpSourceListener = this.sourceListenersMap.putIfAbsent(listenerKey,
+                new HttpSourceListener(workerThread, listenerUrl, isAuth, sourceEventListener,
+                        requestedTransportPropertyNames, siddhiAppName, metrics, table, hubId, siddhiAppContext));
+        if (httpSourceListener != null) {
+            if (metrics != null) {
+                metrics.getTotalHttpErrorsMetric().inc();
+            }
             throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected");
         }
     }

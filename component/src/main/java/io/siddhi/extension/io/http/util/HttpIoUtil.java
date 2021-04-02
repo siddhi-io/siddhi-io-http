@@ -24,21 +24,35 @@ import io.netty.handler.codec.http.DefaultLastHttpContent;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.QueryStringDecoder;
+import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.apache.log4j.Logger;
 import org.wso2.transport.http.netty.contract.config.Parameter;
 import org.wso2.transport.http.netty.contract.exceptions.ServerConnectorException;
+import org.wso2.transport.http.netty.contractimpl.DefaultHttpWsConnectorFactory;
+import org.wso2.transport.http.netty.contractimpl.sender.channel.pool.PoolConfiguration;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import static io.siddhi.extension.io.http.util.HttpConstants.ACCEPTED_CODE;
+import static io.siddhi.extension.io.http.util.HttpConstants.HUB_CALLBACK;
+import static io.siddhi.extension.io.http.util.HttpConstants.HUB_MODE;
+import static io.siddhi.extension.io.http.util.HttpConstants.HUB_MODE_DENIED;
+import static io.siddhi.extension.io.http.util.HttpConstants.HUB_REASON;
+import static io.siddhi.extension.io.http.util.HttpConstants.HUB_SECRET;
+import static io.siddhi.extension.io.http.util.HttpConstants.HUB_TOPIC;
 import static io.siddhi.extension.io.http.util.HttpConstants.PARAMETER_SEPARATOR;
+import static io.siddhi.extension.io.http.util.HttpConstants.PERSISTENT_ACCESS_FAIL_CODE;
 import static io.siddhi.extension.io.http.util.HttpConstants.VALUE_SEPARATOR;
 import static org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE;
 import static org.wso2.transport.http.netty.contract.Constants.DIRECTION;
@@ -48,6 +62,11 @@ import static org.wso2.transport.http.netty.contract.Constants.DIRECTION;
  */
 public class HttpIoUtil {
     private static final Logger log = Logger.getLogger(HttpIoUtil.class);
+    private static String clientStoreFile;
+    private static String clientStorePass;
+    private static ConfigReader configReader;
+    private static PoolConfiguration connectionPoolConfiguration;
+    private static DefaultHttpWsConnectorFactory httpConnectorFactory;
 
     /**
      * Handle response from http message.
@@ -112,7 +131,7 @@ public class HttpIoUtil {
     }
 
     /**
-     * This method generate the appropirate response for the received OPTIONS request.
+     * This method generate the appropriate response for the received OPTIONS request.
      *
      * @param request Received option request by the source
      * @return Generated HTTPCarbonMessage as the repsonse of OPTIONS request
@@ -132,6 +151,23 @@ public class HttpIoUtil {
         response.setHttpStatusCode(Integer.parseInt(HttpConstants.DEFAULT_HTTP_SUCCESS_CODE));
         response.setProperty(DIRECTION, DIRECTION_RESPONSE);
 
+        return response;
+    }
+
+    public static HttpCarbonMessage createResponseMessageForWebSub(HttpCarbonMessage request) {
+        HttpCarbonMessage response = createHttpCarbonMessage();
+
+        response.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(ByteBuffer.allocate(0))));
+        response.setHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(),
+                request.getHeaders().contains(HttpHeaderNames.ORIGIN.toString()) ?
+                        request.getHeader(HttpHeaderNames.ORIGIN.toString()) : "*");
+        response.setHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_METHODS.toString(), HttpConstants.HTTP_METHOD_POST);
+        response.setHeader(HttpHeaderNames.ACCESS_CONTROL_ALLOW_HEADERS.toString(),
+                String.format("%s,%s,%s,%s,%s", HttpHeaderNames.CONTENT_TYPE.toString(),
+                        HttpHeaderNames.USER_AGENT.toString(), HttpHeaderNames.ORIGIN.toString(),
+                        HttpHeaderNames.REFERER.toString(), HttpHeaderNames.ACCEPT.toString()));
+        response.setHttpStatusCode(ACCEPTED_CODE);
+        response.setProperty(DIRECTION, DIRECTION_RESPONSE);
         return response;
     }
 
@@ -192,6 +228,51 @@ public class HttpIoUtil {
                     }
                 }
         );
+        return parameterMap;
+    }
+
+    public static boolean validateAndVerifySubscriptionRequest(HttpCarbonMessage carbonMessage,
+                                                               Map<String, Object> parameterMap,
+                                                               String decodedPayload) {
+
+        Map<String, Object> responsePayloadMap = new HashMap<>();
+        String responseMessage;
+        int responseCode;
+
+        if (!parameterMap.containsKey(HUB_CALLBACK) || !parameterMap.containsKey(HUB_MODE) ||
+                !parameterMap.containsKey(HUB_TOPIC)) {
+
+            responseCode = PERSISTENT_ACCESS_FAIL_CODE;
+            responsePayloadMap.put(HUB_MODE, HUB_MODE_DENIED);
+            responsePayloadMap.put(HUB_REASON, "Subscription request must contains hub.callback, hub.mode and " +
+                    "hub.topic parameters. But only found:" + decodedPayload);
+            responsePayloadMap.put(HUB_TOPIC, parameterMap.get(HUB_TOPIC));
+            responseMessage = responsePayloadMap.keySet().stream().map(key -> key + "=" +
+                    responsePayloadMap.get(key)).collect(Collectors.joining("&"));
+            handleFailure(carbonMessage, null, responseCode, responseMessage);
+            log.error("Subscription request must contains hub.callback, hub.mode and " +
+                    "hub.topic parameters. But only found:" + decodedPayload);
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public static Map<String, Object> processPayload(String payload) {
+        String decodedPayload = QueryStringDecoder.decodeComponent(payload, StandardCharsets.UTF_8);
+        String[] parametersArray = decodedPayload.split("&");
+        Map<String, Object> parameterMap = new HashMap<>();
+        if (parametersArray.length > 0) {
+            for (String parameterPair : parametersArray) {
+                String[] parameterPairArray = parameterPair.split("=");
+                if (parameterPairArray.length == 2) {
+                    parameterMap.put(parameterPairArray[0].replace("hub.", ""), parameterPairArray[1]);
+                }
+            }
+        }
+        if (!parameterMap.containsKey(HUB_SECRET)) {
+            parameterMap.put(HUB_SECRET, "");
+        }
         return parameterMap;
     }
 }
