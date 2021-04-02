@@ -41,6 +41,7 @@ import org.wso2.transport.http.netty.message.HttpConnectorUtil;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -160,11 +161,12 @@ public class HttpConnectorRegistry {
     void registerSourceListener(SourceEventListener sourceEventListener, String listenerUrl, int workerThread,
                                 Boolean isAuth, String[] requestedTransportPropertyNames,
                                 String siddhiAppName, SourceMetrics metrics, Table table, String hubId,
-                                SiddhiAppContext siddhiAppContext) {
+                                SiddhiAppContext siddhiAppContext, List<String> topics) {
         String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
         HttpSourceListener httpSourceListener = this.sourceListenersMap.putIfAbsent(listenerKey,
                 new HttpSourceListener(workerThread, listenerUrl, isAuth, sourceEventListener,
-                        requestedTransportPropertyNames, siddhiAppName, metrics, table, hubId, siddhiAppContext));
+                        requestedTransportPropertyNames, siddhiAppName, metrics, table, hubId, siddhiAppContext,
+                        topics));
         if (httpSourceListener != null) {
             if (metrics != null) {
                 metrics.getTotalHttpErrorsMetric().inc();

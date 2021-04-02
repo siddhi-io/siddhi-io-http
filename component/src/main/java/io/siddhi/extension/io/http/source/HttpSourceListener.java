@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Condition;
@@ -59,6 +60,7 @@ public class HttpSourceListener {
     String hubId;
     private String siddhiAppName;
     private SiddhiAppContext siddhiAppContext;
+    private List<String> topics;
 
     protected HttpSourceListener(int workerThread, String url, Boolean auth, SourceEventListener sourceEventListener,
                                  String[] requestedTransportPropertyNames, String siddhiAppName,
@@ -77,7 +79,8 @@ public class HttpSourceListener {
 
     protected HttpSourceListener(int workerThread, String url, Boolean auth, SourceEventListener sourceEventListener,
                                  String[] requestedTransportPropertyNames, String siddhiAppName,
-                                 SourceMetrics metrics, Table table, String hubId, SiddhiAppContext siddhiAppContext) {
+                                 SourceMetrics metrics, Table table, String hubId, SiddhiAppContext siddhiAppContext,
+                                 List<String> topics) {
         this.executorService = Executors.newFixedThreadPool(workerThread);
         this.siddhiAppName = siddhiAppName;
         this.paused = false;
@@ -92,6 +95,7 @@ public class HttpSourceListener {
         this.table = table;
         this.hubId = hubId;
         this.siddhiAppContext = siddhiAppContext;
+        this.topics = topics;
     }
 
     public String getSiddhiAppName() {
@@ -137,7 +141,7 @@ public class HttpSourceListener {
         if (isWebSub) {
             executorService.execute(new HttpWebSubResponseProcessor(carbonMessage,
                     sourceEventListener, sourceEventListener.getStreamDefinition().toString(), trpProperties,
-                    metrics, table, hubId, siddhiAppContext));
+                    metrics, table, hubId, siddhiAppContext, topics));
         } else {
             executorService.execute(new HttpWorkerThread(carbonMessage,
                     sourceEventListener, sourceEventListener.getStreamDefinition().toString(), trpProperties, metrics));
@@ -164,14 +168,14 @@ public class HttpSourceListener {
                 if (property.startsWith(String.valueOf(QUERY_PARAMS_IDENTIFIER))) {
                     String[] param = property.split(String.valueOf(QUERY_PARAMS_IDENTIFIER), -2);
                     urlString = carbonMessage.getProperty(QUERY_PARAMS_CONTAINING_PROPERTY).toString();
-                        String[] temp1 = urlString.split(QUERY_PARAMS_SPLITTER_FROM_URLSTRING, -2);
-                        String[] temp2 = temp1[1].split(String.valueOf(QUERY_PARAMS_SEPARATOR), -2);
-                        for (String temp3 : temp2) {
-                            String[] temp4 = temp3.split(String.valueOf(QUERY_PARAMS_KEY_AND_VALUE_SEPARATOR), -2);
-                            if (temp4[0].equals(param[1])) {
-                                properties[i] = temp4[1];
-                            }
+                    String[] temp1 = urlString.split(QUERY_PARAMS_SPLITTER_FROM_URLSTRING, -2);
+                    String[] temp2 = temp1[1].split(String.valueOf(QUERY_PARAMS_SEPARATOR), -2);
+                    for (String temp3 : temp2) {
+                        String[] temp4 = temp3.split(String.valueOf(QUERY_PARAMS_KEY_AND_VALUE_SEPARATOR), -2);
+                        if (temp4[0].equals(param[1])) {
+                            properties[i] = temp4[1];
                         }
+                    }
                 } else {
                     Object value = carbonMessage.getProperty(property);
                     if (value != null) {
