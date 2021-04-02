@@ -40,14 +40,11 @@ public class HttpSSEWorkerThread implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(HttpWorkerThread.class);
     private HttpCarbonMessage carbonMessage;
     private String streamID;
-    private String[] trpProperties;
     private SourceMetrics metrics;
 
-    HttpSSEWorkerThread(HttpCarbonMessage cMessage, String streamID, String[] trpProperties,
-                        SourceMetrics metrics) {
+    HttpSSEWorkerThread(HttpCarbonMessage cMessage, String streamID, SourceMetrics metrics) {
         this.carbonMessage = cMessage;
         this.streamID = streamID;
-        this.trpProperties = trpProperties;
         this.metrics = metrics;
     }
 
@@ -59,18 +56,15 @@ public class HttpSSEWorkerThread implements Runnable {
         String payload = buf.lines().collect(Collectors.joining("\n"));
         carbonMessage.setStreaming(true);
         HTTPSinkRegistry.findAndGetSSESource(streamID).registerCallback(carbonMessage);
-
         if (metrics != null) {
             metrics.getTotalReadsMetric().inc();
             metrics.getTotalHttpReadsMetric().inc();
             metrics.getRequestSizeMetric().inc(HttpSourceUtil.getByteSize(payload));
             metrics.setLastEventTime(System.currentTimeMillis());
         }
-
         if (logger.isDebugEnabled()) {
             logger.debug("Submitted Event " + payload + " Stream");
         }
-
         try {
             buf.close();
             carbonMessage.waitAndReleaseAllEntities();
@@ -78,9 +72,7 @@ public class HttpSSEWorkerThread implements Runnable {
             if (metrics != null) {
                 metrics.getTotalHttpErrorsMetric().inc();
             }
-
             logger.error("Error occurred when closing the byte buffer in source " + streamID, e);
         }
-
     }
 }
