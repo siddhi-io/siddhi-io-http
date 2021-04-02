@@ -1,29 +1,28 @@
 /*
- *  Copyright (c) 2017 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- *  WSO2 Inc. licenses this file to you under the Apache License,
- *  Version 2.0 (the "License"); you may not use this file except
- *  in compliance with the License.
- *  You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *  http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
- *  specific language governing permissions and limitations
- *  under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  *
  */
-package io.siddhi.extension.io.http.source;
 
-import io.siddhi.core.config.SiddhiAppContext;
+package io.siddhi.extension.io.http.sink;
+
 import io.siddhi.core.exception.SiddhiAppCreationException;
-import io.siddhi.core.stream.input.source.SourceEventListener;
-import io.siddhi.core.table.Table;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.extension.io.http.metrics.SourceMetrics;
+import io.siddhi.extension.io.http.source.ConnectorStartupSynchronizer;
+import io.siddhi.extension.io.http.source.HTTPConnectorListener;
+import io.siddhi.extension.io.http.source.HttpConnectorPortBindingListener;
 import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
 import io.siddhi.extension.io.http.util.HttpConstants;
@@ -50,17 +49,17 @@ import static io.siddhi.extension.io.http.util.HttpConstants.PARAMETER_SEPARATOR
 import static io.siddhi.extension.io.http.util.HttpIoUtil.populateParameterMap;
 
 /**
- * {@code HttpConnectorRegistry} The code is responsible for maintaining the all active server connectors.
+ * This class is responsible for maintaining the connections.
  */
-public class HttpConnectorRegistry {
-    private static HttpConnectorRegistry instance = new HttpConnectorRegistry();
-    private final Logger log = Logger.getLogger(HttpConnectorRegistry.class);
+public class SSEConnectorRegistry {
+    private static SSEConnectorRegistry instance = new SSEConnectorRegistry();
+    private final Logger log = Logger.getLogger(SSEConnectorRegistry.class);
     protected TransportsConfiguration trpConfig;
     protected DefaultHttpWsConnectorFactory httpConnectorFactory;
-    private Map<String, HttpServerConnectorContext> serverConnectorPool = new ConcurrentHashMap<>();
-    private Map<String, HttpSourceListener> sourceListenersMap = new ConcurrentHashMap<>();
+    private Map<String, SSEServerConnectorContext> serverConnectorPool = new ConcurrentHashMap<>();
+    private Map<String, HttpSSERequestListener> sourceListenersMap = new ConcurrentHashMap<>();
 
-    protected HttpConnectorRegistry() {
+    protected SSEConnectorRegistry() {
     }
 
     /**
@@ -68,7 +67,7 @@ public class HttpConnectorRegistry {
      *
      * @return HttpConnectorRegistry instance
      */
-    static HttpConnectorRegistry getInstance() {
+    static SSEConnectorRegistry getInstance() {
         return instance;
     }
 
@@ -116,59 +115,30 @@ public class HttpConnectorRegistry {
      *
      * @return the source listener map
      */
-    Map<String, HttpSourceListener> getSourceListenersMap() {
+    Map<String, HttpSSERequestListener> getSourceListenersMap() {
         return this.sourceListenersMap;
     }
 
     /**
      * Register new source listener.
      *
-     * @param sourceEventListener the source event listener.
      * @param listenerUrl         the listener url.
      * @param workerThread        the worker thread count of siddhi level thread pool executor.
      * @param isAuth              the authentication is required for source listener.
      * @param siddhiAppName       the Siddhi application name
      */
-    void registerSourceListener(SourceEventListener sourceEventListener, String listenerUrl,
+    void registerSourceListener(String listenerUrl,
                                 int workerThread, Boolean isAuth, String[] requestedTransportPropertyNames,
                                 String siddhiAppName, SourceMetrics metrics) {
         String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
-        HttpSourceListener httpSourceListener = this.sourceListenersMap.putIfAbsent(listenerKey,
-                new HttpSourceListener(workerThread, listenerUrl, isAuth, sourceEventListener,
-                        requestedTransportPropertyNames, siddhiAppName, metrics));
+        HttpSSERequestListener httpSourceListener = this.sourceListenersMap.putIfAbsent(listenerKey,
+                new HttpSSERequestListener(workerThread, listenerUrl, isAuth,
+                        requestedTransportPropertyNames, "", siddhiAppName, metrics));
         if (httpSourceListener != null) {
             if (metrics != null) {
                 metrics.getTotalHttpErrorsMetric().inc();
             }
-            throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected");
-        }
-    }
 
-    /**
-     * Register new source listener.
-     *
-     * @param sourceEventListener the source event listener.
-     * @param listenerUrl         the listener url.
-     * @param workerThread        the worker thread count of siddhi level thread pool executor.
-     * @param isAuth              the authentication is required for source listener.
-     * @param siddhiAppName       the Siddhi application name
-     * @param metrics             Source metrics object
-     * @param table               Subscription data table
-     * @param hubId               webhub ID
-     * @param siddhiAppContext    siddhiAppContext
-     */
-    void registerSourceListener(SourceEventListener sourceEventListener, String listenerUrl, int workerThread,
-                                Boolean isAuth, String[] requestedTransportPropertyNames,
-                                String siddhiAppName, SourceMetrics metrics, Table table, String hubId,
-                                SiddhiAppContext siddhiAppContext) {
-        String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
-        HttpSourceListener httpSourceListener = this.sourceListenersMap.putIfAbsent(listenerKey,
-                new HttpSourceListener(workerThread, listenerUrl, isAuth, sourceEventListener,
-                        requestedTransportPropertyNames, siddhiAppName, metrics, table, hubId, siddhiAppContext));
-        if (httpSourceListener != null) {
-            if (metrics != null) {
-                metrics.getTotalHttpErrorsMetric().inc();
-            }
             throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected");
         }
     }
@@ -181,7 +151,7 @@ public class HttpConnectorRegistry {
      */
     protected void unregisterSourceListener(String listenerUrl, String siddhiAppName, SourceMetrics metrics) {
         String key = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
-        HttpSourceListener httpSourceListener = this.sourceListenersMap.get(key);
+        HttpSSERequestListener httpSourceListener = this.sourceListenersMap.get(key);
         if (httpSourceListener != null && httpSourceListener.getSiddhiAppName().equals(siddhiAppName)) {
             sourceListenersMap.remove(key);
             httpSourceListener.disconnect();
@@ -237,10 +207,10 @@ public class HttpConnectorRegistry {
     void createHttpServerConnector(ListenerConfiguration listenerConfig, SourceMetrics metrics) {
         synchronized (this) {
             String listenerInterface = listenerConfig.getHost() + ":" + listenerConfig.getPort();
-            HttpServerConnectorContext httpServerConnectorContext =
+            SSEServerConnectorContext sseServerConnectorContext =
                     serverConnectorPool.get(listenerInterface);
-            if (httpServerConnectorContext != null) {
-                if (checkForConflicts(listenerConfig, httpServerConnectorContext)) {
+            if (sseServerConnectorContext != null) {
+                if (checkForConflicts(listenerConfig, sseServerConnectorContext)) {
                     if (metrics != null) {
                         metrics.getTotalHttpErrorsMetric().inc();
                     }
@@ -248,16 +218,16 @@ public class HttpConnectorRegistry {
                     throw new HttpSourceAdaptorRuntimeException("Conflicting configuration detected for listener " +
                             "configuration id " + listenerConfig.getId());
                 }
-                httpServerConnectorContext.incrementReferenceCount();
+                sseServerConnectorContext.incrementReferenceCount();
                 return;
             }
             ServerBootstrapConfiguration serverBootstrapConfiguration = HttpConnectorUtil
                     .getServerBootstrapConfiguration(trpConfig.getTransportProperties());
             ServerConnector serverConnector =
                     httpConnectorFactory.createServerConnector(serverBootstrapConfiguration, listenerConfig);
-            httpServerConnectorContext = new HttpServerConnectorContext(serverConnector, listenerConfig);
-            serverConnectorPool.put(serverConnector.getConnectorID(), httpServerConnectorContext);
-            httpServerConnectorContext.incrementReferenceCount();
+            sseServerConnectorContext = new SSEServerConnectorContext(serverConnector, listenerConfig);
+            serverConnectorPool.put(serverConnector.getConnectorID(), sseServerConnectorContext);
+            sseServerConnectorContext.incrementReferenceCount();
             this.registerServerConnector(serverConnector, listenerConfig, metrics);
         }
     }
@@ -284,7 +254,7 @@ public class HttpConnectorRegistry {
         validateConnectorStartup(startupSyncer);
     }
 
-    Map<String, HttpServerConnectorContext> getServerConnectorPool() {
+    Map<String, SSEServerConnectorContext> getServerConnectorPool() {
         return serverConnectorPool;
     }
 
@@ -296,7 +266,7 @@ public class HttpConnectorRegistry {
     boolean unregisterServerConnector(String listenerUrl) {
         String port = HttpSourceUtil.getPort(listenerUrl);
         synchronized (this) {
-            HttpServerConnectorContext context = serverConnectorPool.get(getSeverConnectorKey(listenerUrl));
+            SSEServerConnectorContext context = serverConnectorPool.get(getSeverConnectorKey(listenerUrl));
             if (context != null) {
                 if (context.getReferenceCount() == 1) {
                     serverConnectorPool.remove(getSeverConnectorKey(listenerUrl));
@@ -320,7 +290,7 @@ public class HttpConnectorRegistry {
      * @return conflict exits or not.
      */
     private boolean checkForConflicts(ListenerConfiguration listenerConfiguration,
-                                      HttpServerConnectorContext context) {
+                                      SSEServerConnectorContext context) {
         if (context == null) {
             return false;
         }
@@ -366,13 +336,13 @@ public class HttpConnectorRegistry {
     /**
      * The server connector context.
      */
-    private static class HttpServerConnectorContext {
+    private static class SSEServerConnectorContext {
         private ServerConnector serverConnector;
         private ListenerConfiguration listenerConfiguration;
         private int referenceCount = 0;
 
-        public HttpServerConnectorContext(ServerConnector
-                                                  serverConnector, ListenerConfiguration listenerConfiguration) {
+        public SSEServerConnectorContext(ServerConnector
+                                                 serverConnector, ListenerConfiguration listenerConfiguration) {
             this.serverConnector = serverConnector;
             this.listenerConfiguration = listenerConfiguration;
         }
