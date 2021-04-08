@@ -296,8 +296,6 @@ public class HttpWebSubSource extends Source {
     protected SourceMetrics metrics;
     private HttpConnectorRegistry httpConnectorRegistry;
     private SourceEventListener sourceEventListener;
-    private OptionHolder optionHolder;
-    private ConfigReader configReader;
     private SiddhiAppContext siddhiAppContext;
     private String listenerUrl;
     private boolean isAuth;
@@ -324,8 +322,6 @@ public class HttpWebSubSource extends Source {
         this.siddhiAppName = siddhiAppContext.getName();
         initConnectorRegistry(optionHolder, configReader);
         this.sourceEventListener = sourceEventListener;
-        this.optionHolder = optionHolder;
-        this.configReader = configReader;
         this.siddhiAppContext = siddhiAppContext;
         this.hubId = optionHolder.validateAndGetStaticValue(HUB_ID);
         String scheme = configReader.readConfig(HttpConstants.DEFAULT_SOURCE_SCHEME, HttpConstants

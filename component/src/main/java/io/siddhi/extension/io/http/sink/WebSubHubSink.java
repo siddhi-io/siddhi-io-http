@@ -30,7 +30,12 @@ import io.siddhi.annotation.SystemParameter;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.aggregation.AggregationRuntime;
 import io.siddhi.core.config.SiddhiAppContext;
+import io.siddhi.core.config.SiddhiQueryContext;
+import io.siddhi.core.event.ComplexEvent;
+import io.siddhi.core.event.ComplexEventChunk;
 import io.siddhi.core.event.Event;
+import io.siddhi.core.event.state.StateEvent;
+import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.exception.SiddhiAppRuntimeException;
@@ -40,6 +45,7 @@ import io.siddhi.core.stream.output.sink.Sink;
 import io.siddhi.core.table.Table;
 import io.siddhi.core.util.SiddhiAppRuntimeBuilder;
 import io.siddhi.core.util.SiddhiConstants;
+import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.core.util.parser.OnDemandQueryParser;
 import io.siddhi.core.util.snapshot.state.State;
@@ -94,6 +100,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static io.siddhi.extension.io.http.sink.util.HttpSinkUtil.createConnectorFactory;
@@ -114,13 +121,14 @@ import static io.siddhi.extension.io.http.util.HttpConstants.SHA256_HASHING;
 import static io.siddhi.extension.io.http.util.HttpConstants.SOCKET_IDEAL_TIMEOUT_VALUE;
 import static io.siddhi.extension.io.http.util.HttpConstants.TRUE;
 import static io.siddhi.extension.io.http.util.HttpConstants.WEB_SUB_SUBSCRIPTION_DATA_TABLE_KEY;
+import static io.siddhi.extension.io.http.util.HttpConstants.WEB_SUB_SUBSCRIPTION_MAP_UPDATE_TIMESTAMP;
 import static io.siddhi.extension.io.http.util.HttpConstants.X_HUB_SIGNATURE;
 import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientConstants.REQUEST_URL;
 
 /**
  * {@code WebSubHubEventPublisher } Handle the WebSubHub Publishing task
  */
-@Extension(name = "websubhubeventpublisher", namespace = "sink",
+@Extension(name = "websubhub", namespace = "sink",
         description = "" +
                 "WebSubHubEventPublisher publishes messages via HTTP/HTTP according to the provided URL when " +
                 "subscribe to the WebSub hub. The table.name, hub.id and ",
@@ -424,12 +432,13 @@ public class WebSubHubSink extends Sink {
     private ProxyServerConfiguration proxyServerConfiguration;
     private PoolConfiguration connectionPoolConfiguration;
     private String hubId;
-    private String tableName;
     private Table subscriptionTable;
     private Map<String, List<WebSubSubscriptionDTO>> webSubSubscriptionMap;
     private ScheduledExecutorService scheduledExecutorService;
     private StreamDefinition outputStreamDefinition;
     private OnDemandQueryRuntime onDemandQueryRuntime;
+    private long webSubSubscriptionMapUpdateTimeInterval;
+    private List<WebSubSubscriptionDTO> expiredSubscriptions = new ArrayList<>();
 
     @Override
     public Class[] getSupportedInputEventClasses() {
@@ -462,6 +471,9 @@ public class WebSubHubSink extends Sink {
         this.tokenURL = optionHolder.validateAndGetStaticValue(HttpConstants.TOKEN_URL, EMPTY_STRING);
         this.clientStoreFile = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PATH_PARAM,
                 HttpSinkUtil.trustStorePath(configReader));
+        //create a static method to notify from source
+        this.webSubSubscriptionMapUpdateTimeInterval = Long.parseLong(optionHolder.
+                validateAndGetStaticValue(WEB_SUB_SUBSCRIPTION_MAP_UPDATE_TIMESTAMP, "0"));
         clientStorePass = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD_PARAM,
                 HttpSinkUtil.trustStorePassword(configReader));
         socketIdleTimeout = Integer.parseInt(optionHolder.validateAndGetStaticValue
@@ -469,11 +481,12 @@ public class WebSubHubSink extends Sink {
         sslProtocol = optionHolder.validateAndGetStaticValue(HttpConstants.SSL_PROTOCOL, EMPTY_STRING);
         tlsStoreType = optionHolder.validateAndGetStaticValue(HttpConstants.TLS_STORE_TYPE, EMPTY_STRING);
         chunkDisabled = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_CHUNK_DISABLED, EMPTY_STRING);
+
         this.hubId = optionHolder.validateAndGetStaticValue(HUB_ID);
-        this.tableName = optionHolder.validateAndGetStaticValue(WEB_SUB_SUBSCRIPTION_DATA_TABLE_KEY);
+        String tableName = optionHolder.validateAndGetStaticValue(WEB_SUB_SUBSCRIPTION_DATA_TABLE_KEY);
         this.subscriptionTable = getSubscriptionTable(tableName);
-        this.scheduledExecutorService = siddhiAppContext.getScheduledExecutorService();
-        setStoreQueryRuntime();
+        this.scheduledExecutorService = new ScheduledThreadPoolExecutor(10);
+        setOnDemandQueryRuntimeForFindSubscription();
 
         //pool configurations
         connectionPoolConfiguration = createPoolConfigurations(optionHolder);
@@ -502,26 +515,30 @@ public class WebSubHubSink extends Sink {
                 new ArrayList<>();
         if (topic != null) {
             subscriptionListToPublish = this.webSubSubscriptionMap.get(topic.toString());
-            //get the dynamic parameter
-            for (WebSubSubscriptionDTO webSubDTO : subscriptionListToPublish) {
-                long subscriptionLeaseTime = webSubDTO.getLeaseSeconds();
-                long subscribedTime = webSubDTO.getTimestamp();
-                if (System.currentTimeMillis() < subscribedTime + subscriptionLeaseTime) {
-                    if (!webSubDTO.getSecret().equalsIgnoreCase("")) {
-                        String signatureHeaderValue = SHA256_HASHING +
-                                getHexValue(payloadMap.get("payload").toString());
-                        Header signatureHeader = new Header(X_HUB_SIGNATURE, signatureHeaderValue);
-                        headersList.add(signatureHeader);
-                    }
+            if (subscriptionListToPublish != null) {
+                for (WebSubSubscriptionDTO webSubDTO : subscriptionListToPublish) {
+                    long subscriptionLeaseTime = webSubDTO.getLeaseSeconds();
+                    long subscribedTime = webSubDTO.getTimestamp();
+                    if (System.currentTimeMillis() < subscribedTime + subscriptionLeaseTime * 1000) {
+                        if (!webSubDTO.getSecret().equalsIgnoreCase("")) {
+                            String signatureHeaderValue = SHA256_HASHING +
+                                    getHexValue(payloadMap.get("payload").toString());
+                            Header signatureHeader = new Header(X_HUB_SIGNATURE, signatureHeaderValue);
+                            headersList.add(signatureHeader);
+                        }
 
-                    String publisherURL = webSubDTO.getCallback();
-                    ClientConnector clientConnector;
-                    clientConnector = createClientConnector(dynamicOptions, publisherURL);
+                        String publisherURL = webSubDTO.getCallback();
+                        ClientConnector clientConnector;
+                        clientConnector = createClientConnector(publisherURL);
 
-                    if (mapType == null) {
-                        mapType = getMapper().getType();
+                        if (mapType == null) {
+                            mapType = getMapper().getType();
+                        }
+                        sendRequest(payload, dynamicOptions, headersList, clientConnector, publisherURL);
+                    } else {
+                        log.info("Added to expired list " + webSubDTO.getCallback());
+                        expiredSubscriptions.add(webSubDTO);
                     }
-                    sendRequest(payload, dynamicOptions, headersList, clientConnector, publisherURL);
                 }
             }
         }
@@ -577,8 +594,17 @@ public class WebSubHubSink extends Sink {
     @Override
     public void connect() throws ConnectionUnavailableException {
         subscriptionTable.connectWithRetry();
-        scheduledExecutorService.scheduleAtFixedRate(new SubscriptionMapUpdate(),
-                0, 1, TimeUnit.MINUTES);
+        if (webSubSubscriptionMapUpdateTimeInterval != 0) {
+            scheduledExecutorService.scheduleAtFixedRate(new SubscriptionMapUpdate(false,
+                            onDemandQueryRuntime, hubId),
+                    0, webSubSubscriptionMapUpdateTimeInterval, TimeUnit.SECONDS);
+        } else {
+            scheduledExecutorService.scheduleAtFixedRate(new SubscriptionMapUpdate(true,
+                            onDemandQueryRuntime, hubId),
+                    0, 1, TimeUnit.SECONDS);
+        }
+        scheduledExecutorService.scheduleAtFixedRate(
+                new SubscriptionTableCleanupTask(subscriptionTable, siddhiAppContext), 0, 10, TimeUnit.SECONDS);
     }
 
     @Override
@@ -678,7 +704,7 @@ public class WebSubHubSink extends Sink {
         }
     }
 
-    public ClientConnector createClientConnector(DynamicOptions dynamicOptions, String publisherURL) {
+    public ClientConnector createClientConnector(String publisherURL) {
 
         String scheme = HttpSinkUtil.getScheme(publisherURL);
         Map<String, String> httpURLProperties = HttpSinkUtil.getURLProperties(publisherURL);
@@ -769,7 +795,7 @@ public class WebSubHubSink extends Sink {
         return siddhiAppRuntimeBuilder.getTableMap().get(tableName);
     }
 
-    private void setStoreQueryRuntime() {
+    private void setOnDemandQueryRuntimeForFindSubscription() {
         List<OutputAttribute> selectionList = new ArrayList<>();
         Map<String, Table> tableMap = new HashMap<>();
         tableMap.put(subscriptionTable.getTableDefinition().getId(), subscriptionTable);
@@ -791,6 +817,30 @@ public class WebSubHubSink extends Sink {
         this.onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, null,
                 siddhiAppContext, tableMap, windowMap, aggregationRuntimeMap);
     }
+
+    private void setOnDemandQueryRuntimeForDeleteSubscription() {
+        List<OutputAttribute> selectionList = new ArrayList<>();
+        Map<String, Table> tableMap = new HashMap<>();
+        tableMap.put(subscriptionTable.getTableDefinition().getId(), subscriptionTable);
+        Map<String, Window> windowMap = new HashMap<>();
+        Map<String, AggregationRuntime> aggregationRuntimeMap = new HashMap<>();
+
+        for (String column : outputColumns) {
+            selectionList.add(new OutputAttribute(new Variable(column)));
+        }
+
+        Selector selector = new Selector().addSelectionList(selectionList);
+
+        InputStore inputStore = InputStore.store(subscriptionTable.getTableDefinition().getId()).on(new Compare(
+                new StringConstant(hubId),
+                Compare.Operator.EQUAL,
+                new Variable(HUB_ID_COLUMN_NAME)));
+        OnDemandQuery onDemandQuery = new OnDemandQuery().from(inputStore).select(selector);
+        onDemandQuery.setType(OnDemandQuery.OnDemandQueryType.FIND);
+        this.onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, null,
+                siddhiAppContext, tableMap, windowMap, aggregationRuntimeMap);
+    }
+
 
     public void setWebSubSubscriptionMap(Map<String, List<WebSubSubscriptionDTO>> webSubSubscriptionMap) {
         this.webSubSubscriptionMap = webSubSubscriptionMap;
@@ -859,16 +909,41 @@ public class WebSubHubSink extends Sink {
     }
 
     private class SubscriptionMapUpdate implements Runnable {
+        boolean isStateCheck;
+        OnDemandQueryRuntime onDemandQueryRuntime;
+        String hubId;
+        boolean initialExecution = true;
 
-        SubscriptionMapUpdate() {
+        SubscriptionMapUpdate(boolean isStateCheck, OnDemandQueryRuntime onDemandQueryRuntime, String hubId) {
+            this.isStateCheck = isStateCheck;
+            this.onDemandQueryRuntime = onDemandQueryRuntime;
+            this.hubId = hubId;
         }
 
         @Override
         public void run() {
+            boolean status;
+            if (isStateCheck) {
+                status = HttpIoUtil.isWebSubSinkUpdated(hubId);
+                if (status || initialExecution) {
+                    log.info("Running SubscriptionMapUpdate task mode Status Check: " + isStateCheck + " status : "
+                            + status);
+                    updateSubscriptionMap();
+                    initialExecution = false;
+                }
+            } else {
+                updateSubscriptionMap();
+            }
+            if (expiredSubscriptions.size() > 0){
+
+            }
+        }
+
+        public void updateSubscriptionMap() {
             Map<String, List<WebSubSubscriptionDTO>> tempWebSubSubscriptionDTOMap = new HashMap<>();
             try {
                 Event[] events = onDemandQueryRuntime.execute();
-                if (events.length > 0) {
+                if (events != null && events.length > 0) {
                     for (Event event : events) {
                         String topic = event.getData(1).toString();
                         List<WebSubSubscriptionDTO> webSubSubscriptionList = tempWebSubSubscriptionDTOMap.
@@ -880,8 +955,53 @@ public class WebSubHubSink extends Sink {
                 }
                 setWebSubSubscriptionMap(tempWebSubSubscriptionDTOMap);
             } catch (Exception e) {
-                log.error("Error Exception ", e);
+                log.error("Error occurred while updating webSubSubscriptionMap ", e);
             }
+        }
+    }
+
+    private class SubscriptionTableCleanupTask implements Runnable {
+        CompiledCondition compiledCondition;
+
+        SubscriptionTableCleanupTask(Table subscriptionTable, SiddhiAppContext siddhiAppContext) {
+            Map<String, Table> tableMap = new HashMap<>();
+            tableMap.put(subscriptionTable.getTableDefinition().getId(), subscriptionTable);
+            SiddhiQueryContext siddhiQueryContext = new SiddhiQueryContext(siddhiAppContext,
+                    siddhiAppContext.getName());
+            this.compiledCondition = HttpIoUtil.createTableDeleteResource(tableMap,
+                    subscriptionTable.getTableDefinition().getId(), siddhiQueryContext);
+
+        }
+
+        @Override
+        public void run() {
+            log.info("expiredSubscriptions list length " + expiredSubscriptions.size());
+            if (expiredSubscriptions.size() > 0) {
+                for (WebSubSubscriptionDTO dto : expiredSubscriptions) {
+                    log.info("Deleting record " + dto.getCallback() + " : " + dto.getTopic());
+                    try {
+                        generateComplexEvent(dto);
+                        log.info("Record deleted successfully ");
+                    } catch (Throwable e) {
+                        log.error("Error occurred while deleting expired subscription record from database" +
+                                " table. callbackUrl :" + dto.getCallback() + ", Topic " + dto.getTopic(), e);
+                        expiredSubscriptions.remove(dto);
+                    }
+                }
+            }
+        }
+
+        private void generateComplexEvent(WebSubSubscriptionDTO dto) {
+            Object[] event = new Object[]{dto.getCallback(), dto.getTopic()};
+            StreamEvent complexEvent = new StreamEvent(0, 0, 2);
+            StateEvent stateEvent = new StateEvent(1, 2);
+            complexEvent.setOutputData(event);
+            stateEvent.addEvent(0, complexEvent);
+            stateEvent.setType(ComplexEvent.Type.CURRENT);
+            ComplexEventChunk complexEventChunk = new ComplexEventChunk();
+            complexEventChunk.add(stateEvent);
+            subscriptionTable.deleteEvents(complexEventChunk, compiledCondition, 1);
+            expiredSubscriptions.remove(dto);
         }
     }
 }

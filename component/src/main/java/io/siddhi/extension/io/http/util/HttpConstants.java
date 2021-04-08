@@ -277,5 +277,5 @@ public class HttpConstants {
     public static final String HUB_MODE_DENIED = "denied";
     public static final String HUB_MODE_SUBSCRIBE = "subscribe";
     public static final String HUB_MODE_UNSUBSCRIBE = "unsubscribe";
-
+    public static final String WEB_SUB_SUBSCRIPTION_MAP_UPDATE_TIMESTAMP = "hub.update.time";
 }
