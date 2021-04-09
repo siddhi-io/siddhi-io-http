@@ -536,10 +536,15 @@ public class WebSubHubSink extends Sink {
                         }
                         sendRequest(payload, dynamicOptions, headersList, clientConnector, publisherURL);
                     } else {
-                        log.info("Added to expired list " + webSubDTO.getCallback());
+                        log.debug("Added to expired subscription list " + webSubDTO.getCallback() + " : "
+                                + webSubDTO.getTopic());
                         expiredSubscriptions.add(webSubDTO);
                     }
                 }
+                for (WebSubSubscriptionDTO expiredSubscription : expiredSubscriptions) {
+                    subscriptionListToPublish.remove(expiredSubscription);
+                }
+                webSubSubscriptionMap.replace(topic.toString(), subscriptionListToPublish);
             }
         }
     }
@@ -818,32 +823,13 @@ public class WebSubHubSink extends Sink {
                 siddhiAppContext, tableMap, windowMap, aggregationRuntimeMap);
     }
 
-    private void setOnDemandQueryRuntimeForDeleteSubscription() {
-        List<OutputAttribute> selectionList = new ArrayList<>();
-        Map<String, Table> tableMap = new HashMap<>();
-        tableMap.put(subscriptionTable.getTableDefinition().getId(), subscriptionTable);
-        Map<String, Window> windowMap = new HashMap<>();
-        Map<String, AggregationRuntime> aggregationRuntimeMap = new HashMap<>();
-
-        for (String column : outputColumns) {
-            selectionList.add(new OutputAttribute(new Variable(column)));
-        }
-
-        Selector selector = new Selector().addSelectionList(selectionList);
-
-        InputStore inputStore = InputStore.store(subscriptionTable.getTableDefinition().getId()).on(new Compare(
-                new StringConstant(hubId),
-                Compare.Operator.EQUAL,
-                new Variable(HUB_ID_COLUMN_NAME)));
-        OnDemandQuery onDemandQuery = new OnDemandQuery().from(inputStore).select(selector);
-        onDemandQuery.setType(OnDemandQuery.OnDemandQueryType.FIND);
-        this.onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, null,
-                siddhiAppContext, tableMap, windowMap, aggregationRuntimeMap);
-    }
-
 
     public void setWebSubSubscriptionMap(Map<String, List<WebSubSubscriptionDTO>> webSubSubscriptionMap) {
         this.webSubSubscriptionMap = webSubSubscriptionMap;
+    }
+
+    public void removeFromExpiredSubscriptions(WebSubSubscriptionDTO webSubSubscriptionDTO) {
+        this.expiredSubscriptions.remove(webSubSubscriptionDTO);
     }
 
     String getHexValue(String payload) {
@@ -926,16 +912,13 @@ public class WebSubHubSink extends Sink {
             if (isStateCheck) {
                 status = HttpIoUtil.isWebSubSinkUpdated(hubId);
                 if (status || initialExecution) {
-                    log.info("Running SubscriptionMapUpdate task mode Status Check: " + isStateCheck + " status : "
+                    log.debug("Running SubscriptionMapUpdate task mode Status Check: " + isStateCheck + " status : "
                             + status);
                     updateSubscriptionMap();
                     initialExecution = false;
                 }
             } else {
                 updateSubscriptionMap();
-            }
-            if (expiredSubscriptions.size() > 0){
-
             }
         }
 
@@ -975,23 +958,26 @@ public class WebSubHubSink extends Sink {
 
         @Override
         public void run() {
-            log.info("expiredSubscriptions list length " + expiredSubscriptions.size());
+            List<WebSubSubscriptionDTO> deletedSubscriptions = new ArrayList<>();
             if (expiredSubscriptions.size() > 0) {
                 for (WebSubSubscriptionDTO dto : expiredSubscriptions) {
-                    log.info("Deleting record " + dto.getCallback() + " : " + dto.getTopic());
+                    log.debug("Deleting record " + dto.getCallback() + " : " + dto.getTopic());
                     try {
-                        generateComplexEvent(dto);
-                        log.info("Record deleted successfully ");
+                        subscriptionTable.deleteEvents(generateComplexEvent(dto), compiledCondition, 1);
+
+                        deletedSubscriptions.add(dto);
                     } catch (Throwable e) {
                         log.error("Error occurred while deleting expired subscription record from database" +
                                 " table. callbackUrl :" + dto.getCallback() + ", Topic " + dto.getTopic(), e);
                         expiredSubscriptions.remove(dto);
                     }
                 }
+                log.info(deletedSubscriptions.size() + "Expired subscriptions deleted successfully.");
+                deletedSubscriptions.forEach(dto -> expiredSubscriptions.remove(dto));
             }
         }
 
-        private void generateComplexEvent(WebSubSubscriptionDTO dto) {
+        private ComplexEventChunk generateComplexEvent(WebSubSubscriptionDTO dto) {
             Object[] event = new Object[]{dto.getCallback(), dto.getTopic()};
             StreamEvent complexEvent = new StreamEvent(0, 0, 2);
             StateEvent stateEvent = new StateEvent(1, 2);
@@ -1000,8 +986,7 @@ public class WebSubHubSink extends Sink {
             stateEvent.setType(ComplexEvent.Type.CURRENT);
             ComplexEventChunk complexEventChunk = new ComplexEventChunk();
             complexEventChunk.add(stateEvent);
-            subscriptionTable.deleteEvents(complexEventChunk, compiledCondition, 1);
-            expiredSubscriptions.remove(dto);
+            return complexEventChunk;
         }
     }
 }

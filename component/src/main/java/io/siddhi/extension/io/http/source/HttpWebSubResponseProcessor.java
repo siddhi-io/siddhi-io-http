@@ -127,29 +127,29 @@ public class HttpWebSubResponseProcessor implements Runnable {
                     metrics.setLastEventTime(System.currentTimeMillis());
                 }
 
-                Map<String, Object> parameterMap = processPayload(payload);
-                boolean isRequestValid = HttpIoUtil.validateAndVerifySubscriptionRequest(carbonMessage, parameterMap,
+                Map<String, Object> payloadMap = processPayload(payload);
+                boolean isRequestValid = HttpIoUtil.validateAndVerifySubscriptionRequest(carbonMessage, payloadMap,
                         payload, topics);
                 if (isRequestValid) {
                     List<Object> event = new ArrayList<>();
                     List<Attribute> attributeList = table.getTableDefinition().getAttributeList();
-                    if (parameterMap.get(HUB_MODE).toString().equalsIgnoreCase(HUB_MODE_SUBSCRIBE)) {
+                    if (payloadMap.get(HUB_MODE).toString().equalsIgnoreCase(HUB_MODE_SUBSCRIBE)) {
                         for (Attribute attribute : attributeList) {
                             if (attribute.getName().equals(HttpConstants.HUB_ID_COLUMN_NAME)) {
                                 event.add(hubId);
                             } else if (attribute.getName().equals(REQUEST_TIMESTAMP)) {
                                 event.add(System.currentTimeMillis());
                             } else {
-                                event.add(processAndGet(parameterMap.get(attribute.getName()).toString(), attribute));
+                                event.add(processAndGet(payloadMap.get(attribute.getName()).toString(), attribute));
                             }
                         }
                     } else {
-                        event.add(parameterMap.get(HUB_CALLBACK));
-                        event.add(parameterMap.get(HUB_TOPIC));
+                        event.add(payloadMap.get(HUB_CALLBACK));
+                        event.add(payloadMap.get(HUB_TOPIC));
                     }
                     ComplexEventChunk eventChunk = new ComplexEventChunk();
                     StreamEvent complexEvent;
-                    if (parameterMap.get(HUB_MODE).toString().equalsIgnoreCase(HUB_MODE_SUBSCRIBE)) {
+                    if (payloadMap.get(HUB_MODE).toString().equalsIgnoreCase(HUB_MODE_SUBSCRIBE)) {
                         complexEvent = new StreamEvent(0, 0,
                                 attributeList.size());
                         StateEvent stateEvent = new StateEvent(1, 0);
@@ -168,9 +168,11 @@ public class HttpWebSubResponseProcessor implements Runnable {
                         eventChunk.add(stateEvent);
                         table.deleteEvents(eventChunk, deleteCompileCondition, 1);
                     }
+                    logger.debug("Incoming Request accepted for callback: " + payloadMap.get(HUB_CALLBACK) +
+                            ". topic: " + payloadMap.get(HUB_TOPIC) + " mode: " + payloadMap.get(HUB_MODE));
                     HttpIoUtil.notifyWebSubSink(hubId);
                     HttpIoUtil.handleResponse(carbonMessage, HttpIoUtil.createResponseMessageForWebSub(carbonMessage));
-                    sourceEventListener.onEvent(parameterMap, trpProperties);
+                    sourceEventListener.onEvent(payloadMap, trpProperties);
                 }
                 if (logger.isDebugEnabled()) {
                     logger.debug("Submitted Event " + payload + " Stream");

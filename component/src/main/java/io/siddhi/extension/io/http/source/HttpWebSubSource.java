@@ -510,7 +510,7 @@ public class HttpWebSubSource extends Source {
     }
 
     private List<String> validateTopics(String topicList) {
-        String[] topics = topicList.split(",");
+        String[] topics = Arrays.stream(topicList.split(",")).map(String::trim).toArray(String[]::new);
         return new ArrayList<>(Arrays.asList(topics));
     }
 }
