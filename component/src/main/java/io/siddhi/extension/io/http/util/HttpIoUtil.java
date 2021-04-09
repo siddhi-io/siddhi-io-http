@@ -24,9 +24,20 @@ import io.netty.handler.codec.http.DefaultLastHttpContent;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
-import io.netty.handler.codec.http.QueryStringDecoder;
+import io.siddhi.core.config.SiddhiQueryContext;
+import io.siddhi.core.event.state.MetaStateEvent;
+import io.siddhi.core.event.stream.MetaStreamEvent;
+import io.siddhi.core.table.Table;
+import io.siddhi.core.util.collection.operator.CompiledCondition;
+import io.siddhi.core.util.collection.operator.MatchingMetaInfoHolder;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeException;
+import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.definition.TableDefinition;
+import io.siddhi.query.api.expression.Expression;
+import io.siddhi.query.api.expression.Variable;
+import io.siddhi.query.api.expression.condition.And;
+import io.siddhi.query.api.expression.condition.Compare;
 import org.apache.log4j.Logger;
 import org.wso2.transport.http.netty.contract.config.Parameter;
 import org.wso2.transport.http.netty.contract.exceptions.ServerConnectorException;
@@ -36,21 +47,22 @@ import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static io.siddhi.extension.io.http.util.HttpConstants.ACCEPTED_CODE;
 import static io.siddhi.extension.io.http.util.HttpConstants.HUB_CALLBACK;
+import static io.siddhi.extension.io.http.util.HttpConstants.HUB_CALLBACK_COLUMN_NAME;
 import static io.siddhi.extension.io.http.util.HttpConstants.HUB_MODE;
 import static io.siddhi.extension.io.http.util.HttpConstants.HUB_MODE_DENIED;
 import static io.siddhi.extension.io.http.util.HttpConstants.HUB_REASON;
-import static io.siddhi.extension.io.http.util.HttpConstants.HUB_SECRET;
 import static io.siddhi.extension.io.http.util.HttpConstants.HUB_TOPIC;
+import static io.siddhi.extension.io.http.util.HttpConstants.HUB_TOPIC_COLUMN_NAME;
 import static io.siddhi.extension.io.http.util.HttpConstants.PARAMETER_SEPARATOR;
 import static io.siddhi.extension.io.http.util.HttpConstants.PERSISTENT_ACCESS_FAIL_CODE;
 import static io.siddhi.extension.io.http.util.HttpConstants.VALUE_SEPARATOR;
@@ -67,6 +79,7 @@ public class HttpIoUtil {
     private static ConfigReader configReader;
     private static PoolConfiguration connectionPoolConfiguration;
     private static DefaultHttpWsConnectorFactory httpConnectorFactory;
+    private static Map<String, Boolean> webSuHubSubscriptionUpdate = new ConcurrentHashMap<>();
 
     /**
      * Handle response from http message.
@@ -254,8 +267,8 @@ public class HttpIoUtil {
                     "hub.topic parameters.");
             return false;
         } else if (!topics.contains(parameterMap.get(HUB_TOPIC))) {
-            responseMessage = "Subscription request failed!. Subscribed topic" + parameterMap.get(HUB_TOPIC) +
-                    "is not found in the WebSub hub ";
+            responseMessage = "Subscription request failed!. Subscribed topic " + parameterMap.get(HUB_TOPIC) +
+                    " is not found in the WebSub hub ";
             handleFailure(carbonMessage, null, PERSISTENT_ACCESS_FAIL_CODE, responseMessage);
             log.error(responseMessage);
             return false;
@@ -264,21 +277,60 @@ public class HttpIoUtil {
         }
     }
 
-    public static Map<String, Object> processPayload(String payload) {
-        String decodedPayload = QueryStringDecoder.decodeComponent(payload, StandardCharsets.UTF_8);
-        String[] parametersArray = decodedPayload.split("&");
-        Map<String, Object> parameterMap = new HashMap<>();
-        if (parametersArray.length > 0) {
-            for (String parameterPair : parametersArray) {
-                String[] parameterPairArray = parameterPair.split("=");
-                if (parameterPairArray.length == 2) {
-                    parameterMap.put(parameterPairArray[0].replace("hub.", ""), parameterPairArray[1]);
-                }
+    public static void notifyWebSubSink(String hubId) {
+        if (webSuHubSubscriptionUpdate.containsKey(hubId)) {
+            webSuHubSubscriptionUpdate.replace(hubId, true);
+        } else {
+            webSuHubSubscriptionUpdate.put(hubId, true);
+        }
+    }
+
+    public static boolean isWebSubSinkUpdated(String hubId) {
+        if (webSuHubSubscriptionUpdate.containsKey(hubId)) {
+            if (webSuHubSubscriptionUpdate.get(hubId)) {
+                webSuHubSubscriptionUpdate.replace(hubId, false);
+                return true;
             }
         }
-        if (!parameterMap.containsKey(HUB_SECRET)) {
-            parameterMap.put(HUB_SECRET, "");
-        }
-        return parameterMap;
+        return false;
+    }
+
+    public static Expression generateFilterConditionForWebSubHub(Table table) {
+        Variable leftOperator = new Variable(HUB_CALLBACK_COLUMN_NAME);
+        leftOperator.setStreamId(table.getTableDefinition().getId());
+        Compare leftExpression = new Compare(leftOperator, Compare.Operator.EQUAL,
+                new Variable(HUB_CALLBACK_COLUMN_NAME));
+        Variable rightExpresionLeftOperator = new Variable(HUB_TOPIC_COLUMN_NAME);
+        rightExpresionLeftOperator.setStreamId(table.getTableDefinition().getId());
+        Compare rightExpression = new Compare(rightExpresionLeftOperator, Compare.Operator.EQUAL,
+                new Variable(HUB_TOPIC_COLUMN_NAME));
+        return new And(leftExpression, rightExpression);
+    }
+
+    public static CompiledCondition createTableDeleteResource(Map<String, Table> tableMap, String tableName,
+                                                              SiddhiQueryContext siddhiQueryContext) {
+        Table table = tableMap.get(tableName);
+        Expression condition = HttpIoUtil.generateFilterConditionForWebSubHub(table);
+
+        MetaStateEvent metaStateEvent = new MetaStateEvent(2);
+        MetaStreamEvent tableMetaStreamEvent = new MetaStreamEvent();
+        MetaStreamEvent inputStreamMetaStreamEvent = new MetaStreamEvent();
+
+        tableMetaStreamEvent.addInputDefinition(table.getTableDefinition());
+        tableMetaStreamEvent.setEventType(MetaStreamEvent.EventType.TABLE);
+
+        TableDefinition tableDefinition = TableDefinition.id("");
+        tableDefinition.attribute(HUB_CALLBACK, Attribute.Type.STRING);
+        tableDefinition.attribute(HUB_TOPIC, Attribute.Type.STRING);
+        inputStreamMetaStreamEvent.addInputDefinition(tableDefinition);
+        inputStreamMetaStreamEvent.setEventType(MetaStreamEvent.EventType.TABLE);
+        metaStateEvent.addEvent(inputStreamMetaStreamEvent);
+        metaStateEvent.addEvent(tableMetaStreamEvent);
+
+        MatchingMetaInfoHolder matchingMetaInfoHolder = new MatchingMetaInfoHolder(metaStateEvent, 0, 1,
+                tableDefinition, table.getTableDefinition(), 0);
+
+        return table.compileCondition(condition, matchingMetaInfoHolder, null,
+                tableMap, siddhiQueryContext);
     }
 }
