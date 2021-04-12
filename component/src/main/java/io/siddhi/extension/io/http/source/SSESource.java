@@ -188,8 +188,8 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
                 )
         }
 )
-public class HttpSSESource extends Source {
-    private static final Logger log = Logger.getLogger(HttpSSESource.class);
+public class SSESource extends Source {
+    private static final Logger log = Logger.getLogger(SSESource.class);
     private int workerThread;
     private String siddhiAppName;
     private String streamID;
@@ -209,8 +209,8 @@ public class HttpSSESource extends Source {
     private DefaultHttpWsConnectorFactory httpConnectorFactory;
     private ConfigReader configReader;
     private PoolConfiguration connectionPoolConfiguration;
-    private HttpSSESourceConnectorRegistry httpConnectorRegistry;
-    private HttpSSEResponseConnectorListener httpSSEResponseConnectorListener;
+    private SSESourceConnectorRegistry httpConnectorRegistry;
+    private SSEResponseConnectorListener httpSSEResponseConnectorListener;
     private ServiceDeploymentInfo serviceDeploymentInfo;
     private SourceEventListener sourceEventListener;
     private SourceMetrics metrics;
@@ -256,7 +256,7 @@ public class HttpSSESource extends Source {
 
         this.serviceDeploymentInfo = new ServiceDeploymentInfo(port, isSecured);
         this.eventSourceUrl = optionHolder.validateAndGetOption(HttpConstants.EVENT_SOURCE_URL).getValue();
-        this.httpConnectorRegistry = HttpSSESourceConnectorRegistry.getInstance();
+        this.httpConnectorRegistry = SSESourceConnectorRegistry.getInstance();
         this.requestedTransportPropertyNames = requestedTransportPropertyNames.clone();
         this.httpConnectorFactory = createConnectorFactory(configReader);
         this.connectionPoolConfiguration = createPoolConfigurations(optionHolder);
@@ -274,7 +274,7 @@ public class HttpSSESource extends Source {
     @Override
     public void connect(ConnectionCallback connectionCallback, State state) throws ConnectionUnavailableException {
         this.httpSSEResponseConnectorListener =
-                new HttpSSEResponseConnectorListener(workerThread, sourceEventListener, streamID,
+                new SSEResponseConnectorListener(workerThread, sourceEventListener, streamID,
                         requestedTransportPropertyNames, siddhiAppName);
         this.httpConnectorRegistry.registerSourceListener(httpSSEResponseConnectorListener, streamID);
         HTTPSourceRegistry.registerSSESource(streamID, this);
@@ -295,7 +295,7 @@ public class HttpSSESource extends Source {
             latch = new CountDownLatch(1);
         }
 
-        HttpSSEResponseListener httpListener = new HttpSSEResponseListener(this, streamID, latch, metrics);
+        SSEResponseListener httpListener = new SSEResponseListener(this, streamID, latch, metrics);
         httpResponseFuture.setHttpConnectorListener(httpListener);
         if (latch != null) {
             try {
@@ -372,7 +372,7 @@ public class HttpSSESource extends Source {
         }
     }
 
-    public HttpSSEResponseConnectorListener getConnectorListener() {
+    public SSEResponseConnectorListener getConnectorListener() {
         return httpSSEResponseConnectorListener;
     }
 

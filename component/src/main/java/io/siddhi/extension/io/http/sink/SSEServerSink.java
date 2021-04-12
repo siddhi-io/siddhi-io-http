@@ -187,8 +187,8 @@ import static org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE;
                 )
         }
 )
-public class HttpSSESink extends Sink {
-    private static final Logger logger = Logger.getLogger(HttpSSESink.class);
+public class SSEServerSink extends Sink {
+    private static final Logger logger = Logger.getLogger(SSEServerSink.class);
 
     private String siddhiAppName;
     private String streamId;

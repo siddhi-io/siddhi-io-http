@@ -35,7 +35,7 @@ public class SSESyncConnectorListener extends SSEConnectorListener {
                         (carbonMessage));
     }
 
-    protected HttpSSERequestListener getSourceListener(StringBuilder sourceListenerKey) {
+    protected SSERequestListener getSourceListener(StringBuilder sourceListenerKey) {
 
         return SSESyncConnectorRegistry.getInstance().getSyncSourceListenersMap().get(sourceListenerKey.toString());
     }

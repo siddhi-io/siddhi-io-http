@@ -18,7 +18,7 @@
  */
 package io.siddhi.extension.io.http.util;
 
-import io.siddhi.extension.io.http.sink.HttpSSESink;
+import io.siddhi.extension.io.http.sink.SSEServerSink;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,9 +28,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class HTTPSinkRegistry {
 
-    private static Map<String, HttpSSESink> sseSourceRegistry = new ConcurrentHashMap<>();
+    private static Map<String, SSEServerSink> sseSourceRegistry = new ConcurrentHashMap<>();
 
-    public static void registerSSESink(String streamId, HttpSSESink source) {
+    public static void registerSSESink(String streamId, SSEServerSink source) {
         sseSourceRegistry.put(streamId, source);
     }
 
@@ -38,8 +38,8 @@ public class HTTPSinkRegistry {
         sseSourceRegistry.remove(streamId);
     }
 
-    public static HttpSSESink findAndGetSSESource(String streamId) {
-        for (HttpSSESink sseSink : sseSourceRegistry.values()) {
+    public static SSEServerSink findAndGetSSESource(String streamId) {
+        for (SSEServerSink sseSink : sseSourceRegistry.values()) {
             if (sseSink.matches(streamId)) {
                 return sseSink;
             }

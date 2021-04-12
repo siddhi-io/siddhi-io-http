@@ -40,8 +40,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Tests http sse sink.
  */
-public class HttpSSESinkTestCase {
-    private static final Logger log = Logger.getLogger(HttpSSESinkTestCase.class);
+public class SSEServerSinkTestCase {
+    private static final Logger log = Logger.getLogger(SSEServerSinkTestCase.class);
     private static final int SLEEP_TIME = 50;
     private static final int EVENT_COUNT = 10;
     private static final int TIMEOUT = 30000;

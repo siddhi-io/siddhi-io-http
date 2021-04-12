@@ -26,11 +26,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * {@code HttpSSESourceConnectorRegistry} The code is responsible for maintaining the all active connector listeners
  * for http-sse source.
  */
-class HttpSSESourceConnectorRegistry {
-    private static HttpSSESourceConnectorRegistry instance = new HttpSSESourceConnectorRegistry();
-    private Map<String, HttpSSEResponseConnectorListener> sourceListenersMap = new ConcurrentHashMap<>();
+class SSESourceConnectorRegistry {
+    private static SSESourceConnectorRegistry instance = new SSESourceConnectorRegistry();
+    private Map<String, SSEResponseConnectorListener> sourceListenersMap = new ConcurrentHashMap<>();
 
-    private HttpSSESourceConnectorRegistry() {
+    private SSESourceConnectorRegistry() {
 
     }
 
@@ -39,7 +39,7 @@ class HttpSSESourceConnectorRegistry {
      *
      * @return HttpSSESourceConnectorRegistry instance
      */
-    static HttpSSESourceConnectorRegistry getInstance() {
+    static SSESourceConnectorRegistry getInstance() {
         return instance;
     }
 
@@ -49,7 +49,7 @@ class HttpSSESourceConnectorRegistry {
      *
      * @return the source listener map
      */
-    Map<String, HttpSSEResponseConnectorListener> getSourceListenersMap() {
+    Map<String, SSEResponseConnectorListener> getSourceListenersMap() {
         return this.sourceListenersMap;
     }
 
@@ -59,8 +59,8 @@ class HttpSSESourceConnectorRegistry {
      *
      * @param streamId the sink id for the source
      */
-    void registerSourceListener(HttpSSEResponseConnectorListener httpSSEResponseConnectorListener, String streamId) {
-        HttpSSEResponseConnectorListener sourceListener =
+    void registerSourceListener(SSEResponseConnectorListener httpSSEResponseConnectorListener, String streamId) {
+        SSEResponseConnectorListener sourceListener =
                 this.sourceListenersMap.putIfAbsent((streamId), httpSSEResponseConnectorListener);
         if (sourceListener != null) {
             throw new SiddhiAppCreationException("There is a connection already established for the sse source with "
@@ -75,7 +75,7 @@ class HttpSSESourceConnectorRegistry {
      * @param siddhiAppName name of the siddhi app
      */
     void unregisterSourceListener(String streamId, String siddhiAppName) {
-        HttpSSEResponseConnectorListener httpSourceListener =
+        SSEResponseConnectorListener httpSourceListener =
                 this.sourceListenersMap.get(streamId);
         if (httpSourceListener != null && httpSourceListener.getSiddhiAppName().equals(siddhiAppName)) {
             sourceListenersMap.remove(streamId);

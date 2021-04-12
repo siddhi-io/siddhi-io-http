@@ -19,8 +19,8 @@
 package io.siddhi.extension.io.http.util;
 
 import io.siddhi.extension.io.http.source.HttpCallResponseSource;
-import io.siddhi.extension.io.http.source.HttpSSESource;
 import io.siddhi.extension.io.http.source.HttpServiceSource;
+import io.siddhi.extension.io.http.source.SSESource;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,7 +32,7 @@ public class HTTPSourceRegistry {
 
     private static Map<String, HttpServiceSource> serviceSourceRegistry = new ConcurrentHashMap<>();
     private static Map<String, HttpCallResponseSource> callResponseSourceRegistry = new ConcurrentHashMap<>();
-    private static Map<String, HttpSSESource> sseSourceRegistry = new ConcurrentHashMap<>();
+    private static Map<String, SSESource> sseSourceRegistry = new ConcurrentHashMap<>();
 
     // handle service sources
     public static HttpServiceSource getServiceSource(String sourceId) {
@@ -64,7 +64,7 @@ public class HTTPSourceRegistry {
         return null;
     }
 
-    public static void registerSSESource(String streamId, HttpSSESource source) {
+    public static void registerSSESource(String streamId, SSESource source) {
         sseSourceRegistry.put(streamId, source);
     }
 
@@ -72,8 +72,8 @@ public class HTTPSourceRegistry {
         sseSourceRegistry.remove(streamId);
     }
 
-    public static HttpSSESource findAndGetSSESource(String streamId) {
-        for (HttpSSESource sseSource : sseSourceRegistry.values()) {
+    public static SSESource findAndGetSSESource(String streamId) {
+        for (SSESource sseSource : sseSourceRegistry.values()) {
             if (sseSource.matches(streamId)) {
                 return sseSource;
             }

@@ -49,8 +49,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Tests http sse source.
  */
-public class HttpSSESourceTestCase {
-    private static final Logger log = Logger.getLogger(HttpSSESourceTestCase.class);
+public class SSESourceTestCase {
+    private static final Logger log = Logger.getLogger(SSESourceTestCase.class);
     private static final int SSE_SERVER_PORT = 8010;
     private static final int SLEEP_TIME = 50;
     private static final int EVENT_COUNT = 10;

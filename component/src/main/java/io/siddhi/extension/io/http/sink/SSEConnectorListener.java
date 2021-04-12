@@ -50,7 +50,7 @@ public class SSEConnectorListener implements HttpConnectorListener {
                             .valueOf(carbonMessage.getProperty(HttpConstants.LISTENER_PORT)))
                             .append(HttpConstants.PORT_CONTEXT_KEY_SEPARATOR)
                             .append(carbonMessage.getProperty(HttpConstants.TO));
-                    HttpSSERequestListener requestListener = getSourceListener(sourceListenerKey);
+                    SSERequestListener requestListener = getSourceListener(sourceListenerKey);
                     if (requestListener != null) {
                         requestListener.send(carbonMessage);
                     } else {
@@ -81,7 +81,7 @@ public class SSEConnectorListener implements HttpConnectorListener {
                 SSEConnectorRegistry.getInstance().getServerConnectorPool().containsKey(getInterface(carbonMessage));
     }
 
-    protected HttpSSERequestListener getSourceListener(StringBuilder sourceListenerKey) {
+    protected SSERequestListener getSourceListener(StringBuilder sourceListenerKey) {
 
         return SSEConnectorRegistry.getInstance().getSourceListenersMap().get(sourceListenerKey.toString());
     }
