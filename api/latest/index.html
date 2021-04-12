@@ -114,7 +114,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#api-docs-v231" tabindex="1" class="md-skip">
+      <a href="#api-docs-v232" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -361,8 +361,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#websubhubeventpublisher-sink" title="websubhubeventpublisher (Sink)" class="md-nav__link">
-    websubhubeventpublisher (Sink)
+  <a href="#websubhub-sink" title="websubhub (Sink)" class="md-nav__link">
+    websubhub (Sink)
   </a>
   
 </li>
@@ -442,6 +442,18 @@
   
 </nav>
     
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../2.3.2/" title="2.3.2" class="md-nav__link">
+      2.3.2
+    </a>
   </li>
 
         
@@ -857,8 +869,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#websubhubeventpublisher-sink" title="websubhubeventpublisher (Sink)" class="md-nav__link">
-    websubhubeventpublisher (Sink)
+  <a href="#websubhub-sink" title="websubhub (Sink)" class="md-nav__link">
+    websubhub (Sink)
   </a>
   
 </li>
@@ -949,7 +961,7 @@
                   <a href="https://github.com/siddhi-io/siddhi-io-http/blob/master/api/latest.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="api-docs-v231">API Docs - v2.3.1</h1>
+                <h1 id="api-docs-v232">API Docs - v2.3.2</h1>
 <div class="admonition info">
 <p class="admonition-title">Tested Siddhi Core version: <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/">5.1.19</a></em></p>
 <p>It could also support other Siddhi Core minor versions.</p>
@@ -2449,12 +2461,12 @@ insert into ResultStream;
 
 <p></p>
 
-<h3 id="websubhubeventpublisher-sink">websubhubeventpublisher <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#sink">(Sink)</a></em></h3>
+<h3 id="websubhub-sink">websubhub <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#sink">(Sink)</a></em></h3>
 <p><p></p>
 <p style="word-wrap: break-word;margin: 0;">WebSubHubEventPublisher publishes messages via HTTP/HTTP according to the provided URL when subscribe to the WebSub hub. The table.name, hub.id and </p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
-<pre><code>@sink(type=&quot;websubhubeventpublisher&quot;, hub.id=&quot;&lt;STRING&gt;&quot;, table.name=&quot;&lt;STRING&gt;&quot;, https.truststore.file=&quot;&lt;STRING&gt;&quot;, https.truststore.password=&quot;&lt;STRING&gt;&quot;, consumer.key=&quot;&lt;STRING&gt;&quot;, consumer.secret=&quot;&lt;STRING&gt;&quot;, token.url=&quot;&lt;STRING&gt;&quot;, refresh.token=&quot;&lt;STRING&gt;&quot;, headers=&quot;&lt;STRING&gt;&quot;, method=&quot;&lt;STRING&gt;&quot;, socket.idle.timeout=&quot;&lt;INT&gt;&quot;, chunk.disabled=&quot;&lt;BOOL&gt;&quot;, ssl.protocol=&quot;&lt;STRING&gt;&quot;, ssl.verification.disabled=&quot;&lt;BOOL&gt;&quot;, tls.store.type=&quot;&lt;STRING&gt;&quot;, ssl.configurations=&quot;&lt;STRING&gt;&quot;, proxy.host=&quot;&lt;STRING&gt;&quot;, proxy.port=&quot;&lt;STRING&gt;&quot;, proxy.username=&quot;&lt;STRING&gt;&quot;, proxy.password=&quot;&lt;STRING&gt;&quot;, client.bootstrap.configurations=&quot;&lt;STRING&gt;&quot;, max.pool.active.connections=&quot;&lt;INT&gt;&quot;, min.pool.idle.connections=&quot;&lt;INT&gt;&quot;, max.pool.idle.connections=&quot;&lt;INT&gt;&quot;, min.evictable.idle.time=&quot;&lt;STRING&gt;&quot;, time.between.eviction.runs=&quot;&lt;STRING&gt;&quot;, max.wait.time=&quot;&lt;STRING&gt;&quot;, test.on.borrow=&quot;&lt;BOOL&gt;&quot;, test.while.idle=&quot;&lt;BOOL&gt;&quot;, exhausted.action=&quot;&lt;INT&gt;&quot;, hostname.verification.enabled=&quot;&lt;BOOL&gt;&quot;, @map(...)))
+<pre><code>@sink(type=&quot;websubhub&quot;, hub.id=&quot;&lt;STRING&gt;&quot;, table.name=&quot;&lt;STRING&gt;&quot;, https.truststore.file=&quot;&lt;STRING&gt;&quot;, https.truststore.password=&quot;&lt;STRING&gt;&quot;, consumer.key=&quot;&lt;STRING&gt;&quot;, consumer.secret=&quot;&lt;STRING&gt;&quot;, token.url=&quot;&lt;STRING&gt;&quot;, refresh.token=&quot;&lt;STRING&gt;&quot;, headers=&quot;&lt;STRING&gt;&quot;, method=&quot;&lt;STRING&gt;&quot;, socket.idle.timeout=&quot;&lt;INT&gt;&quot;, chunk.disabled=&quot;&lt;BOOL&gt;&quot;, ssl.protocol=&quot;&lt;STRING&gt;&quot;, ssl.verification.disabled=&quot;&lt;BOOL&gt;&quot;, tls.store.type=&quot;&lt;STRING&gt;&quot;, ssl.configurations=&quot;&lt;STRING&gt;&quot;, proxy.host=&quot;&lt;STRING&gt;&quot;, proxy.port=&quot;&lt;STRING&gt;&quot;, proxy.username=&quot;&lt;STRING&gt;&quot;, proxy.password=&quot;&lt;STRING&gt;&quot;, client.bootstrap.configurations=&quot;&lt;STRING&gt;&quot;, max.pool.active.connections=&quot;&lt;INT&gt;&quot;, min.pool.idle.connections=&quot;&lt;INT&gt;&quot;, max.pool.idle.connections=&quot;&lt;INT&gt;&quot;, min.evictable.idle.time=&quot;&lt;STRING&gt;&quot;, time.between.eviction.runs=&quot;&lt;STRING&gt;&quot;, max.wait.time=&quot;&lt;STRING&gt;&quot;, test.on.borrow=&quot;&lt;BOOL&gt;&quot;, test.while.idle=&quot;&lt;BOOL&gt;&quot;, exhausted.action=&quot;&lt;INT&gt;&quot;, hostname.verification.enabled=&quot;&lt;BOOL&gt;&quot;, @map(...)))
 </code></pre>
 
 <p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -4025,13 +4037,13 @@ define stream webSubStream(callback string, lease_seconds long, secret string, t
           </a>
         
         
-          <a href="../2.3.1/" title="2.3.1" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../2.3.2/" title="2.3.2" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                2.3.1
+                2.3.2
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
