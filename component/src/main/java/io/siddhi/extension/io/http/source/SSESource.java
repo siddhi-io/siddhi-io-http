@@ -75,16 +75,10 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
         description = "HTTP SSE source send a request to a given url and listen to the response stream.",
         parameters = {
                 @Parameter(
-                        name = "event.source.url",
+                        name = "receiver.url",
                         description = "The sse endpoint url which should be listened.",
                         type = {DataType.STRING}
                 ),
-                @Parameter(
-                        name = "method",
-                        description = "The HTTP method used for calling the endpoint.",
-                        type = {DataType.STRING},
-                        optional = true,
-                        defaultValue = "GET"),
                 @Parameter(
                         name = "basic.auth.username",
                         description = "The username to be included in the authentication header when calling " +
@@ -197,7 +191,6 @@ public class SSESource extends Source {
     private String mapType;
     private String clientStoreFile;
     private String clientStorePass;
-    private String httpMethod;
     private String clientBootstrapConfiguration;
     private String userName;
     private String userPassword;
@@ -231,7 +224,6 @@ public class SSESource extends Source {
         this.mapType = HttpConstants.MAP_JSON;
         this.workerThread = Integer.parseInt(optionHolder
                 .validateAndGetStaticValue(HttpConstants.WORKER_COUNT, DEFAULT_WORKER_COUNT));
-        this.httpMethod = optionHolder.validateAndGetStaticValue(HttpConstants.METHOD, HttpConstants.HTTP_METHOD_GET);
         this.clientStoreFile = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PATH_PARAM,
                 HttpSinkUtil.trustStorePath(configReader));
         this.clientStorePass = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD_PARAM,
@@ -280,6 +272,7 @@ public class SSESource extends Source {
         HTTPSourceRegistry.registerSSESource(streamID, this);
 
         // Send initial request
+        String httpMethod = HttpConstants.HTTP_METHOD_GET;
         String headers = httpHeaderOption.getValue();
         List<Header> headersList = HttpSinkUtil.getHeaders(headers);
         String contentType = HttpSinkUtil.getContentType(mapType, headersList);

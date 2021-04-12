@@ -70,11 +70,11 @@ import static org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE;
 /**
  * Http sink to publish sse events.
  */
-@Extension(name = "sse", namespace = "sink",
+@Extension(name = "sse-server", namespace = "sink",
         description = "HTTP SSE sink sends events to all subscribers.",
         parameters = {
                 @Parameter(
-                        name = "event.sink.url",
+                        name = "server.url",
                         description = "The sse endpoint url which should be listened.",
                         type = {DataType.STRING}
                 ),
