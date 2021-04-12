@@ -49,8 +49,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Tests http sse source.
  */
-public class HttpSSESourceTestCase {
-    private static final Logger log = Logger.getLogger(HttpSSESourceTestCase.class);
+public class SSESourceTestCase {
+    private static final Logger log = Logger.getLogger(SSESourceTestCase.class);
     private static final int SSE_SERVER_PORT = 8010;
     private static final int SLEEP_TIME = 50;
     private static final int EVENT_COUNT = 10;
@@ -111,7 +111,7 @@ public class HttpSSESourceTestCase {
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("json-output-mapper", JsonSinkMapper.class);
         siddhiManager.setExtension("json-input-mapper", JsonSourceMapper.class);
-        String inStreamDefinition = "@Source(type='sse', event.source.url='http://localhost:8010/',\n" +
+        String sourceStreamDefinition = "@Source(type='sse', receiver.url='http://localhost:8010/',\n" +
                 "@map(type='json'))\n" +
                 "define stream ReceiveProductionStream (param1 string);\n" +
                 "\n" +
@@ -124,7 +124,7 @@ public class HttpSSESourceTestCase {
                 "from ReceiveProductionStream\n" +
                 "select *\n" +
                 "insert into LogProductionStream";
-        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition);
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(sourceStreamDefinition);
         siddhiAppRuntime.addCallback("log", new QueryCallback() {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {

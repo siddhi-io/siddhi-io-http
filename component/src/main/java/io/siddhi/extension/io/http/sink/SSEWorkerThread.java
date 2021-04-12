@@ -36,13 +36,13 @@ import java.util.stream.Collectors;
 /**
  * Handles the send data to source listener.
  */
-public class HttpSSEWorkerThread implements Runnable {
+public class SSEWorkerThread implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(HttpWorkerThread.class);
     private HttpCarbonMessage carbonMessage;
     private String streamID;
     private SourceMetrics metrics;
 
-    HttpSSEWorkerThread(HttpCarbonMessage cMessage, String streamID, SourceMetrics metrics) {
+    SSEWorkerThread(HttpCarbonMessage cMessage, String streamID, SourceMetrics metrics) {
         this.carbonMessage = cMessage;
         this.streamID = streamID;
         this.metrics = metrics;

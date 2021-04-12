@@ -32,8 +32,8 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * This class is responsible for listening to incoming events.
  */
-public class HttpSSERequestListener {
-    private static final Logger logger = LoggerFactory.getLogger(HttpSSERequestListener.class);
+public class SSERequestListener {
+    private static final Logger logger = LoggerFactory.getLogger(SSERequestListener.class);
     private ExecutorService executorService;
     private boolean paused;
     private ReentrantLock lock;
@@ -44,8 +44,8 @@ public class HttpSSERequestListener {
     private SourceMetrics metrics;
     private String streamId;
 
-    public HttpSSERequestListener(int workerThread, String url, Boolean auth,
-                                  String streamId, String siddhiAppName, SourceMetrics metrics) {
+    public SSERequestListener(int workerThread, String url, Boolean auth,
+                              String streamId, String siddhiAppName, SourceMetrics metrics) {
         this.executorService = Executors.newFixedThreadPool(workerThread);
         this.siddhiAppName = siddhiAppName;
         this.paused = false;
@@ -66,7 +66,7 @@ public class HttpSSERequestListener {
                 throw new HttpSourceAdaptorRuntimeException(carbonMessage, "Authorisation fails", 401);
             }
         }
-        executorService.execute(new HttpSSEWorkerThread(carbonMessage, streamId, metrics));
+        executorService.execute(new SSEWorkerThread(carbonMessage, streamId, metrics));
     }
 
     public String getSiddhiAppName() {

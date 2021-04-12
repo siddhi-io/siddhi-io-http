@@ -70,36 +70,14 @@ import static org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE;
 /**
  * Http sink to publish sse events.
  */
-@Extension(name = "sse", namespace = "sink",
+@Extension(name = "sse-server", namespace = "sink",
         description = "HTTP SSE sink sends events to all subscribers.",
         parameters = {
                 @Parameter(
-                        name = "event.sink.url",
+                        name = "server.url",
                         description = "The sse endpoint url which should be listened.",
                         type = {DataType.STRING}
                 ),
-                @Parameter(
-                        name = "method",
-                        description = "The HTTP method used for calling the endpoint.",
-                        type = {DataType.STRING},
-                        optional = true,
-                        defaultValue = "GET"),
-                @Parameter(
-                        name = "basic.auth.username",
-                        description = "The username to be included in the authentication header when calling " +
-                                "endpoints protected by basic authentication. `basic.auth.password` property " +
-                                "should be also set when using this property.",
-                        type = {DataType.STRING},
-                        optional = true,
-                        defaultValue = "-"),
-                @Parameter(
-                        name = "basic.auth.password",
-                        description = "The password to be included in the authentication header when calling " +
-                                "endpoints protected by basic authentication. `basic.auth.username` property " +
-                                "should be also set when using this property.",
-                        type = {DataType.STRING},
-                        optional = true,
-                        defaultValue = "-"),
                 @Parameter(
                         name = "worker.count",
                         description = "The number of active worker threads to serve the " +
@@ -178,17 +156,15 @@ import static org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE;
         },
         examples = {
                 @Example(
-                        syntax = "" +
-                                "@Source(type='sse', event.source.url='http://localhost:8080/sse', " +
+                        syntax = "@Source(type='sse-server', server.url='http://localhost:8080/sse', " +
                                 "@map(type='json')) " +
-                                "define stream IncomingStream (param1 string);",
-                        description = "This subscribes to the events which gets published by the " +
-                                "SSE server at event.source.url"
+                                "define stream PublishingStream (param1 string);",
+                        description = "External clients can listen to the server.url"
                 )
         }
 )
-public class HttpSSESink extends Sink {
-    private static final Logger logger = Logger.getLogger(HttpSSESink.class);
+public class SSEServerSink extends Sink {
+    private static final Logger logger = Logger.getLogger(SSEServerSink.class);
 
     private String siddhiAppName;
     private String streamId;
@@ -254,7 +230,7 @@ public class HttpSSESink extends Sink {
                     PORT_CONTEXT_SEPARATOR + siddhiAppContext.getName()
                     + HttpConstants.PORT_CONTEXT_SEPARATOR + streamId;
         }
-        this.listenerUrl = optionHolder.validateAndGetStaticValue(HttpConstants.EVENT_SINK_URL, defaultURL);
+        this.listenerUrl = optionHolder.validateAndGetStaticValue(HttpConstants.SERVER_URL, defaultURL);
         this.isAuth = Boolean.parseBoolean(optionHolder
                 .validateAndGetStaticValue(HttpConstants.IS_AUTH, HttpConstants.EMPTY_IS_AUTH)
                 .toLowerCase(Locale.ENGLISH));

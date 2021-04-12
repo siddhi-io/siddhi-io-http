@@ -75,16 +75,10 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
         description = "HTTP SSE source send a request to a given url and listen to the response stream.",
         parameters = {
                 @Parameter(
-                        name = "event.source.url",
+                        name = "receiver.url",
                         description = "The sse endpoint url which should be listened.",
                         type = {DataType.STRING}
                 ),
-                @Parameter(
-                        name = "method",
-                        description = "The HTTP method used for calling the endpoint.",
-                        type = {DataType.STRING},
-                        optional = true,
-                        defaultValue = "GET"),
                 @Parameter(
                         name = "basic.auth.username",
                         description = "The username to be included in the authentication header when calling " +
@@ -180,16 +174,16 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
         examples = {
                 @Example(
                         syntax = "" +
-                                "@Source(type='sse', event.source.url='http://localhost:8080/sse', " +
+                                "@Source(type='sse', receiver.url='http://localhost:8080/sse', " +
                                 "@map(type='json')) " +
                                 "define stream IncomingStream (param1 string);",
                         description = "This subscribes to the events which gets published by the " +
-                                "SSE server at event.source.url"
+                                "SSE server at receiver.url"
                 )
         }
 )
-public class HttpSSESource extends Source {
-    private static final Logger log = Logger.getLogger(HttpSSESource.class);
+public class SSESource extends Source {
+    private static final Logger log = Logger.getLogger(SSESource.class);
     private int workerThread;
     private String siddhiAppName;
     private String streamID;
@@ -197,7 +191,6 @@ public class HttpSSESource extends Source {
     private String mapType;
     private String clientStoreFile;
     private String clientStorePass;
-    private String httpMethod;
     private String clientBootstrapConfiguration;
     private String userName;
     private String userPassword;
@@ -209,8 +202,8 @@ public class HttpSSESource extends Source {
     private DefaultHttpWsConnectorFactory httpConnectorFactory;
     private ConfigReader configReader;
     private PoolConfiguration connectionPoolConfiguration;
-    private HttpSSESourceConnectorRegistry httpConnectorRegistry;
-    private HttpSSEResponseConnectorListener httpSSEResponseConnectorListener;
+    private SSESourceConnectorRegistry httpConnectorRegistry;
+    private SSEResponseConnectorListener httpSSEResponseConnectorListener;
     private ServiceDeploymentInfo serviceDeploymentInfo;
     private SourceEventListener sourceEventListener;
     private SourceMetrics metrics;
@@ -231,7 +224,6 @@ public class HttpSSESource extends Source {
         this.mapType = HttpConstants.MAP_JSON;
         this.workerThread = Integer.parseInt(optionHolder
                 .validateAndGetStaticValue(HttpConstants.WORKER_COUNT, DEFAULT_WORKER_COUNT));
-        this.httpMethod = optionHolder.validateAndGetStaticValue(HttpConstants.METHOD, HttpConstants.HTTP_METHOD_GET);
         this.clientStoreFile = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PATH_PARAM,
                 HttpSinkUtil.trustStorePath(configReader));
         this.clientStorePass = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD_PARAM,
@@ -255,8 +247,8 @@ public class HttpSSESource extends Source {
         }
 
         this.serviceDeploymentInfo = new ServiceDeploymentInfo(port, isSecured);
-        this.eventSourceUrl = optionHolder.validateAndGetOption(HttpConstants.EVENT_SOURCE_URL).getValue();
-        this.httpConnectorRegistry = HttpSSESourceConnectorRegistry.getInstance();
+        this.eventSourceUrl = optionHolder.validateAndGetOption(HttpConstants.RECEIVER_URL).getValue();
+        this.httpConnectorRegistry = SSESourceConnectorRegistry.getInstance();
         this.requestedTransportPropertyNames = requestedTransportPropertyNames.clone();
         this.httpConnectorFactory = createConnectorFactory(configReader);
         this.connectionPoolConfiguration = createPoolConfigurations(optionHolder);
@@ -274,12 +266,13 @@ public class HttpSSESource extends Source {
     @Override
     public void connect(ConnectionCallback connectionCallback, State state) throws ConnectionUnavailableException {
         this.httpSSEResponseConnectorListener =
-                new HttpSSEResponseConnectorListener(workerThread, sourceEventListener, streamID,
+                new SSEResponseConnectorListener(workerThread, sourceEventListener, streamID,
                         requestedTransportPropertyNames, siddhiAppName);
         this.httpConnectorRegistry.registerSourceListener(httpSSEResponseConnectorListener, streamID);
         HTTPSourceRegistry.registerSSESource(streamID, this);
 
         // Send initial request
+        String httpMethod = HttpConstants.HTTP_METHOD_GET;
         String headers = httpHeaderOption.getValue();
         List<Header> headersList = HttpSinkUtil.getHeaders(headers);
         String contentType = HttpSinkUtil.getContentType(mapType, headersList);
@@ -295,7 +288,7 @@ public class HttpSSESource extends Source {
             latch = new CountDownLatch(1);
         }
 
-        HttpSSEResponseListener httpListener = new HttpSSEResponseListener(this, streamID, latch, metrics);
+        SSEResponseListener httpListener = new SSEResponseListener(this, streamID, latch, metrics);
         httpResponseFuture.setHttpConnectorListener(httpListener);
         if (latch != null) {
             try {
@@ -372,7 +365,7 @@ public class HttpSSESource extends Source {
         }
     }
 
-    public HttpSSEResponseConnectorListener getConnectorListener() {
+    public SSEResponseConnectorListener getConnectorListener() {
         return httpSSEResponseConnectorListener;
     }
 

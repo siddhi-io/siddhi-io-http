@@ -22,9 +22,9 @@ import io.siddhi.core.stream.input.source.SourceEventListener;
 /**
  * Extended HttpCallResponseConnectorListener for HttpSSESource, where shouldAllowStreamingResponses is true.
  */
-public class HttpSSEResponseConnectorListener extends HttpCallResponseConnectorListener {
-    public HttpSSEResponseConnectorListener(int numberOfThreads, SourceEventListener sourceEventListener,
-                                            String streamId, String[] trpPropertyNames, String siddhiAppName) {
+public class SSEResponseConnectorListener extends HttpCallResponseConnectorListener {
+    public SSEResponseConnectorListener(int numberOfThreads, SourceEventListener sourceEventListener,
+                                        String streamId, String[] trpPropertyNames, String siddhiAppName) {
         super(numberOfThreads, sourceEventListener, true, streamId,
                 trpPropertyNames, siddhiAppName);
     }

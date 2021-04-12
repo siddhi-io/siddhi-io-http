@@ -38,7 +38,7 @@ public class SSESyncConnectorRegistry extends SSEConnectorRegistry {
 
     private static SSESyncConnectorRegistry instance = new SSESyncConnectorRegistry();
     private final Logger log = Logger.getLogger(SSESyncConnectorRegistry.class);
-    private Map<String, HttpSSERequestListener> sourceListenersMap = new ConcurrentHashMap<>();
+    private Map<String, SSERequestListener> sourceListenersMap = new ConcurrentHashMap<>();
 
     private SSESyncConnectorRegistry() {
     }
@@ -57,7 +57,7 @@ public class SSESyncConnectorRegistry extends SSEConnectorRegistry {
      *
      * @return the source listener map
      */
-    protected Map<String, HttpSSERequestListener> getSyncSourceListenersMap() {
+    protected Map<String, SSERequestListener> getSyncSourceListenersMap() {
         return this.sourceListenersMap;
     }
 
@@ -74,8 +74,8 @@ public class SSESyncConnectorRegistry extends SSEConnectorRegistry {
                                           int workerThread, Boolean isAuth, String sourceId, String siddhiAppName,
                                           SourceMetrics metrics) {
         String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
-        HttpSSERequestListener httpSourceListener = this.sourceListenersMap.putIfAbsent(listenerKey,
-                new HttpSSERequestListener(workerThread, listenerUrl, isAuth, sourceId, siddhiAppName, metrics));
+        SSERequestListener httpSourceListener = this.sourceListenersMap.putIfAbsent(listenerKey,
+                new SSERequestListener(workerThread, listenerUrl, isAuth, sourceId, siddhiAppName, metrics));
         if (httpSourceListener != null) {
             throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected");
         }
@@ -89,7 +89,7 @@ public class SSESyncConnectorRegistry extends SSEConnectorRegistry {
      */
     protected void unregisterSourceListener(String listenerUrl, String siddhiAppName, SourceMetrics metrics) {
         String key = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
-        HttpSSERequestListener httpSourceListener = this.sourceListenersMap.get(key);
+        SSERequestListener httpSourceListener = this.sourceListenersMap.get(key);
         if (httpSourceListener != null && httpSourceListener.getSiddhiAppName().equals(siddhiAppName)) {
             sourceListenersMap.remove(key);
             httpSourceListener.disconnect();

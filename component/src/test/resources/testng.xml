@@ -28,7 +28,7 @@ limitations under the License.
             <class name="io.siddhi.extension.io.http.source.HttpSourceConflictsTestCase"/>
             <class name="io.siddhi.extension.io.http.source.HttpSyncRequestResponseTestCase"/>
             <class name="io.siddhi.extension.io.http.source.HttpSyncServiceResponseTestCase"/>
-            <class name="io.siddhi.extension.io.http.source.HttpSSESourceTestCase"/>
+            <class name="io.siddhi.extension.io.http.source.SSESourceTestCase"/>
 
             <class name="io.siddhi.extension.io.http.sink.HttpAuthTestCase"/>
             <class name="io.siddhi.extension.io.http.sink.HttpOAuthTestCase"/>
@@ -40,6 +40,7 @@ limitations under the License.
             <class name="io.siddhi.extension.io.http.sink.HttpSinkCustomConfigurationTestCase"/>
             <class name="io.siddhi.extension.io.http.sink.HttpRequestResponseTestCase"/>
             <class name="io.siddhi.extension.io.http.sink.HttpCallResponseTestCase"/>
+            <class name="io.siddhi.extension.io.http.sink.SSEServerSinkTestCase"/>
 
         </classes>
     </test>

@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.wso2.transport.http.netty.contract.Constants;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
 import org.wso2.transport.http.netty.contract.exceptions.ClientClosedConnectionException;
-import org.wso2.transport.http.netty.contract.exceptions.ServerConnectorException;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 /**
@@ -43,34 +42,24 @@ public class SSEConnectorListener implements HttpConnectorListener {
     public void onMessage(HttpCarbonMessage carbonMessage) {
         try {
             if (isValidRequest(carbonMessage)) {
-                //Check the message is a response or direct message
-                if (carbonMessage.getProperty(org.wso2.carbon.messaging.Constants.DIRECTION) != null &&
-                        carbonMessage.getProperty(org.wso2.carbon.messaging.Constants.DIRECTION)
-                                .equals(org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE)) {
-                    try {
-                        carbonMessage.respond(carbonMessage);
-                    } catch (ServerConnectorException e) {
-                        log.error("Error occurred during message notification: " + e.getMessage(), e);
-                    }
-                } else {
-                    if (HttpConstants.HTTP_METHOD_POST.equalsIgnoreCase(carbonMessage.getHttpMethod())) {
-                        //get the required source listener
-                        StringBuilder sourceListenerKey = new StringBuilder().append(String
-                                .valueOf(carbonMessage.getProperty(HttpConstants.LISTENER_PORT)))
-                                .append(HttpConstants.PORT_CONTEXT_KEY_SEPARATOR)
-                                .append(carbonMessage.getProperty(HttpConstants.TO));
-                        HttpSSERequestListener requestListener = getSourceListener(sourceListenerKey);
-                        if (requestListener != null) {
-                            requestListener.send(carbonMessage);
-                        } else {
-                            HttpSourceUtil.handleCallback(carbonMessage, 404);
-                        }
-                    } else if (HttpConstants.HTTP_METHOD_OPTIONS.equalsIgnoreCase(carbonMessage.getHttpMethod())) {
-                        HttpSourceUtil.handleCORS(carbonMessage);
+                //Check the message type to match GET or POST
+                if (HttpConstants.HTTP_METHOD_GET.equalsIgnoreCase(carbonMessage.getHttpMethod())
+                        || HttpConstants.HTTP_METHOD_POST.equalsIgnoreCase(carbonMessage.getHttpMethod())) {
+                    StringBuilder sourceListenerKey = new StringBuilder().append(String
+                            .valueOf(carbonMessage.getProperty(HttpConstants.LISTENER_PORT)))
+                            .append(HttpConstants.PORT_CONTEXT_KEY_SEPARATOR)
+                            .append(carbonMessage.getProperty(HttpConstants.TO));
+                    SSERequestListener requestListener = getSourceListener(sourceListenerKey);
+                    if (requestListener != null) {
+                        requestListener.send(carbonMessage);
                     } else {
-                        throw new HttpSourceAdaptorRuntimeException(carbonMessage,
-                                "Request type is not a type of POST ", 400);
+                        HttpSourceUtil.handleCallback(carbonMessage, 404);
                     }
+                } else if (HttpConstants.HTTP_METHOD_OPTIONS.equalsIgnoreCase(carbonMessage.getHttpMethod())) {
+                    HttpSourceUtil.handleCORS(carbonMessage);
+                } else {
+                    throw new HttpSourceAdaptorRuntimeException(carbonMessage,
+                            "Request type is not a type of GET or POST ", 400);
                 }
             } else {
                 if (log.isDebugEnabled()) {
@@ -91,7 +80,7 @@ public class SSEConnectorListener implements HttpConnectorListener {
                 SSEConnectorRegistry.getInstance().getServerConnectorPool().containsKey(getInterface(carbonMessage));
     }
 
-    protected HttpSSERequestListener getSourceListener(StringBuilder sourceListenerKey) {
+    protected SSERequestListener getSourceListener(StringBuilder sourceListenerKey) {
 
         return SSEConnectorRegistry.getInstance().getSourceListenersMap().get(sourceListenerKey.toString());
     }
