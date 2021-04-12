@@ -174,11 +174,11 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
         examples = {
                 @Example(
                         syntax = "" +
-                                "@Source(type='sse', event.source.url='http://localhost:8080/sse', " +
+                                "@Source(type='sse', receiver.url='http://localhost:8080/sse', " +
                                 "@map(type='json')) " +
                                 "define stream IncomingStream (param1 string);",
                         description = "This subscribes to the events which gets published by the " +
-                                "SSE server at event.source.url"
+                                "SSE server at receiver.url"
                 )
         }
 )
@@ -247,7 +247,7 @@ public class SSESource extends Source {
         }
 
         this.serviceDeploymentInfo = new ServiceDeploymentInfo(port, isSecured);
-        this.eventSourceUrl = optionHolder.validateAndGetOption(HttpConstants.EVENT_SOURCE_URL).getValue();
+        this.eventSourceUrl = optionHolder.validateAndGetOption(HttpConstants.RECEIVER_URL).getValue();
         this.httpConnectorRegistry = SSESourceConnectorRegistry.getInstance();
         this.requestedTransportPropertyNames = requestedTransportPropertyNames.clone();
         this.httpConnectorFactory = createConnectorFactory(configReader);

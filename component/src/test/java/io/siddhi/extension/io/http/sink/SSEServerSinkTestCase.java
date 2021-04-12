@@ -55,10 +55,10 @@ public class SSEServerSinkTestCase {
         siddhiManager.setPersistenceStore(persistenceStore);
         siddhiManager.setExtension("json-output-mapper", JsonSinkMapper.class);
         siddhiManager.setExtension("json-input-mapper", JsonSourceMapper.class);
-        String sinkStreamDefinition = "@sink(type = 'sse', event.sink.url='http://localhost:8010/send', " +
+        String sinkStreamDefinition = "@sink(type = 'sse-server', server.url='http://localhost:8010/send', " +
                 "@map(type='json'))\n" +
                 "define stream PublishStream (param1 string);\n";
-        String sourceStreamDefinition = "@Source(type = 'sse', event.source.url='http://localhost:8010/send', " +
+        String sourceStreamDefinition = "@Source(type = 'sse', receiver.url='http://localhost:8010/send', " +
                 "@map(type='json'))\n" +
                 "@sink(type='log')\n" +
                 "define stream ListenStream (param1 string);\n";
