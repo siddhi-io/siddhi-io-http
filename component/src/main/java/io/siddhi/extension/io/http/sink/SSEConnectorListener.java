@@ -42,10 +42,9 @@ public class SSEConnectorListener implements HttpConnectorListener {
     public void onMessage(HttpCarbonMessage carbonMessage) {
         try {
             if (isValidRequest(carbonMessage)) {
-                //Check the message is a response or direct message
+                //Check the message type to match GET or POST
                 if (HttpConstants.HTTP_METHOD_GET.equalsIgnoreCase(carbonMessage.getHttpMethod())
                         || HttpConstants.HTTP_METHOD_POST.equalsIgnoreCase(carbonMessage.getHttpMethod())) {
-                    //get the required source listener
                     StringBuilder sourceListenerKey = new StringBuilder().append(String
                             .valueOf(carbonMessage.getProperty(HttpConstants.LISTENER_PORT)))
                             .append(HttpConstants.PORT_CONTEXT_KEY_SEPARATOR)
