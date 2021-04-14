@@ -30,6 +30,7 @@ import io.siddhi.annotation.SystemParameter;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.config.SiddhiAppContext;
 import io.siddhi.core.exception.ConnectionUnavailableException;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.ServiceDeploymentInfo;
 import io.siddhi.core.stream.output.sink.Sink;
 import io.siddhi.core.util.config.ConfigReader;
@@ -55,6 +56,8 @@ import org.wso2.transport.http.netty.contract.config.ListenerConfiguration;
 import org.wso2.transport.http.netty.contract.exceptions.ServerConnectorException;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -231,6 +234,17 @@ public class SSEServerSink extends Sink {
                     + HttpConstants.PORT_CONTEXT_SEPARATOR + streamId;
         }
         this.listenerUrl = optionHolder.validateAndGetStaticValue(HttpConstants.SERVER_URL, defaultURL);
+        try {
+            if ((new URL(listenerUrl)).getPath().replace("/", "").trim().isEmpty()) {
+                throw new SiddhiAppCreationException("Please provide a valid `server.url` with a context in " +
+                        HttpConstants.HTTP_SINK_ID + " with the stream " + streamId + " in Siddhi app " +
+                        siddhiAppContext.getName());
+            }
+        } catch (MalformedURLException e) {
+            throw new SiddhiAppCreationException("Please provide a valid `server.url` in " +
+                    HttpConstants.HTTP_SINK_ID + " with the stream " + streamId + " in Siddhi app " +
+                    siddhiAppContext.getName());
+        }
         this.isAuth = Boolean.parseBoolean(optionHolder
                 .validateAndGetStaticValue(HttpConstants.IS_AUTH, HttpConstants.EMPTY_IS_AUTH)
                 .toLowerCase(Locale.ENGLISH));
@@ -248,10 +262,6 @@ public class SSEServerSink extends Sink {
         }
         this.listenerConfiguration = HttpSourceUtil.getListenerConfiguration(this.listenerUrl, configReader);
         this.listenerConfiguration.setSocketIdleTimeout(-1);
-//        if (!HttpConstants.EMPTY_STRING.equals(requestSizeValidationConfigList)) {
-//            this.listenerConfiguration.setMsgSizeValidationConfig(HttpConnectorRegistry.getInstance()
-//                    .populateRequestSizeValidationConfiguration());
-//        }
         isSecured = (listenerConfiguration.getScheme().equalsIgnoreCase(HttpConstants.SCHEME_HTTPS));
         port = listenerConfiguration.getPort();
         listenerConfiguration.setParameters(HttpIoUtil.populateParameters(sslConfigs));
@@ -307,7 +317,8 @@ public class SSEServerSink extends Sink {
         try {
             requestMsg.respond(responseMsg).setHttpConnectorListener(new HttpConnectorListener() {
                 @Override
-                public void onMessage(HttpCarbonMessage httpMessage) {}
+                public void onMessage(HttpCarbonMessage httpMessage) {
+                }
 
                 @Override
                 public void onError(Throwable throwable) {
