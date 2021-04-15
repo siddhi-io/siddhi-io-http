@@ -284,14 +284,6 @@ public class SSEServerSink extends Sink {
         this.httpConnectorRegistry.setTransportConfig(serverBootstrapPropertiesList, requestSizeValidationConfigList);
     }
 
-    private void connectConnectorRegistry() {
-        listenerConfiguration.setChunkConfig(ChunkConfig.ALWAYS);
-        listenerConfiguration.setKeepAliveConfig(KeepAliveConfig.ALWAYS);
-        this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration);
-        this.httpConnectorRegistry.registerSourceListener(listenerUrl, workerThread, isAuth, streamId, siddhiAppName);
-        HTTPSinkRegistry.registerSSESink(streamId, this);
-    }
-
     public boolean matches(String thatSinkId) {
         return (Objects.equals(streamId, thatSinkId));
     }
@@ -406,16 +398,32 @@ public class SSEServerSink extends Sink {
 
     @Override
     public void connect() throws ConnectionUnavailableException {
-        connectConnectorRegistry();
+        listenerConfiguration.setChunkConfig(ChunkConfig.ALWAYS);
+        listenerConfiguration.setKeepAliveConfig(KeepAliveConfig.ALWAYS);
+        this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration);
+        this.httpConnectorRegistry.registerSourceListener(listenerUrl, workerThread, isAuth, streamId, siddhiAppName);
+        HTTPSinkRegistry.registerSSESink(streamId, this);
     }
 
     @Override
     public void disconnect() {
+        this.httpConnectorRegistry.unregisterSourceListener(listenerUrl, siddhiAppName);
+        this.httpConnectorRegistry.unregisterServerConnector(listenerUrl);
 
+        HTTPSinkRegistry.removeSSESink(streamId);
+        if (!requestContainerList.isEmpty()) {
+            requestContainerList.forEach(carbonMessage -> {
+                if (carbonMessage != null) {
+                    handleResponse(carbonMessage, 200, null, null, null);
+                }
+            });
+            requestContainerList.clear();
+        }
     }
 
     @Override
     public void destroy() {
-
+        this.httpConnectorRegistry.clearBootstrapConfigIfLast();
+        HTTPSinkRegistry.removeSSESink(streamId);
     }
 }

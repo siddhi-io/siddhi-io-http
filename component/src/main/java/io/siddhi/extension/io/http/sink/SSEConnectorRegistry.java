@@ -248,7 +248,7 @@ public class SSEConnectorRegistry {
     }
 
     /**
-     * Register the new server connector.
+     * Unregister the server connector.
      *
      * @param listenerUrl the listener url
      */
