@@ -39,7 +39,7 @@ import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.DynamicOptions;
 import io.siddhi.core.util.transport.Option;
 import io.siddhi.core.util.transport.OptionHolder;
-import io.siddhi.extension.io.http.metrics.SourceMetrics;
+import io.siddhi.extension.io.http.metrics.SinkMetrics;
 import io.siddhi.extension.io.http.sink.util.HttpSinkUtil;
 import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
@@ -49,6 +49,7 @@ import io.siddhi.extension.io.http.util.HttpIoUtil;
 import io.siddhi.query.api.definition.StreamDefinition;
 import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
+import org.wso2.carbon.si.metrics.core.internal.MetricsDataHolder;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
 import org.wso2.transport.http.netty.contract.config.ChunkConfig;
 import org.wso2.transport.http.netty.contract.config.KeepAliveConfig;
@@ -78,8 +79,8 @@ import static org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE;
         parameters = {
                 @Parameter(
                         name = "server.url",
-                        description = "The listening URL of the SSE server which clients need to connect to receive events" +
-                                 "If not provided url will be " +
+                        description = "The listening URL of the SSE server which clients need to connect to " +
+                                "receive events. If not provided url will be " +
                                 "constructed using siddhi app name and stream name as the context by default " +
                                 "with port 8280. eg :- http://0.0.0.0:8280/{app_name}/{stream_name}",
                         type = {DataType.STRING}
@@ -178,7 +179,7 @@ public class SSEServerSink extends Sink {
     private int workerThread;
     private boolean isAuth;
     private boolean isSecured;
-    private SourceMetrics metrics;
+    private SinkMetrics metrics;
     private String[] requestedTransportPropertyNames;
     private ListenerConfiguration listenerConfiguration;
     private ServiceDeploymentInfo serviceDeploymentInfo;
@@ -208,7 +209,7 @@ public class SSEServerSink extends Sink {
         String[] requestedTransportPropertyNames = new String[10];
         initSource(streamDefinition, optionHolder, requestedTransportPropertyNames, configReader, siddhiAppContext);
         initConnectorRegistry(optionHolder, configReader);
-        //TODO: Init metrics
+        initMetrics(siddhiAppName, streamDefinition.getId());
         return null;
     }
 
@@ -283,15 +284,6 @@ public class SSEServerSink extends Sink {
         this.httpConnectorRegistry.setTransportConfig(serverBootstrapPropertiesList, requestSizeValidationConfigList);
     }
 
-    private void connectConnectorRegistry() {
-        listenerConfiguration.setChunkConfig(ChunkConfig.ALWAYS);
-        listenerConfiguration.setKeepAliveConfig(KeepAliveConfig.ALWAYS);
-        this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration, metrics);
-        this.httpConnectorRegistry.registerSourceListener(listenerUrl, workerThread, isAuth, streamId, siddhiAppName,
-                metrics);
-        HTTPSinkRegistry.registerSSESink(streamId, this);
-    }
-
     public boolean matches(String thatSinkId) {
         return (Objects.equals(streamId, thatSinkId));
     }
@@ -329,15 +321,26 @@ public class SSEServerSink extends Sink {
                 }
             });
         } catch (ServerConnectorException e) {
+            if (metrics != null) {
+                metrics.getTotalHttpErrorsMetric(requestMsg.getRequestUrl()).inc();
+            }
+
             throw new HttpSourceAdaptorRuntimeException("Error occurred during response", e);
         }
     }
 
     private void handleResponse(HttpCarbonMessage requestMessage, Integer code, String payload, List<Header>
             headers, String contentType) {
-
         int statusCode = (code == null) ? 500 : code;
         String responsePayload = (payload != null) ? payload : "";
+        String publisherUrl = requestMessage.getRequestUrl();
+        if (metrics != null) {
+            metrics.getTotalWritesMetric().inc();
+            metrics.getTotalHttpWritesMetric(publisherUrl).inc();
+            metrics.getRequestSizeMetric(publisherUrl).inc(HttpSinkUtil.getByteSize(payload));
+            metrics.setLastEventTime(publisherUrl, System.currentTimeMillis());
+        }
+
         handleResponse(requestMessage, createResponseMessage(responsePayload, statusCode, headers, contentType));
     }
 
@@ -368,6 +371,21 @@ public class SSEServerSink extends Sink {
         return response;
     }
 
+    private void initMetrics(String appName, String streamName) {
+        if (MetricsDataHolder.getInstance().getMetricService() != null
+                && MetricsDataHolder.getInstance().getMetricManagementService().isEnabled()) {
+            try {
+                if (MetricsDataHolder.getInstance().getMetricManagementService()
+                        .isReporterRunning(HttpConstants.PROMETHEUS_REPORTER_NAME)) {
+                    metrics = new SinkMetrics(appName, streamName);
+                }
+            } catch (IllegalArgumentException e) {
+                logger.debug("Prometheus reporter is not running. Hence sse sink metrics will not be initialized for "
+                        + appName);
+            }
+        }
+    }
+
     @Override
     public void publish(Object payload, DynamicOptions dynamicOptions, State state)
             throws ConnectionUnavailableException {
@@ -380,16 +398,32 @@ public class SSEServerSink extends Sink {
 
     @Override
     public void connect() throws ConnectionUnavailableException {
-        connectConnectorRegistry();
+        listenerConfiguration.setChunkConfig(ChunkConfig.ALWAYS);
+        listenerConfiguration.setKeepAliveConfig(KeepAliveConfig.ALWAYS);
+        this.httpConnectorRegistry.createHttpServerConnector(listenerConfiguration);
+        this.httpConnectorRegistry.registerSourceListener(listenerUrl, workerThread, isAuth, streamId, siddhiAppName);
+        HTTPSinkRegistry.registerSSESink(streamId, this);
     }
 
     @Override
     public void disconnect() {
+        this.httpConnectorRegistry.unregisterSourceListener(listenerUrl, siddhiAppName);
+        this.httpConnectorRegistry.unregisterServerConnector(listenerUrl);
 
+        HTTPSinkRegistry.removeSSESink(streamId);
+        if (!requestContainerList.isEmpty()) {
+            requestContainerList.forEach(carbonMessage -> {
+                if (carbonMessage != null) {
+                    handleResponse(carbonMessage, 200, null, null, null);
+                }
+            });
+            requestContainerList.clear();
+        }
     }
 
     @Override
     public void destroy() {
-
+        this.httpConnectorRegistry.clearBootstrapConfigIfLast();
+        HTTPSinkRegistry.removeSSESink(streamId);
     }
 }

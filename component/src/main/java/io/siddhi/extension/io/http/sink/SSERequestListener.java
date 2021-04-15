@@ -17,7 +17,6 @@
 
 package io.siddhi.extension.io.http.sink;
 
-import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.source.HttpAuthenticator;
 import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import org.slf4j.Logger;
@@ -41,11 +40,10 @@ public class SSERequestListener {
     private String url;
     private Boolean isAuthEnabled;
     private String siddhiAppName;
-    private SourceMetrics metrics;
     private String streamId;
 
     public SSERequestListener(int workerThread, String url, Boolean auth,
-                              String streamId, String siddhiAppName, SourceMetrics metrics) {
+                              String streamId, String siddhiAppName) {
         this.executorService = Executors.newFixedThreadPool(workerThread);
         this.siddhiAppName = siddhiAppName;
         this.paused = false;
@@ -53,20 +51,17 @@ public class SSERequestListener {
         this.condition = lock.newCondition();
         this.url = url;
         this.isAuthEnabled = auth;
-        this.metrics = metrics;
         this.streamId = streamId;
     }
 
     protected void send(HttpCarbonMessage carbonMessage) {
         if (isAuthEnabled) {
             if (!HttpAuthenticator.authenticate(carbonMessage)) {
-                if (metrics != null) {
-                    metrics.getTotalHttpErrorsMetric().inc();
-                }
                 throw new HttpSourceAdaptorRuntimeException(carbonMessage, "Authorisation fails", 401);
             }
         }
-        executorService.execute(new SSEWorkerThread(carbonMessage, streamId, metrics));
+
+        executorService.execute(new SSEWorkerThread(carbonMessage, streamId));
     }
 
     public String getSiddhiAppName() {

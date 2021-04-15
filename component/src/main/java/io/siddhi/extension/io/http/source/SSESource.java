@@ -267,7 +267,7 @@ public class SSESource extends Source {
     public void connect(ConnectionCallback connectionCallback, State state) throws ConnectionUnavailableException {
         this.httpSSEResponseConnectorListener =
                 new SSEResponseConnectorListener(workerThread, sourceEventListener, streamID,
-                        requestedTransportPropertyNames, siddhiAppName);
+                        requestedTransportPropertyNames, siddhiAppName, metrics);
         this.httpConnectorRegistry.registerSourceListener(httpSSEResponseConnectorListener, streamID);
         HTTPSourceRegistry.registerSSESource(streamID, this);
 
@@ -434,7 +434,7 @@ public class SSESource extends Source {
                             eventSourceUrl);
                 }
             } catch (IllegalArgumentException e) {
-                log.debug("Prometheus reporter is not running. Hence http source metrics will not be initialized for "
+                log.debug("Prometheus reporter is not running. Hence sse source metrics will not be initialized for "
                         + siddhiAppName);
             }
         }

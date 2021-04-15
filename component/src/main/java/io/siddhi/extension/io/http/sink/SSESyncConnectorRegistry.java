@@ -19,7 +19,6 @@ package io.siddhi.extension.io.http.sink;
 
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.util.config.ConfigReader;
-import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.source.ConnectorStartupSynchronizer;
 import io.siddhi.extension.io.http.source.HttpConnectorPortBindingListener;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
@@ -64,18 +63,17 @@ public class SSESyncConnectorRegistry extends SSEConnectorRegistry {
     /**
      * Register new source listener.
      *
-     * @param listenerUrl                     the listener url.
-     * @param workerThread                    the worker thread count of siddhi level thread pool executor.
-     * @param isAuth                          the authentication is required for source listener.
-     * @param sourceId                        source Id.
+     * @param listenerUrl   the listener url.
+     * @param workerThread  the worker thread count of siddhi level thread pool executor.
+     * @param isAuth        the authentication is required for source listener.
+     * @param sourceId      source Id.
      * @param siddhiAppName
      */
     protected void registerSourceListener(String listenerUrl,
-                                          int workerThread, Boolean isAuth, String sourceId, String siddhiAppName,
-                                          SourceMetrics metrics) {
-        String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
+                                          int workerThread, Boolean isAuth, String sourceId, String siddhiAppName) {
+        String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl, null);
         SSERequestListener httpSourceListener = this.sourceListenersMap.putIfAbsent(listenerKey,
-                new SSERequestListener(workerThread, listenerUrl, isAuth, sourceId, siddhiAppName, metrics));
+                new SSERequestListener(workerThread, listenerUrl, isAuth, sourceId, siddhiAppName));
         if (httpSourceListener != null) {
             throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected");
         }
@@ -87,8 +85,8 @@ public class SSESyncConnectorRegistry extends SSEConnectorRegistry {
      * @param listenerUrl   the listener url
      * @param siddhiAppName
      */
-    protected void unregisterSourceListener(String listenerUrl, String siddhiAppName, SourceMetrics metrics) {
-        String key = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
+    protected void unregisterSourceListener(String listenerUrl, String siddhiAppName) {
+        String key = HttpSourceUtil.getSourceListenerKey(listenerUrl, null);
         SSERequestListener httpSourceListener = this.sourceListenersMap.get(key);
         if (httpSourceListener != null && httpSourceListener.getSiddhiAppName().equals(siddhiAppName)) {
             sourceListenersMap.remove(key);
@@ -139,10 +137,10 @@ public class SSESyncConnectorRegistry extends SSEConnectorRegistry {
     }
 
     protected void setConnectorListeners(ServerConnectorFuture connectorFuture, String serverConnectorId,
-                                         ConnectorStartupSynchronizer startupSyncer, SourceMetrics metrics) {
+                                         ConnectorStartupSynchronizer startupSyncer) {
 
         connectorFuture.setHttpConnectorListener(new SSESyncConnectorListener());
         connectorFuture.setPortBindingEventListener(
-                new HttpConnectorPortBindingListener(startupSyncer, serverConnectorId, metrics));
+                new HttpConnectorPortBindingListener(startupSyncer, serverConnectorId, null));
     }
 }

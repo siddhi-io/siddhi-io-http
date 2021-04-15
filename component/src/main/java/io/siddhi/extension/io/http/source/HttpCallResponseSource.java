@@ -181,7 +181,8 @@ public class HttpCallResponseSource extends Source {
     public void connect(ConnectionCallback connectionCallback, State state) throws ConnectionUnavailableException {
         this.httpCallResponseSourceListener =
                 new HttpCallResponseConnectorListener(Integer.parseInt(workerThread), sourceEventListener,
-                        shouldAllowStreamingResponses, sinkId, requestedTransportPropertyNames, siddhiAppName);
+                        shouldAllowStreamingResponses, sinkId, requestedTransportPropertyNames,
+                        siddhiAppName, null);
         this.httpConnectorRegistry.registerSourceListener(httpCallResponseSourceListener, sinkId, httpStatusCode);
         HTTPSourceRegistry.registerCallResponseSource(sinkId, httpStatusCode, this);
     }

@@ -18,9 +18,7 @@
  */
 package io.siddhi.extension.io.http.sink;
 
-import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.source.HttpWorkerThread;
-import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
 import io.siddhi.extension.io.http.util.HTTPSinkRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,12 +38,10 @@ public class SSEWorkerThread implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(HttpWorkerThread.class);
     private HttpCarbonMessage carbonMessage;
     private String streamID;
-    private SourceMetrics metrics;
 
-    SSEWorkerThread(HttpCarbonMessage cMessage, String streamID, SourceMetrics metrics) {
+    SSEWorkerThread(HttpCarbonMessage cMessage, String streamID) {
         this.carbonMessage = cMessage;
         this.streamID = streamID;
-        this.metrics = metrics;
     }
 
     @Override
@@ -56,22 +52,14 @@ public class SSEWorkerThread implements Runnable {
         String payload = buf.lines().collect(Collectors.joining("\n"));
         carbonMessage.setStreaming(true);
         HTTPSinkRegistry.findAndGetSSESource(streamID).registerCallback(carbonMessage);
-        if (metrics != null) {
-            metrics.getTotalReadsMetric().inc();
-            metrics.getTotalHttpReadsMetric().inc();
-            metrics.getRequestSizeMetric().inc(HttpSourceUtil.getByteSize(payload));
-            metrics.setLastEventTime(System.currentTimeMillis());
-        }
         if (logger.isDebugEnabled()) {
             logger.debug("Submitted Event " + payload + " Stream");
         }
+
         try {
             buf.close();
             carbonMessage.waitAndReleaseAllEntities();
         } catch (IOException e) {
-            if (metrics != null) {
-                metrics.getTotalHttpErrorsMetric().inc();
-            }
             logger.error("Error occurred when closing the byte buffer in source " + streamID, e);
         }
     }

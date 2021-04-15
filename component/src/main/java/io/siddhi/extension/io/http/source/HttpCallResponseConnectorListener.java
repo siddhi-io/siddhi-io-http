@@ -20,6 +20,7 @@
 package io.siddhi.extension.io.http.source;
 
 import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
@@ -39,16 +40,19 @@ public class HttpCallResponseConnectorListener implements HttpConnectorListener 
     private String siddhiAppName;
     private String[] trpPropertyNames;
     private boolean shouldAllowStreamingResponses;
+    private SourceMetrics metrics;
 
     public HttpCallResponseConnectorListener(int numberOfThreads, SourceEventListener sourceEventListener,
                                              boolean shouldAllowStreamingResponses,
-                                             String sinkId, String[] trpPropertyNames, String siddhiAppName) {
+                                             String sinkId, String[] trpPropertyNames, String siddhiAppName,
+                                             SourceMetrics metrics) {
         this.sourceEventListener = sourceEventListener;
         this.sinkId = sinkId;
         this.executorService = Executors.newFixedThreadPool(numberOfThreads);
         this.siddhiAppName = siddhiAppName;
         this.trpPropertyNames = trpPropertyNames.clone();
         this.shouldAllowStreamingResponses = shouldAllowStreamingResponses;
+        this.metrics = metrics;
     }
 
     @Override
@@ -62,7 +66,7 @@ public class HttpCallResponseConnectorListener implements HttpConnectorListener 
         }
         HttpResponseProcessor workerThread =
                 new HttpResponseProcessor(carbonMessage, sourceEventListener, shouldAllowStreamingResponses,
-                        sinkId, properties);
+                        sinkId, properties, metrics);
         executorService.execute(workerThread);
     }
 
