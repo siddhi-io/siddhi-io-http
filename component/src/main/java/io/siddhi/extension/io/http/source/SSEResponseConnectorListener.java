@@ -18,14 +18,16 @@
 package io.siddhi.extension.io.http.source;
 
 import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.extension.io.http.metrics.SourceMetrics;
 
 /**
  * Extended HttpCallResponseConnectorListener for HttpSSESource, where shouldAllowStreamingResponses is true.
  */
 public class SSEResponseConnectorListener extends HttpCallResponseConnectorListener {
     public SSEResponseConnectorListener(int numberOfThreads, SourceEventListener sourceEventListener,
-                                        String streamId, String[] trpPropertyNames, String siddhiAppName) {
+                                        String streamId, String[] trpPropertyNames, String siddhiAppName,
+                                        SourceMetrics metrics) {
         super(numberOfThreads, sourceEventListener, true, streamId,
-                trpPropertyNames, siddhiAppName);
+                trpPropertyNames, siddhiAppName, metrics);
     }
 }

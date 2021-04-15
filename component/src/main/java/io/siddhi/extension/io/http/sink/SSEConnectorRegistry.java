@@ -19,7 +19,6 @@ package io.siddhi.extension.io.http.sink;
 
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.util.config.ConfigReader;
-import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.source.ConnectorStartupSynchronizer;
 import io.siddhi.extension.io.http.source.HTTPConnectorListener;
 import io.siddhi.extension.io.http.source.HttpConnectorPortBindingListener;
@@ -122,22 +121,18 @@ public class SSEConnectorRegistry {
     /**
      * Register new source listener.
      *
-     * @param listenerUrl         the listener url.
-     * @param workerThread        the worker thread count of siddhi level thread pool executor.
-     * @param isAuth              the authentication is required for source listener.
-     * @param siddhiAppName       the Siddhi application name
+     * @param listenerUrl   the listener url.
+     * @param workerThread  the worker thread count of siddhi level thread pool executor.
+     * @param isAuth        the authentication is required for source listener.
+     * @param siddhiAppName the Siddhi application name
      */
     void registerSourceListener(String listenerUrl,
                                 int workerThread, Boolean isAuth, String[] requestedTransportPropertyNames,
-                                String siddhiAppName, SourceMetrics metrics) {
-        String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
+                                String siddhiAppName) {
+        String listenerKey = HttpSourceUtil.getSourceListenerKey(listenerUrl, null);
         SSERequestListener httpSourceListener = this.sourceListenersMap.putIfAbsent(listenerKey,
-                new SSERequestListener(workerThread, listenerUrl, isAuth, "", siddhiAppName, metrics));
+                new SSERequestListener(workerThread, listenerUrl, isAuth, "", siddhiAppName));
         if (httpSourceListener != null) {
-            if (metrics != null) {
-                metrics.getTotalHttpErrorsMetric().inc();
-            }
-
             throw new SiddhiAppCreationException("Listener URL " + listenerUrl + " already connected");
         }
     }
@@ -148,8 +143,8 @@ public class SSEConnectorRegistry {
      * @param listenerUrl   the listener url
      * @param siddhiAppName
      */
-    protected void unregisterSourceListener(String listenerUrl, String siddhiAppName, SourceMetrics metrics) {
-        String key = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
+    protected void unregisterSourceListener(String listenerUrl, String siddhiAppName) {
+        String key = HttpSourceUtil.getSourceListenerKey(listenerUrl, null);
         SSERequestListener httpSourceListener = this.sourceListenersMap.get(key);
         if (httpSourceListener != null && httpSourceListener.getSiddhiAppName().equals(siddhiAppName)) {
             sourceListenersMap.remove(key);
@@ -203,17 +198,13 @@ public class SSEConnectorRegistry {
      *
      * @param listenerConfig listener configurations.
      */
-    void createHttpServerConnector(ListenerConfiguration listenerConfig, SourceMetrics metrics) {
+    void createHttpServerConnector(ListenerConfiguration listenerConfig) {
         synchronized (this) {
             String listenerInterface = listenerConfig.getHost() + ":" + listenerConfig.getPort();
             SSEServerConnectorContext sseServerConnectorContext =
                     serverConnectorPool.get(listenerInterface);
             if (sseServerConnectorContext != null) {
                 if (checkForConflicts(listenerConfig, sseServerConnectorContext)) {
-                    if (metrics != null) {
-                        metrics.getTotalHttpErrorsMetric().inc();
-                    }
-
                     throw new HttpSourceAdaptorRuntimeException("Conflicting configuration detected for listener " +
                             "configuration id " + listenerConfig.getId());
                 }
@@ -227,7 +218,7 @@ public class SSEConnectorRegistry {
             sseServerConnectorContext = new SSEServerConnectorContext(serverConnector, listenerConfig);
             serverConnectorPool.put(serverConnector.getConnectorID(), sseServerConnectorContext);
             sseServerConnectorContext.incrementReferenceCount();
-            this.registerServerConnector(serverConnector, listenerConfig, metrics);
+            this.registerServerConnector(serverConnector, listenerConfig);
         }
     }
 
@@ -237,12 +228,11 @@ public class SSEConnectorRegistry {
      * @param serverConnector server connector.
      * @param listenerConfig  listener configuration.
      */
-    void registerServerConnector(ServerConnector serverConnector, ListenerConfiguration listenerConfig,
-                                 SourceMetrics metrics) {
+    void registerServerConnector(ServerConnector serverConnector, ListenerConfiguration listenerConfig) {
         ServerConnectorFuture connectorFuture = serverConnector.start();
         ConnectorStartupSynchronizer startupSyncer =
                 new ConnectorStartupSynchronizer(new CountDownLatch(1));
-        setConnectorListeners(connectorFuture, serverConnector.getConnectorID(), startupSyncer, metrics);
+        setConnectorListeners(connectorFuture, serverConnector.getConnectorID(), startupSyncer);
         try {
             // Wait for all the connectors to start
             startupSyncer.getCountDownLatch().await();
@@ -310,10 +300,10 @@ public class SSEConnectorRegistry {
     }
 
     protected void setConnectorListeners(ServerConnectorFuture connectorFuture, String serverConnectorId,
-                                         ConnectorStartupSynchronizer startupSyncer, SourceMetrics metrics) {
+                                         ConnectorStartupSynchronizer startupSyncer) {
         connectorFuture.setHttpConnectorListener(new HTTPConnectorListener());
         connectorFuture.setPortBindingEventListener(
-                new HttpConnectorPortBindingListener(startupSyncer, serverConnectorId, metrics));
+                new HttpConnectorPortBindingListener(startupSyncer, serverConnectorId, null));
     }
 
     private void validateConnectorStartup(ConnectorStartupSynchronizer startupSyncer) {

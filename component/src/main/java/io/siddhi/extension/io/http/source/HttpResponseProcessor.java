@@ -21,6 +21,8 @@ package io.siddhi.extension.io.http.source;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.handler.codec.http.LastHttpContent;
 import io.siddhi.core.stream.input.source.SourceEventListener;
+import io.siddhi.extension.io.http.metrics.SourceMetrics;
+import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
 import io.siddhi.extension.io.http.util.HttpConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,14 +51,16 @@ public class HttpResponseProcessor implements Runnable {
     private String sinkId;
     private String[] trpProperties;
     private String filePath;
+    private SourceMetrics metrics;
 
     HttpResponseProcessor(HttpCarbonMessage cMessage, SourceEventListener sourceEventListener, boolean
-            shouldAllowStreamingResponses, String sinkId, String[] trpProperties) {
+            shouldAllowStreamingResponses, String sinkId, String[] trpProperties, SourceMetrics metrics) {
         this.carbonMessage = cMessage;
         this.sourceEventListener = sourceEventListener;
         this.sinkId = sinkId;
         this.trpProperties = trpProperties;
         this.shouldAllowStreamingResponses = shouldAllowStreamingResponses;
+        this.metrics = metrics;
     }
 
     @Override
@@ -104,6 +108,13 @@ public class HttpResponseProcessor implements Runnable {
                         if (content != null) {
                             String payload = content.content().toString(Charset.defaultCharset());
                             if (!payload.equals(HttpConstants.EMPTY_STRING)) {
+                                if (metrics != null) {
+                                    metrics.getTotalReadsMetric().inc();
+                                    metrics.getTotalHttpReadsMetric().inc();
+                                    metrics.getRequestSizeMetric().inc(HttpSourceUtil.getByteSize(payload));
+                                    metrics.setLastEventTime(System.currentTimeMillis());
+                                }
+
                                 sourceEventListener.onEvent(payload, trpProperties);
                                 if (logger.isDebugEnabled()) {
                                     logger.debug("Submitted Event :" + payload);
