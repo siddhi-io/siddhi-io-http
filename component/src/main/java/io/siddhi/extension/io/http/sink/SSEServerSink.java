@@ -78,7 +78,9 @@ import static org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE;
         parameters = {
                 @Parameter(
                         name = "server.url",
-                        description = "The sse endpoint url which should be listened.",
+                        description = "The sse endpoint url which should be listened. If not provided url will be " +
+                                "constructed using siddhi app name and stream name as the context by default " +
+                                "with port 8280. eg :- http://0.0.0.0:8280/{app_name}/{stream_name}",
                         type = {DataType.STRING}
                 ),
                 @Parameter(
@@ -236,13 +238,13 @@ public class SSEServerSink extends Sink {
         this.listenerUrl = optionHolder.validateAndGetStaticValue(HttpConstants.SERVER_URL, defaultURL);
         try {
             if ((new URL(listenerUrl)).getPath().replace("/", "").trim().isEmpty()) {
-                throw new SiddhiAppCreationException("Please provide a valid `server.url` with a context in " +
-                        HttpConstants.HTTP_SINK_ID + " with the stream " + streamId + " in Siddhi app " +
+                throw new SiddhiAppCreationException("Please provide a valid `server.url` with a context for " +
+                        "SSE server with the stream " + streamId + " in Siddhi app " +
                         siddhiAppContext.getName());
             }
         } catch (MalformedURLException e) {
-            throw new SiddhiAppCreationException("Please provide a valid `server.url` in " +
-                    HttpConstants.HTTP_SINK_ID + " with the stream " + streamId + " in Siddhi app " +
+            throw new SiddhiAppCreationException("Please provide a valid `server.url` for SSE server " +
+                    "with the stream " + streamId + " in Siddhi app " +
                     siddhiAppContext.getName());
         }
         this.isAuth = Boolean.parseBoolean(optionHolder
