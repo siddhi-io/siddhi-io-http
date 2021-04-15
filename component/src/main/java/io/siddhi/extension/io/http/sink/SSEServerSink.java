@@ -79,8 +79,8 @@ import static org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE;
         parameters = {
                 @Parameter(
                         name = "server.url",
-                        description = "The listening URL of the SSE server which clients need to connect to receive events" +
-                                 "If not provided url will be " +
+                        description = "The listening URL of the SSE server which clients need to connect to " +
+                                "receive events. If not provided url will be " +
                                 "constructed using siddhi app name and stream name as the context by default " +
                                 "with port 8280. eg :- http://0.0.0.0:8280/{app_name}/{stream_name}",
                         type = {DataType.STRING}
