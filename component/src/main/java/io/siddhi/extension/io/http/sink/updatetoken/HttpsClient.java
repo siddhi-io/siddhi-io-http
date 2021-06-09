@@ -19,23 +19,33 @@
 package io.siddhi.extension.io.http.sink.updatetoken;
 
 import io.netty.handler.codec.http.HttpHeaderValues;
-import io.siddhi.extension.io.http.sink.util.HttpSinkUtil;
 import io.siddhi.extension.io.http.util.HttpConstants;
+import okhttp3.OkHttpClient;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.transport.http.netty.contract.Constants;
-import org.wso2.transport.http.netty.contract.HttpClientConnector;
-import org.wso2.transport.http.netty.contract.config.SenderConfiguration;
-import org.wso2.transport.http.netty.contractimpl.DefaultHttpWsConnectorFactory;
+import org.wso2.transport.http.netty.contractimpl.common.Util;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import static org.wso2.transport.http.netty.contract.Constants.HTTPS_SCHEME;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManagerFactory;
 
 
 /**
@@ -44,16 +54,6 @@ import static org.wso2.transport.http.netty.contract.Constants.HTTPS_SCHEME;
 public class HttpsClient {
     private static final Logger LOG = LoggerFactory.getLogger(HttpsClient.class);
     private AccessTokenCache accessTokenCache = AccessTokenCache.getInstance();
-    private Map<String, String> tokenURLProperties;
-
-    private static SenderConfiguration getSenderConfigurationForHttp(String trustStorePath, String trustStorePassword) {
-        SenderConfiguration senderConfiguration = new SenderConfiguration();
-        senderConfiguration.setTrustStoreFile(trustStorePath);
-        senderConfiguration.setTrustStorePass(trustStorePassword);
-        senderConfiguration.setScheme(HTTPS_SCHEME);
-        senderConfiguration.setHostNameVerificationEnabled(false);
-        return senderConfiguration;
-    }
 
     private static String encodeMessage(Object s) {
         try {
@@ -80,55 +80,102 @@ public class HttpsClient {
     }
 
     public void getPasswordGrantAccessToken(String tokenUrl, String trustStorePath, String trustStorePassword,
-                                            String username, String password, String encodedAuth) {
-        tokenURLProperties = HttpSinkUtil.getURLProperties(tokenUrl);
-        DefaultHttpWsConnectorFactory factory = new DefaultHttpWsConnectorFactory();
-        HttpClientConnector httpClientConnector = factory
-                .createHttpClientConnector(new HashMap<>(), getSenderConfigurationForHttp(trustStorePath,
-                        trustStorePassword));
+                                            String username, String password, String encodedAuth, String consumerKey,
+                                            String consumerSecret, String oAuth2Scope) {
         final Map<String, String> refreshTokenBody = new HashMap<>();
         refreshTokenBody.put(HttpConstants.GRANT_TYPE, HttpConstants.GRANT_PASSWORD);
         refreshTokenBody.put(HttpConstants.USERNAME, username);
         refreshTokenBody.put(HttpConstants.PASSWORD, password);
-        String payload = getPayload(refreshTokenBody);
+        if (!HttpConstants.EMPTY_STRING.equals(oAuth2Scope)) {
+            refreshTokenBody.put(HttpConstants.OAUTH2_SCOPE_PARAMETER_KEY, oAuth2Scope);
+        }
+        if (!HttpConstants.EMPTY_STRING.equals(consumerKey)) {
+            refreshTokenBody.put(HttpConstants.OAUTH_CLIENT_ID, consumerKey);
+        }
+        if (!HttpConstants.EMPTY_STRING.equals(consumerSecret)) {
+            refreshTokenBody.put(HttpConstants.OAUTH_CLIENT_SECRET, consumerSecret);
+        }
+
+        OkHttpClient client = getOkHttpClient(trustStorePath, trustStorePassword);
         Map<String, String> headers = setHeaders(encodedAuth);
-        ArrayList<String> response = HttpRequest.sendPostRequest(httpClientConnector,
-                tokenURLProperties.get(HttpConstants.PROTOCOL), tokenURLProperties.get(Constants.HTTP_HOST),
-                Integer.parseInt(tokenURLProperties.get(Constants.HTTP_PORT)),
-                tokenURLProperties.get(HttpConstants.PATH), payload,
+        List<String> response = HttpRequest.getResponse(tokenUrl, encodedAuth, getPayload(refreshTokenBody), client,
                 headers);
         JSONObject jsonObject = new JSONObject(response.get(1));
         int statusCode = Integer.parseInt(response.get(0));
         if (statusCode == HttpConstants.SUCCESS_CODE) {
             String accessToken = jsonObject.getString(HttpConstants.ACCESS_TOKEN);
             accessTokenCache.setAccessToken(encodedAuth, HttpConstants.BEARER + accessToken);
-            if (jsonObject.has(HttpConstants.REFRESH_TOKEN)) {
-                String newRefreshToken = jsonObject.getString(HttpConstants.REFRESH_TOKEN);
+            String newRefreshToken = jsonObject.getString(HttpConstants.REFRESH_TOKEN);
+            if (newRefreshToken != null) {
                 accessTokenCache.setRefreshtoken(encodedAuth, newRefreshToken);
             }
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         } else {
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         }
-        factory.shutdownNow();
+    }
+
+    private static OkHttpClient getOkHttpClient(String trustStorePath, String trustStorePassword) {
+        KeyStore keyStore;
+        try {
+            keyStore = readKeyStore(trustStorePath, trustStorePassword);
+            SSLContext sslContext = SSLContext.getInstance("SSL");
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
+                    TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(keyStore);
+            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(
+                    KeyManagerFactory.getDefaultAlgorithm());
+            keyManagerFactory.init(keyStore, "keystore_pass".toCharArray());
+            sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(),
+                    new SecureRandom());
+
+            return new OkHttpClient().newBuilder()
+                    .sslSocketFactory(sslContext.getSocketFactory())
+                    .hostnameVerifier(new HostnameVerifier() {
+                        @Override
+                        public boolean verify(String s, SSLSession sslSession) {
+                            return true;
+                        }
+                    }).build();
+        } catch (IOException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException
+                | KeyManagementException e) {
+            LOG.error("Error occurred while initializing the http client, Returning normal client", e);
+            return new OkHttpClient();
+        }
+    }
+
+    private static KeyStore readKeyStore(String trustStorePath, String trustStorePassword)
+            throws IOException, KeyStoreException {
+        KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+
+        // Get user password and file input stream
+        char[] password = trustStorePassword.toCharArray();
+        FileInputStream fis = null;
+        try {
+            File file = new File(Util.substituteVariables(trustStorePath));
+            fis = new FileInputStream(file);
+            ks.load(fis, password);
+        } catch (CertificateException | NoSuchAlgorithmException | IOException e) {
+            LOG.error(e.getMessage(), e);
+        } finally {
+            if (fis != null) {
+                fis.close();
+            }
+        }
+        return ks;
     }
 
     public void getRefreshGrantAccessToken(String url, String trustStorePath, String trustStorePassword,
-                                           String encodedAuth, String refreshToken) {
-        tokenURLProperties = HttpSinkUtil.getURLProperties(url);
-        DefaultHttpWsConnectorFactory factory = new DefaultHttpWsConnectorFactory();
-        HttpClientConnector httpClientConnector = factory
-                .createHttpClientConnector(new HashMap<>(), getSenderConfigurationForHttp(trustStorePath,
-                        trustStorePassword));
+                                           String encodedAuth, String refreshToken, String oauthUsername,
+                                           String oauthUserPassword, String bodyConsumerKey, String bodyConsumerSecret,
+                                           String oauth2Scope) {
         final Map<String, String> refreshTokenBody = new HashMap<>();
         Map<String, String> headers = setHeaders(encodedAuth);
         refreshTokenBody.put(HttpConstants.GRANT_TYPE, HttpConstants.GRANT_REFRESHTOKEN);
         refreshTokenBody.put(HttpConstants.GRANT_REFRESHTOKEN, refreshToken);
-        String payload = getPayload(refreshTokenBody);
-        ArrayList<String> response = HttpRequest.sendPostRequest(httpClientConnector,
-                tokenURLProperties.get(HttpConstants.PROTOCOL), tokenURLProperties.get(Constants.HTTP_HOST),
-                Integer.parseInt(tokenURLProperties.get(Constants.HTTP_PORT)),
-                tokenURLProperties.get(HttpConstants.PATH), payload, headers);
+        OkHttpClient client = getOkHttpClient(trustStorePath, trustStorePassword);
+        List<String> response = HttpRequest.getResponse(url, encodedAuth, getPayload(refreshTokenBody), client,
+                headers);
         int statusCode = Integer.parseInt(response.get(0));
         JSONObject jsonObject = new JSONObject(response.get(1));
         if (statusCode == HttpConstants.SUCCESS_CODE) {
@@ -137,30 +184,28 @@ public class HttpsClient {
             accessTokenCache.setAccessToken(encodedAuth, HttpConstants.BEARER + accessToken);
             accessTokenCache.setRefreshtoken(encodedAuth, newRefreshToken);
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
+        } else if ((statusCode == HttpConstants.AUTHENTICATION_FAIL_CODE
+                || statusCode == HttpConstants.PERSISTENT_ACCESS_FAIL_CODE) &&
+                (!HttpConstants.EMPTY_STRING.equals(oauthUsername) &&
+                        !HttpConstants.EMPTY_STRING.equals(oauthUserPassword))) {
+            getPasswordGrantAccessToken(url, trustStorePath, trustStorePassword, oauthUsername,
+                    oauthUserPassword, encodedAuth, bodyConsumerKey, bodyConsumerSecret, oauth2Scope);
         } else if (statusCode == HttpConstants.AUTHENTICATION_FAIL_CODE
                 || statusCode == HttpConstants.PERSISTENT_ACCESS_FAIL_CODE) {
             getClientGrantAccessToken(url, trustStorePath, trustStorePassword, encodedAuth);
         } else {
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         }
-        factory.shutdownNow();
     }
 
     public void getClientGrantAccessToken(String url, String trustStorePath, String trustStorePassword,
                                           String encodedAuth) {
-        tokenURLProperties = HttpSinkUtil.getURLProperties(url);
-        DefaultHttpWsConnectorFactory factory = new DefaultHttpWsConnectorFactory();
-        HttpClientConnector httpClientConnector = factory
-                .createHttpClientConnector(new HashMap<>(), getSenderConfigurationForHttp(trustStorePath,
-                        trustStorePassword));
         final Map<String, String> refreshTokenBody = new HashMap<>();
         refreshTokenBody.put(HttpConstants.GRANT_TYPE, HttpConstants.GRANT_CLIENTTOKEN);
-        String payload = getPayload(refreshTokenBody);
+        OkHttpClient client = getOkHttpClient(trustStorePath, trustStorePassword);
         Map<String, String> headers = setHeaders(encodedAuth);
-        ArrayList<String> response = HttpRequest.sendPostRequest(httpClientConnector,
-                tokenURLProperties.get(HttpConstants.PROTOCOL), tokenURLProperties.get(Constants.HTTP_HOST),
-                Integer.parseInt(tokenURLProperties.get(Constants.HTTP_PORT)),
-                tokenURLProperties.get(HttpConstants.PATH), payload, headers);
+        List<String> response = HttpRequest.getResponse(url, encodedAuth, getPayload(refreshTokenBody), client,
+                headers);
         JSONObject jsonObject = new JSONObject(response.get(1));
         int statusCode = Integer.parseInt(response.get(0));
         if (statusCode == HttpConstants.SUCCESS_CODE) {
@@ -170,6 +215,5 @@ public class HttpsClient {
         } else {
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         }
-        factory.shutdownNow();
     }
 }

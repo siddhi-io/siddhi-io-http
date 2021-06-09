@@ -166,6 +166,19 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
                         optional = true,
                         defaultValue = "-"),
                 @Parameter(
+                        name = "body.consumer.key",
+                        description = "Consumer key used for calling endpoints protected by OAuth 2.0 if it's " +
+                                "required to be sent in token request body",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "-"),
+                @Parameter(
+                        name = "body.consumer.secret",
+                        description = "Consumer secret used for calling endpoints protected by OAuth 2.0",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "-"),
+                @Parameter(
                         name = "token.url",
                         description = "Token URL to generate a new access tokens " +
                                 "when calling endpoints protected by OAuth 2.0",
@@ -179,6 +192,13 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
                         type = {DataType.STRING},
                         optional = true,
                         defaultValue = "-"),
+                @Parameter(
+                        name = HttpConstants.OAUTH2_SCOPE_PARAMETER_NAME,
+                        description = "Standard OAuth 2.0 scope parameter",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "default"
+                ),
                 @Parameter(
                         name = "headers",
                         description = "HTTP request headers in format `\"'<key>:<value>','<key>:<value>'\"`.\n" +
@@ -432,17 +452,22 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
 )
 public class HttpSink extends Sink {
     private static final Logger log = Logger.getLogger(HttpSink.class);
-    String mapType;
-    Option httpHeaderOption;
-    Option httpMethodOption;
     protected String streamID;
     protected String consumerKey;
     protected String consumerSecret;
-    private String authorizationHeader;
     protected String userName;
     protected String userPassword;
     protected ClientConnector staticClientConnector;
     protected Option publisherURLOption;
+    protected SiddhiAppContext siddhiAppContext;
+    protected String oauthUsername;
+    protected String oauthUserPassword;
+    protected String authType;
+    protected String tokenURL;
+    String mapType;
+    Option httpHeaderOption;
+    Option httpMethodOption;
+    private String authorizationHeader;
     private String clientStoreFile;
     private String clientStorePass;
     private int socketIdleTimeout;
@@ -452,13 +477,8 @@ public class HttpSink extends Sink {
     private String parametersList;
     private String clientBootstrapConfiguration;
     private ConfigReader configReader;
-    protected SiddhiAppContext siddhiAppContext;
-    protected String oauthUsername;
-    protected String oauthUserPassword;
     private Option refreshToken;
-    protected String authType;
     private AccessTokenCache accessTokenCache = AccessTokenCache.getInstance();
-    protected String tokenURL;
     private String hostnameVerificationEnabled;
     private String sslVerificationDisabled;
     private Executor executor = null;
@@ -466,6 +486,9 @@ public class HttpSink extends Sink {
     protected SinkMetrics metrics;
     protected long startTime;
     protected long endTime;
+    private String bodyConsumerKey;
+    private String bodyConsumerSecret;
+    private String oauth2Scope;
 
     private DefaultHttpWsConnectorFactory httpConnectorFactory;
     private ProxyServerConfiguration proxyServerConfiguration;
@@ -519,6 +542,9 @@ public class HttpSink extends Sink {
         this.httpMethodOption = optionHolder.getOrCreateOption(HttpConstants.METHOD, HttpConstants.DEFAULT_METHOD);
         this.consumerKey = optionHolder.validateAndGetStaticValue(HttpConstants.CONSUMER_KEY, EMPTY_STRING);
         this.consumerSecret = optionHolder.validateAndGetStaticValue(HttpConstants.CONSUMER_SECRET, EMPTY_STRING);
+        this.bodyConsumerKey = optionHolder.validateAndGetStaticValue(HttpConstants.BODY_CONSUMER_KEY, EMPTY_STRING);
+        this.bodyConsumerSecret = optionHolder.validateAndGetStaticValue(HttpConstants.BODY_CONSUMER_SECRET,
+                EMPTY_STRING);
         this.oauthUsername = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_OAUTH_USERNAME,
                 EMPTY_STRING);
         this.oauthUserPassword = optionHolder.validateAndGetStaticValue(HttpConstants.RECEIVER_OAUTH_PASSWORD,
@@ -527,6 +553,8 @@ public class HttpSink extends Sink {
         this.tokenURL = optionHolder.validateAndGetStaticValue(HttpConstants.TOKEN_URL, EMPTY_STRING);
         this.clientStoreFile = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PATH_PARAM,
                 HttpSinkUtil.trustStorePath(configReader));
+        this.oauth2Scope = optionHolder.validateAndGetStaticValue(HttpConstants.OAUTH2_SCOPE_PARAMETER_NAME,
+                "default");
         clientStorePass = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD_PARAM,
                 HttpSinkUtil.trustStorePassword(configReader));
         socketIdleTimeout = Integer.parseInt(optionHolder.validateAndGetStaticValue
@@ -554,6 +582,8 @@ public class HttpSink extends Sink {
             authType = HttpConstants.BASIC_AUTH;
         } else if ((!HttpConstants.EMPTY_STRING.equals(consumerKey)
                 && !HttpConstants.EMPTY_STRING.equals(consumerSecret)) ||
+                (!HttpConstants.EMPTY_STRING.equals(bodyConsumerKey)
+                        && !HttpConstants.EMPTY_STRING.equals(bodyConsumerSecret)) ||
                 (!HttpConstants.EMPTY_STRING.equals(oauthUsername)
                         && !HttpConstants.EMPTY_STRING.equals(oauthUserPassword))) {
             authType = HttpConstants.OAUTH;
@@ -676,6 +706,7 @@ public class HttpSink extends Sink {
                         clientConnector.getPublisherURL() + ", " + e + ". Message dropped.");
             }
             HttpCarbonMessage response = listener.getHttpResponseMessage();
+            log.info(" Response: *********** " + response.getNettyHttpResponse().status());
             return response.getNettyHttpResponse().status().code();
         } else {
             HttpResponseFuture responseFuture = clientConnector.send(cMessage);
@@ -707,7 +738,14 @@ public class HttpSink extends Sink {
                                     ClientConnector clientConnector)
             throws ConnectionUnavailableException {
         //generate encoded base64 auth for getting refresh token
-        String consumerKeyValue = consumerKey + ":" + consumerSecret;
+        String consumerKeyValue;
+
+        if (!HttpConstants.EMPTY_STRING.equals(this.consumerKey)
+                && !HttpConstants.EMPTY_STRING.equals(this.consumerSecret)) {
+            consumerKeyValue = consumerKey + ":" + consumerSecret;
+        } else {
+            consumerKeyValue = bodyConsumerKey + ":" + bodyConsumerSecret;
+        }
         String encodedAuth = "Basic " + encodeBase64(consumerKeyValue)
                 .replaceAll(HttpConstants.NEW_LINE, HttpConstants.EMPTY_STRING);
         //check the availability of access token in the header
@@ -858,14 +896,15 @@ public class HttpSink extends Sink {
     void getAccessToken(DynamicOptions dynamicOptions, String encodedAuth, String tokenURL) {
         this.tokenURL = tokenURL;
         HttpsClient httpsClient = new HttpsClient();
-        if (!HttpConstants.EMPTY_STRING.equals(oauthUsername) &&
-                !HttpConstants.EMPTY_STRING.equals(oauthUserPassword)) {
-            httpsClient.getPasswordGrantAccessToken(tokenURL, clientStoreFile,
-                    clientStorePass, oauthUsername, oauthUserPassword, encodedAuth);
-        } else if (!HttpConstants.EMPTY_STRING.equals(refreshToken.getValue(dynamicOptions)) ||
+        if (!HttpConstants.EMPTY_STRING.equals(refreshToken.getValue(dynamicOptions)) ||
                 accessTokenCache.getRefreshtoken(encodedAuth) != null) {
             httpsClient.getRefreshGrantAccessToken(tokenURL, clientStoreFile,
-                    clientStorePass, encodedAuth, refreshToken.getValue(dynamicOptions));
+                    clientStorePass, encodedAuth, refreshToken.getValue(dynamicOptions), oauthUsername,
+                    oauthUserPassword, bodyConsumerKey, bodyConsumerSecret, oauth2Scope);
+        } else if (!HttpConstants.EMPTY_STRING.equals(oauthUsername) &&
+                !HttpConstants.EMPTY_STRING.equals(oauthUserPassword)) {
+            httpsClient.getPasswordGrantAccessToken(tokenURL, clientStoreFile, clientStorePass, oauthUsername,
+                    oauthUserPassword, encodedAuth, bodyConsumerKey, bodyConsumerSecret, oauth2Scope);
         } else {
             httpsClient.getClientGrantAccessToken(tokenURL, clientStoreFile,
                     clientStorePass, encodedAuth);
@@ -1062,7 +1101,8 @@ public class HttpSink extends Sink {
             publisherURL = publisherURLOption.getValue(dynamicOptions);
         }
         if (authType.equals(HttpConstants.OAUTH)) {
-            if (EMPTY_STRING.equals(consumerSecret) || EMPTY_STRING.equals(consumerKey)) {
+            if ((EMPTY_STRING.equals(consumerSecret) || EMPTY_STRING.equals(consumerKey))
+                    && (EMPTY_STRING.equals(bodyConsumerKey) || EMPTY_STRING.equals(bodyConsumerSecret))) {
                 throw new SiddhiAppCreationException(HttpConstants.CONSUMER_KEY + " and " +
                         HttpConstants.CONSUMER_SECRET + " found empty but it is Mandatory field in " +
                         HttpConstants.HTTP_SINK_ID + " in " + streamID);
