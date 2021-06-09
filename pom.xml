@@ -157,6 +157,12 @@
                 <artifactId>commons-codec</artifactId>
                 <version>${commons.codec.version}</version>
             </dependency>
+            <!-- https://mvnrepository.com/artifact/com.squareup.okhttp3/okhttp -->
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${okhttp.client.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <properties>
@@ -193,6 +199,8 @@
         <surefire.plugin.version>2.22.1</surefire.plugin.version>
         <carbon.analytics.version>3.0.49</carbon.analytics.version>
         <commons.codec.version>1.15</commons.codec.version>
+        <okhttp.client.version>4.8.1</okhttp.client.version>
+        <mavan.findbugsplugin.exclude.file>findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
     </properties>
     <build>
         <extensions>
@@ -291,6 +299,9 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>findbugs-maven-plugin</artifactId>
+                    <configuration>
+                        <excludeFilterFile>${mavan.findbugsplugin.exclude.file}</excludeFilterFile>
+                    </configuration>
                     <executions>
                         <execution>
                             <phase>none</phase>

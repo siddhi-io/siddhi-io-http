@@ -59,6 +59,8 @@ public class HttpConstants {
     public static final String DEFAULT_ENCODING = "UTF-8";
     public static final String DOWNLOAD_ENABLED = "downloading.enabled";
     public static final String DEFAULT_DOWNLOAD_ENABLED_VALUE = "false";
+    public static final String OAUTH2_SCOPE_PARAMETER_NAME = "oauth.scope";
+    public static final String OAUTH2_SCOPE_PARAMETER_KEY = "scope";
     //Common util values
     public static final String HTTP_METHOD_GET = "GET";
     public static final String HTTP_METHOD_POST = "POST"; //method name
@@ -197,6 +199,8 @@ public class HttpConstants {
     public static final String TOKEN_URL = "token.url";
     public static final String CONSUMER_SECRET = "consumer.secret";
     public static final String CONSUMER_KEY = "consumer.key";
+    public static final String BODY_CONSUMER_SECRET = "body.consumer.secret";
+    public static final String BODY_CONSUMER_KEY = "body.consumer.key";
     public static final String GRANT_TYPE = "grant_type";
     public static final String GRANT_PASSWORD = "password";
     public static final String GRANT_REFRESHTOKEN = "refresh_token";
@@ -210,6 +214,8 @@ public class HttpConstants {
     public static final int AUTHENTICATION_FAIL_CODE = 401;
     public static final int PERSISTENT_ACCESS_FAIL_CODE = 400;
     public static final int INTERNAL_SERVER_FAIL_CODE = 500;
+    public static final String OAUTH_CLIENT_ID = "client_id";
+    public static final String OAUTH_CLIENT_SECRET = "client_secret";
     public static final String RECEIVER_OAUTH_USERNAME = "oauth.username";
     public static final String RECEIVER_OAUTH_PASSWORD = "oauth.password";
     public static final String RECEIVER_REFRESH_TOKEN = "refresh.token";

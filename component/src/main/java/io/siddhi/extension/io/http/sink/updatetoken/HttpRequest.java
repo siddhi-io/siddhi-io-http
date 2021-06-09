@@ -18,87 +18,52 @@
  */
 package io.siddhi.extension.io.http.sink.updatetoken;
 
-import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.http.DefaultHttpRequest;
-import io.netty.handler.codec.http.DefaultLastHttpContent;
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.HttpHeaderValues;
 import io.siddhi.extension.io.http.util.HttpConstants;
+import okhttp3.Headers;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.transport.http.netty.contract.Constants;
-import org.wso2.transport.http.netty.contract.HttpClientConnector;
-import org.wso2.transport.http.netty.contract.HttpResponseFuture;
-import org.wso2.transport.http.netty.message.HttpCarbonMessage;
-import org.wso2.transport.http.netty.message.HttpMessageDataStreamer;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+
+import static io.siddhi.extension.io.http.util.HttpConstants.HTTP_CONTENT_TYPE;
+import static io.siddhi.extension.io.http.util.HttpConstants.HTTP_METHOD_POST;
 
 /**
  * {@code HttpRequest} Handle the HTTP request for invalid access token.
  */
 public class HttpRequest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HttpRequest.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
-    public static ArrayList<String> sendPostRequest(HttpClientConnector httpClientConnector, String serverScheme,
-                                                    String serverHost, int serverPort, String serverPath,
-                                                    String payload, Map<String, String> headers) {
-        ArrayList<String> responses = new ArrayList<>();
+    public static List<String> getResponse(String tokenUrl, String encodedAuth, String payload, OkHttpClient client,
+                                           Map<String, String> headers) {
+        List<String> responses = new ArrayList<>();
+        MediaType mediaType = MediaType.parse(String.valueOf(HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED));
+        RequestBody requestBody = RequestBody.create(payload.getBytes(StandardCharsets.UTF_8), mediaType);
+        headers.put(HTTP_CONTENT_TYPE, String.valueOf(HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED));
+        headers.put(HttpConstants.AUTHORIZATION_HEADER, encodedAuth);
 
-        HttpCarbonMessage msg = createHttpPostReq(serverScheme, serverHost, serverPort, serverPath, payload);
-        for (Map.Entry<String, String> entry : headers.entrySet()) {
-            msg.setHeader(entry.getKey(), entry.getValue());
-        }
-        CountDownLatch latch = new CountDownLatch(1);
-        DefaultListener listener = new DefaultListener(latch, HttpConstants.OAUTH);
-        HttpResponseFuture responseFuture = httpClientConnector.send(msg);
-        responseFuture.setHttpConnectorListener(listener);
+        Headers headerbuilder = Headers.of(headers);
+
+        Request request = new Request.Builder().url(tokenUrl).method(HTTP_METHOD_POST, requestBody)
+                .headers(headerbuilder).build();
         try {
-            boolean latchCount = latch.await(30, TimeUnit.SECONDS);
-            if (!latchCount) {
-                LOG.debug("Time out due to getting new access token. ");
-            }
-        } catch (InterruptedException e) {
-            LOG.debug("Time out due to getting new access token. " + e);
-        }
-        HttpCarbonMessage response = listener.getHttpResponseMessage();
-        String statusCode = Integer.toString(response.getNettyHttpResponse().status().code());
-        responses.add(statusCode);
-        InputStream httpMessageDataStreamer = new HttpMessageDataStreamer(response).getInputStream();
-        InputStreamReader inputStreamReader = new InputStreamReader(httpMessageDataStreamer, Charset.defaultCharset());
-        try (BufferedReader buffer = new BufferedReader(inputStreamReader)) {
-            String responsePayload = buffer.lines().collect(Collectors.joining("\n"));
-            responses.add(responsePayload);
+            Response response = client.newCall(request).execute();
+            responses.add(String.valueOf(response.code()));
+            responses.add(response.body().string());
         } catch (IOException e) {
-            LOG.debug("There was an error in reading the file while generating new access token. " + e);
+            log.error("Error occurred while generating a new access token ", e);
         }
         return responses;
-    }
-
-    private static HttpCarbonMessage createHttpPostReq(String serverScheme, String serverHost, int serverPort,
-                                                       String serverPath, String payload) {
-        HttpCarbonMessage httpPostRequest = new HttpCarbonMessage(
-                new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, serverPath));
-        httpPostRequest.setProperty(Constants.PROTOCOL, serverScheme);
-        httpPostRequest.setProperty(Constants.HTTP_HOST, serverHost);
-        httpPostRequest.setProperty(Constants.HTTP_PORT, serverPort);
-        httpPostRequest.setProperty(Constants.TO, serverPath);
-        httpPostRequest.setHttpMethod(Constants.HTTP_POST_METHOD);
-        // this header is mandatory otherwise the request would result in 400 status
-        httpPostRequest.setHeader(Constants.HTTP_HOST, serverHost);
-        ByteBuffer byteBuffer = ByteBuffer.wrap(payload.getBytes(Charset.forName("UTF-8")));
-        httpPostRequest.addHttpContent(new DefaultLastHttpContent(Unpooled.wrappedBuffer(byteBuffer)));
-        return httpPostRequest;
     }
 }
