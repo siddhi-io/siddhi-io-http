@@ -41,10 +41,8 @@ import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManagerFactory;
 
 
@@ -79,42 +77,6 @@ public class HttpsClient {
         return headers;
     }
 
-    public void getPasswordGrantAccessToken(String tokenUrl, String trustStorePath, String trustStorePassword,
-                                            String username, String password, String encodedAuth, String consumerKey,
-                                            String consumerSecret, String oAuth2Scope) {
-        final Map<String, String> refreshTokenBody = new HashMap<>();
-        refreshTokenBody.put(HttpConstants.GRANT_TYPE, HttpConstants.GRANT_PASSWORD);
-        refreshTokenBody.put(HttpConstants.USERNAME, username);
-        refreshTokenBody.put(HttpConstants.PASSWORD, password);
-        if (!HttpConstants.EMPTY_STRING.equals(oAuth2Scope)) {
-            refreshTokenBody.put(HttpConstants.OAUTH2_SCOPE_PARAMETER_KEY, oAuth2Scope);
-        }
-        if (!HttpConstants.EMPTY_STRING.equals(consumerKey)) {
-            refreshTokenBody.put(HttpConstants.OAUTH_CLIENT_ID, consumerKey);
-        }
-        if (!HttpConstants.EMPTY_STRING.equals(consumerSecret)) {
-            refreshTokenBody.put(HttpConstants.OAUTH_CLIENT_SECRET, consumerSecret);
-        }
-
-        OkHttpClient client = getOkHttpClient(trustStorePath, trustStorePassword);
-        Map<String, String> headers = setHeaders(encodedAuth);
-        List<String> response = HttpRequest.getResponse(tokenUrl, encodedAuth, getPayload(refreshTokenBody), client,
-                headers);
-        JSONObject jsonObject = new JSONObject(response.get(1));
-        int statusCode = Integer.parseInt(response.get(0));
-        if (statusCode == HttpConstants.SUCCESS_CODE) {
-            String accessToken = jsonObject.getString(HttpConstants.ACCESS_TOKEN);
-            accessTokenCache.setAccessToken(encodedAuth, HttpConstants.BEARER + accessToken);
-            String newRefreshToken = jsonObject.getString(HttpConstants.REFRESH_TOKEN);
-            if (newRefreshToken != null) {
-                accessTokenCache.setRefreshtoken(encodedAuth, newRefreshToken);
-            }
-            accessTokenCache.setResponseCode(encodedAuth, statusCode);
-        } else {
-            accessTokenCache.setResponseCode(encodedAuth, statusCode);
-        }
-    }
-
     private static OkHttpClient getOkHttpClient(String trustStorePath, String trustStorePassword) {
         KeyStore keyStore;
         try {
@@ -131,12 +93,7 @@ public class HttpsClient {
 
             return new OkHttpClient().newBuilder()
                     .sslSocketFactory(sslContext.getSocketFactory())
-                    .hostnameVerifier(new HostnameVerifier() {
-                        @Override
-                        public boolean verify(String s, SSLSession sslSession) {
-                            return true;
-                        }
-                    }).build();
+                    .hostnameVerifier((host, sslSession) -> true).build();
         } catch (IOException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException
                 | KeyManagementException e) {
             LOG.error("Error occurred while initializing the http client, Returning normal client", e);
@@ -165,6 +122,43 @@ public class HttpsClient {
         return ks;
     }
 
+    public void getPasswordGrantAccessToken(String tokenUrl, String trustStorePath, String trustStorePassword,
+                                            String username, String password, String encodedAuth, String consumerKey,
+                                            String consumerSecret, String oAuth2Scope) {
+        final Map<String, String> refreshTokenBody = new HashMap<>();
+        refreshTokenBody.put(HttpConstants.GRANT_TYPE, HttpConstants.GRANT_PASSWORD);
+        refreshTokenBody.put(HttpConstants.USERNAME, username);
+        refreshTokenBody.put(HttpConstants.PASSWORD, password);
+        if (!HttpConstants.EMPTY_STRING.equals(oAuth2Scope)) {
+            refreshTokenBody.put(HttpConstants.OAUTH2_SCOPE_PARAMETER_KEY, oAuth2Scope);
+        }
+        if (!HttpConstants.EMPTY_STRING.equals(consumerKey)) {
+            refreshTokenBody.put(HttpConstants.OAUTH_CLIENT_ID, consumerKey);
+        }
+        if (!HttpConstants.EMPTY_STRING.equals(consumerSecret)) {
+            refreshTokenBody.put(HttpConstants.OAUTH_CLIENT_SECRET, consumerSecret);
+        }
+
+        OkHttpClient client = getOkHttpClient(trustStorePath, trustStorePassword);
+        Map<String, String> headers = setHeaders(encodedAuth);
+        List<String> response = HttpRequest.getResponse(tokenUrl, encodedAuth, getPayload(refreshTokenBody), client,
+                headers);
+        client.dispatcher().executorService().shutdown();
+        JSONObject jsonObject = new JSONObject(response.get(1));
+        int statusCode = Integer.parseInt(response.get(0));
+        if (statusCode == HttpConstants.SUCCESS_CODE) {
+            String accessToken = jsonObject.getString(HttpConstants.ACCESS_TOKEN);
+            accessTokenCache.setAccessToken(encodedAuth, HttpConstants.BEARER + accessToken);
+            String newRefreshToken = jsonObject.getString(HttpConstants.REFRESH_TOKEN);
+            if (newRefreshToken != null) {
+                accessTokenCache.setRefreshtoken(encodedAuth, newRefreshToken);
+            }
+            accessTokenCache.setResponseCode(encodedAuth, statusCode);
+        } else {
+            accessTokenCache.setResponseCode(encodedAuth, statusCode);
+        }
+    }
+
     public void getRefreshGrantAccessToken(String url, String trustStorePath, String trustStorePassword,
                                            String encodedAuth, String refreshToken, String oauthUsername,
                                            String oauthUserPassword, String bodyConsumerKey, String bodyConsumerSecret,
@@ -176,6 +170,7 @@ public class HttpsClient {
         OkHttpClient client = getOkHttpClient(trustStorePath, trustStorePassword);
         List<String> response = HttpRequest.getResponse(url, encodedAuth, getPayload(refreshTokenBody), client,
                 headers);
+        client.dispatcher().executorService().shutdown();
         int statusCode = Integer.parseInt(response.get(0));
         JSONObject jsonObject = new JSONObject(response.get(1));
         if (statusCode == HttpConstants.SUCCESS_CODE) {
@@ -206,6 +201,7 @@ public class HttpsClient {
         Map<String, String> headers = setHeaders(encodedAuth);
         List<String> response = HttpRequest.getResponse(url, encodedAuth, getPayload(refreshTokenBody), client,
                 headers);
+        client.dispatcher().executorService().shutdown();
         JSONObject jsonObject = new JSONObject(response.get(1));
         int statusCode = Integer.parseInt(response.get(0));
         if (statusCode == HttpConstants.SUCCESS_CODE) {
