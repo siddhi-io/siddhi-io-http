@@ -61,6 +61,7 @@ public class HttpRequest {
             Response response = client.newCall(request).execute();
             responses.add(String.valueOf(response.code()));
             responses.add(response.body().string());
+            response.close();
         } catch (IOException e) {
             log.error("Error occurred while generating a new access token ", e);
         }
