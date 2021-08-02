@@ -231,6 +231,8 @@ public class HttpConstants {
     public static final String BLOCKING_IO = "blocking.io";
 
     //pool configurations
+    public static final String EXECUTOR_SERVICE_THREAD_COUNT = "executor.service.threads";
+    public static final String DEFAULT_EXECUTOR_SERVICE_THREAD_COUNT = "20";
     public static final String MAX_ACTIVE_CONNECTIONS_PER_POOL = "max.pool.active.connections";
     public static final String DEFAULT_MAX_ACTIVE_CONNECTIONS_PER_POOL = "-1"; // unlimited
     public static final String MIN_IDLE_CONNECTIONS_PER_POOL = "min.pool.idle.connections";

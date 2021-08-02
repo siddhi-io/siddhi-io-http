@@ -300,6 +300,12 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
                         optional = true,
                         defaultValue = "100"),
                 @Parameter(
+                        name = "executor.service.threads",
+                        description = "Thread count for the executor service.",
+                        type = {DataType.INT},
+                        optional = true,
+                        defaultValue = "20"),
+                @Parameter(
                         name = "min.evictable.idle.time",
                         description = "Minimum time (in millis) a connection may sit idle in the " +
                                 "client pool before it become eligible for eviction.",
@@ -490,6 +496,7 @@ public class WebSubHubSink extends Sink {
 
         //pool configurations
         connectionPoolConfiguration = createPoolConfigurations(optionHolder);
+        executor = Executors.newFixedThreadPool(connectionPoolConfiguration.getExecutorServiceThreads());
         parametersList = optionHolder.validateAndGetStaticValue(HttpConstants.SINK_PARAMETERS, EMPTY_STRING);
         clientBootstrapConfiguration = optionHolder
                 .validateAndGetStaticValue(HttpConstants.CLIENT_BOOTSTRAP_CONFIGURATION, EMPTY_STRING);
@@ -760,9 +767,6 @@ public class WebSubHubSink extends Sink {
             senderConfig.disableSsl();
         }
 
-        executor = Executors.newFixedThreadPool(
-                senderConfig.getPoolConfiguration().getExecutorServiceThreads());
-
         //overwrite default transport configuration
         Map<String, Object> bootStrapProperties = HttpSinkUtil
                 .populateTransportConfiguration(clientBootstrapConfiguration);
@@ -822,7 +826,6 @@ public class WebSubHubSink extends Sink {
         this.onDemandQueryRuntime = OnDemandQueryParser.parse(onDemandQuery, null,
                 siddhiAppContext, tableMap, windowMap, aggregationRuntimeMap);
     }
-
 
     public void setWebSubSubscriptionMap(Map<String, List<WebSubSubscriptionDTO>> webSubSubscriptionMap) {
         this.webSubSubscriptionMap = webSubSubscriptionMap;

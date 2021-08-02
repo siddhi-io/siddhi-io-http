@@ -320,6 +320,12 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
                         optional = true,
                         defaultValue = "100"),
                 @Parameter(
+                        name = "executor.service.threads",
+                        description = "Thread count for the executor service.",
+                        type = {DataType.INT},
+                        optional = true,
+                        defaultValue = "20"),
+                @Parameter(
                         name = "min.evictable.idle.time",
                         description = "Minimum time (in millis) a connection may sit idle in the " +
                                 "client pool before it become eligible for eviction.",
@@ -565,6 +571,8 @@ public class HttpSink extends Sink {
 
         //pool configurations
         connectionPoolConfiguration = createPoolConfigurations(optionHolder);
+
+        executor = Executors.newFixedThreadPool(connectionPoolConfiguration.getExecutorServiceThreads());
 
         parametersList = optionHolder.validateAndGetStaticValue(HttpConstants.SINK_PARAMETERS, EMPTY_STRING);
 
@@ -1160,9 +1168,6 @@ public class HttpSink extends Sink {
         if (TRUE.equalsIgnoreCase(sslVerificationDisabled)) {
             senderConfig.disableSsl();
         }
-
-        executor = Executors.newFixedThreadPool(
-                senderConfig.getPoolConfiguration().getExecutorServiceThreads());
 
         //overwrite default transport configuration
         Map<String, Object> bootStrapProperties = HttpSinkUtil
