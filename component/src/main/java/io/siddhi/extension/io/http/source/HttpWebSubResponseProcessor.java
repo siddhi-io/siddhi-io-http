@@ -192,12 +192,13 @@ public class HttpWebSubResponseProcessor implements Runnable {
         } finally {
             try {
                 buf.close();
-                carbonMessage.waitAndReleaseAllEntities();
             } catch (IOException e) {
                 if (metrics != null) {
                     metrics.getTotalHttpErrorsMetric().inc();
                 }
                 logger.error("Error occurred when closing the byte buffer in source " + sourceID, e);
+            } finally {
+                carbonMessage.waitAndReleaseAllEntities();
             }
         }
     }

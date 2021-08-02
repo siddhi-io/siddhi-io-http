@@ -295,6 +295,8 @@ public class HttpSinkUtil {
     }
 
     public static PoolConfiguration createPoolConfigurations(OptionHolder optionHolder) {
+        int executorServiceThreads = Integer.parseInt(optionHolder.validateAndGetStaticValue(
+                HttpConstants.EXECUTOR_SERVICE_THREAD_COUNT, HttpConstants.DEFAULT_EXECUTOR_SERVICE_THREAD_COUNT));
         int maxIdlePerPool = Integer.parseInt(optionHolder.validateAndGetStaticValue(
                 HttpConstants.MAX_IDLE_CONNECTIONS_PER_POOL, HttpConstants.DEFAULT_MAX_IDLE_CONNECTIONS_PER_POOL));
         int minIdlePerPool = Integer.parseInt(optionHolder.validateAndGetStaticValue(
@@ -315,6 +317,7 @@ public class HttpSinkUtil {
         int maxWaitTime = Integer.parseInt(optionHolder.validateAndGetStaticValue(
                 HttpConstants.MAX_WAIT_TIME, HttpConstants.DEFAULT_MAX_WAIT_TIME));
         PoolConfiguration connectionPoolConfiguration = new PoolConfiguration();
+        connectionPoolConfiguration.setExecutorServiceThreads(executorServiceThreads);
         connectionPoolConfiguration.setMaxActivePerPool(maxActivePerPool);
         connectionPoolConfiguration.setMinIdlePerPool(minIdlePerPool);
         connectionPoolConfiguration.setMaxIdlePerPool(maxIdlePerPool);
