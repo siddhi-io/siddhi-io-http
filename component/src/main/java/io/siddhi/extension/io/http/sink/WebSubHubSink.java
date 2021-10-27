@@ -38,7 +38,6 @@ import io.siddhi.core.event.state.StateEvent;
 import io.siddhi.core.event.stream.StreamEvent;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
-import io.siddhi.core.exception.SiddhiAppRuntimeException;
 import io.siddhi.core.query.OnDemandQueryRuntime;
 import io.siddhi.core.stream.ServiceDeploymentInfo;
 import io.siddhi.core.stream.output.sink.Sink;
@@ -89,8 +88,6 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -770,15 +767,6 @@ public class WebSubHubSink extends Sink {
                 .populateTransportConfiguration(clientBootstrapConfiguration);
         return new ClientConnector(publisherURL, httpURLProperties,
                 httpConnectorFactory.createHttpClientConnector(bootStrapProperties, senderConfig));
-    }
-
-    private String encodeMessage(Object s) {
-        try {
-            return URLEncoder.encode((String) s, HttpConstants.DEFAULT_ENCODING);
-        } catch (UnsupportedEncodingException e) {
-            throw new SiddhiAppRuntimeException("Execution of Siddhi app " + siddhiAppContext.getName() +
-                    " failed due to " + e.getMessage(), e);
-        }
     }
 
     private Table getSubscriptionTable(String tableName) {
