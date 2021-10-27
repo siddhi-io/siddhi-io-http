@@ -136,7 +136,7 @@ public class HttpWebSubResponseProcessor implements Runnable {
                     List<Attribute> attributeList = table.getTableDefinition().getAttributeList();
                     if (payloadMap.get(HUB_MODE).toString().equalsIgnoreCase(HUB_MODE_SUBSCRIBE)) {
                         for (Attribute attribute : attributeList) {
-                            if (attribute.getName().equalsIgnoreCase(HUB_CALLBACK)){
+                            if (attribute.getName().equalsIgnoreCase(HUB_CALLBACK)) {
                                 event.add(java.net.URLDecoder.decode(payloadMap.get(attribute.getName()).toString(),
                                         StandardCharsets.UTF_8.name()));
                             } else if (attribute.getName().equals(HttpConstants.HUB_ID_COLUMN_NAME)) {
