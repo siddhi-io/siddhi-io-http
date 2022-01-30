@@ -19,7 +19,8 @@
 package io.siddhi.extension.io.http.sink.util;
 
 import com.sun.net.httpserver.HttpServer;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -28,7 +29,7 @@ import java.net.InetSocketAddress;
  * Http test sever listener for file downloading feature.
  */
 public class HttpFileServerListenerHandler implements Runnable {
-    private static final Logger logger = Logger.getLogger(HttpFileServerListenerHandler.class);
+    private static final Logger logger = LogManager.getLogger(HttpFileServerListenerHandler.class);
     private HttpFileServerListener fileServerListener;
     private HttpServer server;
     private int port;

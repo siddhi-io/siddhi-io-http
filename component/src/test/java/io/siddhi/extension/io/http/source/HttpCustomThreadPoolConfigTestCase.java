@@ -28,7 +28,8 @@ import io.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import io.siddhi.core.util.persistence.PersistenceStore;
 import io.siddhi.extension.io.http.source.util.HttpTestUtil;
 import io.siddhi.extension.map.xml.sourcemapper.XmlSourceMapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -42,7 +43,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Test case for HTTPS protocol.
  */
 public class HttpCustomThreadPoolConfigTestCase {
-    private static final Logger logger = Logger.getLogger(HttpCustomThreadPoolConfigTestCase.class);
+    private static final Logger logger = LogManager.getLogger(HttpCustomThreadPoolConfigTestCase.class);
     private AtomicInteger eventCount = new AtomicInteger(0);
 
     @BeforeMethod

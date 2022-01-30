@@ -26,7 +26,8 @@ import io.siddhi.core.util.SiddhiTestHelper;
 import io.siddhi.core.util.config.InMemoryConfigManager;
 import io.siddhi.extension.io.http.source.util.HttpTestUtil;
 import io.siddhi.extension.map.xml.sourcemapper.XmlSourceMapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -42,7 +43,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 
 public class HttpSourceConflictsTestCase {
-    private static final Logger logger = Logger.getLogger(HttpSourceConflictsTestCase.class);
+    private static final Logger logger = LogManager.getLogger(HttpSourceConflictsTestCase.class);
     private AtomicInteger eventCountA = new AtomicInteger(0);
     private AtomicInteger eventCountB = new AtomicInteger(0);
     private int waitTime = 50;

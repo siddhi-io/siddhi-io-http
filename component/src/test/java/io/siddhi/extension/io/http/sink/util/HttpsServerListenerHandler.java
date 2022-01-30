@@ -21,7 +21,8 @@ package io.siddhi.extension.io.http.sink.util;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsParameters;
 import com.sun.net.httpserver.HttpsServer;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -41,7 +42,7 @@ import javax.net.ssl.TrustManagerFactory;
  * Https test sever listener.
  */
 public class HttpsServerListenerHandler implements Runnable {
-    private static final Logger logger = Logger.getLogger(HttpsServerListenerHandler.class);
+    private static final Logger logger = LogManager.getLogger(HttpsServerListenerHandler.class);
     private HttpServerListener serverListener;
     private int port;
     private KeyStore keyStore;

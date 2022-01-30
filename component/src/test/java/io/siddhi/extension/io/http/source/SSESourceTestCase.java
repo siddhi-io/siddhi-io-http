@@ -31,7 +31,8 @@ import io.siddhi.core.util.persistence.PersistenceStore;
 import io.siddhi.extension.io.http.util.HttpConstants;
 import io.siddhi.extension.map.json.sinkmapper.JsonSinkMapper;
 import io.siddhi.extension.map.json.sourcemapper.JsonSourceMapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -50,7 +51,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Tests http sse source.
  */
 public class SSESourceTestCase {
-    private static final Logger log = Logger.getLogger(SSESourceTestCase.class);
+    private static final Logger log = LogManager.getLogger(SSESourceTestCase.class);
     private static final int SSE_SERVER_PORT = 8010;
     private static final int SLEEP_TIME = 50;
     private static final int EVENT_COUNT = 10;

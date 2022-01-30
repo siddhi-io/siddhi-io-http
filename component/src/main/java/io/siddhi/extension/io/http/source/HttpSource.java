@@ -36,7 +36,8 @@ import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
 import io.siddhi.extension.io.http.util.HttpConstants;
 import io.siddhi.extension.io.http.util.HttpIoUtil;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.si.metrics.core.internal.MetricsDataHolder;
 import org.wso2.transport.http.netty.contract.config.ListenerConfiguration;
 
@@ -267,7 +268,7 @@ import static io.siddhi.extension.io.http.util.HttpConstants.SOCKET_IDEAL_TIMEOU
         }
 )
 public class HttpSource extends Source {
-    private static final Logger log = Logger.getLogger(HttpSource.class);
+    private static final Logger log = LogManager.getLogger(HttpSource.class);
     protected String listenerUrl;
     protected Boolean isAuth;
     protected int workerThread;

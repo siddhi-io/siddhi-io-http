@@ -26,8 +26,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -43,8 +43,7 @@ import static io.siddhi.extension.io.http.util.HttpConstants.HTTP_METHOD_POST;
  */
 public class HttpRequest {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
-
+    private static final Logger log = LogManager.getLogger(HttpRequest.class);
     public static List<String> getResponse(String tokenUrl, String encodedAuth, String payload, OkHttpClient client,
                                            Map<String, String> headers) {
         List<String> responses = new ArrayList<>();

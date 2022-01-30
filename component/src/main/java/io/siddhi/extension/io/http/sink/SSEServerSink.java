@@ -47,7 +47,8 @@ import io.siddhi.extension.io.http.util.HTTPSinkRegistry;
 import io.siddhi.extension.io.http.util.HttpConstants;
 import io.siddhi.extension.io.http.util.HttpIoUtil;
 import io.siddhi.query.api.definition.StreamDefinition;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.carbon.si.metrics.core.internal.MetricsDataHolder;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
@@ -171,8 +172,7 @@ import static org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE;
         }
 )
 public class SSEServerSink extends Sink {
-    private static final Logger logger = Logger.getLogger(SSEServerSink.class);
-
+    private static final Logger logger = LogManager.getLogger(SSEServerSink.class);
     private String siddhiAppName;
     private String streamId;
     private String listenerUrl;

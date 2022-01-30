@@ -19,6 +19,8 @@
 package io.siddhi.extension.io.http.source.util;
 
 import io.netty.handler.codec.http.HttpMethod;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -47,7 +49,7 @@ import javax.net.ssl.TrustManagerFactory;
  * Util class for test cases.
  */
 public class HttpTestUtil {
-    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(HttpTestUtil.class);
+    private static final Logger logger = LogManager.getLogger(HttpTestUtil.class);
     private static final String CARBON_HOME = "carbon.home";
 
     public static void setCarbonHome() {

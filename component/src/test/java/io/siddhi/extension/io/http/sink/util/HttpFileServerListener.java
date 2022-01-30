@@ -22,7 +22,8 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,7 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Test handler for file downloading feature.
  */
 public class HttpFileServerListener implements HttpHandler {
-    private static final Logger logger = Logger.getLogger(HttpFileServerListener.class);
+    private static final Logger logger = LogManager.getLogger(HttpFileServerListener.class);
     private AtomicBoolean isEventArrived = new AtomicBoolean(false);
     private Headers headers;
     private String filePath;

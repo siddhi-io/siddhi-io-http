@@ -44,7 +44,8 @@ import io.siddhi.extension.io.http.sink.ClientConnector;
 import io.siddhi.extension.io.http.sink.util.HttpSinkUtil;
 import io.siddhi.extension.io.http.util.HTTPSourceRegistry;
 import io.siddhi.extension.io.http.util.HttpConstants;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.carbon.si.metrics.core.internal.MetricsDataHolder;
 import org.wso2.transport.http.netty.contract.Constants;
@@ -183,7 +184,7 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
         }
 )
 public class SSESource extends Source {
-    private static final Logger log = Logger.getLogger(SSESource.class);
+    private static final Logger log = LogManager.getLogger(SSESource.class);
     private int workerThread;
     private String siddhiAppName;
     private String streamID;

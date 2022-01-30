@@ -27,10 +27,18 @@ import io.siddhi.core.util.SiddhiTestHelper;
 import io.siddhi.core.util.config.InMemoryConfigManager;
 import io.siddhi.extension.io.http.source.util.HttpTestUtil;
 import io.siddhi.extension.map.xml.sourcemapper.XmlSourceMapper;
-import org.apache.log4j.AppenderSkeleton;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Core;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.plugins.Plugin;
+import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
+import org.apache.logging.log4j.core.config.plugins.PluginElement;
+import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -46,7 +54,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Test case for HTTPS protocol.
  */
 public class HttpsSSLSourceTestCase {
-    private static final Logger logger = Logger.getLogger(HttpsSSLSourceTestCase.class);
+    private static final Logger logger = (Logger) LogManager.getLogger(HttpsSSLSourceTestCase.class);
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;
@@ -129,8 +137,10 @@ public class HttpsSSLSourceTestCase {
      */
     @Test(dependsOnMethods = "testHTTPSInputTransport")
     public void testHTTPSInputTransportInvalidKeyStore() throws Exception {
-        final TestAppender appender = new TestAppender();
-        final Logger logger = Logger.getRootLogger();
+        final HttpsSSLSourceTestCaseTestAppender appender = new
+                HttpsSSLSourceTestCaseTestAppender("HttpsSSLSourceTestCaseTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
         logger.addAppender(appender);
         logger.info("Creating test for publishing events with https protocol with invalid keystore.");
         HttpTestUtil.setCarbonHome();
@@ -186,16 +196,19 @@ public class HttpsSSLSourceTestCase {
                 + "</events>";
         HttpTestUtil.httpsPublishEvent(event1);
         HttpTestUtil.httpsPublishEvent(event2);
-        final List<LoggingEvent> log = appender.getLog();
-        List<Object> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            logMessages.add(logEvent.getLevel());
-        }
-        Assert.assertEquals(logMessages.contains(Level.ERROR), true);
-        Assert.assertEquals(Collections.frequency(logMessages, Level.ERROR), 4);
+        final List<String> loggedEvents = ((HttpsSSLSourceTestCaseTestAppender) logger.getAppenders().
+                get("HttpsSSLSourceTestCaseTestAppender")).getLog();
+        Assert.assertEquals(loggedEvents.contains("Error on '" + siddhiAppRuntime.getName() +
+                        "'. Failed to initialize the SSLContext: Keystore was tampered with, or password was " +
+                        "incorrect Error while connecting at Source 'http' at 'inputStream'.")
+                , true);
+        Assert.assertEquals(Collections.frequency(loggedEvents, "Error on '" + siddhiAppRuntime.getName() +
+                "'. Failed to initialize the SSLContext: Keystore was tampered with, or password was " +
+                "incorrect Error while connecting at Source 'http' at 'inputStream'."), 1);
         SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
+        logger.removeAppender(appender);
     }
 
     /**
@@ -205,8 +218,10 @@ public class HttpsSSLSourceTestCase {
      */
     @Test(dependsOnMethods = "testHTTPSInputTransportInvalidKeyStore")
     public void testHTTPSInputTransportInvalidKeyStorePass() throws Exception {
-        final TestAppender appender = new TestAppender();
-        final Logger logger = Logger.getRootLogger();
+        final HttpsSSLSourceTestCaseTestAppender appender = new
+                HttpsSSLSourceTestCaseTestAppender("HttpsSSLSourceTestCaseTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
         logger.addAppender(appender);
         logger.info("Creating test for publishing events with https protocol with invalid keystore pass.");
         HttpTestUtil.setCarbonHome();
@@ -263,18 +278,21 @@ public class HttpsSSLSourceTestCase {
                     + "</events>";
             HttpTestUtil.httpsPublishEvent(event1);
             HttpTestUtil.httpsPublishEvent(event2);
-            final List<LoggingEvent> log = appender.getLog();
-            List<Object> logMessages = new ArrayList<>();
-            for (LoggingEvent logEvent : log) {
-                logMessages.add(logEvent.getLevel());
-            }
-            Assert.assertEquals(logMessages.contains(Level.ERROR), true);
-            Assert.assertEquals(Collections.frequency(logMessages, Level.ERROR), 4);
+            final List<String> loggedEvents = ((HttpsSSLSourceTestCaseTestAppender) logger.getAppenders().
+                    get("HttpsSSLSourceTestCaseTestAppender")).getLog();
+            Assert.assertEquals(loggedEvents.contains("Error on '" + siddhiAppRuntime.getName() +
+                        "'. Failed to initialize the SSLContext: Keystore was tampered with, or password was " +
+                        "incorrect Error while connecting at Source 'http' at 'inputStream'.")
+                , true);
+            Assert.assertEquals(Collections.frequency(loggedEvents, "Error on '" + siddhiAppRuntime.getName() +
+                "'. Failed to initialize the SSLContext: Keystore was tampered with, or password was " +
+                "incorrect Error while connecting at Source 'http' at 'inputStream'."), 1);
             SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
         } catch (InterruptedException t) {
             logger.error(t.getMessage(), t);
         } finally {
             siddhiAppRuntime.shutdown();
+            logger.removeAppender(appender);
         }
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
     }
@@ -286,8 +304,10 @@ public class HttpsSSLSourceTestCase {
      */
     @Test(enabled = false, dependsOnMethods = "testHTTPSInputTransportInvalidKeyStorePass")
     public void testHTTPSInputTransportInvalidCertPassword() throws Exception {
-        final TestAppender appender = new TestAppender();
-        final Logger logger = Logger.getRootLogger();
+        final HttpsSSLSourceTestCaseTestAppender appender = new
+                HttpsSSLSourceTestCaseTestAppender("HttpsSSLSourceTestCaseTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
         logger.addAppender(appender);
         logger.info(" Creating test for publishing events with https protocol with invalid cert pass.");
         HttpTestUtil.setCarbonHome();
@@ -341,37 +361,50 @@ public class HttpsSSLSourceTestCase {
                 + "</events>";
         HttpTestUtil.httpsPublishEvent(event1);
         HttpTestUtil.httpsPublishEvent(event2);
-        final List<LoggingEvent> log = appender.getLog();
-        List<Object> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            logMessages.add(logEvent.getLevel());
-        }
-        Assert.assertEquals(logMessages.contains(Level.ERROR), true);
-        Assert.assertEquals(Collections.frequency(logMessages, Level.ERROR), 2);
+        final List<String> loggedEvents = ((HttpsSSLSourceTestCaseTestAppender) logger.getAppenders().
+                get("HttpsSSLSourceTestCaseTestAppender")).getLog();
+        Assert.assertEquals(loggedEvents.contains("Error on '" + siddhiAppRuntime.getName() +
+                        "'. Failed to initialize the SSLContext: Keystore was tampered with, or password was " +
+                        "incorrect Error while connecting at Source 'http' at 'inputStream'.")
+                , true);
+        Assert.assertEquals(Collections.frequency(loggedEvents, "Error on '" + siddhiAppRuntime.getName() +
+                "'. Failed to initialize the SSLContext: Keystore was tampered with, or password was " +
+                "incorrect Error while connecting at Source 'http' at 'inputStream'."), 1);
         SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
+        logger.removeAppender(appender);
     }
 
-    private class TestAppender extends AppenderSkeleton {
-        private final List<LoggingEvent> log = new ArrayList<>();
+    @Plugin(name = "HttpsSSLSourceTestCaseTestAppender",
+            category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE)
+    private class HttpsSSLSourceTestCaseTestAppender extends AbstractAppender {
 
-        @Override
-        public boolean requiresLayout() {
-            return false;
+        private final List<String> log = new ArrayList<>();
+
+        public HttpsSSLSourceTestCaseTestAppender(String name, Filter filter) {
+
+            super(name, filter, null);
+        }
+
+        @PluginFactory
+        public HttpsSSLSourceTestCaseTestAppender createAppender(
+                @PluginAttribute("name") String name,
+                @PluginElement("Filter") Filter filter) {
+
+            return new HttpsSSLSourceTestCaseTestAppender(name, filter);
         }
 
         @Override
-        protected void append(final LoggingEvent loggingEvent) {
-            log.add(loggingEvent);
+        public void append(LogEvent event) {
+            log.add(event.getMessage().getFormattedMessage());
+
         }
 
-        @Override
-        public void close() {
-        }
-
-        List<LoggingEvent> getLog() {
-            return new ArrayList<LoggingEvent>(log);
+        public List<String> getLog() {
+            List<String> clone = new ArrayList<>(log);
+            log.clear();
+            return clone;
         }
     }
 }

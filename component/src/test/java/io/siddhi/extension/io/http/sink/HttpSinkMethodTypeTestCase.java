@@ -23,7 +23,8 @@ import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.extension.io.http.sink.util.HttpServerListenerHandler;
 import io.siddhi.extension.map.xml.sinkmapper.XMLSinkMapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -33,7 +34,7 @@ import org.testng.annotations.Test;
  * Test cases for different method types.
  */
 public class HttpSinkMethodTypeTestCase {
-    private static final Logger log = Logger.getLogger(HttpSinkMethodTypeTestCase.class);
+    private static final Logger log = LogManager.getLogger(HttpSinkMethodTypeTestCase.class);
     private String payload;
     private String expected;
 

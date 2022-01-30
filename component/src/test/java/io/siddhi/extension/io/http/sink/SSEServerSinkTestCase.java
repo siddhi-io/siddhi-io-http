@@ -28,7 +28,6 @@ import io.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import io.siddhi.core.util.persistence.PersistenceStore;
 import io.siddhi.extension.map.json.sinkmapper.JsonSinkMapper;
 import io.siddhi.extension.map.json.sourcemapper.JsonSourceMapper;
-import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -41,7 +40,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Tests http sse sink.
  */
 public class SSEServerSinkTestCase {
-    private static final Logger log = Logger.getLogger(SSEServerSinkTestCase.class);
     private static final int SLEEP_TIME = 50;
     private static final int EVENT_COUNT = 10;
     private static final int TIMEOUT = 30000;

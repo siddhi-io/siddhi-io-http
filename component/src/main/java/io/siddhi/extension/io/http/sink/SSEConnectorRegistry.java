@@ -25,7 +25,8 @@ import io.siddhi.extension.io.http.source.HttpConnectorPortBindingListener;
 import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
 import io.siddhi.extension.io.http.util.HttpConstants;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.transport.http.netty.contract.ServerConnector;
 import org.wso2.transport.http.netty.contract.ServerConnectorFuture;
 import org.wso2.transport.http.netty.contract.config.InboundMsgSizeValidationConfig;
@@ -52,7 +53,7 @@ import static io.siddhi.extension.io.http.util.HttpIoUtil.populateParameterMap;
  */
 public class SSEConnectorRegistry {
     private static SSEConnectorRegistry instance = new SSEConnectorRegistry();
-    private final Logger log = Logger.getLogger(SSEConnectorRegistry.class);
+    private static final Logger log = LogManager.getLogger(SSEConnectorRegistry.class);
     protected TransportsConfiguration trpConfig;
     protected DefaultHttpWsConnectorFactory httpConnectorFactory;
     private Map<String, SSEServerConnectorContext> serverConnectorPool = new ConcurrentHashMap<>();

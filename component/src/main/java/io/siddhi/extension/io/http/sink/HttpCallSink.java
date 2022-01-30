@@ -40,7 +40,8 @@ import io.siddhi.extension.io.http.source.HttpResponseMessageListener;
 import io.siddhi.extension.io.http.util.HttpConstants;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.StreamDefinition;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.transport.http.netty.contract.Constants;
 import org.wso2.transport.http.netty.contract.HttpResponseFuture;
@@ -435,7 +436,7 @@ import static io.siddhi.extension.io.http.util.HttpConstants.EMPTY_STRING;
 )
 public class HttpCallSink extends HttpSink {
 
-    private static final Logger log = Logger.getLogger(HttpCallSink.class);
+    private static final Logger log = LogManager.getLogger(HttpCallSink.class);
     private String sinkId;
     private boolean isDownloadEnabled;
     private Option downloadPath;

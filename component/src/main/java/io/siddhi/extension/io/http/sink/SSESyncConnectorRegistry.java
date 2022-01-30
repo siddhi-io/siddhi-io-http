@@ -23,7 +23,6 @@ import io.siddhi.extension.io.http.source.ConnectorStartupSynchronizer;
 import io.siddhi.extension.io.http.source.HttpConnectorPortBindingListener;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
 import io.siddhi.extension.io.http.util.HttpConstants;
-import org.apache.log4j.Logger;
 import org.wso2.transport.http.netty.contract.ServerConnectorFuture;
 import org.wso2.transport.http.netty.contractimpl.DefaultHttpWsConnectorFactory;
 
@@ -36,7 +35,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SSESyncConnectorRegistry extends SSEConnectorRegistry {
 
     private static SSESyncConnectorRegistry instance = new SSESyncConnectorRegistry();
-    private final Logger log = Logger.getLogger(SSESyncConnectorRegistry.class);
     private Map<String, SSERequestListener> sourceListenersMap = new ConcurrentHashMap<>();
 
     private SSESyncConnectorRegistry() {

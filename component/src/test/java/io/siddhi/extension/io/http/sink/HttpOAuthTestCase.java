@@ -26,7 +26,8 @@ import io.siddhi.core.stream.output.StreamCallback;
 import io.siddhi.core.util.SiddhiTestHelper;
 import io.siddhi.extension.io.http.sink.util.HttpOAuthListenerHandler;
 import io.siddhi.extension.map.xml.sinkmapper.XMLSinkMapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -37,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class HttpOAuthTestCase {
     public static final String CARBON_HOME = "carbon.home";
-    private static final Logger log = Logger.getLogger(HttpAuthTestCase.class);
+    private static final Logger log = LogManager.getLogger(HttpAuthTestCase.class);
     private AtomicInteger eventCount = new AtomicInteger(0);
 
     @BeforeMethod
