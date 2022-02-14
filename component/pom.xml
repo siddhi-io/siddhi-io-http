@@ -149,7 +149,7 @@
                         </Export-Package>
                         <Import-Package>
                             !org.wso2.transport.http.netty.*,
-                            !io.netty.*,
+                            !io.netty.*;version="${netty.version.range}",
                             io.siddhi.core.*;version="${siddhi.version.range}",
                             io.siddhi.annotation.*;version="${siddhi.version.range}",
                             io.siddhi.query.api.*;version="${siddhi.version.range}",
