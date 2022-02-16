@@ -38,7 +38,8 @@ import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.Variable;
 import io.siddhi.query.api.expression.condition.And;
 import io.siddhi.query.api.expression.condition.Compare;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.transport.http.netty.contract.config.Parameter;
 import org.wso2.transport.http.netty.contract.exceptions.ServerConnectorException;
 import org.wso2.transport.http.netty.contractimpl.DefaultHttpWsConnectorFactory;
@@ -73,7 +74,7 @@ import static org.wso2.transport.http.netty.contract.Constants.DIRECTION;
  * Util class which is use for handle HTTP util function.
  */
 public class HttpIoUtil {
-    private static final Logger log = Logger.getLogger(HttpIoUtil.class);
+    private static final Logger log = LogManager.getLogger(HttpIoUtil.class);
     private static String clientStoreFile;
     private static String clientStorePass;
     private static ConfigReader configReader;

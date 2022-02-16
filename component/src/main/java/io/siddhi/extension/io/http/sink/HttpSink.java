@@ -53,7 +53,8 @@ import io.siddhi.extension.io.http.sink.util.HttpSinkUtil;
 import io.siddhi.extension.io.http.util.HttpConstants;
 import io.siddhi.extension.io.http.util.HttpIoUtil;
 import io.siddhi.query.api.definition.StreamDefinition;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.carbon.si.metrics.core.internal.MetricsDataHolder;
 import org.wso2.transport.http.netty.contract.Constants;
@@ -457,7 +458,7 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
         }
 )
 public class HttpSink extends Sink {
-    private static final Logger log = Logger.getLogger(HttpSink.class);
+    private static final Logger log = LogManager.getLogger(HttpSink.class);
     protected String streamID;
     protected String consumerKey;
     protected String consumerSecret;

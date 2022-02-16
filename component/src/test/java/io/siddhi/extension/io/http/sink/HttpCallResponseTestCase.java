@@ -26,7 +26,8 @@ import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
 import io.siddhi.extension.io.http.sink.util.HttpFileServerListenerHandler;
 import io.siddhi.extension.io.http.sink.util.HttpServerListenerHandler;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -36,7 +37,7 @@ import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class HttpCallResponseTestCase {
-    private static final Logger log = Logger.getLogger(HttpCallResponseTestCase.class);
+    private static final Logger log = LogManager.getLogger(HttpCallResponseTestCase.class);
 
     private AtomicInteger eventCount = new AtomicInteger(0);
     private String downloadPath;

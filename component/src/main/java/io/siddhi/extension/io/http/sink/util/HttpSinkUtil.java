@@ -24,7 +24,8 @@ import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.extension.io.http.sink.exception.HttpSinkAdaptorRuntimeException;
 import io.siddhi.extension.io.http.util.HttpConstants;
 import io.siddhi.extension.io.http.util.TrpPropertyTypes;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.transport.http.netty.contract.Constants;
 import org.wso2.transport.http.netty.contract.config.ProxyServerConfiguration;
@@ -59,7 +60,7 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
  * {@code HttpSinkUtil } responsible of the all configuration reading and input formatting of http transport.
  */
 public class HttpSinkUtil {
-    private static final Logger log = Logger.getLogger(HttpSinkUtil.class);
+    private static final Logger log = LogManager.getLogger(HttpSinkUtil.class);
 
     private HttpSinkUtil() {
     }
@@ -223,7 +224,7 @@ public class HttpSinkUtil {
 
             case HttpConstants.MAP_JSON:
                 return HttpConstants.APPLICATION_JSON;
-            
+
             case HttpConstants.MAP_KEYVALUE:
                 return HttpConstants.APPLICATION_URL_ENCODED;
 
@@ -307,7 +308,7 @@ public class HttpSinkUtil {
                 HttpConstants.DEFAULT_TEST_ON_BORROW));
         boolean testWhileIdle = Boolean.parseBoolean(
                 optionHolder.validateAndGetStaticValue(HttpConstants.TEST_WHILE_IDLE,
-                HttpConstants.DEFAULT_TEST_WHILE_IDLE));
+                        HttpConstants.DEFAULT_TEST_WHILE_IDLE));
         long timeBetweenEvictionRuns = Long.parseLong(optionHolder.validateAndGetStaticValue(
                 HttpConstants.TIME_BETWEEN_EVICTION_RUNS, HttpConstants.DEFAULT_TIME_BETWEEN_EVICTION_RUNS));
         long minEvictableIdleTime = Long.parseLong(optionHolder.validateAndGetStaticValue(

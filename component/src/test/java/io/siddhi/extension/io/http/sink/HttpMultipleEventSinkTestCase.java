@@ -24,9 +24,18 @@ import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.extension.io.http.sink.util.HttpServerListener;
 import io.siddhi.extension.io.http.sink.util.HttpServerListenerHandler;
 import io.siddhi.extension.map.xml.sinkmapper.XMLSinkMapper;
-import org.apache.log4j.AppenderSkeleton;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Core;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.plugins.Plugin;
+import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
+import org.apache.logging.log4j.core.config.plugins.PluginElement;
+import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -37,7 +46,7 @@ import java.util.List;
  * Test cases for multiple event sink synchronously.
  */
 public class HttpMultipleEventSinkTestCase {
-    private static final Logger logger = Logger.getLogger(HttpMultipleEventSinkTestCase.class);
+    private static final Logger logger = (Logger) LogManager.getLogger(HttpMultipleEventSinkTestCase.class);
 
     /**
      * Test cases for multiple event sink synchronously.
@@ -47,11 +56,13 @@ public class HttpMultipleEventSinkTestCase {
     @Test
     public void testHTTPMultipleEvents() throws Exception {
         logger.info("Creating test for multiple event sink synchronously.");
-        final TestAppender appender = new TestAppender();
-        final Logger logger = Logger.getLogger(HttpServerListener.class);
+        final TestAppender appender = new TestAppender("TestAppender", null);
+        Logger logger = (Logger) LogManager.getLogger(HttpServerListener.class);
+        logger.setLevel(Level.ALL);
         logger.addAppender(appender);
         SiddhiManager siddhiManager = new SiddhiManager();
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
+
 
         String inStreamDefinition1 = "Define stream FooStreamA (message String,method String,headers String);"
                 + "@sink(type='http',publisher.url='http://localhost:8005/abc',method='{{method}}'," +
@@ -100,38 +111,54 @@ public class HttpMultipleEventSinkTestCase {
         fooStream.send(new Object[]{event1, "POST", "'Name:John','Age:23'"});
         fooStream2.send(new Object[]{event2, "POST", "'Name:John','Age:23'"});
         Thread.sleep(1000);
-        final List<LoggingEvent> log = appender.getLog();
+        final List<String> loggedEvents = ((TestAppender) logger.getAppenders().
+                get("TestAppender")).getLog();
         List<String> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            logMessages.add(logEvent.getMessage().toString());
+        for (String logEvent : loggedEvents) {
+            String message = String.valueOf(logEvent);
+            if (message.contains(":")) {
+                message = message.split(":")[1].trim();
+            }
+            logMessages.add(message);
         }
-        Assert.assertEquals(logMessages.contains("Event Arrived: " + event1 + "\n"), true);
-        Assert.assertEquals(logMessages.contains("Event Arrived: " + event2 + "\n"), true);
+        Assert.assertEquals(logMessages.contains(event1), true);
+        Assert.assertEquals(logMessages.contains(event2), true);
         Thread.sleep(500);
         siddhiAppRuntime.shutdown();
         lst.shutdown();
+        logger.removeAppender(appender);
     }
 
-    private static class TestAppender extends AppenderSkeleton {
+    @Plugin(name = "TestAppender",
+            category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE)
+    private static class TestAppender extends AbstractAppender {
 
-        private final List<LoggingEvent> log = new ArrayList<>();
+        private final List<String> log = new ArrayList<>();
 
-        @Override
-        public boolean requiresLayout() {
-            return false;
+        public TestAppender(String name, Filter filter) {
+
+            super(name, filter, null);
+        }
+
+        @PluginFactory
+        public static TestAppender createAppender(
+                @PluginAttribute("name") String name,
+                @PluginElement("Filter") Filter filter) {
+
+            return new TestAppender(name, filter);
         }
 
         @Override
-        protected void append(final LoggingEvent loggingEvent) {
-            log.add(loggingEvent);
+        public void append(LogEvent event) {
+
+            log.add(event.getMessage().getFormattedMessage());
+
         }
 
-        @Override
-        public void close() {
-        }
-
-        List<LoggingEvent> getLog() {
-            return new ArrayList<>(log);
+        public List<String> getLog() {
+            List<String> clone = new ArrayList<>(log);
+            log.clear();
+            return clone;
         }
     }
 }

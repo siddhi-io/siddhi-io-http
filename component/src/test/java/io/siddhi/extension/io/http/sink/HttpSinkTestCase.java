@@ -26,7 +26,9 @@ import io.siddhi.core.stream.output.sink.Sink;
 import io.siddhi.extension.io.http.sink.util.HttpServerListenerHandler;
 import io.siddhi.extension.io.http.sink.util.UnitTestAppender;
 import io.siddhi.extension.map.xml.sinkmapper.XMLSinkMapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -39,7 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Test cases for content type header.
  */
 public class HttpSinkTestCase {
-    private static final Logger log = Logger.getLogger(HttpSinkTestCase.class);
+    private static final Logger log = (Logger) LogManager.getLogger(HttpSinkTestCase.class);
     private String payload;
     private String expected;
     private AtomicInteger eventCount = new AtomicInteger(0);
@@ -166,6 +168,12 @@ public class HttpSinkTestCase {
     public void testHTTPConnectionFailure() throws InterruptedException {
         log.info("Creating test for publishing events to invalid HTTP endpoint.");
         SiddhiManager siddhiManager = new SiddhiManager();
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
+        Logger logger = (Logger) LogManager.getLogger(Sink.class);
+        logger.setLevel(Level.ALL);
+        logger.addAppender(appender);
+        appender.start();
+
         siddhiManager.setExtension("xml-output-mapper", XMLSinkMapper.class);
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);"
                 + "@sink(type='http', publisher.url='http://localhost:8010/abcd',method='{{method}}',"
@@ -182,9 +190,6 @@ public class HttpSinkTestCase {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(inStreamDefinition + query);
         InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
         siddhiAppRuntime.start();
-        Logger logger = Logger.getLogger(Sink.class);
-        UnitTestAppender appender = new UnitTestAppender();
-        logger.addAppender(appender);
 
         try {
             fooStream.send(1566562744069L, new Object[]{payload, "POST", "'Name:John','Age:23'"});
@@ -192,7 +197,8 @@ public class HttpSinkTestCase {
             String expectedMessage = "Dropping event at Sink 'http' at 'BarStream' as its still trying to " +
                     "reconnect!, events dropped '<events><event><symbol>WSO2</symbol><price>55.645</price>" +
                     "<volume>100</volume></event></events>'";
-            Assert.assertTrue(appender.getMessages().contains(expectedMessage));
+            Assert.assertTrue(((UnitTestAppender) logger.getAppenders().
+                    get("UnitTestAppender")).getMessages().contains(expectedMessage));
         } finally {
             logger.removeAppender(appender);
             siddhiAppRuntime.shutdown();

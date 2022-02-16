@@ -35,7 +35,6 @@ import io.siddhi.extension.io.http.sink.util.HttpSinkUtil;
 import io.siddhi.extension.io.http.util.HTTPSourceRegistry;
 import io.siddhi.extension.io.http.util.HttpConstants;
 import io.siddhi.query.api.definition.StreamDefinition;
-import org.apache.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 
 import java.util.List;
@@ -118,7 +117,6 @@ import java.util.List;
 )
 public class HttpServiceResponseSink extends Sink {
 
-    private static final Logger log = Logger.getLogger(HttpServiceResponseSink.class);
     private Option messageIdOption;
     private String sourceId;
     private Option httpHeaderOption;

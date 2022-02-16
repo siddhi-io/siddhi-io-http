@@ -30,6 +30,8 @@ import io.siddhi.extension.io.http.source.util.HttpTestUtil;
 import io.siddhi.extension.map.json.sourcemapper.JsonSourceMapper;
 import io.siddhi.extension.map.text.sourcemapper.TextSourceMapper;
 import io.siddhi.extension.map.xml.sourcemapper.XmlSourceMapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -43,8 +45,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Test cases for mapping types.
  */
 public class HttpSourceMappingTestCase {
-    private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger
-            (HttpSourceMappingTestCase.class);
+    private static final Logger logger = LogManager.getLogger(HttpSourceMappingTestCase.class);
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;

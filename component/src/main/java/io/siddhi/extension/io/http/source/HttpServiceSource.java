@@ -42,7 +42,8 @@ import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeExce
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
 import io.siddhi.extension.io.http.util.HTTPSourceRegistry;
 import io.siddhi.extension.io.http.util.HttpConstants;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.transport.http.netty.contract.exceptions.ServerConnectorException;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
@@ -299,11 +300,11 @@ import static org.wso2.carbon.messaging.Constants.DIRECTION_RESPONSE;
 )
 public class HttpServiceSource extends HttpSource {
 
-    private static final Logger log = Logger.getLogger(HttpServiceSource.class);
+    private static final Logger log = LogManager.getLogger(HttpServiceSource.class);
     private HttpSyncConnectorRegistry httpConnectorRegistry;
     private String sourceId;
     private long connectionTimeout;
-    
+
     private Map<String, HttpCarbonMessage> requestContainerMap = new ConcurrentHashMap<>();
 
     private HashedWheelTimer timer;

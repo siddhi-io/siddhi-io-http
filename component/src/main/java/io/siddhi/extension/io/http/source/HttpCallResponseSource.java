@@ -32,7 +32,6 @@ import io.siddhi.core.util.snapshot.state.StateFactory;
 import io.siddhi.core.util.transport.OptionHolder;
 import io.siddhi.extension.io.http.util.HTTPSourceRegistry;
 import io.siddhi.extension.io.http.util.HttpConstants;
-import org.apache.log4j.Logger;
 
 import static io.siddhi.extension.io.http.util.HttpConstants.DEFAULT_WORKER_COUNT;
 
@@ -128,7 +127,6 @@ import static io.siddhi.extension.io.http.util.HttpConstants.DEFAULT_WORKER_COUN
 )
 public class HttpCallResponseSource extends Source {
 
-    private static final Logger log = Logger.getLogger(HttpCallResponseSource.class);
     private String sinkId;
     private SourceEventListener sourceEventListener;
     private String[] requestedTransportPropertyNames;

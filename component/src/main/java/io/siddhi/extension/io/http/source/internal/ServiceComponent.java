@@ -19,7 +19,8 @@
 package io.siddhi.extension.io.http.source.internal;
 
 import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -38,7 +39,7 @@ import org.wso2.carbon.analytics.idp.client.core.api.IdPClient;
         immediate = true
 )
 public class ServiceComponent {
-    private static final Logger log = Logger.getLogger(ServiceComponent.class);
+    private static final Logger log = LogManager.getLogger(ServiceComponent.class);
 
     /**
      * This is the activation method of Http io declarative service. This will be called when its references are

@@ -27,9 +27,18 @@ import io.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import io.siddhi.core.util.persistence.PersistenceStore;
 import io.siddhi.extension.io.http.source.util.HttpTestUtil;
 import io.siddhi.extension.map.xml.sourcemapper.XmlSourceMapper;
-import org.apache.log4j.AppenderSkeleton;
-import org.apache.log4j.Logger;
-import org.apache.log4j.spi.LoggingEvent;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Core;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.LogEvent;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.plugins.Plugin;
+import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
+import org.apache.logging.log4j.core.config.plugins.PluginElement;
+import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -44,7 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Basic test cases for http source functions.
  */
 public class HttpBasicTestCase {
-    private static final Logger logger = Logger.getLogger(HttpBasicTestCase.class);
+    private static final Logger logObj = (Logger) LogManager.getLogger(HttpBasicTestCase.class);
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;
@@ -61,7 +70,7 @@ public class HttpBasicTestCase {
      */
     @Test
     public void testHTTPInputTransportWithoutURL() throws Exception {
-        logger.info(" Creating test for publishing events without URL.");
+        logObj.info(" Creating test for publishing events without URL.");
         URI baseURI = URI.create(String.format("http://%s:%d", "0.0.0.0", 8280));
         List<String> receivedEventNameList = new ArrayList<>(2);
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
@@ -122,10 +131,13 @@ public class HttpBasicTestCase {
      */
     @Test(dependsOnMethods = "testHTTPInputTransportWithoutURL")
     public void testHTTPInputTransportPutMethod() throws Exception {
-        logger.info("Test case for put method");
-        final TestAppender appender = new TestAppender();
-        final Logger logger = Logger.getRootLogger();
+        logObj.info("Test case for put method");
+        final HttpBasicTestCaseTestAppender appender = new
+                HttpBasicTestCaseTestAppender("HttpBasicTestCaseTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
         logger.addAppender(appender);
+        appender.start();
         logger.info("Creating test for publishing events from PUT method.");
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
         List<String> receivedEventNameList = new ArrayList<>(2);
@@ -169,16 +181,14 @@ public class HttpBasicTestCase {
         HttpTestUtil.httpPublishEvent(event1, baseURI, "/endpoints/RecPro",
                 "PUT");
         HttpTestUtil.httpPublishEvent(event2, baseURI, "/endpoints/RecPro", "PUT");
-        final List<LoggingEvent> log = appender.getLog();
-        List<String> logMessages = new ArrayList<>();
-        for (LoggingEvent logEvent : log) {
-            logMessages.add(String.valueOf(logEvent.getMessage()));
-        }
+        final List<String> loggedEvents = ((HttpBasicTestCaseTestAppender) logger.getAppenders().
+                get("HttpBasicTestCaseTestAppender")).getLog();
         SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
-        Assert.assertEquals(logMessages.contains("Event response code 400"), true);
-        Assert.assertEquals(Collections.frequency(logMessages, "Event response code 400"), 2);
+        Assert.assertEquals(loggedEvents.contains("Event response code 400"), true);
+        Assert.assertEquals(Collections.frequency(loggedEvents, "Event response code 400"), 2);
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
         siddhiAppRuntime.shutdown();
+        logger.removeAppender(appender);
     }
 
     /**
@@ -188,10 +198,14 @@ public class HttpBasicTestCase {
      */
     @Test(dependsOnMethods = "testHTTPInputTransportPutMethod")
     public void testMultipleListenersSameURL() throws Exception {
-        logger.info("Creating test for same url in different execution plain.");
-        final TestAppender appender = new TestAppender();
-        final Logger logger = Logger.getRootLogger();
+        logObj.info("Creating test for same url in different execution plain.");
+        final HttpBasicTestCaseTestAppender appender = new
+                HttpBasicTestCaseTestAppender("HttpBasicTestCaseTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
         logger.addAppender(appender);
+        appender.start();
+        logger.info("ADDED the HttpBasicTestCaseTestAppender appender in testMultipleListenersSameURL");
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8008));
         List<String> receivedEventNameList = new ArrayList<>(2);
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
@@ -272,17 +286,14 @@ public class HttpBasicTestCase {
                         "POST");
                 HttpTestUtil.httpPublishEvent(event2, baseURI, "/endpoints/abc",
                         "POST");
-                final List<LoggingEvent> log = appender.getLog();
-                List<String> logMessages = new ArrayList<>();
-                for (LoggingEvent logEvent : log) {
-                    logMessages.add(String.valueOf(logEvent.getMessage()));
-                }
+                final List<String> loggedEvents = ((HttpBasicTestCaseTestAppender) logger.getAppenders().
+                        get("HttpBasicTestCaseTestAppender")).getLog();
                 SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
-                Assert.assertEquals(logMessages.contains("Error on '" + siddhiAppRuntime2.getName() +
+                Assert.assertEquals(loggedEvents.contains("Error on '" + siddhiAppRuntime2.getName() +
                                 "'. Listener URL http://localhost:8008/endpoints/abc already connected " +
                                 "Error while connecting at Source 'http' at 'inputStream2'.")
                         , true);
-                Assert.assertEquals(Collections.frequency(logMessages, "Error on '" + siddhiAppRuntime2.getName() +
+                Assert.assertEquals(Collections.frequency(loggedEvents, "Error on '" + siddhiAppRuntime2.getName() +
                         "'. Listener URL http://localhost:8008/endpoints/abc already connected " +
                         "Error while connecting at Source 'http' at 'inputStream2'."), 1);
             } catch (InterruptedException e) {
@@ -294,6 +305,7 @@ public class HttpBasicTestCase {
             logger.error(t.getMessage(), t);
         } finally {
             siddhiAppRuntime.shutdown();
+            logger.removeAppender(appender);
         }
         Assert.assertEquals(receivedEventNameList.toString(), expected.toString());
 
@@ -304,10 +316,13 @@ public class HttpBasicTestCase {
      */
     @Test(dependsOnMethods = "testMultipleListenersSameURL")
     public void testMultipleListenersSameURLInSameExecutionPlan() throws InterruptedException {
-        logger.info("Creating test for publishing events same url in same execution plain.");
-        final TestAppender appender = new TestAppender();
-        final Logger logger = Logger.getRootLogger();
+        logObj.info("Creating test for publishing events same url in same execution plain.");
+        final HttpBasicTestCaseTestAppender appender = new
+                HttpBasicTestCaseTestAppender("HttpBasicTestCaseTestAppender", null);
+        final Logger logger = (Logger) LogManager.getRootLogger();
+        logger.setLevel(Level.ALL);
         logger.addAppender(appender);
+        appender.start();
         SiddhiManager siddhiManager = new SiddhiManager();
 
         List<String> receivedEventNameListA = new ArrayList<>(2);
@@ -357,22 +372,20 @@ public class HttpBasicTestCase {
         try {
             siddhiAppRuntime.start();
             //To check weather only one is deployed
-            final List<LoggingEvent> log = appender.getLog();
-            List<String> logMessages = new ArrayList<>();
-            for (LoggingEvent logEvent : log) {
-                logMessages.add(String.valueOf(logEvent.getMessage()));
-            }
+            final List<String> loggedEvents = ((HttpBasicTestCaseTestAppender) logger.getAppenders().
+                    get("HttpBasicTestCaseTestAppender")).getLog();
             SiddhiTestHelper.waitForEvents(waitTime, 0, eventCount, timeout);
-            Assert.assertEquals(logMessages.contains("Error on '" + siddhiAppRuntime.getName() + "'. Listener URL " +
+            Assert.assertEquals(loggedEvents.contains("Error on '" + siddhiAppRuntime.getName() + "'. Listener URL " +
                     "http://localhost:8006/endpoints/RecPro already connected Error while " +
                     "connecting at Source 'http' at 'inputStreamA'."), true);
-            Assert.assertEquals(Collections.frequency(logMessages, "Error on '" + siddhiAppRuntime.getName() +
+            Assert.assertEquals(Collections.frequency(loggedEvents, "Error on '" + siddhiAppRuntime.getName() +
                     "'. Listener URL http://localhost:8006/endpoints/RecPro already connected Error while " +
                     "connecting at Source 'http' at 'inputStreamA'."), 1);
         } catch (InterruptedException t) {
             logger.error(t.getMessage(), t);
         } finally {
             siddhiAppRuntime.shutdown();
+            logger.removeAppender(appender);
         }
     }
 
@@ -383,7 +396,7 @@ public class HttpBasicTestCase {
      */
     @Test(dependsOnMethods = "testMultipleListenersSameURLInSameExecutionPlan")
     public void testHTTPInputTransportDifferentURL() throws Exception {
-        logger.info("Creating test for publishing events with different url with same context.");
+        logObj.info("Creating test for publishing events with different url with same context.");
         URI baseURIA = URI.create(String.format("http://%s:%d", "localhost", 8005));
         URI baseURIB = URI.create(String.format("http://%s:%d", "localhost", 8009));
         List<String> receivedEventNameListA = new ArrayList<>(2);
@@ -487,7 +500,7 @@ public class HttpBasicTestCase {
      */
     @Test(dependsOnMethods = "testHTTPInputTransportDifferentURL")
     public void testHTTPInputTransportEmployPayload() throws Exception {
-        logger.info("Creating test for publishing events with empty payload.");
+        logObj.info("Creating test for publishing events with empty payload.");
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
         List<String> receivedEventNameList = new ArrayList<>(2);
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -523,26 +536,35 @@ public class HttpBasicTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    private static class TestAppender extends AppenderSkeleton {
+    @Plugin(name = "HttpBasicTestCaseTestAppender",
+            category = Core.CATEGORY_NAME, elementType = Appender.ELEMENT_TYPE)
+    private static class HttpBasicTestCaseTestAppender extends AbstractAppender {
 
-        private final List<LoggingEvent> log = new ArrayList<>();
+        private final List<String> log = new ArrayList<>();
 
-        @Override
-        public boolean requiresLayout() {
-            return false;
+        public HttpBasicTestCaseTestAppender(String name, Filter filter) {
+
+            super(name, filter, null);
+        }
+
+        @PluginFactory
+        public static HttpBasicTestCaseTestAppender createAppender(
+                @PluginAttribute("name") String name,
+                @PluginElement("Filter") Filter filter) {
+
+            return new HttpBasicTestCaseTestAppender(name, filter);
         }
 
         @Override
-        protected void append(final LoggingEvent loggingEvent) {
-            log.add(loggingEvent);
+        public void append(LogEvent event) {
+            log.add(event.getMessage().getFormattedMessage());
+
         }
 
-        @Override
-        public void close() {
-        }
-
-        List<LoggingEvent> getLog() {
-            return new ArrayList<>(log);
+        public List<String> getLog() {
+            List<String> clone = new ArrayList<>(log);
+            log.clear();
+            return clone;
         }
     }
 }

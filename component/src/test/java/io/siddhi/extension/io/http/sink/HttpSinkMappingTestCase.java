@@ -25,7 +25,8 @@ import io.siddhi.extension.io.http.sink.util.HttpServerListenerHandler;
 import io.siddhi.extension.map.json.sinkmapper.JsonSinkMapper;
 import io.siddhi.extension.map.text.sinkmapper.TextSinkMapper;
 import io.siddhi.extension.map.xml.sinkmapper.XMLSinkMapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -34,7 +35,7 @@ import org.testng.annotations.Test;
  * Test case for mapping type.
  */
 public class HttpSinkMappingTestCase {
-    private static final Logger log = Logger.getLogger(HttpSinkMappingTestCase.class);
+    private static final Logger log = LogManager.getLogger(HttpSinkMappingTestCase.class);
 
     /**
      * Creating test for publishing events with XML mapping.

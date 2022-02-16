@@ -42,7 +42,8 @@ import io.siddhi.extension.io.http.util.HttpIoUtil;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.si.metrics.core.internal.MetricsDataHolder;
 import org.wso2.transport.http.netty.contract.config.ListenerConfiguration;
 
@@ -291,7 +292,7 @@ import static io.siddhi.extension.io.http.util.HttpConstants.WEB_SUB_SUBSCRIPTIO
         }
 )
 public class HttpWebSubSource extends Source {
-    private static final Logger log = Logger.getLogger(HttpWebSubSource.class);
+    private static final Logger log = LogManager.getLogger(HttpWebSubSource.class);
     public String siddhiAppName;
     protected SourceMetrics metrics;
     private HttpConnectorRegistry httpConnectorRegistry;

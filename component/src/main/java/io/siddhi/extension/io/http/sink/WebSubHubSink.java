@@ -70,7 +70,8 @@ import io.siddhi.query.api.expression.Variable;
 import io.siddhi.query.api.expression.condition.Compare;
 import io.siddhi.query.api.expression.constant.StringConstant;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
 import org.wso2.carbon.si.metrics.core.internal.MetricsDataHolder;
 import org.wso2.transport.http.netty.contract.Constants;
@@ -402,7 +403,7 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
 )
 public class WebSubHubSink extends Sink {
 
-    private static final Logger log = Logger.getLogger(WebSubHubSink.class);
+    private static final Logger log = LogManager.getLogger(WebSubHubSink.class);
     private final String[] outputColumns = new String[]{HUB_CALLBACK, HUB_TOPIC, HUB_SECRET, HUB_LEASE_SECONDS,
             REQUEST_TIMESTAMP};
     protected String streamID;

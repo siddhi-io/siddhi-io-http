@@ -24,7 +24,6 @@ import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
 import io.siddhi.extension.io.http.util.HttpConstants;
-import org.apache.log4j.Logger;
 import org.wso2.transport.http.netty.contract.ServerConnectorFuture;
 import org.wso2.transport.http.netty.contractimpl.DefaultHttpWsConnectorFactory;
 
@@ -37,7 +36,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
 
     private static HttpSyncConnectorRegistry instance = new HttpSyncConnectorRegistry();
-    private final Logger log = Logger.getLogger(HttpSyncConnectorRegistry.class);
     private Map<String, HttpSyncSourceListener> sourceListenersMap = new ConcurrentHashMap<>();
 
     private HttpSyncConnectorRegistry() {

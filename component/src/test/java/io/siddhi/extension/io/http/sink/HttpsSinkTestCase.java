@@ -23,7 +23,8 @@ import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.extension.io.http.sink.util.HttpsServerListenerHandler;
 import io.siddhi.extension.map.xml.sinkmapper.XMLSinkMapper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -36,7 +37,7 @@ import java.nio.file.Paths;
  */
 public class HttpsSinkTestCase {
     public static final String CARBON_HOME = "carbon.home";
-    private static final Logger logger = Logger.getLogger(HttpsSinkTestCase.class);
+    private static final Logger logger = LogManager.getLogger(HttpsSinkTestCase.class);
     private String payload;
     private String expected;
 

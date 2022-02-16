@@ -25,7 +25,8 @@ import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeExce
 import io.siddhi.extension.io.http.util.HttpConstants;
 import io.siddhi.extension.io.http.util.HttpIoUtil;
 import io.siddhi.extension.io.http.util.TrpPropertyTypes;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.transport.http.netty.contract.config.ListenerConfiguration;
 import org.wso2.transport.http.netty.contract.config.TransportProperty;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
@@ -67,7 +68,7 @@ import static io.siddhi.extension.io.http.util.HttpConstants.SERVER_BOOTSTRAP_SO
  * Handles the http source util functions.
  */
 public class HttpSourceUtil {
-    private static final Logger log = Logger.getLogger(HttpSourceUtil.class);
+    private static final Logger log = LogManager.getLogger(HttpSourceUtil.class);
 
     private HttpSourceUtil() {
     }

@@ -26,7 +26,8 @@ import io.siddhi.extension.io.http.sink.exception.HttpSinkAdaptorRuntimeExceptio
 import io.siddhi.extension.io.http.sink.util.HttpServerListenerHandler;
 import io.siddhi.extension.map.xml.sinkmapper.XMLSinkMapper;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -34,7 +35,7 @@ import org.testng.annotations.Test;
  * test cases for basic authentication.
  */
 public class HttpAuthTestCase {
-    private static final Logger log = Logger.getLogger(HttpAuthTestCase.class);
+    private static final Logger log = LogManager.getLogger(HttpAuthTestCase.class);
 
     /**
      * Creating test for publishing events wth basic authentication false.
