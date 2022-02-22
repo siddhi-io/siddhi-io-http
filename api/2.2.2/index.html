@@ -296,6 +296,18 @@
 
 
   <li class="md-nav__item">
+    <a href="../2.3.4/" title="2.3.4" class="md-nav__link">
+      2.3.4
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="../2.3.3/" title="2.3.3" class="md-nav__link">
       2.3.3
     </a>
@@ -928,7 +940,7 @@
 <p style="word-wrap: break-word;margin: 0;">HTTP sink publishes messages via HTTP or HTTPS protocols using methods such as POST, GET, PUT, and DELETE on formats <code>text</code>, <code>XML</code> and <code>JSON</code>. It can also publish to endpoints protected by basic authentication or OAuth 2.0.</p>
 <p></p>
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
-<pre><code>@sink(type=&quot;http&quot;, publisher.url=&quot;&lt;STRING&gt;&quot;, basic.auth.username=&quot;&lt;STRING&gt;&quot;, basic.auth.password=&quot;&lt;STRING&gt;&quot;, https.truststore.file=&quot;&lt;STRING&gt;&quot;, https.truststore.password=&quot;&lt;STRING&gt;&quot;, oauth.username=&quot;&lt;STRING&gt;&quot;, oauth.password=&quot;&lt;STRING&gt;&quot;, consumer.key=&quot;&lt;STRING&gt;&quot;, consumer.secret=&quot;&lt;STRING&gt;&quot;, token.url=&quot;&lt;STRING&gt;&quot;, refresh.token=&quot;&lt;STRING&gt;&quot;, headers=&quot;&lt;STRING&gt;&quot;, method=&quot;&lt;STRING&gt;&quot;, socket.idle.timeout=&quot;&lt;INT&gt;&quot;, chunk.disabled=&quot;&lt;BOOL&gt;&quot;, ssl.protocol=&quot;&lt;STRING&gt;&quot;, ssl.verification.disabled=&quot;&lt;BOOL&gt;&quot;, tls.store.type=&quot;&lt;STRING&gt;&quot;, ssl.configurations=&quot;&lt;STRING&gt;&quot;, proxy.host=&quot;&lt;STRING&gt;&quot;, proxy.port=&quot;&lt;STRING&gt;&quot;, proxy.username=&quot;&lt;STRING&gt;&quot;, proxy.password=&quot;&lt;STRING&gt;&quot;, client.bootstrap.configurations=&quot;&lt;STRING&gt;&quot;, max.pool.active.connections=&quot;&lt;INT&gt;&quot;, min.pool.idle.connections=&quot;&lt;INT&gt;&quot;, max.pool.idle.connections=&quot;&lt;INT&gt;&quot;, min.evictable.idle.time=&quot;&lt;STRING&gt;&quot;, time.between.eviction.runs=&quot;&lt;STRING&gt;&quot;, max.wait.time=&quot;&lt;STRING&gt;&quot;, test.on.borrow=&quot;&lt;BOOL&gt;&quot;, test.while.idle=&quot;&lt;BOOL&gt;&quot;, exhausted.action=&quot;&lt;INT&gt;&quot;, hostname.verification.enabled=&quot;&lt;BOOL&gt;&quot;, @map(...)))
+<pre><code>@sink(type=&quot;http&quot;, publisher.url=&quot;&lt;STRING&gt;&quot;, basic.auth.username=&quot;&lt;STRING&gt;&quot;, basic.auth.password=&quot;&lt;STRING&gt;&quot;, https.truststore.file=&quot;&lt;STRING&gt;&quot;, https.truststore.password=&quot;&lt;STRING&gt;&quot;, oauth.username=&quot;&lt;STRING&gt;&quot;, oauth.password=&quot;&lt;STRING&gt;&quot;, consumer.key=&quot;&lt;STRING&gt;&quot;, consumer.secret=&quot;&lt;STRING&gt;&quot;, body.consumer.key=&quot;&lt;STRING&gt;&quot;, body.consumer.secret=&quot;&lt;STRING&gt;&quot;, token.url=&quot;&lt;STRING&gt;&quot;, refresh.token=&quot;&lt;STRING&gt;&quot;, oauth.scope=&quot;&lt;STRING&gt;&quot;, headers=&quot;&lt;STRING&gt;&quot;, method=&quot;&lt;STRING&gt;&quot;, socket.idle.timeout=&quot;&lt;INT&gt;&quot;, chunk.disabled=&quot;&lt;BOOL&gt;&quot;, ssl.protocol=&quot;&lt;STRING&gt;&quot;, ssl.verification.disabled=&quot;&lt;BOOL&gt;&quot;, tls.store.type=&quot;&lt;STRING&gt;&quot;, ssl.configurations=&quot;&lt;STRING&gt;&quot;, proxy.host=&quot;&lt;STRING&gt;&quot;, proxy.port=&quot;&lt;STRING&gt;&quot;, proxy.username=&quot;&lt;STRING&gt;&quot;, proxy.password=&quot;&lt;STRING&gt;&quot;, client.bootstrap.configurations=&quot;&lt;STRING&gt;&quot;, max.pool.active.connections=&quot;&lt;INT&gt;&quot;, min.pool.idle.connections=&quot;&lt;INT&gt;&quot;, max.pool.idle.connections=&quot;&lt;INT&gt;&quot;, min.evictable.idle.time=&quot;&lt;STRING&gt;&quot;, time.between.eviction.runs=&quot;&lt;STRING&gt;&quot;, max.wait.time=&quot;&lt;STRING&gt;&quot;, test.on.borrow=&quot;&lt;BOOL&gt;&quot;, test.while.idle=&quot;&lt;BOOL&gt;&quot;, exhausted.action=&quot;&lt;INT&gt;&quot;, hostname.verification.enabled=&quot;&lt;BOOL&gt;&quot;, @map(...)))
 </code></pre>
 
 <p><span id="query-parameters" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">QUERY PARAMETERS</span>
@@ -1014,6 +1026,22 @@
         <td style="vertical-align: top">No</td>
     </tr>
     <tr>
+        <td style="vertical-align: top">body.consumer.key</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Consumer key used for calling endpoints protected by OAuth 2.0 if it's required to be sent in token request body</p></td>
+        <td style="vertical-align: top">-</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">body.consumer.secret</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Consumer secret used for calling endpoints protected by OAuth 2.0</p></td>
+        <td style="vertical-align: top">-</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
         <td style="vertical-align: top">token.url</td>
         <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Token URL to generate a new access tokens when calling endpoints protected by OAuth 2.0</p></td>
         <td style="vertical-align: top">-</td>
@@ -1025,6 +1053,14 @@
         <td style="vertical-align: top">refresh.token</td>
         <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Refresh token used for generating new access tokens when calling endpoints protected by OAuth 2.0</p></td>
         <td style="vertical-align: top">-</td>
+        <td style="vertical-align: top">STRING</td>
+        <td style="vertical-align: top">Yes</td>
+        <td style="vertical-align: top">No</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">oauth.scope</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Standard OAuth 2.0 scope parameter</p></td>
+        <td style="vertical-align: top">default</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
         <td style="vertical-align: top">No</td>
