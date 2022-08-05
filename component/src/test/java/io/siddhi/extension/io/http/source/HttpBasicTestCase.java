@@ -27,13 +27,13 @@ import io.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import io.siddhi.core.util.persistence.PersistenceStore;
 import io.siddhi.extension.io.http.source.util.HttpTestUtil;
 import io.siddhi.extension.map.xml.sourcemapper.XmlSourceMapper;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Core;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
@@ -134,10 +134,10 @@ public class HttpBasicTestCase {
         logObj.info("Test case for put method");
         final HttpBasicTestCaseTestAppender appender = new
                 HttpBasicTestCaseTestAppender("HttpBasicTestCaseTestAppender", null);
-        final Logger logger = (Logger) LogManager.getRootLogger();
-        logger.setLevel(Level.ALL);
-        logger.addAppender(appender);
+        LoggerContext loggerContext = (LoggerContext) LogManager.getContext(LogManager.class.getClassLoader(), false);
         appender.start();
+        loggerContext.getRootLogger().addAppender(loggerContext.getConfiguration().getAppender(appender.getName()));
+        final Logger logger = loggerContext.getRootLogger();
         logger.info("Creating test for publishing events from PUT method.");
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8005));
         List<String> receivedEventNameList = new ArrayList<>(2);
@@ -201,10 +201,10 @@ public class HttpBasicTestCase {
         logObj.info("Creating test for same url in different execution plain.");
         final HttpBasicTestCaseTestAppender appender = new
                 HttpBasicTestCaseTestAppender("HttpBasicTestCaseTestAppender", null);
-        final Logger logger = (Logger) LogManager.getRootLogger();
-        logger.setLevel(Level.ALL);
-        logger.addAppender(appender);
+        LoggerContext loggerContext = (LoggerContext) LogManager.getContext(LogManager.class.getClassLoader(), false);
         appender.start();
+        loggerContext.getRootLogger().addAppender(loggerContext.getConfiguration().getAppender(appender.getName()));
+        final Logger logger = loggerContext.getRootLogger();
         logger.info("ADDED the HttpBasicTestCaseTestAppender appender in testMultipleListenersSameURL");
         URI baseURI = URI.create(String.format("http://%s:%d", "localhost", 8008));
         List<String> receivedEventNameList = new ArrayList<>(2);
@@ -319,10 +319,10 @@ public class HttpBasicTestCase {
         logObj.info("Creating test for publishing events same url in same execution plain.");
         final HttpBasicTestCaseTestAppender appender = new
                 HttpBasicTestCaseTestAppender("HttpBasicTestCaseTestAppender", null);
-        final Logger logger = (Logger) LogManager.getRootLogger();
-        logger.setLevel(Level.ALL);
-        logger.addAppender(appender);
+        LoggerContext loggerContext = (LoggerContext) LogManager.getContext(LogManager.class.getClassLoader(), false);
         appender.start();
+        loggerContext.getRootLogger().addAppender(loggerContext.getConfiguration().getAppender(appender.getName()));
+        final Logger logger = loggerContext.getRootLogger();
         SiddhiManager siddhiManager = new SiddhiManager();
 
         List<String> receivedEventNameListA = new ArrayList<>(2);

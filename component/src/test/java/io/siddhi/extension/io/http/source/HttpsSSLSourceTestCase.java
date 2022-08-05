@@ -27,13 +27,13 @@ import io.siddhi.core.util.SiddhiTestHelper;
 import io.siddhi.core.util.config.InMemoryConfigManager;
 import io.siddhi.extension.io.http.source.util.HttpTestUtil;
 import io.siddhi.extension.map.xml.sourcemapper.XmlSourceMapper;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Core;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
@@ -139,9 +139,11 @@ public class HttpsSSLSourceTestCase {
     public void testHTTPSInputTransportInvalidKeyStore() throws Exception {
         final HttpsSSLSourceTestCaseTestAppender appender = new
                 HttpsSSLSourceTestCaseTestAppender("HttpsSSLSourceTestCaseTestAppender", null);
-        final Logger logger = (Logger) LogManager.getRootLogger();
-        logger.setLevel(Level.ALL);
-        logger.addAppender(appender);
+        LoggerContext loggerContext = (LoggerContext) LogManager.getContext(LogManager.class.getClassLoader(), false);
+        appender.start();
+        loggerContext.getConfiguration().addAppender(appender);
+        loggerContext.getRootLogger().addAppender(loggerContext.getConfiguration().getAppender(appender.getName()));
+        final Logger logger = loggerContext.getRootLogger();
         logger.info("Creating test for publishing events with https protocol with invalid keystore.");
         HttpTestUtil.setCarbonHome();
         Map<String, String> masterConfigs = new HashMap<>();
@@ -220,9 +222,10 @@ public class HttpsSSLSourceTestCase {
     public void testHTTPSInputTransportInvalidKeyStorePass() throws Exception {
         final HttpsSSLSourceTestCaseTestAppender appender = new
                 HttpsSSLSourceTestCaseTestAppender("HttpsSSLSourceTestCaseTestAppender", null);
-        final Logger logger = (Logger) LogManager.getRootLogger();
-        logger.setLevel(Level.ALL);
-        logger.addAppender(appender);
+        LoggerContext loggerContext = (LoggerContext) LogManager.getContext(LogManager.class.getClassLoader(), false);
+        appender.start();
+        loggerContext.getRootLogger().addAppender(loggerContext.getConfiguration().getAppender(appender.getName()));
+        final Logger logger = loggerContext.getRootLogger();
         logger.info("Creating test for publishing events with https protocol with invalid keystore pass.");
         HttpTestUtil.setCarbonHome();
         Map<String, String> masterConfigs = new HashMap<>();
@@ -306,9 +309,10 @@ public class HttpsSSLSourceTestCase {
     public void testHTTPSInputTransportInvalidCertPassword() throws Exception {
         final HttpsSSLSourceTestCaseTestAppender appender = new
                 HttpsSSLSourceTestCaseTestAppender("HttpsSSLSourceTestCaseTestAppender", null);
-        final Logger logger = (Logger) LogManager.getRootLogger();
-        logger.setLevel(Level.ALL);
-        logger.addAppender(appender);
+        LoggerContext loggerContext = (LoggerContext) LogManager.getContext(LogManager.class.getClassLoader(), false);
+        appender.start();
+        loggerContext.getRootLogger().addAppender(loggerContext.getConfiguration().getAppender(appender.getName()));
+        final Logger logger = loggerContext.getRootLogger();
         logger.info(" Creating test for publishing events with https protocol with invalid cert pass.");
         HttpTestUtil.setCarbonHome();
         Map<String, String> masterConfigs = new HashMap<>();
