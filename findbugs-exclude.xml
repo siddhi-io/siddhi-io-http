@@ -22,4 +22,8 @@
         <Class name="io.siddhi.extension.io.http.sink.updatetoken.HttpRequest"/>
         <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE"/>
     </Match>
+    <Match>
+        <Class name="io.siddhi.extension.io.http.source.HttpResponseProcessor"/>
+        <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE"/>
+    </Match>
 </FindBugsFilter>

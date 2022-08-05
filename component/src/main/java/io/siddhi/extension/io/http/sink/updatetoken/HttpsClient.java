@@ -38,12 +38,14 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 
 /**
@@ -90,9 +92,24 @@ public class HttpsClient {
             keyManagerFactory.init(keyStore, "keystore_pass".toCharArray());
             sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(),
                     new SecureRandom());
+            X509TrustManager dummyX509TrustManager = new X509TrustManager() {
+                @Override
+                public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                    // Do nothing
+                }
 
+                @Override
+                public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                    // Do nothing
+                }
+
+                @Override
+                public X509Certificate[] getAcceptedIssuers() {
+                    return new X509Certificate[0];
+                }
+            };
             return new OkHttpClient().newBuilder()
-                    .sslSocketFactory(sslContext.getSocketFactory())
+                    .sslSocketFactory(sslContext.getSocketFactory(), dummyX509TrustManager)
                     .hostnameVerifier((host, sslSession) -> true).build();
         } catch (IOException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException
                 | KeyManagementException e) {
