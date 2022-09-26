@@ -369,6 +369,7 @@ public class HttpSinkUtil {
                     proxyServerConfiguration.setProxyPassword(proxyPassword);
                     proxyServerConfiguration.setProxyUsername(proxyUsername);
                 }
+                return proxyServerConfiguration;
             } catch (UnknownHostException e) {
                 log.error("Proxy url of sink defined in '" + streamID + "' of Siddhi App '" +
                         appName + "' is invalid.", e);
