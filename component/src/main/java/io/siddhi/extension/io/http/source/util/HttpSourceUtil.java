@@ -136,7 +136,8 @@ public class HttpSourceUtil {
     /**
      * Key value generated for Source Listener using host and port.
      *
-     * @param listenerUrl the listener URL
+     * @param listenerUrl   the listener URL
+     * @param metrics       source metrics
      * @return key value for source Listener
      */
     public static String getSourceListenerKey(String listenerUrl, SourceMetrics metrics) {

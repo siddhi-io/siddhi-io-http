@@ -142,7 +142,7 @@ public class SSEConnectorRegistry {
      * Unregister the source listener.
      *
      * @param listenerUrl   the listener url
-     * @param siddhiAppName
+     * @param siddhiAppName name of the siddhi app
      */
     protected void unregisterSourceListener(String listenerUrl, String siddhiAppName) {
         String key = HttpSourceUtil.getSourceListenerKey(listenerUrl, null);

@@ -468,6 +468,7 @@ public class HttpSource extends Source {
 
     /**
      * Initialize metrics.
+     * @param appName app name
      */
     protected void initMetrics(String appName) {
         if (MetricsDataHolder.getInstance().getMetricService() != null

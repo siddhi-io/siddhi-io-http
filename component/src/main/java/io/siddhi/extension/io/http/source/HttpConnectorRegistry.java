@@ -180,7 +180,8 @@ public class HttpConnectorRegistry {
      * Unregister the source listener.
      *
      * @param listenerUrl   the listener url
-     * @param siddhiAppName
+     * @param siddhiAppName siddhi app name
+     * @param metrics source metrics
      */
     protected void unregisterSourceListener(String listenerUrl, String siddhiAppName, SourceMetrics metrics) {
         String key = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
