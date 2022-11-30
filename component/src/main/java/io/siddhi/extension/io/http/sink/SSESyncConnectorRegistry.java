@@ -65,7 +65,7 @@ public class SSESyncConnectorRegistry extends SSEConnectorRegistry {
      * @param workerThread  the worker thread count of siddhi level thread pool executor.
      * @param isAuth        the authentication is required for source listener.
      * @param sourceId      source Id.
-     * @param siddhiAppName
+     * @param siddhiAppName siddhi app name.
      */
     protected void registerSourceListener(String listenerUrl,
                                           int workerThread, Boolean isAuth, String sourceId, String siddhiAppName) {
@@ -81,7 +81,7 @@ public class SSESyncConnectorRegistry extends SSEConnectorRegistry {
      * Unregister the source listener.
      *
      * @param listenerUrl   the listener url
-     * @param siddhiAppName
+     * @param siddhiAppName siddhi app name
      */
     protected void unregisterSourceListener(String listenerUrl, String siddhiAppName) {
         String key = HttpSourceUtil.getSourceListenerKey(listenerUrl, null);

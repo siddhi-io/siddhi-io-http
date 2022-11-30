@@ -1023,6 +1023,7 @@ public class HttpSink extends Sink {
 
     /**
      * Initialize metrics.
+     * @param streamName name of the stream
      */
     protected void initMetrics(String streamName) {
         if (MetricsDataHolder.getInstance().getMetricService() != null

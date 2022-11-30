@@ -71,7 +71,9 @@ public class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
      * @param isAuth                          the authentication is required for source listener.
      * @param requestedTransportPropertyNames requested transport property names.
      * @param sourceId                        source Id.
-     * @param siddhiAppName
+     * @param siddhiAppName                   siddhi app name
+     * @param metrics                         source metrics
+     * @param isWebSub                        is web sub
      */
     protected void registerSourceListener(SourceEventListener sourceEventListener, String listenerUrl,
                                           int workerThread, Boolean isAuth, String[] requestedTransportPropertyNames,
@@ -90,7 +92,7 @@ public class HttpSyncConnectorRegistry extends HttpConnectorRegistry {
      * Unregister the source listener.
      *
      * @param listenerUrl   the listener url
-     * @param siddhiAppName
+     * @param siddhiAppName siddhi app name
      */
     protected void unregisterSourceListener(String listenerUrl, String siddhiAppName, SourceMetrics metrics) {
         String key = HttpSourceUtil.getSourceListenerKey(listenerUrl, metrics);
