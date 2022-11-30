@@ -308,6 +308,7 @@
         <okhttp.client.version>4.8.1</okhttp.client.version>
         <mavan.findbugsplugin.exclude.file>findbugs-exclude.xml</mavan.findbugsplugin.exclude.file>
         <jaxb.version>2.3.0</jaxb.version>
+        <maven.javadoc.plugin.version>3.4.1</maven.javadoc.plugin.version>
     </properties>
     <build>
         <extensions>
