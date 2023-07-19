@@ -18,7 +18,9 @@
  */
 package io.siddhi.extension.io.http.util;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.base64.Base64;
 import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.DefaultLastHttpContent;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -48,6 +50,7 @@ import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -333,5 +336,16 @@ public class HttpIoUtil {
 
         return table.compileCondition(condition, matchingMetaInfoHolder, null,
                 tableMap, siddhiQueryContext);
+    }
+
+    /**
+     * Encode the given value using Base64 encoding scheme.
+     * @param value value to be encoded
+     * @return encoded value
+     */
+    public static String encodeBase64(String value) {
+        ByteBuf byteBuf = Unpooled.wrappedBuffer(value.getBytes(StandardCharsets.UTF_8));
+        ByteBuf encodedByteBuf = Base64.encode(byteBuf);
+        return encodedByteBuf.toString(StandardCharsets.UTF_8);
     }
 }
