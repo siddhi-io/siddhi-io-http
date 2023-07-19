@@ -28,6 +28,8 @@ import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
 import io.siddhi.core.util.persistence.InMemoryPersistenceStore;
 import io.siddhi.core.util.persistence.PersistenceStore;
+import io.siddhi.extension.io.http.sink.util.HttpServerListenerHandler;
+import io.siddhi.extension.io.http.source.util.Constants;
 import io.siddhi.extension.io.http.util.HttpConstants;
 import io.siddhi.extension.map.json.sinkmapper.JsonSinkMapper;
 import io.siddhi.extension.map.json.sourcemapper.JsonSourceMapper;
@@ -60,7 +62,7 @@ public class SSESourceTestCase {
     private HttpServer sseServer;
     private ThreadPoolExecutor threadPoolExecutor;
 
-    @BeforeMethod
+    @BeforeMethod(groups = "event-server")
     public void init() {
         eventCount.set(0);
         try {
@@ -104,7 +106,7 @@ public class SSESourceTestCase {
         }
     }
 
-    @Test
+    @Test(groups = "event-server")
     public void testSSESource() throws Exception {
         List<String> receivedEventList = new ArrayList<>(2);
         PersistenceStore persistenceStore = new InMemoryPersistenceStore();
@@ -147,7 +149,31 @@ public class SSESourceTestCase {
         siddhiAppRuntime.shutdown();
     }
 
-    @AfterMethod
+    @Test(dependsOnMethods = "testSSESource")
+    public void testSSESourceWithBasicAuth() throws Exception {
+        SiddhiManager siddhiManager = new SiddhiManager();
+        siddhiManager.setExtension("json-output-mapper", JsonSinkMapper.class);
+        siddhiManager.setExtension("json-input-mapper", JsonSourceMapper.class);
+        String sourceStreamDefinition = "@Source(type='sse', receiver.url='http://localhost:8005/abc', " +
+                "basic.auth.username='admin', basic.auth.password='admin',\n" +
+                "@map(type='json'))\n" +
+                "define stream ReceiveProductionStream (param1 string);\n";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(sourceStreamDefinition);
+        siddhiAppRuntime.start();
+        HttpServerListenerHandler lst = new HttpServerListenerHandler(8005);
+        lst.run();
+        while (!lst.getServerListener().isMessageArrive()) {
+            Thread.sleep(10);
+        }
+        List<String> authHeader = lst.getServerListener().getHeaders().get(Constants.BASIC_AUTH_HEADER);
+        String authHeaderValue = (authHeader != null && authHeader.size() > 0) ? authHeader.get(0) : null;
+        Assert.assertEquals(authHeaderValue, Constants.BASIC_AUTH_HEADER_VALUE, "Invalid basic auth header present");
+        siddhiAppRuntime.shutdown();
+        lst.shutdown();
+    }
+
+
+    @AfterMethod(groups = "event-server")
     public void destroy() {
         sseServer.stop(1);
         threadPoolExecutor.shutdownNow();

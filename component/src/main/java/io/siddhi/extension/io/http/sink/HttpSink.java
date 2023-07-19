@@ -18,9 +18,7 @@
  */
 package io.siddhi.extension.io.http.sink;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.base64.Base64;
 import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.DefaultLastHttpContent;
 import io.netty.handler.codec.http.HttpHeaders;
@@ -610,8 +608,8 @@ public class HttpSink extends Sink {
         } else if (!(EMPTY_STRING.equals(userName))) {
             byte[] val = (userName + HttpConstants.AUTH_USERNAME_PASSWORD_SEPARATOR + userPassword).getBytes(Charset
                     .defaultCharset());
-            this.authorizationHeader = HttpConstants.AUTHORIZATION_METHOD + Base64.encode
-                    (Unpooled.copiedBuffer(val));
+            this.authorizationHeader = HttpConstants.AUTHORIZATION_METHOD + HttpIoUtil.encodeBase64(new String(val,
+                    StandardCharsets.UTF_8));
         }
 
         proxyServerConfiguration = createProxyServerConfiguration(optionHolder, streamID, siddhiAppContext.getName());
@@ -755,7 +753,7 @@ public class HttpSink extends Sink {
         } else {
             consumerKeyValue = bodyConsumerKey + ":" + bodyConsumerSecret;
         }
-        String encodedAuth = "Basic " + encodeBase64(consumerKeyValue)
+        String encodedAuth = "Basic " + HttpIoUtil.encodeBase64(consumerKeyValue)
                 .replaceAll(HttpConstants.NEW_LINE, HttpConstants.EMPTY_STRING);
         //check the availability of access token in the header
         setAccessToken(encodedAuth, dynamicOptions, headersList, clientConnector.getPublisherURL());
@@ -1185,12 +1183,6 @@ public class HttpSink extends Sink {
             throw new SiddhiAppRuntimeException("Execution of Siddhi app " + siddhiAppContext.getName() +
                     " failed due to " + e.getMessage(), e);
         }
-    }
-
-    private String encodeBase64(String consumerKeyValue) {
-        ByteBuf byteBuf = Unpooled.wrappedBuffer(consumerKeyValue.getBytes(StandardCharsets.UTF_8));
-        ByteBuf encodedByteBuf = Base64.encode(byteBuf);
-        return encodedByteBuf.toString(StandardCharsets.UTF_8);
     }
 
     private class HTTPResponseListener implements HttpConnectorListener {
