@@ -17,8 +17,6 @@
 
 package io.siddhi.extension.io.http.source;
 
-import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.base64.Base64;
 import io.netty.handler.codec.http.DefaultHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
@@ -44,6 +42,7 @@ import io.siddhi.extension.io.http.sink.ClientConnector;
 import io.siddhi.extension.io.http.sink.util.HttpSinkUtil;
 import io.siddhi.extension.io.http.util.HTTPSourceRegistry;
 import io.siddhi.extension.io.http.util.HttpConstants;
+import io.siddhi.extension.io.http.util.HttpIoUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.messaging.Header;
@@ -57,6 +56,7 @@ import org.wso2.transport.http.netty.contractimpl.sender.channel.pool.PoolConfig
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -355,8 +355,8 @@ public class SSESource extends Source {
         } else if (!(EMPTY_STRING.equals(userName))) {
             byte[] val = (userName + HttpConstants.AUTH_USERNAME_PASSWORD_SEPARATOR + userPassword).getBytes(Charset
                     .defaultCharset());
-            this.authorizationHeader = HttpConstants.AUTHORIZATION_METHOD + Base64.encode
-                    (Unpooled.copiedBuffer(val));
+            this.authorizationHeader = HttpConstants.AUTHORIZATION_METHOD + HttpIoUtil.encodeBase64(new String(val,
+                    StandardCharsets.UTF_8));
         }
 
         if (!HttpConstants.EMPTY_STRING.equals(userName) && !HttpConstants.EMPTY_STRING.equals(userPassword)) {
