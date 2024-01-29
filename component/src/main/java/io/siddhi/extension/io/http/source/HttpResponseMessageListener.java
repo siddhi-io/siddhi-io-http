@@ -95,6 +95,7 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
         trpProperties.forEach((k, v) -> {
             carbonMessage.setProperty(k, v);
         });
+        carbonMessage.setProperty(HttpConstants.HTTP_STATUS_CODE, carbonMessage.getHttpStatusCode());
         carbonMessage.setProperty(HttpConstants.IS_DOWNLOADABLE_CONTENT, isDownloadEnabled);
         this.carbonMessages = carbonMessage;
         if (latch != null) {
