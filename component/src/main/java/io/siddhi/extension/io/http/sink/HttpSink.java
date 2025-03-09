@@ -139,6 +139,24 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
                         optional = true,
                         defaultValue = "wso2carbon"),
                 @Parameter(
+                        name = "https.keystore.file",
+                        description = "The file path of the keystore when sending messages through `https`" +
+                                " protocol.",
+                        type = {DataType.STRING},
+                        optional = true, defaultValue = "`${carbon.home}/resources/security/wso2carbon.jks`"),
+                @Parameter(
+                        name = "https.keystore.password",
+                        description = "The password for the keystore.",
+                        type = {DataType.STRING},
+                        optional = true,
+                        defaultValue = "wso2carbon"),
+                @Parameter(
+                        name = "https.keystore.key.password",
+                        description = "The password for the keys in the path of the keystore when sending messages " +
+                                "through `https` protocol.",
+                        type = {DataType.STRING},
+                        optional = true, defaultValue = "wso2carbon"),
+                @Parameter(
                         name = "oauth.username",
                         description = "The username to be included in the authentication header when calling " +
                                 "endpoints protected by OAuth 2.0. `oauth.password` property " +
@@ -454,6 +472,24 @@ import static org.wso2.carbon.analytics.idp.client.external.ExternalIdPClientCon
                         description = "The default truststore password.",
                         defaultValue = "wso2carbon",
                         possibleParameters = "Truststore password as string"
+                ),
+                @SystemParameter(
+                        name = "keyStoreLocation",
+                        description = "The default keystore file path.",
+                        defaultValue = "${carbon.home}/resources/security/wso2carbon.jks",
+                        possibleParameters = "Path to client keystore `.jks` file"
+                ),
+                @SystemParameter(
+                        name = "keyStorePassword",
+                        description = "The default keystore password.",
+                        defaultValue = "wso2carbon",
+                        possibleParameters = "Keystore password as string"
+                ),
+                @SystemParameter(
+                        name = "keyPassword",
+                        description = "The default keystore key password.",
+                        defaultValue = "wso2carbon",
+                        possibleParameters = "Keystore key password as string"
                 )
         }
 )
@@ -475,8 +511,11 @@ public class HttpSink extends Sink {
     Option httpHeaderOption;
     Option httpMethodOption;
     private String authorizationHeader;
-    private String clientStoreFile;
-    private String clientStorePass;
+    private String clientTrustStoreFile;
+    private String clientTrustStorePass;
+    private String keyStorePath;
+    private String keyStorePass;
+    private String keyPassword;
     private int socketIdleTimeout;
     private String sslProtocol;
     private String tlsStoreType;
@@ -558,18 +597,23 @@ public class HttpSink extends Sink {
                 EMPTY_STRING);
         this.refreshToken = optionHolder.getOrCreateOption(HttpConstants.RECEIVER_REFRESH_TOKEN, EMPTY_STRING);
         this.tokenURL = optionHolder.validateAndGetStaticValue(HttpConstants.TOKEN_URL, EMPTY_STRING);
-        this.clientStoreFile = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PATH_PARAM,
+        this.clientTrustStoreFile = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PATH_PARAM,
                 HttpSinkUtil.trustStorePath(configReader));
         this.oauth2Scope = optionHolder.validateAndGetStaticValue(HttpConstants.OAUTH2_SCOPE_PARAMETER_NAME,
                 "default");
-        clientStorePass = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD_PARAM,
+        clientTrustStorePass = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_TRUSTSTORE_PASSWORD_PARAM,
                 HttpSinkUtil.trustStorePassword(configReader));
         socketIdleTimeout = Integer.parseInt(optionHolder.validateAndGetStaticValue
                 (HttpConstants.SOCKET_IDEAL_TIMEOUT, SOCKET_IDEAL_TIMEOUT_VALUE));
         sslProtocol = optionHolder.validateAndGetStaticValue(HttpConstants.SSL_PROTOCOL, EMPTY_STRING);
         tlsStoreType = optionHolder.validateAndGetStaticValue(HttpConstants.TLS_STORE_TYPE, EMPTY_STRING);
         chunkDisabled = optionHolder.validateAndGetStaticValue(HttpConstants.CLIENT_CHUNK_DISABLED, EMPTY_STRING);
-
+        this.keyStorePath = optionHolder.validateAndGetStaticValue(HttpConstants.KEYSTORE_PATH_PARAM,
+                HttpSinkUtil.keyStorePath(configReader));
+        this.keyStorePass = optionHolder.validateAndGetStaticValue(HttpConstants.KEYSTORE_PASSWORD_PARAM,
+                HttpSinkUtil.keyStorePassword(configReader));
+        this.keyPassword = optionHolder.validateAndGetStaticValue(HttpConstants.KEYSTORE_KEY_PASSWORD_PARAM,
+                HttpSinkUtil.keyPassword(configReader));
         //pool configurations
         connectionPoolConfiguration = createPoolConfigurations(optionHolder);
 
@@ -907,16 +951,17 @@ public class HttpSink extends Sink {
         HttpsClient httpsClient = new HttpsClient();
         if (!HttpConstants.EMPTY_STRING.equals(refreshToken.getValue(dynamicOptions)) ||
                 accessTokenCache.getRefreshtoken(encodedAuth) != null) {
-            httpsClient.getRefreshGrantAccessToken(tokenURL, clientStoreFile,
-                    clientStorePass, encodedAuth, refreshToken.getValue(dynamicOptions), oauthUsername,
-                    oauthUserPassword, bodyConsumerKey, bodyConsumerSecret, oauth2Scope);
+            httpsClient.getRefreshGrantAccessToken(tokenURL, keyStorePath, keyStorePass, keyPassword,
+                    clientTrustStoreFile, clientTrustStorePass, encodedAuth, refreshToken.getValue(dynamicOptions),
+                    oauthUsername, oauthUserPassword, bodyConsumerKey, bodyConsumerSecret, oauth2Scope);
         } else if (!HttpConstants.EMPTY_STRING.equals(oauthUsername) &&
                 !HttpConstants.EMPTY_STRING.equals(oauthUserPassword)) {
-            httpsClient.getPasswordGrantAccessToken(tokenURL, clientStoreFile, clientStorePass, oauthUsername,
-                    oauthUserPassword, encodedAuth, bodyConsumerKey, bodyConsumerSecret, oauth2Scope);
+            httpsClient.getPasswordGrantAccessToken(tokenURL, keyStorePath, keyStorePass, keyPassword,
+                    clientTrustStoreFile, clientTrustStorePass, oauthUsername, oauthUserPassword, encodedAuth,
+                    bodyConsumerKey, bodyConsumerSecret, oauth2Scope);
         } else {
-            httpsClient.getClientGrantAccessToken(tokenURL, clientStoreFile,
-                    clientStorePass, encodedAuth);
+            httpsClient.getClientGrantAccessToken(tokenURL, keyStorePath, keyStorePass, keyPassword,
+                    clientTrustStoreFile, clientTrustStorePass, encodedAuth);
         }
     }
 
@@ -1125,13 +1170,15 @@ public class HttpSink extends Sink {
         String scheme = HttpSinkUtil.getScheme(publisherURL);
         Map<String, String> httpURLProperties = HttpSinkUtil.getURLProperties(publisherURL);
         //Generate basic sender configurations
-        SenderConfiguration senderConfig = HttpSinkUtil
-                .getSenderConfigurations(httpURLProperties, clientStoreFile, clientStorePass, configReader);
+        SenderConfiguration senderConfig =
+                HttpSinkUtil.getSenderConfigurations(httpURLProperties, clientTrustStoreFile, clientTrustStorePass,
+                        configReader);
         if (EMPTY_STRING.equals(publisherURL)) {
             throw new SiddhiAppCreationException("Receiver URL found empty but it is Mandatory field in " +
                     "" + HttpConstants.HTTP_SINK_ID + " in " + streamID);
         }
-        if (HttpConstants.SCHEME_HTTPS.equals(scheme) && ((clientStoreFile == null) || (clientStorePass == null))) {
+        if (HttpConstants.SCHEME_HTTPS.equals(scheme) &&
+                ((clientTrustStoreFile == null) || (clientTrustStorePass == null))) {
             throw new ExceptionInInitializerError("Client trustStore file path or password are empty while " +
                     "default scheme is 'https'. Please provide client " +
                     "trustStore file path and password in " + streamID);
