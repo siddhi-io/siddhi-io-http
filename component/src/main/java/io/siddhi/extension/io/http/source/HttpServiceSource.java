@@ -453,7 +453,7 @@ public class HttpServiceSource extends HttpSource {
             // Send the response to the correlating message.
             handleResponse(carbonMessage, 200, payload, headersList, contentType);
         } else {
-            log.warn("No source message found for source: " + sourceId + " and message: " + messageId);
+            log.warn("No source message found for source: {} and message: {}", sourceId, messageId);
         }
     }
 

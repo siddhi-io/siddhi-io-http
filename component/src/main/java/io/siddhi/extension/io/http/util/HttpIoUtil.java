@@ -111,7 +111,7 @@ public class HttpIoUtil {
         if (statusCode == 404) {
             if (ex != null) {
                 responsePayload = ex.getMessage();
-                log.error(responsePayload, ex);
+                log.error("{}", responsePayload, ex);
             }
         }
         handleResponse(requestMessage, createErrorMessage(responsePayload, statusCode));
@@ -237,8 +237,8 @@ public class HttpIoUtil {
                     if (entry.length == 2) {
                         parameterMap.put(entry[0], entry[1]);
                     } else {
-                        log.error("Configuration parameter '" + valueEntry + "' is not in expected format. Please " +
-                                "insert them as 'key:val' format");
+                        log.error("Configuration parameter '{}' is not in expected format. Please insert them as " +
+                                        "'key:val' format", valueEntry);
                     }
                 }
         );
@@ -271,7 +271,7 @@ public class HttpIoUtil {
             responseMessage = "Subscription request failed!. Subscribed topic " + parameterMap.get(HUB_TOPIC) +
                     " is not found in the WebSub hub ";
             handleFailure(carbonMessage, null, PERSISTENT_ACCESS_FAIL_CODE, responseMessage);
-            log.error(responseMessage);
+            log.error("{}", responseMessage);
             return false;
         } else {
             return true;

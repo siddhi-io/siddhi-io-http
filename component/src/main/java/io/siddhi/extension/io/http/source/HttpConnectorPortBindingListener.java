@@ -19,8 +19,8 @@ package io.siddhi.extension.io.http.source;
 
 import io.siddhi.extension.io.http.metrics.EndpointStatus;
 import io.siddhi.extension.io.http.metrics.SourceMetrics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.transport.http.netty.contract.PortBindingEventListener;
 
 import java.net.BindException;
@@ -32,7 +32,7 @@ import java.net.BindException;
  */
 public class HttpConnectorPortBindingListener implements PortBindingEventListener {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpConnectorPortBindingListener.class);
+    private static final Logger log = LogManager.getLogger(HttpConnectorPortBindingListener.class);
 
     private ConnectorStartupSynchronizer connectorStartupSynchronizer;
     private String serverConnectorId;
@@ -52,9 +52,9 @@ public class HttpConnectorPortBindingListener implements PortBindingEventListene
         }
 
         if (isHttps) {
-            log.info("HTTPS source " + serverConnectorId + " has been started");
+            log.info("HTTPS source {} has been started", serverConnectorId);
         } else {
-            log.info("HTTP source " + serverConnectorId + " has been started");
+            log.info("HTTP source {} has been started", serverConnectorId);
         }
 
         connectorStartupSynchronizer.getCountDownLatch().countDown();
@@ -67,9 +67,9 @@ public class HttpConnectorPortBindingListener implements PortBindingEventListene
         }
 
         if (isHttps) {
-            log.info("HTTPS source " + serverConnectorId + " has been closed");
+            log.info("HTTPS source {} has been closed", serverConnectorId);
         } else {
-            log.info("HTTP source " + serverConnectorId + " has been closed");
+            log.info("HTTP source {} has been closed", serverConnectorId);
         }
     }
 

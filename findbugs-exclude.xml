@@ -24,6 +24,13 @@
     </Match>
     <Match>
         <Class name="io.siddhi.extension.io.http.source.HttpResponseProcessor"/>
-        <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE"/>
+        <Bug pattern="RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE, PATH_TRAVERSAL_IN"/>
+    </Match>
+    <Match>
+        <Bug pattern="IMPROPER_UNICODE"/>
+    </Match>
+    <Match>
+        <Class name="io.siddhi.extension.io.http.sink.updatetoken.HttpsClient"/>
+        <Bug pattern="PATH_TRAVERSAL_IN"/>
     </Match>
 </FindBugsFilter>

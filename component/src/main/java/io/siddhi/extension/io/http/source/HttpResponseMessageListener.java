@@ -27,8 +27,8 @@ import io.siddhi.extension.io.http.metrics.SinkMetrics;
 import io.siddhi.extension.io.http.sink.HttpSink;
 import io.siddhi.extension.io.http.util.HTTPSourceRegistry;
 import io.siddhi.extension.io.http.util.HttpConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
 import org.wso2.transport.http.netty.contract.exceptions.ClientConnectorException;
 import org.wso2.transport.http.netty.contract.exceptions.ServerConnectorException;
@@ -44,7 +44,7 @@ import java.util.concurrent.CountDownLatch;
  * http-responses sources considering their http status code.
  */
 public class HttpResponseMessageListener implements HttpConnectorListener {
-    private static final Logger log = LoggerFactory.getLogger(HttpResponseMessageListener.class);
+    private static final Logger log = LogManager.getLogger(HttpResponseMessageListener.class);
 
     private Map<String, Object> trpProperties;
     private boolean isDownloadEnabled;
@@ -107,9 +107,8 @@ public class HttpResponseMessageListener implements HttpConnectorListener {
             HttpCallResponseConnectorListener responseConnectorListener = responseSource.getConnectorListener();
             responseConnectorListener.onMessage(carbonMessage);
         } else {
-            log.error("No source of type 'http-call-response' with sink.id '" + sinkId +
-                    "' for the status code '" + statusCode +
-                    "' defined. Hence dropping the response message.");
+            log.error("No source of type 'http-call-response' with sink.id '{}' for the status code '{}' defined. "
+                            , sinkId, statusCode);
         }
 
     }

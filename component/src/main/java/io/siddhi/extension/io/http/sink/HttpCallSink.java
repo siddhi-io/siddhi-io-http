@@ -515,15 +515,15 @@ public class HttpCallSink extends HttpSink {
             try {
                 boolean latchCount = latch.await(30, TimeUnit.SECONDS);
                 if (!latchCount) {
-                    log.debug("Timeout due to getting response from " + clientConnector.getPublisherURL() +
-                            ". Message dropped.");
+                    log.debug("Timeout due to getting response from {}. Message dropped.",
+                            clientConnector.getPublisherURL());
                     throw new ConnectionUnavailableException("Time out due to getting response from " +
                             clientConnector.getPublisherURL() + ". Message dropped.");
 
                 }
             } catch (InterruptedException e) {
-                log.debug("Failed to get a response from " + clientConnector.getPublisherURL() + "," + e +
-                        ". Message dropped.");
+                log.debug("Failed to get a response from {},{}. Message dropped.", clientConnector.getPublisherURL(),
+                        e);
                 throw new ConnectionUnavailableException("Failed to get a response from " +
                         clientConnector.getPublisherURL() + ", " + e + ". Message dropped.");
             }

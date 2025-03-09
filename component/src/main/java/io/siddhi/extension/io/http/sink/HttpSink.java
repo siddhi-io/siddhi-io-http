@@ -703,19 +703,19 @@ public class HttpSink extends Sink {
             try {
                 boolean latchCount = latch.await(30, TimeUnit.SECONDS);
                 if (!latchCount) {
-                    log.debug("Time out due to getting getting response from " + clientConnector.getPublisherURL() +
-                            ". Message dropped.");
+                    log.debug("Time out due to getting getting response from {}. Message dropped.",
+                            clientConnector.getPublisherURL());
                     throw new ConnectionUnavailableException("Time out due to getting getting response from "
                             + clientConnector.getPublisherURL() + ". Message dropped.");
                 }
             } catch (InterruptedException e) {
-                log.debug("Failed to get a response from " + clientConnector.getPublisherURL() + "," + e +
-                        ". Message dropped.");
+                log.debug("Failed to get a response from {},{}. Message dropped.", clientConnector.getPublisherURL(),
+                        e);
                 throw new ConnectionUnavailableException("Failed to get a response from " +
                         clientConnector.getPublisherURL() + ", " + e + ". Message dropped.");
             }
             HttpCarbonMessage response = listener.getHttpResponseMessage();
-            log.info(" Response: *********** " + response.getNettyHttpResponse().status());
+            log.info(" Response: *********** {}", response.getNettyHttpResponse().status());
             return response.getNettyHttpResponse().status().code();
         } else {
             HttpResponseFuture responseFuture = clientConnector.send(cMessage);
@@ -765,17 +765,16 @@ public class HttpSink extends Sink {
         if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
             handleOAuthFailure(payload, dynamicOptions, headersList, encodedAuth, clientConnector);
         } else if (HttpConstants.SUCCESS_CODE <= response && response < HttpConstants.MULTIPLE_CHOICES) {
-            log.info("Request sent successfully to " + clientConnector.getPublisherURL());
+            log.info("Request sent successfully to {}", clientConnector.getPublisherURL());
         } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
-            log.error("Error at sending oauth request to API endpoint " + clientConnector.getPublisherURL() +
-                    "', with response code: " +
-                    response + "- Internal server error. Message dropped");
+            log.error("Error at sending oauth request to API endpoint {}', with response code: {}- Internal server " +
+                            "error. Message dropped", clientConnector.getPublisherURL(), response);
             throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint, " +
                     clientConnector.getPublisherURL() + "', with response code: " + response +
                     "- Internal server error. Message dropped.");
         } else {
-            log.error("Error at sending oauth request to API endpoint " +
-                    clientConnector.getPublisherURL() + "', with response code: " + response + ". Message dropped.");
+            log.error("Error at sending oauth request to API endpoint {}', with response code: {}. Message dropped.",
+                    clientConnector.getPublisherURL(), response);
             throw new ConnectionUnavailableException("Error at sending oauth request to API endpoint " +
                     clientConnector.getPublisherURL() + "', and response code: " + response + ". Message dropped.");
         }
@@ -806,20 +805,18 @@ public class HttpSink extends Sink {
         int response = sendRequest(payload, dynamicOptions, headersList, clientConnector
         );
         if (response == HttpConstants.SUCCESS_CODE) {
-            log.info("Request sent successfully to " + clientConnector.getPublisherURL());
+            log.info("Request sent successfully to {}", clientConnector.getPublisherURL());
         } else if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
             requestForNewAccessToken(payload, dynamicOptions, headersList, encodedAuth, clientConnector);
         } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
-            log.error("Error at sending oauth request to API endpoint, " + clientConnector.getPublisherURL() +
-                    "', with response code: " +
-                    response + "- Internal server error. Message dropped");
+            log.error("Error at sending oauth request to API endpoint, {}', with response code: {}- Internal server " +
+                            "error. Message dropped", clientConnector.getPublisherURL(), response);
             throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint, " +
                     clientConnector.getPublisherURL() + "', with response code: " + response +
                     "- Internal server error. Message dropped");
         } else {
-            log.error("Error at sending oauth request to API endpoint " + clientConnector.getPublisherURL() +
-                    "', with response code: " +
-                    response + ". Message dropped.");
+            log.error("Error at sending oauth request to API endpoint {}', with response code: {}. Message dropped.",
+                    clientConnector.getPublisherURL(), response);
             throw new ConnectionUnavailableException("Error at sending oauth request to API endpoint " +
                     clientConnector.getPublisherURL() +
                     "', with response code: " + response + ". Message dropped.");
@@ -857,45 +854,44 @@ public class HttpSink extends Sink {
             int response = sendRequest(payload, dynamicOptions, headersList, clientConnector
             );
             if (response == HttpConstants.SUCCESS_CODE) {
-                log.info("Request sent successfully to " + clientConnector.getPublisherURL());
+                log.info("Request sent successfully to {}", clientConnector.getPublisherURL());
             } else if (response == HttpConstants.AUTHENTICATION_FAIL_CODE) {
-                log.error("Error at sending oauth request to API endpoint " + clientConnector.getPublisherURL() +
-                        "', with response code: " +
-                        response + "- Authentication Failure. Please provide a valid Consumer key, Consumer secret" +
-                        " and token endpoint URL . Message dropped");
+                log.error("Error at sending oauth request to API endpoint {}', with response code: {}- " +
+                                "Authentication Failure. Please provide a valid Consumer key, Consumer secret and" +
+                                " token endpoint URL. Message dropped", clientConnector.getPublisherURL(), response);
                 throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint " +
                         clientConnector.getPublisherURL() + "', with response code: " + response +
                         "- Authentication Failure." +
                         " Please provide a valid Consumer key, Consumer secret and token endpoint URL." +
                         " Message dropped");
             } else if (response == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
-                log.error("Error at sending oauth request to API endpoint " + clientConnector.getPublisherURL() +
-                        "', with response code: " +
-                        response + "- Internal server error. Message dropped");
+                log.error("Error at sending oauth request to API endpoint {}', with response code: {}- " +
+                                "Internal server error. Message dropped",
+                        clientConnector.getPublisherURL(), response);
                 throw new HttpSinkAdaptorRuntimeException("Error at sending oauth request to API endpoint "
                         + clientConnector.getPublisherURL() + "', with response code: " + response +
                         "- Internal server error. Message dropped");
             } else {
-                log.error("Error at sending oauth request to API endpoint " + clientConnector.getPublisherURL() +
-                        "', with response code: " +
-                        response + ". Message dropped.");
+                log.error("Error at sending oauth request to API endpoint {}', with response code: {}. " +
+                                "Message dropped.", clientConnector.getPublisherURL(), response);
                 throw new ConnectionUnavailableException("Error at sending oauth request to API endpoint " +
                         clientConnector.getPublisherURL() + "', with response code: " + response +
                         ". Message dropped.");
             }
         } else if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.AUTHENTICATION_FAIL_CODE) {
-            log.error("Failed to generate new access token for the expired access token to " +
-                    clientConnector.getPublisherURL() + "', " +
-                    accessTokenCache.getResponseCode(encodedAuth) + ": Authentication Failure.cPlease provide a " +
-                    "valid Consumer key, Consumer secret and token endpoint URL . Message dropped");
+            log.error(
+                    "Failed to generate new access token for the expired access token to {}', {}: Authentication " +
+                            "Failure.cPlease provide a valid Consumer key, Consumer secret and token endpoint URL . " +
+                            "Message dropped",
+                    clientConnector.getPublisherURL(), accessTokenCache.getResponseCode(encodedAuth));
             throw new HttpSinkAdaptorRuntimeException("Failed to generate new access token for the expired access " +
                     "token to " + clientConnector.getPublisherURL() + "', " +
                     accessTokenCache.getResponseCode(encodedAuth) +
                     ": Authentication Failure.Please provide a valid Consumer key, Consumer secret" +
                     " and token endpoint URL . Message dropped");
         } else {
-            log.error("Failed to generate new access token for the expired access token. Error code: " +
-                    accessTokenCache.getResponseCode(encodedAuth) + ". Message dropped.");
+            log.error("Failed to generate new access token for the expired access token. Error code: {}." +
+                    " Message dropped.", accessTokenCache.getResponseCode(encodedAuth));
             throw new ConnectionUnavailableException("Failed to generate new access token for the expired" +
                     " access token. Error code: " + accessTokenCache.getResponseCode(encodedAuth)
                     + ". Message dropped.");
@@ -944,25 +940,25 @@ public class HttpSink extends Sink {
                             accessTokenCache.getRefreshtoken(encodedAuth)));
                 }
             } else if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.AUTHENTICATION_FAIL_CODE) {
-                log.error("Failed to generate new access token for the expired access token to " + publisherURL +
-                        "', with response code: " + accessTokenCache.getResponseCode(encodedAuth) +
-                        "- Authentication Failure.Please provide a valid Consumer key, Consumer secret" +
-                        " and token endpoint URL . Message dropped");
+                log.error("Failed to generate new access token for the expired access token to {}', with " +
+                                "response code: {}- Authentication Failure.Please provide a valid Consumer key, " +
+                                "Consumer secret and token endpoint URL . Message dropped", publisherURL,
+                        accessTokenCache.getResponseCode(encodedAuth));
                 throw new HttpSinkAdaptorRuntimeException("Failed to generate new access token for the expired" +
                         " access token to " + publisherURL + "', with response code: " +
                         accessTokenCache.getResponseCode(encodedAuth) + "- Authentication Failure." +
                         "Please provide a valid Consumer key, Consumer secret and token endpoint URL ." +
                         " Message dropped");
             } else if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.INTERNAL_SERVER_FAIL_CODE) {
-                log.error("Failed to generate new access token for the expired access token to " + publisherURL +
-                        "', with response code: " + accessTokenCache.getResponseCode(encodedAuth) +
-                        "- Internal server error. Message dropped");
+                log.error("Failed to generate new access token for the expired access token to {}', with " +
+                                "response code: {}- Internal server error. Message dropped",
+                        publisherURL, accessTokenCache.getResponseCode(encodedAuth));
                 throw new HttpSinkAdaptorRuntimeException("Failed to generate new access token for the expired" +
                         " access token to " + publisherURL + "', with response code: " +
                         accessTokenCache.getResponseCode(encodedAuth) + "- Internal server error. Message dropped");
             } else {
-                log.error("Failed to generate new access token for the expired access token. Error code: " +
-                        accessTokenCache.getResponseCode(encodedAuth) + ". Message dropped.");
+                log.error("Failed to generate new access token for the expired access token. Error code: {}. " +
+                                "Message dropped.", accessTokenCache.getResponseCode(encodedAuth));
                 throw new ConnectionUnavailableException("Failed to generate new access token for the expired" +
                         " access token. Error code: " + accessTokenCache.getResponseCode(encodedAuth) +
                         ". Message dropped.");
@@ -999,7 +995,7 @@ public class HttpSink extends Sink {
         if (staticClientConnector != null) {
             String publisherURL = staticClientConnector.getPublisherURL();
             staticClientConnector = null;
-            log.debug("Server connector for url " + publisherURL + " disconnected.");
+            log.debug("Server connector for url {} disconnected.", publisherURL);
         }
 
         if (httpConnectorFactory != null) {
@@ -1017,7 +1013,7 @@ public class HttpSink extends Sink {
         if (staticClientConnector != null) {
             String publisherURL = staticClientConnector.getPublisherURL();
             staticClientConnector = null;
-            log.debug("Server connector for url " + publisherURL + " disconnected.");
+            log.debug("Server connector for url {} disconnected.", publisherURL);
         }
     }
 
@@ -1034,8 +1030,8 @@ public class HttpSink extends Sink {
                     metrics = new SinkMetrics(siddhiAppContext.getName(), streamName);
                 }
             } catch (IllegalArgumentException e) {
-                log.debug("Prometheus reporter is not running. Hence http sink metrics will not be initialized for "
-                        + siddhiAppContext.getName());
+                log.debug("Prometheus reporter is not running. Hence http sink metrics will not be initialized for {}",
+                        siddhiAppContext.getName());
             }
         }
     }

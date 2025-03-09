@@ -21,9 +21,9 @@ package io.siddhi.extension.io.http.sink.updatetoken;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.siddhi.extension.io.http.util.HttpConstants;
 import okhttp3.OkHttpClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wso2.transport.http.netty.contractimpl.common.Util;
 
 import java.io.File;
@@ -52,14 +52,14 @@ import javax.net.ssl.X509TrustManager;
  * {@code HttpsClient} Handle the HTTP client.
  */
 public class HttpsClient {
-    private static final Logger LOG = LoggerFactory.getLogger(HttpsClient.class);
+    private static final Logger LOG = LogManager.getLogger(HttpsClient.class);
     private AccessTokenCache accessTokenCache = AccessTokenCache.getInstance();
 
     private static String encodeMessage(Object s) {
         try {
             return URLEncoder.encode((String) s, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            LOG.error("Unable to encode the message while generating new access token: " + e);
+            LOG.error("Unable to encode the message while generating new access token: {}", String.valueOf(e));
             return HttpConstants.EMPTY_STRING;
         }
     }
@@ -130,7 +130,7 @@ public class HttpsClient {
             fis = new FileInputStream(file);
             ks.load(fis, password);
         } catch (CertificateException | NoSuchAlgorithmException | IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("{}", e.getMessage(), e);
         } finally {
             if (fis != null) {
                 fis.close();

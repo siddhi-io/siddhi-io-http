@@ -271,7 +271,7 @@ public class HttpSinkUtil {
                     properties.put(key, Double.valueOf(value));
                     break;
                 default:
-                    log.error("Transport property:'" + tryMap.get(key).name() + "' is no defined.");
+                    log.error("Transport property:'{}' is no defined.", tryMap.get(key).name());
                     break;
             }
         });
@@ -371,8 +371,7 @@ public class HttpSinkUtil {
                 }
                 return proxyServerConfiguration;
             } catch (UnknownHostException e) {
-                log.error("Proxy url of sink defined in '" + streamID + "' of Siddhi App '" +
-                        appName + "' is invalid.", e);
+                log.error("Proxy url of sink defined in '{}' of Siddhi App '{}' is invalid.", streamID, appName, e);
             }
         }
         return null;
