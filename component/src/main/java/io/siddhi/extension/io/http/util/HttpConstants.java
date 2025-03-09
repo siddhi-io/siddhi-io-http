@@ -101,10 +101,15 @@ public class HttpConstants {
     public static final String CLIENT_TRUSTSTORE_PASSWORD = "trustStorePassword";
     public static final String CLIENT_TRUSTSTORE_PASSWORD_PARAM = "https.truststore.password";
     public static final String CLIENT_TRUSTSTORE_PASSWORD_VALUE = "wso2carbon";
+    public static final String KEYSTORE_PATH_PARAM = "https.keystore.file";
     public static final String KEYSTORE_FILE = "keyStoreLocation";
     public static final String KEYSTORE_FILE_VALUE = "${carbon.home}/resources/security/wso2carbon.jks";
+    public static final String KEYSTORE_PASSWORD_PARAM = "https.keystore.password";
     public static final String KEYSTORE_PASSWORD = "keyStorePassword";
     public static final String KEYSTORE_PASSWORD_VALUE = "wso2carbon";
+    public static final String KEYSTORE_KEY_PASSWORD_PARAM = "https.keystore.key.password";
+    public static final String KEYSTORE_KEY_PASSWORD = "keyPassword";
+    public static final String KEYSTORE_KEY_PASSWORD_VALUE = "wso2carbon";
 
     public static final String DEFAULT_SOURCE_SCHEME = "defaultScheme";
     public static final String DEFAULT_SOURCE_SCHEME_VALUE = "http";

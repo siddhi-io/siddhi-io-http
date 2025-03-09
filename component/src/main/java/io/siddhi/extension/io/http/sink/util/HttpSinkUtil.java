@@ -151,6 +151,40 @@ public class HttpSinkUtil {
     }
 
     /**
+     * user can give custom key store file if user did not give then custom then system read the default values which is
+     * in the deployment yaml.
+     *
+     * @param sinkConfigReader configuration reader for sink.
+     * @return key store file path.
+     */
+    public static String keyStorePath(ConfigReader sinkConfigReader) {
+        return sinkConfigReader.readConfig(HttpConstants.KEYSTORE_FILE, HttpConstants.KEYSTORE_FILE_VALUE);
+    }
+
+    /**
+     * user can give custom keystore password,, if user did not give then custom then system read the default values
+     * which is in the deployment yaml.
+     *
+     * @param sinkConfigReader configuration reader for sink.
+     * @return key store password.
+     */
+    public static String keyStorePassword(ConfigReader sinkConfigReader) {
+        return sinkConfigReader.readConfig(HttpConstants.KEYSTORE_PASSWORD, HttpConstants.KEYSTORE_PASSWORD_VALUE);
+    }
+
+    /**
+     * user can give custom key store key password if user did not give then custom then system read the default values
+     * which is in the deployment yaml.
+     *
+     * @param sinkConfigReader configuration reader for sink.
+     * @return key store key password.
+     */
+    public static String keyPassword(ConfigReader sinkConfigReader) {
+        return sinkConfigReader.readConfig(HttpConstants.KEYSTORE_KEY_PASSWORD,
+                HttpConstants.KEYSTORE_KEY_PASSWORD_VALUE);
+    }
+
+    /**
      * Method is responsible for set sender configuration values .
      *
      * @param httpStaticProperties the map that url details.

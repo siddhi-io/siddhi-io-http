@@ -38,7 +38,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,40 +78,29 @@ public class HttpsClient {
         return headers;
     }
 
-    private static OkHttpClient getOkHttpClient(String trustStorePath, String trustStorePassword) {
+    private static OkHttpClient getOkHttpClient(String keyStorePath, String keyStorePassword, String keyPassword,
+                                                String trustStorePath, String trustStorePassword) {
         KeyStore keyStore;
+        KeyStore trustStore;
         try {
-            keyStore = readKeyStore(trustStorePath, trustStorePassword);
-            SSLContext sslContext = SSLContext.getInstance("SSL");
-            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
-                    TrustManagerFactory.getDefaultAlgorithm());
-            trustManagerFactory.init(keyStore);
+            keyStore = readKeyStore(keyStorePath, keyStorePassword);
+            SSLContext sslContext = SSLContext.getInstance("TLS");
             KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(
                     KeyManagerFactory.getDefaultAlgorithm());
-            keyManagerFactory.init(keyStore, "keystore_pass".toCharArray());
+            keyManagerFactory.init(keyStore, keyPassword.toCharArray());
+
+            trustStore = readKeyStore(trustStorePath, trustStorePassword);
+            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
+                    TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(trustStore);
             sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(),
                     new SecureRandom());
-            X509TrustManager dummyX509TrustManager = new X509TrustManager() {
-                @Override
-                public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                    // Do nothing
-                }
 
-                @Override
-                public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                    // Do nothing
-                }
-
-                @Override
-                public X509Certificate[] getAcceptedIssuers() {
-                    return new X509Certificate[0];
-                }
-            };
             return new OkHttpClient().newBuilder()
-                    .sslSocketFactory(sslContext.getSocketFactory(), dummyX509TrustManager)
-                    .hostnameVerifier((host, sslSession) -> true).build();
+                    .sslSocketFactory(sslContext.getSocketFactory(),
+                            (X509TrustManager) trustManagerFactory.getTrustManagers()[0]).build();
         } catch (IOException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException
-                | KeyManagementException e) {
+                 | KeyManagementException e) {
             LOG.error("Error occurred while initializing the http client, Returning normal client", e);
             return new OkHttpClient();
         }
@@ -139,7 +127,8 @@ public class HttpsClient {
         return ks;
     }
 
-    public void getPasswordGrantAccessToken(String tokenUrl, String trustStorePath, String trustStorePassword,
+    public void getPasswordGrantAccessToken(String tokenUrl, String keyStorePath, String keyStorePassword,
+                                            String keyPassword, String trustStorePath, String trustStorePassword,
                                             String username, String password, String encodedAuth, String consumerKey,
                                             String consumerSecret, String oAuth2Scope) {
         final Map<String, String> refreshTokenBody = new HashMap<>();
@@ -156,7 +145,8 @@ public class HttpsClient {
             refreshTokenBody.put(HttpConstants.OAUTH_CLIENT_SECRET, consumerSecret);
         }
 
-        OkHttpClient client = getOkHttpClient(trustStorePath, trustStorePassword);
+        OkHttpClient client =
+                getOkHttpClient(keyStorePath, keyStorePassword, keyPassword, trustStorePath, trustStorePassword);
         Map<String, String> headers = setHeaders(encodedAuth);
         List<String> response = HttpRequest.getResponse(tokenUrl, encodedAuth, getPayload(refreshTokenBody), client,
                 headers);
@@ -176,15 +166,16 @@ public class HttpsClient {
         }
     }
 
-    public void getRefreshGrantAccessToken(String url, String trustStorePath, String trustStorePassword,
-                                           String encodedAuth, String refreshToken, String oauthUsername,
-                                           String oauthUserPassword, String bodyConsumerKey, String bodyConsumerSecret,
-                                           String oauth2Scope) {
+    public void getRefreshGrantAccessToken(String url, String keyStorePath, String keyStorePassword, String keyPassword,
+                                           String trustStorePath, String trustStorePassword, String encodedAuth,
+                                           String refreshToken, String oauthUsername, String oauthUserPassword,
+                                           String bodyConsumerKey, String bodyConsumerSecret, String oauth2Scope) {
         final Map<String, String> refreshTokenBody = new HashMap<>();
         Map<String, String> headers = setHeaders(encodedAuth);
         refreshTokenBody.put(HttpConstants.GRANT_TYPE, HttpConstants.GRANT_REFRESHTOKEN);
         refreshTokenBody.put(HttpConstants.GRANT_REFRESHTOKEN, refreshToken);
-        OkHttpClient client = getOkHttpClient(trustStorePath, trustStorePassword);
+        OkHttpClient client =
+                getOkHttpClient(keyStorePath, keyStorePassword, keyPassword, trustStorePath, trustStorePassword);
         List<String> response = HttpRequest.getResponse(url, encodedAuth, getPayload(refreshTokenBody), client,
                 headers);
         client.dispatcher().executorService().shutdown();
@@ -200,21 +191,24 @@ public class HttpsClient {
                 || statusCode == HttpConstants.PERSISTENT_ACCESS_FAIL_CODE) &&
                 (!HttpConstants.EMPTY_STRING.equals(oauthUsername) &&
                         !HttpConstants.EMPTY_STRING.equals(oauthUserPassword))) {
-            getPasswordGrantAccessToken(url, trustStorePath, trustStorePassword, oauthUsername,
-                    oauthUserPassword, encodedAuth, bodyConsumerKey, bodyConsumerSecret, oauth2Scope);
+            getPasswordGrantAccessToken(url, keyStorePath, keyStorePassword, keyPassword, trustStorePath,
+                    trustStorePassword, oauthUsername, oauthUserPassword, encodedAuth, bodyConsumerKey,
+                    bodyConsumerSecret, oauth2Scope);
         } else if (statusCode == HttpConstants.AUTHENTICATION_FAIL_CODE
                 || statusCode == HttpConstants.PERSISTENT_ACCESS_FAIL_CODE) {
-            getClientGrantAccessToken(url, trustStorePath, trustStorePassword, encodedAuth);
+            getClientGrantAccessToken(url, keyStorePath, keyStorePassword, keyPassword, trustStorePath,
+                    trustStorePassword, encodedAuth);
         } else {
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         }
     }
 
-    public void getClientGrantAccessToken(String url, String trustStorePath, String trustStorePassword,
-                                          String encodedAuth) {
+    public void getClientGrantAccessToken(String url, String keyStorePath, String keyStorePassword, String keyPassword,
+                                          String trustStorePath, String trustStorePassword, String encodedAuth) {
         final Map<String, String> refreshTokenBody = new HashMap<>();
         refreshTokenBody.put(HttpConstants.GRANT_TYPE, HttpConstants.GRANT_CLIENTTOKEN);
-        OkHttpClient client = getOkHttpClient(trustStorePath, trustStorePassword);
+        OkHttpClient client =
+                getOkHttpClient(keyStorePath, keyStorePassword, keyPassword, trustStorePath, trustStorePassword);
         Map<String, String> headers = setHeaders(encodedAuth);
         List<String> response = HttpRequest.getResponse(url, encodedAuth, getPayload(refreshTokenBody), client,
                 headers);
