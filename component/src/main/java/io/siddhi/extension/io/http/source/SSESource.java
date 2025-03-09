@@ -295,15 +295,15 @@ public class SSESource extends Source {
             try {
                 boolean latchCount = latch.await(30, TimeUnit.SECONDS);
                 if (!latchCount) {
-                    log.debug("Timeout due to getting response from " + clientConnector.getPublisherURL() +
-                            ". Message dropped.");
+                    log.debug("Timeout due to getting response from {}. Message dropped.",
+                            clientConnector.getPublisherURL());
                     throw new ConnectionUnavailableException("Time out due to getting response from " +
                             clientConnector.getPublisherURL() + ". Message dropped.");
 
                 }
             } catch (InterruptedException e) {
-                log.debug("Failed to get a response from " + clientConnector.getPublisherURL() + "," + e +
-                        ". Message dropped.");
+                log.debug("Failed to get a response from {},{}. Message dropped.", clientConnector.getPublisherURL(),
+                        e);
                 throw new ConnectionUnavailableException("Failed to get a response from " +
                         clientConnector.getPublisherURL() + ", " + e + ". Message dropped.");
             }
@@ -315,7 +315,7 @@ public class SSESource extends Source {
         if (clientConnector != null) {
             String publisherURL = clientConnector.getPublisherURL();
             clientConnector = null;
-            log.debug("Server connector for url " + publisherURL + " disconnected.");
+            log.debug("Server connector for url {} disconnected.", publisherURL);
         }
 
         if (httpConnectorFactory != null) {
@@ -332,7 +332,7 @@ public class SSESource extends Source {
         if (clientConnector != null) {
             String publisherURL = clientConnector.getPublisherURL();
             clientConnector = null;
-            log.debug("Server connector for url " + publisherURL + " disconnected.");
+            log.debug("Server connector for url {} disconnected.", publisherURL);
         }
     }
 
@@ -435,8 +435,8 @@ public class SSESource extends Source {
                             eventSourceUrl);
                 }
             } catch (IllegalArgumentException e) {
-                log.debug("Prometheus reporter is not running. Hence sse source metrics will not be initialized for "
-                        + siddhiAppName);
+                log.debug("Prometheus reporter is not running. Hence sse source metrics will not be initialized for {}",
+                        siddhiAppName);
             }
         }
     }

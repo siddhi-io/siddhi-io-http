@@ -21,8 +21,8 @@ package io.siddhi.extension.io.http.source;
 
 import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.extension.io.http.metrics.SourceMetrics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
@@ -33,7 +33,7 @@ import java.util.concurrent.Executors;
  * Connector Listener for HttpResponseSource
  */
 public class HttpCallResponseConnectorListener implements HttpConnectorListener {
-    private static final Logger log = LoggerFactory.getLogger(HttpCallResponseConnectorListener.class);
+    private static final Logger log = LogManager.getLogger(HttpCallResponseConnectorListener.class);
     private SourceEventListener sourceEventListener;
     private String sinkId;
     private ExecutorService executorService;
@@ -72,8 +72,8 @@ public class HttpCallResponseConnectorListener implements HttpConnectorListener 
 
     @Override
     public void onError(Throwable throwable) {
-        log.error("Error occurred during processing response for the request sent by http-call sink with " +
-                "'sink.id' = " + sinkId + " in Siddhi app " + siddhiAppName + ".", throwable);
+        log.error("Error occurred during processing response for the request sent by http-call sink with 'sink.id' = " +
+                        "{} in Siddhi app {}.", sinkId, siddhiAppName, throwable);
     }
 
     /**

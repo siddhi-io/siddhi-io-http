@@ -480,8 +480,8 @@ public class HttpSource extends Source {
                             listenerUrl);
                 }
             } catch (IllegalArgumentException e) {
-                log.debug("Prometheus reporter is not running. Hence http source metrics will not be initialized for "
-                        + appName);
+                log.debug("Prometheus reporter is not running. Hence http source metrics will not be initialized" +
+                                " for {}", appName);
             }
         }
     }

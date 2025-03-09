@@ -304,7 +304,7 @@ public class HttpConnectorRegistry {
             if (context != null) {
                 if (context.getReferenceCount() == 1) {
                     serverConnectorPool.remove(getSeverConnectorKey(listenerUrl));
-                    log.info("Server connector for port '" + port + "' has successfully shutdown.");
+                    log.info("Server connector for port '{}' has successfully shutdown.", port);
                     context.decrementReferenceCount();
                     return context.getServerConnector().stop();
                 }
@@ -358,7 +358,7 @@ public class HttpConnectorRegistry {
         }
 
         startupSyncer.getExceptions().forEach((connectorId, e) -> {
-            log.error("siddhi: " + e.getMessage() + ": [" + connectorId + "]", e);
+            log.error("siddhi: {}: [{}]", e.getMessage(), connectorId, e);
         });
 
         if (noOfExceptions == 1) {

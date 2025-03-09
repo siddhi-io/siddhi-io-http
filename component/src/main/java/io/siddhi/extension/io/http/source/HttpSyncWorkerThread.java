@@ -23,8 +23,8 @@ import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
 import io.siddhi.extension.io.http.util.HTTPSourceRegistry;
 import io.siddhi.extension.io.http.util.HttpConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 import org.wso2.transport.http.netty.message.HttpMessageDataStreamer;
 
@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
  * Handles the send data to source listener.
  */
 public class HttpSyncWorkerThread implements Runnable {
-    private static final Logger logger = LoggerFactory.getLogger(HttpWorkerThread.class);
+    private static final Logger logger = LogManager.getLogger(HttpWorkerThread.class);
     private HttpCarbonMessage carbonMessage;
     private SourceEventListener sourceEventListener;
     private String sourceID;
@@ -79,7 +79,7 @@ public class HttpSyncWorkerThread implements Runnable {
 
                 sourceEventListener.onEvent(payload, trpProperties);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Submitted Event " + payload + " Stream");
+                    logger.debug("Submitted Event {} Stream", payload);
                 }
             } else {
                 if (metrics != null) {
@@ -88,7 +88,7 @@ public class HttpSyncWorkerThread implements Runnable {
 
                 HttpSourceUtil.handleCallback(carbonMessage, 405);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Empty payload event, hence dropping the event chunk at source " + sourceID);
+                    logger.debug("Empty payload event, hence dropping the event chunk at source {}", sourceID);
                 }
             }
         } finally {
@@ -98,7 +98,7 @@ public class HttpSyncWorkerThread implements Runnable {
                 if (metrics != null) {
                     metrics.getTotalHttpErrorsMetric().inc();
                 }
-                logger.error("Error occurred when closing the byte buffer in source " + sourceID, e);
+                logger.error("Error occurred when closing the byte buffer in source {}", sourceID, e);
             } finally {
                 carbonMessage.waitAndReleaseAllEntities();
             }

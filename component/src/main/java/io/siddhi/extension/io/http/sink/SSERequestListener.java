@@ -19,8 +19,8 @@ package io.siddhi.extension.io.http.sink;
 
 import io.siddhi.extension.io.http.source.HttpAuthenticator;
 import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.util.concurrent.ExecutorService;
@@ -32,7 +32,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * This class is responsible for listening to incoming events.
  */
 public class SSERequestListener {
-    private static final Logger logger = LoggerFactory.getLogger(SSERequestListener.class);
+    private static final Logger logger = LogManager.getLogger(SSERequestListener.class);
     private ExecutorService executorService;
     private boolean paused;
     private ReentrantLock lock;

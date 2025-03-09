@@ -20,8 +20,8 @@ package io.siddhi.extension.io.http.source;
 import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.util.HTTPSourceRegistry;
 import io.siddhi.extension.io.http.util.HttpConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
@@ -32,7 +32,7 @@ import java.util.concurrent.CountDownLatch;
  * Connector Listener for HttpSSESource.
  */
 public class SSEResponseListener implements HttpConnectorListener {
-    private static final Logger log = LoggerFactory.getLogger(SSEResponseListener.class);
+    private static final Logger log = LogManager.getLogger(SSEResponseListener.class);
     private String streamId;
     private CountDownLatch latch;
     private SSESource source;
@@ -58,8 +58,8 @@ public class SSEResponseListener implements HttpConnectorListener {
             SSEResponseConnectorListener responseConnectorListener = responseSource.getConnectorListener();
             responseConnectorListener.onMessage(carbonMessage);
         } else {
-            log.error("No sse source is registered for the stream '" + streamId +
-                    "'. Hence dropping the response message.");
+            log.error("No sse source is registered for the stream '{}'. Hence dropping the response message.",
+                    streamId);
         }
     }
 

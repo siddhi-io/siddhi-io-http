@@ -24,8 +24,8 @@ import io.siddhi.core.table.Table;
 import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.util.List;
@@ -39,7 +39,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * such as is currently paused or not,  need isAuthEnabled or not.
  */
 public class HttpSourceListener {
-    private static final Logger logger = LoggerFactory.getLogger(HttpSourceListener.class);
+    private static final Logger logger = LogManager.getLogger(HttpSourceListener.class);
     private static final char QUERY_PARAMS_IDENTIFIER = '_'; //Query params are given a prefix of _ in the SiddhiApp
     private static final String QUERY_PARAMS_CONTAINING_PROPERTY = "TO";
     private static final char QUERY_PARAMS_SEPARATOR = '&';
@@ -212,7 +212,7 @@ public class HttpSourceListener {
         lock.lock();
         try {
             paused = true;
-            logger.info("Event input has paused for " + url);
+            logger.info("Event input has paused for {}", url);
         } finally {
             lock.unlock();
         }
@@ -225,7 +225,7 @@ public class HttpSourceListener {
         lock.lock();
         try {
             paused = false;
-            logger.info("Event input has resume for " + url);
+            logger.info("Event input has resume for {}", url);
             condition.signalAll();
         } finally {
             lock.unlock();

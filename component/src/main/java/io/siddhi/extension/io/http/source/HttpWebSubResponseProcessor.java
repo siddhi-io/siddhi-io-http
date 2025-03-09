@@ -41,8 +41,8 @@ import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.execution.query.output.stream.UpdateSet;
 import io.siddhi.query.api.expression.Expression;
 import io.siddhi.query.api.expression.Variable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 import org.wso2.transport.http.netty.message.HttpMessageDataStreamer;
 
@@ -74,7 +74,7 @@ import static io.siddhi.extension.io.http.util.HttpConstants.REQUEST_TIMESTAMP;
  * Web Sub Hub incoming subscription request processor
  **/
 public class HttpWebSubResponseProcessor implements Runnable {
-    private static final Logger logger = LoggerFactory.getLogger(HttpWebSubResponseProcessor.class);
+    private static final Logger logger = LogManager.getLogger(HttpWebSubResponseProcessor.class);
     private final HttpCarbonMessage carbonMessage;
     private final SourceEventListener sourceEventListener;
     private final String sourceID;
@@ -172,14 +172,14 @@ public class HttpWebSubResponseProcessor implements Runnable {
                         eventChunk.add(stateEvent);
                         table.deleteEvents(eventChunk, deleteCompileCondition, 1);
                     }
-                    logger.debug("Incoming Request accepted for callback: " + payloadMap.get(HUB_CALLBACK) +
-                            ". topic: " + payloadMap.get(HUB_TOPIC) + " mode: " + payloadMap.get(HUB_MODE));
+                    logger.debug("Incoming Request accepted for callback: {}. topic: {} mode: {}",
+                            payloadMap.get(HUB_CALLBACK), payloadMap.get(HUB_TOPIC), payloadMap.get(HUB_MODE));
                     HttpIoUtil.notifyWebSubSink(hubId);
                     HttpIoUtil.handleResponse(carbonMessage, HttpIoUtil.createResponseMessageForWebSub(carbonMessage));
                     sourceEventListener.onEvent(payloadMap, trpProperties);
                 }
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Submitted Event " + payload + " Stream");
+                    logger.debug("Submitted Event {} Stream", payload);
                 }
             } else {
                 if (metrics != null) {
@@ -187,7 +187,7 @@ public class HttpWebSubResponseProcessor implements Runnable {
                 }
                 HttpSourceUtil.handleCallback(carbonMessage, 405);
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Empty payload event, hence dropping the event chunk at source " + sourceID);
+                    logger.debug("Empty payload event, hence dropping the event chunk at source {}", sourceID);
                 }
             }
         } catch (RuntimeException | UnsupportedEncodingException e) {
@@ -200,7 +200,7 @@ public class HttpWebSubResponseProcessor implements Runnable {
                 if (metrics != null) {
                     metrics.getTotalHttpErrorsMetric().inc();
                 }
-                logger.error("Error occurred when closing the byte buffer in source " + sourceID, e);
+                logger.error("Error occurred when closing the byte buffer in source {}", sourceID, e);
             } finally {
                 carbonMessage.waitAndReleaseAllEntities();
             }

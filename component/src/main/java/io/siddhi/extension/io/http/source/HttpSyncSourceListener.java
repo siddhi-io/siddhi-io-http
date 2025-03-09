@@ -22,8 +22,8 @@ import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 
 import java.util.UUID;
@@ -34,7 +34,7 @@ import java.util.UUID;
  */
 public class HttpSyncSourceListener extends HttpSourceListener {
 
-    private static final Logger logger = LoggerFactory.getLogger(HttpSyncSourceListener.class);
+    private static final Logger logger = LogManager.getLogger(HttpSyncSourceListener.class);
     private String sourceId;
 
     protected HttpSyncSourceListener(int workerThread, String url, Boolean auth,

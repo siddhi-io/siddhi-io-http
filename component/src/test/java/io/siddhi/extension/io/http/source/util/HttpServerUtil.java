@@ -19,8 +19,8 @@
 package io.siddhi.extension.io.http.source.util;
 
 import io.netty.handler.codec.http.HttpMethod;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -33,7 +33,7 @@ import java.net.URL;
  */
 class HttpServerUtil {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpServerUtil.class);
+    private static final Logger log = LogManager.getLogger(HttpServerUtil.class);
 
     static void writeContent(HttpURLConnection urlConn, String content) throws IOException {
         OutputStreamWriter out = new OutputStreamWriter(

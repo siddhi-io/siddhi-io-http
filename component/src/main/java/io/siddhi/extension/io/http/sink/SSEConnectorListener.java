@@ -21,8 +21,8 @@ import io.siddhi.extension.io.http.source.HTTPConnectorListener;
 import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
 import io.siddhi.extension.io.http.util.HttpConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.transport.http.netty.contract.Constants;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
 import org.wso2.transport.http.netty.contract.exceptions.ClientClosedConnectionException;
@@ -33,7 +33,7 @@ import org.wso2.transport.http.netty.message.HttpCarbonMessage;
  */
 public class SSEConnectorListener implements HttpConnectorListener {
 
-    private static final Logger log = LoggerFactory.getLogger(HTTPConnectorListener.class);
+    private static final Logger log = LogManager.getLogger(HTTPConnectorListener.class);
 
     public SSEConnectorListener() {
     }
@@ -63,8 +63,8 @@ public class SSEConnectorListener implements HttpConnectorListener {
                 }
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("Event is not type of http which has received to the uri '" + String
-                            .valueOf(carbonMessage.getProperty(HttpConstants.LISTENER_PORT)) +
+                    log.debug("Event is not type of http which has received to the uri '{}{}",
+                            carbonMessage.getProperty(HttpConstants.LISTENER_PORT),
                             carbonMessage.getProperty(HttpConstants.TO));
                 }
                 HttpSourceUtil.handleCallback(carbonMessage, 404);

@@ -23,8 +23,8 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.base64.Base64;
 import io.siddhi.extension.io.http.source.internal.HttpIODataHolder;
 import io.siddhi.extension.io.http.util.HttpConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.carbon.analytics.idp.client.core.api.IdPClient;
 import org.wso2.carbon.analytics.idp.client.core.exception.IdPClientException;
 import org.wso2.carbon.analytics.idp.client.core.utils.IdPClientConstants;
@@ -41,7 +41,7 @@ import static io.siddhi.extension.io.http.util.HttpConstants.EMPTY_STRING;
  * Basic authentication handler of http io implementation.
  */
 public class HttpAuthenticator {
-    private static final Logger logger = LoggerFactory.getLogger(HttpAuthenticator.class);
+    private static final Logger logger = LogManager.getLogger(HttpAuthenticator.class);
 
     public static boolean authenticate(HttpCarbonMessage httpCarbonMessage) {
         if (HttpIODataHolder.getInstance().getBundleContext() == null) {
@@ -67,17 +67,17 @@ public class HttpAuthenticator {
                         if (loginStatus.equals(IdPClientConstants.LoginStatus.LOGIN_SUCCESS)) {
                             return true;
                         } else {
-                            logger.error("Authentication failed for username '" + credentials[0] + "'. Error : '"
-                                    + login.get(IdPClientConstants.ERROR) + "'. Error Description : '"
-                                    + login.get(IdPClientConstants.ERROR_DESCRIPTION) + "'");
+                            logger.error("Authentication failed for username '{}'. Error : '{}'. Error Description :" +
+                                            " '{}'", credentials[0], login.get(IdPClientConstants.ERROR),
+                                    login.get(IdPClientConstants.ERROR_DESCRIPTION));
                             return false;
                         }
                     } catch (IdPClientException e) {
-                        logger.error("Authorization process fails for user '" + credentials[0] + "'", e);
+                        logger.error("Authorization process fails for user '{}'", credentials[0], e);
                         return false;
                     }
                 } else {
-                    logger.error("Authorization header in incorrect format. header: " + usernamePasswordEncoded);
+                    logger.error("Authorization header in incorrect format. header: {}", usernamePasswordEncoded);
                     return false;
                 }
             } else {

@@ -20,8 +20,8 @@ package io.siddhi.extension.io.http.source;
 import io.siddhi.extension.io.http.source.exception.HttpSourceAdaptorRuntimeException;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
 import io.siddhi.extension.io.http.util.HttpConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.transport.http.netty.contract.Constants;
 import org.wso2.transport.http.netty.contract.HttpClientConnector;
 import org.wso2.transport.http.netty.contract.HttpConnectorListener;
@@ -37,7 +37,7 @@ import java.net.URI;
  */
 public class HTTPConnectorListener implements HttpConnectorListener {
 
-    private static final Logger log = LoggerFactory.getLogger(HTTPConnectorListener.class);
+    private static final Logger log = LogManager.getLogger(HTTPConnectorListener.class);
     private TransportsConfiguration configuration;
     private HttpClientConnector clientConnector;
 
@@ -59,7 +59,7 @@ public class HTTPConnectorListener implements HttpConnectorListener {
                     try {
                         carbonMessage.respond(carbonMessage);
                     } catch (ServerConnectorException e) {
-                        log.error("Error occurred during message notification: " + e.getMessage(), e);
+                        log.error("Error occurred during message notification: ", e);
                     }
                 } else {
                 if (HttpConstants.HTTP_METHOD_POST.equalsIgnoreCase(carbonMessage.getHttpMethod())) {
@@ -85,8 +85,8 @@ public class HTTPConnectorListener implements HttpConnectorListener {
                 }
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("Event is not type of http which has received to the uri '" + String
-                            .valueOf(carbonMessage.getProperty(HttpConstants.LISTENER_PORT)) +
+                    log.debug("Event is not type of http which has received to the uri '{}{}", String
+                                    .valueOf(carbonMessage.getProperty(HttpConstants.LISTENER_PORT)),
                             carbonMessage.getProperty(HttpConstants.TO));
                 }
                 HttpSourceUtil.handleCallback(carbonMessage, 404);

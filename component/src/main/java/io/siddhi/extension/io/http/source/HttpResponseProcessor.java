@@ -24,8 +24,8 @@ import io.siddhi.core.stream.input.source.SourceEventListener;
 import io.siddhi.extension.io.http.metrics.SourceMetrics;
 import io.siddhi.extension.io.http.source.util.HttpSourceUtil;
 import io.siddhi.extension.io.http.util.HttpConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 import org.wso2.transport.http.netty.message.HttpMessageDataStreamer;
 
@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
  * Handles sending data to source listener.
  */
 public class HttpResponseProcessor implements Runnable {
-    private static final Logger logger = LoggerFactory.getLogger(HttpResponseProcessor.class);
+    private static final Logger logger = LogManager.getLogger(HttpResponseProcessor.class);
     boolean shouldAllowStreamingResponses;
     private HttpCarbonMessage carbonMessage;
     private SourceEventListener sourceEventListener;
@@ -88,18 +88,19 @@ public class HttpResponseProcessor implements Runnable {
                         if (!payload.equals(HttpConstants.EMPTY_STRING)) {
                             sourceEventListener.onEvent(payload, trpProperties);
                             if (logger.isDebugEnabled()) {
-                                logger.debug("Submitted Event :" + payload);
+                                logger.debug("Submitted Event :{}", payload);
                             }
                         } else {
                             if (logger.isDebugEnabled()) {
-                                logger.debug("Empty payload event, hence dropping the event chunk at source " + sinkId);
+                                logger.debug("Empty payload event, hence dropping the event chunk at source {}",
+                                        sinkId);
                             }
                         }
                     } finally {
                         try {
                             buf.close();
                         } catch (IOException e) {
-                            logger.error("Error occurred when closing the byte buffer in source " + sinkId, e);
+                            logger.error("Error occurred when closing the byte buffer in source {}", sinkId, e);
                         }
                     }
                 } else {
@@ -117,12 +118,12 @@ public class HttpResponseProcessor implements Runnable {
 
                                 sourceEventListener.onEvent(payload, trpProperties);
                                 if (logger.isDebugEnabled()) {
-                                    logger.debug("Submitted Event :" + payload);
+                                    logger.debug("Submitted Event :{}", payload);
                                 }
                             } else {
                                 if (logger.isDebugEnabled()) {
-                                    logger.debug("Empty payload event, hence dropping the event chunk in the source " +
-                                            "with sink.id : " + sinkId);
+                                    logger.debug("Empty payload event, hence dropping the event chunk in the source" +
+                                                    " with sink.id : {}", sinkId);
                                 }
                             }
                         }
@@ -145,9 +146,9 @@ public class HttpResponseProcessor implements Runnable {
             }
             return filePath;
         } catch (FileNotFoundException e) {
-            logger.error("Given path to download the file : '" + filePath + "' cannot be found.", e);
+            logger.error("Given path to download the file : '{}' cannot be found.", filePath, e);
         } catch (IOException e) {
-            logger.error("Error occurred during writing the file to '" + filePath + "' due to " + e.getMessage(), e);
+            logger.error("Error occurred during writing the file to '{}' due to {}", filePath, e.getMessage(), e);
         }
         return null;
     }

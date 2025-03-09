@@ -20,8 +20,8 @@ package io.siddhi.extension.io.http.sink;
 
 import io.siddhi.extension.io.http.source.HttpWorkerThread;
 import io.siddhi.extension.io.http.util.HTTPSinkRegistry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wso2.transport.http.netty.message.HttpCarbonMessage;
 import org.wso2.transport.http.netty.message.HttpMessageDataStreamer;
 
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  * Handles the send data to source listener.
  */
 public class SSEWorkerThread implements Runnable {
-    private static final Logger logger = LoggerFactory.getLogger(HttpWorkerThread.class);
+    private static final Logger logger = LogManager.getLogger(HttpWorkerThread.class);
     private HttpCarbonMessage carbonMessage;
     private String streamID;
 
@@ -53,13 +53,13 @@ public class SSEWorkerThread implements Runnable {
         carbonMessage.setStreaming(true);
         HTTPSinkRegistry.findAndGetSSESource(streamID).registerCallback(carbonMessage);
         if (logger.isDebugEnabled()) {
-            logger.debug("Submitted Event " + payload + " Stream");
+            logger.debug("Submitted Event {} Stream", payload);
         }
 
         try {
             buf.close();
         } catch (IOException e) {
-            logger.error("Error occurred when closing the byte buffer in source " + streamID, e);
+            logger.error("Error occurred when closing the byte buffer in source {}", streamID, e);
         } finally {
             carbonMessage.waitAndReleaseAllEntities();
         }
