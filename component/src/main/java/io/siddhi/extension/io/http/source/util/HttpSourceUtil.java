@@ -211,7 +211,7 @@ public class HttpSourceUtil {
                     throw new HttpSourceAdaptorRuntimeException("Invalid protocol " + protocol);
             }
         } catch (MalformedURLException e) {
-            log.error("Receiver url malformed." + listenerUrl, e);
+            log.error("Receiver url malformed.{}", listenerUrl, e);
         }
         return listenerConfig;
     }

@@ -541,8 +541,8 @@ public class WebSubHubSink extends Sink {
                         }
                         sendRequest(payloadMap, dynamicOptions, headersList, clientConnector, publisherURL);
                     } else {
-                        log.debug("Added to expired subscription list " + webSubDTO.getCallback() + " : "
-                                + webSubDTO.getTopic());
+                        log.debug("Added to expired subscription list {} : {}", webSubDTO.getCallback(),
+                                webSubDTO.getTopic());
                         expiredSubscriptions.add(webSubDTO);
                     }
                 }
@@ -595,7 +595,7 @@ public class WebSubHubSink extends Sink {
             }
             result = bos.toString(StandardCharsets.UTF_8.toString());
         } catch (IOException ioe) {
-            log.error("Couldn't read the complete input stream due to: " + ioe.getMessage(), ioe);
+            log.error("Couldn't read the complete input stream due to: {}", ioe.getMessage(), ioe);
             return "";
         }
         return result;
@@ -622,7 +622,7 @@ public class WebSubHubSink extends Sink {
         if (staticClientConnector != null) {
             String publisherURL = staticClientConnector.getPublisherURL();
             staticClientConnector = null;
-            log.debug("Server connector for url " + publisherURL + " disconnected.");
+            log.debug("Server connector for url {} disconnected.", publisherURL);
         }
 
         if (httpConnectorFactory != null) {
@@ -637,7 +637,7 @@ public class WebSubHubSink extends Sink {
         if (staticClientConnector != null) {
             String publisherURL = staticClientConnector.getPublisherURL();
             staticClientConnector = null;
-            log.debug("Server connector for url " + publisherURL + " disconnected.");
+            log.debug("Server connector for url {} disconnected.", publisherURL);
         }
     }
 
@@ -654,8 +654,8 @@ public class WebSubHubSink extends Sink {
                     metrics = new SinkMetrics(siddhiAppContext.getName(), streamName);
                 }
             } catch (IllegalArgumentException e) {
-                log.debug("Prometheus reporter is not running. Hence http sink metrics will not be initialized for "
-                        + siddhiAppContext.getName());
+                log.debug("Prometheus reporter is not running. Hence http sink metrics will not be initialized for {}",
+                        siddhiAppContext.getName());
             }
         }
     }
@@ -903,8 +903,8 @@ public class WebSubHubSink extends Sink {
             if (isStateCheck) {
                 status = HttpIoUtil.isWebSubSinkUpdated(hubId);
                 if (status || initialExecution) {
-                    log.debug("Running SubscriptionMapUpdate task mode Status Check: " + isStateCheck + " status : "
-                            + status);
+                    log.debug("Running SubscriptionMapUpdate task mode Status Check: {} status : {}", isStateCheck,
+                            status);
                     updateSubscriptionMap();
                     initialExecution = false;
                 }
@@ -952,18 +952,18 @@ public class WebSubHubSink extends Sink {
             List<WebSubSubscriptionDTO> deletedSubscriptions = new ArrayList<>();
             if (expiredSubscriptions.size() > 0) {
                 for (WebSubSubscriptionDTO dto : expiredSubscriptions) {
-                    log.debug("Deleting record " + dto.getCallback() + " : " + dto.getTopic());
+                    log.debug("Deleting record {} : {}", dto.getCallback(), dto.getTopic());
                     try {
                         subscriptionTable.deleteEvents(generateComplexEvent(dto), compiledCondition, 1);
 
                         deletedSubscriptions.add(dto);
                     } catch (Throwable e) {
-                        log.error("Error occurred while deleting expired subscription record from database" +
-                                " table. callbackUrl :" + dto.getCallback() + ", Topic " + dto.getTopic(), e);
+                        log.error("Error occurred while deleting expired subscription record from database table. " +
+                                        "callbackUrl :{}, Topic {}", dto.getCallback(), dto.getTopic(), e);
                         expiredSubscriptions.remove(dto);
                     }
                 }
-                log.info(deletedSubscriptions.size() + "Expired subscriptions deleted successfully.");
+                log.info("{} Expired subscriptions deleted successfully.", deletedSubscriptions.size());
                 deletedSubscriptions.forEach(dto -> expiredSubscriptions.remove(dto));
             }
         }

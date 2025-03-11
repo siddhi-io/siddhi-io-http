@@ -304,7 +304,7 @@ public class SSEServerSink extends Sink {
                 }
             });
         } else {
-            logger.warn("No subscription found" + streamId);
+            logger.warn("No subscription found{}", streamId);
         }
     }
 
@@ -380,8 +380,8 @@ public class SSEServerSink extends Sink {
                     metrics = new SinkMetrics(appName, streamName);
                 }
             } catch (IllegalArgumentException e) {
-                logger.debug("Prometheus reporter is not running. Hence sse sink metrics will not be initialized for "
-                        + appName);
+                logger.debug("Prometheus reporter is not running. Hence sse sink metrics will not be initialized" +
+                                " for {}", appName);
             }
         }
     }
