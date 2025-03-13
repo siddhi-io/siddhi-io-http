@@ -31,6 +31,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import javax.net.ssl.KeyManagerFactory;
@@ -75,7 +76,7 @@ public class HttpOAuthListenerHandler implements Runnable {
             TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
             tmf.init(keyStore);
             SSLContext ssl = SSLContext.getInstance("TLS");
-            ssl.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+            ssl.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
 
             tokenEndPointServer = HttpsServer.create(new InetSocketAddress(tokenEndpointPort), 5);
             oauthEndPointServer = HttpsServer.create(new InetSocketAddress(oauthEndPointPort), 5);
