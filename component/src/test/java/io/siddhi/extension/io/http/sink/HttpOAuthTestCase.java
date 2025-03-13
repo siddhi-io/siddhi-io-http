@@ -71,6 +71,7 @@ public class HttpOAuthTestCase {
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);" +
                 "@sink(type='http',publisher.url='https://localhost:8015/abc',method='{{method}}'" +
                 ",headers='{{headers}}',consumer.key='addConsumerKey', consumer.secret='addConsumerSecret', " +
+                "hostname.verification.enabled='false'," +
                 "token.url='https://localhost:8005/token', @map(type='xml', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
         String query = (
@@ -123,6 +124,7 @@ public class HttpOAuthTestCase {
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);" +
                 "@sink(type='http',publisher.url='https://localhost:8015/abc',method='{{method}}'" +
                 ",headers='{{headers}}',consumer.key='addConsumerKey', consumer.secret='addConsumerSecret', " +
+                "hostname.verification.enabled='false'," +
                 "token.url='https://localhost:8005/token', @map(type='xml', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
         String query = (
@@ -177,7 +179,8 @@ public class HttpOAuthTestCase {
         String inStreamDefinition = "Define stream FooStream (message String,method String,headers String);" +
                 "@sink(type='http',publisher.url='https://localhost:8015/abc',method='{{method}}'" +
                 ",headers='{{headers}}',consumer.key='addConsumerKey', consumer.secret='addConsumerSecret', " +
-                "token.url='https://localhost:8005/token', @map(type='xml', @payload('{{message}}'))) "
+                "token.url='https://localhost:8005/token', hostname.verification.enabled='false'," +
+                "@map(type='xml', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
         String query = (
                 "@info(name = 'query') "
@@ -199,8 +202,10 @@ public class HttpOAuthTestCase {
                 + "</events>";
         fooStream.send(new Object[]{payload, "POST", "'Name:John','Age:23','Country:USA'," +
                 "'Authorization:  Bearer xxxxx'"});
-        while (!httpOAuthListenerHandler.getHttpOAuthTokenEndpointListener().isMessageArrive()) {
+        int i = 1;
+        while (!httpOAuthListenerHandler.getHttpOAuthTokenEndpointListener().isMessageArrive() && i < 1000) {
             Thread.sleep(10);
+            i += 1;
         }
         String eventData = httpOAuthListenerHandler.getHttpOAuthTokenEndpointListener().getData();
         String expected = "<events>"
@@ -232,6 +237,7 @@ public class HttpOAuthTestCase {
                 "@sink(type='http',publisher.url='https://localhost:8015/abc',method='{{method}}'" +
                 ",headers='{{headers}}',consumer.key='addConsumerKey', consumer.secret='addConsumerSecret'," +
                 " token.url='https://localhost:8005/token', oauth.username='admin', oauth.password='admin'," +
+                "hostname.verification.enabled='false'," +
                 "@map(type='xml', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String,method String,headers String);";
         String query = (
@@ -288,6 +294,7 @@ public class HttpOAuthTestCase {
                 "@sink(type='http',publisher.url='https://localhost:8015/abc',method='{{method}}'" +
                 ",headers='{{headers}}',consumer.key='addConsumerKey', consumer.secret='addConsumerSecret', " +
                 "token.url='https://localhost:8005/token', refresh.token='{{refreshToken}}'," +
+                "hostname.verification.enabled='false'," +
                 " @map(type='xml', @payload('{{message}}'))) " +
                 "Define stream BarStream (message String,method String,headers String,refreshToken String);";
         String query = (
@@ -344,6 +351,7 @@ public class HttpOAuthTestCase {
                 "@sink(type='http',publisher.url='https://localhost:8015/abc',method='{{method}}'" +
                 ",headers='{{headers}}',consumer.key='addConsumerKey', consumer.secret='addConsumerSecret'," +
                 " token.url='https://localhost:8005/token', refresh.token='{{refreshToken}}', " +
+                "hostname.verification.enabled='false'," +
                 "@map(type='xml', @payload('{{message}}'))) " +
                 "Define stream BarStream (message String,method String,headers String,refreshToken String);";
         String query = (
@@ -397,6 +405,7 @@ public class HttpOAuthTestCase {
                 + "@sink(type='http-request',publisher.url='https://localhost:8015/abc', method='POST',"
                 + "headers='{{headers}}',sink.id='source-1',consumer.key='addConsumerKey',"
                 + " consumer.secret='addConsumerSecret', token.url='https://localhost:8005/token', "
+                + "hostname.verification.enabled='false',"
                 + "@map(type='json', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String, headers String);"
                 + "@source(type='http-response', sink.id='source-1', "
@@ -459,6 +468,7 @@ public class HttpOAuthTestCase {
                 + "@sink(type='http-call',publisher.url='https://localhost:8016/abc', method='POST',"
                 + "headers='{{headers}}',sink.id='source-1',consumer.key='addConsumerKey',"
                 + " consumer.secret='addConsumerSecret', token.url='https://localhost:8005/token', "
+                + "hostname.verification.enabled='false',"
                 + "@map(type='json', @payload('{{message}}'))) "
                 + "Define stream BarStream (message String, headers String);"
                 + "@source(type='http-call-response', sink.id='source-1', "

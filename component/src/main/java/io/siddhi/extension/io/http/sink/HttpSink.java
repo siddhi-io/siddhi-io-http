@@ -879,7 +879,7 @@ public class HttpSink extends Sink {
                 }
             }
         }
-        getAccessToken(dynamicOptions, encodedAuth, tokenURL);
+        getAccessToken(dynamicOptions, encodedAuth, tokenURL, TRUE.equalsIgnoreCase(hostnameVerificationEnabled));
         if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.SUCCESS_CODE) {
             String newAccessToken = accessTokenCache.getAccessToken(encodedAuth);
             accessTokenCache.setAccessToken(encodedAuth, newAccessToken);
@@ -940,22 +940,24 @@ public class HttpSink extends Sink {
         }
     }
 
-    void getAccessToken(DynamicOptions dynamicOptions, String encodedAuth, String tokenURL) {
+    void getAccessToken(DynamicOptions dynamicOptions, String encodedAuth, String tokenURL,
+                        boolean hostnameVerificationEnabled) {
         this.tokenURL = tokenURL;
         HttpsClient httpsClient = new HttpsClient();
         if (!HttpConstants.EMPTY_STRING.equals(refreshToken.getValue(dynamicOptions)) ||
                 accessTokenCache.getRefreshtoken(encodedAuth) != null) {
             httpsClient.getRefreshGrantAccessToken(tokenURL, keyStorePath, keyStorePass, keyPassword,
                     clientTrustStoreFile, clientTrustStorePass, encodedAuth, refreshToken.getValue(dynamicOptions),
-                    oauthUsername, oauthUserPassword, bodyConsumerKey, bodyConsumerSecret, oauth2Scope);
+                    oauthUsername, oauthUserPassword, bodyConsumerKey, bodyConsumerSecret, oauth2Scope,
+                    hostnameVerificationEnabled);
         } else if (!HttpConstants.EMPTY_STRING.equals(oauthUsername) &&
                 !HttpConstants.EMPTY_STRING.equals(oauthUserPassword)) {
             httpsClient.getPasswordGrantAccessToken(tokenURL, keyStorePath, keyStorePass, keyPassword,
                     clientTrustStoreFile, clientTrustStorePass, oauthUsername, oauthUserPassword, encodedAuth,
-                    bodyConsumerKey, bodyConsumerSecret, oauth2Scope);
+                    bodyConsumerKey, bodyConsumerSecret, oauth2Scope, hostnameVerificationEnabled);
         } else {
             httpsClient.getClientGrantAccessToken(tokenURL, keyStorePath, keyStorePass, keyPassword,
-                    clientTrustStoreFile, clientTrustStorePass, encodedAuth);
+                    clientTrustStoreFile, clientTrustStorePass, encodedAuth, hostnameVerificationEnabled);
         }
     }
 
@@ -974,7 +976,7 @@ public class HttpSink extends Sink {
 
         if (!authAvailability) {
             //generate encoded base64 auth for getting refresh token
-            getAccessToken(dynamicOptions, encodedAuth, tokenURL);
+            getAccessToken(dynamicOptions, encodedAuth, tokenURL, TRUE.equalsIgnoreCase(hostnameVerificationEnabled));
             if (accessTokenCache.getResponseCode(encodedAuth) == HttpConstants.SUCCESS_CODE) {
                 headersList.add(new Header(HttpConstants.AUTHORIZATION_HEADER,
                         accessTokenCache.getAccessToken(encodedAuth)));
