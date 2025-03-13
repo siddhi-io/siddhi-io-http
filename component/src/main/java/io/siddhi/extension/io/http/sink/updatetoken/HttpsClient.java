@@ -79,7 +79,8 @@ public class HttpsClient {
     }
 
     private static OkHttpClient getOkHttpClient(String keyStorePath, String keyStorePassword, String keyPassword,
-                                                String trustStorePath, String trustStorePassword) {
+                                                String trustStorePath, String trustStorePassword,
+                                                boolean hostnameVerificationEnabled) {
         KeyStore keyStore;
         KeyStore trustStore;
         try {
@@ -96,9 +97,13 @@ public class HttpsClient {
             sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(),
                     new SecureRandom());
 
-            return new OkHttpClient().newBuilder()
+            OkHttpClient.Builder builder = new OkHttpClient().newBuilder()
                     .sslSocketFactory(sslContext.getSocketFactory(),
-                            (X509TrustManager) trustManagerFactory.getTrustManagers()[0]).build();
+                            (X509TrustManager) trustManagerFactory.getTrustManagers()[0]);
+            if (!hostnameVerificationEnabled) {
+                builder.hostnameVerifier((hostname, session) -> true);
+            }
+            return builder.build();
         } catch (IOException | NoSuchAlgorithmException | UnrecoverableKeyException | KeyStoreException
                  | KeyManagementException e) {
             LOG.error("Error occurred while initializing the http client, Returning normal client", e);
@@ -130,7 +135,8 @@ public class HttpsClient {
     public void getPasswordGrantAccessToken(String tokenUrl, String keyStorePath, String keyStorePassword,
                                             String keyPassword, String trustStorePath, String trustStorePassword,
                                             String username, String password, String encodedAuth, String consumerKey,
-                                            String consumerSecret, String oAuth2Scope) {
+                                            String consumerSecret, String oAuth2Scope,
+                                            boolean hostnameVerificationEnabled) {
         final Map<String, String> refreshTokenBody = new HashMap<>();
         refreshTokenBody.put(HttpConstants.GRANT_TYPE, HttpConstants.GRANT_PASSWORD);
         refreshTokenBody.put(HttpConstants.USERNAME, username);
@@ -146,7 +152,8 @@ public class HttpsClient {
         }
 
         OkHttpClient client =
-                getOkHttpClient(keyStorePath, keyStorePassword, keyPassword, trustStorePath, trustStorePassword);
+                getOkHttpClient(keyStorePath, keyStorePassword, keyPassword, trustStorePath, trustStorePassword,
+                        hostnameVerificationEnabled);
         Map<String, String> headers = setHeaders(encodedAuth);
         List<String> response = HttpRequest.getResponse(tokenUrl, encodedAuth, getPayload(refreshTokenBody), client,
                 headers);
@@ -169,13 +176,15 @@ public class HttpsClient {
     public void getRefreshGrantAccessToken(String url, String keyStorePath, String keyStorePassword, String keyPassword,
                                            String trustStorePath, String trustStorePassword, String encodedAuth,
                                            String refreshToken, String oauthUsername, String oauthUserPassword,
-                                           String bodyConsumerKey, String bodyConsumerSecret, String oauth2Scope) {
+                                           String bodyConsumerKey, String bodyConsumerSecret, String oauth2Scope,
+                                           boolean hostnameVerificationEnabled) {
         final Map<String, String> refreshTokenBody = new HashMap<>();
         Map<String, String> headers = setHeaders(encodedAuth);
         refreshTokenBody.put(HttpConstants.GRANT_TYPE, HttpConstants.GRANT_REFRESHTOKEN);
         refreshTokenBody.put(HttpConstants.GRANT_REFRESHTOKEN, refreshToken);
         OkHttpClient client =
-                getOkHttpClient(keyStorePath, keyStorePassword, keyPassword, trustStorePath, trustStorePassword);
+                getOkHttpClient(keyStorePath, keyStorePassword, keyPassword, trustStorePath, trustStorePassword,
+                        hostnameVerificationEnabled);
         List<String> response = HttpRequest.getResponse(url, encodedAuth, getPayload(refreshTokenBody), client,
                 headers);
         client.dispatcher().executorService().shutdown();
@@ -193,22 +202,24 @@ public class HttpsClient {
                         !HttpConstants.EMPTY_STRING.equals(oauthUserPassword))) {
             getPasswordGrantAccessToken(url, keyStorePath, keyStorePassword, keyPassword, trustStorePath,
                     trustStorePassword, oauthUsername, oauthUserPassword, encodedAuth, bodyConsumerKey,
-                    bodyConsumerSecret, oauth2Scope);
+                    bodyConsumerSecret, oauth2Scope, hostnameVerificationEnabled);
         } else if (statusCode == HttpConstants.AUTHENTICATION_FAIL_CODE
                 || statusCode == HttpConstants.PERSISTENT_ACCESS_FAIL_CODE) {
             getClientGrantAccessToken(url, keyStorePath, keyStorePassword, keyPassword, trustStorePath,
-                    trustStorePassword, encodedAuth);
+                    trustStorePassword, encodedAuth, hostnameVerificationEnabled);
         } else {
             accessTokenCache.setResponseCode(encodedAuth, statusCode);
         }
     }
 
     public void getClientGrantAccessToken(String url, String keyStorePath, String keyStorePassword, String keyPassword,
-                                          String trustStorePath, String trustStorePassword, String encodedAuth) {
+                                          String trustStorePath, String trustStorePassword, String encodedAuth,
+                                          boolean hostnameVerificationEnabled) {
         final Map<String, String> refreshTokenBody = new HashMap<>();
         refreshTokenBody.put(HttpConstants.GRANT_TYPE, HttpConstants.GRANT_CLIENTTOKEN);
         OkHttpClient client =
-                getOkHttpClient(keyStorePath, keyStorePassword, keyPassword, trustStorePath, trustStorePassword);
+                getOkHttpClient(keyStorePath, keyStorePassword, keyPassword, trustStorePath, trustStorePassword,
+                        hostnameVerificationEnabled);
         Map<String, String> headers = setHeaders(encodedAuth);
         List<String> response = HttpRequest.getResponse(url, encodedAuth, getPayload(refreshTokenBody), client,
                 headers);
