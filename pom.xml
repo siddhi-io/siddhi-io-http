@@ -290,7 +290,7 @@
         <org.wso2.transport.http.version>6.3.30</org.wso2.transport.http.version>
         <org.wso2.transport.http.version.range>[6.0.0,7.0.0)</org.wso2.transport.http.version.range>
         <commons-io.version>2.4.0.wso2v1</commons-io.version>
-        <commons.lang3.version>3.7</commons.lang3.version>
+        <commons.lang3.version>3.18.0</commons.lang3.version>
         <org.wso2.carbon.messaging.version>3.0.2</org.wso2.carbon.messaging.version>
         <org.wso2.carbon.messaging.version.range>[3,4)</org.wso2.carbon.messaging.version.range>
         <org.apache.maven.wagon.version>2.1</org.apache.maven.wagon.version>
