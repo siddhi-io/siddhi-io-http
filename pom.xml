@@ -272,7 +272,7 @@
     </dependencyManagement>
     <properties>
         <msf4j.version>2.8.5</msf4j.version>
-        <log4j.version>2.17.1</log4j.version>
+        <log4j.version>2.25.3</log4j.version>
         <org.json.wso2.version>3.0.0.wso2v1</org.json.wso2.version>
         <siddhi.mapper.json.version>5.2.3</siddhi.mapper.json.version>
         <siddhi.mapper.text.version>2.1.1</siddhi.mapper.text.version>
