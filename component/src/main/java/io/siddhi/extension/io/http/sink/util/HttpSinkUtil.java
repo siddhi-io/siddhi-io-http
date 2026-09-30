@@ -113,7 +113,7 @@ public class HttpSinkUtil {
                 for (String headerValue : spam) {
                     String[] header = headerValue.split(HttpConstants.HEADER_NAME_VALUE_SPLITTER, 2);
                     if (header.length > 1) {
-                        headersList.add(new Header(header[0], header[1]));
+                        headersList.add(new Header(header[0].trim(), header[1].trim()));
                     } else {
                         throw new HttpSinkAdaptorRuntimeException(
                                 "Invalid header format. Please include as 'key1:value1','key2:value2',..");
