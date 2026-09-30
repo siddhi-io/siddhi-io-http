@@ -41,6 +41,7 @@ limitations under the License.
             <class name="io.siddhi.extension.io.http.sink.HttpRequestResponseTestCase"/>
             <class name="io.siddhi.extension.io.http.sink.HttpCallResponseTestCase"/>
             <class name="io.siddhi.extension.io.http.sink.SSEServerSinkTestCase"/>
+            <class name="io.siddhi.extension.io.http.sink.HttpSinkUtilTestCase"/>
 
         </classes>
     </test>

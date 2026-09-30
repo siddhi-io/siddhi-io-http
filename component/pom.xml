@@ -148,16 +148,14 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            org.wso2.transport.http.netty.*;version="${org.wso2.transport.http.version}",
-                            io.netty.*;version="${io.netty.version}",
                             org.apache.commons.codec.*;version="${commons.codec.version}
                         </Private-Package>
                         <Export-Package>
                             io.siddhi.extension.io.http.*
                         </Export-Package>
                         <Import-Package>
-                            !org.wso2.transport.http.netty.*,
-                            !io.netty.*;version="${netty.version.range}",
+                            org.wso2.transport.http.netty.*;version="${org.wso2.transport.http.version.range}",
+                            io.netty.*;version="${netty.version.range}",
                             io.siddhi.core.*;version="${siddhi.version.range}",
                             io.siddhi.annotation.*;version="${siddhi.version.range}",
                             io.siddhi.query.api.*;version="${siddhi.version.range}",
